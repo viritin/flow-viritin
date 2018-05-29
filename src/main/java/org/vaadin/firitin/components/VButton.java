@@ -1,4 +1,4 @@
-package org.vaadin.firitin.button;
+package org.vaadin.firitin.components;
 
 import static org.vaadin.firitin.util.VStyleUtil.applyOrElse;
 
