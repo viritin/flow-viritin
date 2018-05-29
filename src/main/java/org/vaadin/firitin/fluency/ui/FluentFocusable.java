@@ -1,0 +1,13 @@
+package org.vaadin.firitin.fluency.ui;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Focusable;
+
+public interface FluentFocusable<T extends Component, S extends FluentFocusable<T, S> & Focusable<T>>
+        extends Focusable<T>, FluentFocusNotifier<T,S>, FluentBlurNotifier<T, S> {
+
+    default S withTabIndex(int tabIndex) {
+        setTabIndex(tabIndex);
+        return (S) this;
+    }
+}
