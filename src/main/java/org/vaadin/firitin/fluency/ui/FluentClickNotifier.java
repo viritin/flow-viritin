@@ -5,7 +5,7 @@ import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 
-public interface FluentClickNotifier<T extends Component, S extends FluentClickNotifier<T, S> & ClickNotifier<T>>
+public interface FluentClickNotifier<T extends Component, S extends FluentClickNotifier<T, S>>
         extends ClickNotifier<T> {
 
     @SuppressWarnings("unchecked")
