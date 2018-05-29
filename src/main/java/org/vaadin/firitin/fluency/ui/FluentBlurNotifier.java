@@ -7,6 +7,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 public interface FluentBlurNotifier<T extends Component, S extends FluentBlurNotifier<T, S> & BlurNotifier<T>>
         extends BlurNotifier<T> {
 
+    @SuppressWarnings("unchecked")
     default S withBlurListener(ComponentEventListener<BlurEvent<T>> listener) {
         addBlurListener(listener);
         return (S) this;

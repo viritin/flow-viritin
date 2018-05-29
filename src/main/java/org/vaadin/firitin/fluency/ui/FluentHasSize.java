@@ -2,6 +2,7 @@ package org.vaadin.firitin.fluency.ui;
 
 import com.vaadin.flow.component.HasSize;
 
+@SuppressWarnings("unchecked")
 public interface FluentHasSize<S extends FluentHasSize<S> & HasSize> extends HasSize {
 
     default S withHeight(String height) {
