@@ -6,7 +6,8 @@ import com.vaadin.flow.component.textfield.TextField;
 import org.vaadin.firitin.fluency.ui.*;
 
 public class VHorizontalLayout extends HorizontalLayout
-        implements FluentThemableLayout<VHorizontalLayout>, FluentFlexComponent<VHorizontalLayout>
+        implements FluentThemableLayout<VHorizontalLayout>, FluentFlexComponent<VHorizontalLayout>,
+        FluentHasComponents<VHorizontalLayout>
 {
     public VHorizontalLayout() {
         super();
