@@ -47,4 +47,9 @@ public class VCheckBox extends Checkbox implements FluentHasSize<VCheckBox>, Flu
         return this;
     }
 
+    @Override
+    public VCheckBox withId(String id) {
+        setId(id);
+        return this;
+    }
 }
