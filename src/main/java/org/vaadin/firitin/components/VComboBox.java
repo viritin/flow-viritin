@@ -2,12 +2,7 @@ package org.vaadin.firitin.components;
 
 import java.util.Collection;
 
-import org.vaadin.firitin.fluency.ui.FluentComponent;
-import org.vaadin.firitin.fluency.ui.FluentFocusable;
-import org.vaadin.firitin.fluency.ui.FluentHasDataProvider;
-import org.vaadin.firitin.fluency.ui.FluentHasSize;
-import org.vaadin.firitin.fluency.ui.FluentHasValidation;
-import org.vaadin.firitin.fluency.ui.FluentHasValue;
+import org.vaadin.firitin.fluency.ui.*;
 import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
 import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
@@ -20,7 +15,7 @@ import com.vaadin.flow.component.ItemLabelGenerator;
 public class VComboBox<T> extends ComboBox<T> implements FluentHasSize<VComboBox<T>>, FluentHasValidation<VComboBox<T>>,
         FluentHasDataProvider<VComboBox<T>, T>, FluentFocusable<ComboBox<T>, VComboBox<T>>,
         FluentHasValue<VComboBox<T>, ComponentValueChangeEvent<ComboBox<T>, T>, T>, FluentComponent<VComboBox<T>>,
-        FluentHasLabel<VComboBox<T>>, FluentHasAutofocus<VComboBox<T>> {
+        FluentHasLabel<VComboBox<T>>, FluentHasAutofocus<VComboBox<T>>, FluentHasElement<VComboBox<T>> {
 
     public VComboBox() {
         super();

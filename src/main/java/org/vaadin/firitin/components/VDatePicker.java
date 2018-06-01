@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.Locale;
 
 public class VDatePicker extends DatePicker implements FluentHasSize<VDatePicker>, FluentHasValidation<VDatePicker>,
-        FluentHasStyle<VDatePicker>, FluentFocusable<DatePicker, VDatePicker>, FluentComponent<VDatePicker>
+        FluentHasStyle<VDatePicker>, FluentFocusable<DatePicker, VDatePicker>, FluentComponent<VDatePicker>, FluentHasElement<VDatePicker>
 {
     public VDatePicker() {
         super();

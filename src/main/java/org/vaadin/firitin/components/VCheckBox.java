@@ -1,11 +1,6 @@
 package org.vaadin.firitin.components;
 
-import org.vaadin.firitin.fluency.ui.FluentClickNotifier;
-import org.vaadin.firitin.fluency.ui.FluentComponent;
-import org.vaadin.firitin.fluency.ui.FluentFocusable;
-import org.vaadin.firitin.fluency.ui.FluentHasEnabled;
-import org.vaadin.firitin.fluency.ui.FluentHasSize;
-import org.vaadin.firitin.fluency.ui.FluentHasValue;
+import org.vaadin.firitin.fluency.ui.*;
 import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
 import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
@@ -15,7 +10,9 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 public class VCheckBox extends Checkbox implements FluentHasSize<VCheckBox>, FluentFocusable<Checkbox, VCheckBox>,
         FluentClickNotifier<Checkbox, VCheckBox>,
         FluentHasValue<VCheckBox, ComponentValueChangeEvent<Checkbox, Boolean>, Boolean>, FluentHasEnabled<VCheckBox>,
-        FluentComponent<VCheckBox>, FluentHasLabel<VCheckBox>, FluentHasAutofocus<VCheckBox> {
+        FluentComponent<VCheckBox>, FluentHasLabel<VCheckBox>, FluentHasAutofocus<VCheckBox>,
+        FluentHasElement<VCheckBox>
+{
 
     public VCheckBox() {
         super();

@@ -5,7 +5,9 @@ import org.vaadin.firitin.fluency.ui.*;
 
 public class VTextField extends TextField
         implements FluentHasSize<VTextField>, FluentHasValidation<VTextField>,
-        FluentHasStyle<VTextField>, FluentFocusable<TextField, VTextField>, FluentAttachNotifier<VTextField>, FluentDetachNotifier<VTextField> // from the parent classes
+        FluentHasStyle<VTextField>, FluentFocusable<TextField, VTextField>, FluentComponent<VTextField>, FluentAttachNotifier<VTextField>, FluentDetachNotifier<VTextField>, // from the parent classes
+        FluentHasElement<VTextField>
+
     // TODO Fluent implementation of HasValueChangeMode, HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete, HasAutocapitalize, HasAutocorrect
 {
     public VTextField() {
@@ -34,5 +36,26 @@ public class VTextField extends TextField
 
     public VTextField(String label, String initialValue, ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
         super(label, initialValue, listener);
+    }
+
+    public VTextField withRequired(boolean required) {
+        setRequired(required);
+        return this;
+    }
+
+    public VTextField withPlaceholder(String placeholder) {
+        setPlaceholder(placeholder);
+        return this;
+    }
+
+    public VTextField withPattern(String pattern) {
+        setPattern(pattern);
+        return this;
+    }
+
+    @Override
+    public VTextField withId(String id) {
+        setId(id);
+        return this;
     }
 }
