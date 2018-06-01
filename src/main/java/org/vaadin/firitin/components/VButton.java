@@ -173,4 +173,10 @@ public class VButton extends Button
         setAutofocus(autofocus);
         return this;
     }
+
+    @Override
+    public VButton withId(String id) {
+        setId(id);
+        return this;
+    }
 }
