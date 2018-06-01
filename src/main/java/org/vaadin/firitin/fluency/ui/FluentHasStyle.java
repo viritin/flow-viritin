@@ -2,6 +2,7 @@ package org.vaadin.firitin.fluency.ui;
 
 import com.vaadin.flow.component.HasStyle;
 
+@SuppressWarnings("unchecked")
 public interface FluentHasStyle<S extends FluentHasStyle<S>> extends HasStyle {
 
     // Javadoc copied form Vaadin Framework
@@ -15,13 +16,13 @@ public interface FluentHasStyle<S extends FluentHasStyle<S>> extends HasStyle {
      * component not working as intended.
      * </p>
      *
-     * @param style
+     * @param className
      *            The new primary style name
      * @return this (for method chaining)
      * @see #setClassName(String)
      */
-    default S withPrimaryClassName(String style) {
-        setClassName(style);
+    default S withPrimaryClassName(String className) {
+        setClassName(className);
         return (S) this;
     }
 
@@ -65,7 +66,7 @@ public interface FluentHasStyle<S extends FluentHasStyle<S>> extends HasStyle {
      * removing those defined in other layers.
      * </p>
      *
-     * @param styles
+     * @param classNames
      *            the new style or styles of the component as a space-separated
      *            list
      * @return this (for method chaining)
@@ -73,9 +74,9 @@ public interface FluentHasStyle<S extends FluentHasStyle<S>> extends HasStyle {
      * @see #addClassName(String)
      * @see #removeClassName(String)
      */
-    default S withStyleName(String... styles) {
-        for (String styleName : styles) {
-            addClassName(styleName);
+    default S withClassName(String... classNames) {
+        for (String className : classNames) {
+            addClassName(className);
         }
         return (S) this;
     }
