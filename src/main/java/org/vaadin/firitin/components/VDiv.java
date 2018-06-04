@@ -1,14 +1,11 @@
 package org.vaadin.firitin.components;
 
 import com.vaadin.flow.component.Component;
-import org.vaadin.firitin.fluency.ui.FluentClickNotifier;
-import org.vaadin.firitin.fluency.ui.FluentComponent;
-import org.vaadin.firitin.fluency.ui.FluentHasComponents;
-import org.vaadin.firitin.fluency.ui.FluentHasStyle;
+import org.vaadin.firitin.fluency.ui.*;
 
 public class VDiv extends GenericDiv
         implements FluentComponent<VDiv>, FluentClickNotifier<GenericDiv, VDiv>, FluentHasComponents<VDiv>,
-        FluentHasStyle<VDiv>
+        FluentHasStyle<VDiv>, FluentThemableLayout<VDiv>
 {
     public VDiv() {
         super();

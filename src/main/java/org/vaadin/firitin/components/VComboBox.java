@@ -15,7 +15,8 @@ import com.vaadin.flow.component.ItemLabelGenerator;
 public class VComboBox<T> extends ComboBox<T> implements FluentHasSize<VComboBox<T>>, FluentHasValidation<VComboBox<T>>,
         FluentHasDataProvider<VComboBox<T>, T>, FluentFocusable<ComboBox<T>, VComboBox<T>>,
         FluentHasValue<VComboBox<T>, ComponentValueChangeEvent<ComboBox<T>, T>, T>, FluentComponent<VComboBox<T>>,
-        FluentHasLabel<VComboBox<T>>, FluentHasAutofocus<VComboBox<T>>, FluentHasElement<VComboBox<T>> {
+        FluentHasLabel<VComboBox<T>>, FluentHasAutofocus<VComboBox<T>>, FluentHasElement<VComboBox<T>>,
+        FluentHasStyle<VComboBox<T>> {
 
     public VComboBox() {
         super();

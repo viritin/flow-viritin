@@ -12,7 +12,8 @@ import com.vaadin.flow.component.button.Button;
 
 public class VButton extends Button
         implements FluentHasSize<VButton>, FluentHasEnabled<VButton>, FluentClickNotifier<Button, VButton>,
-        FluentHasText<VButton>, FluentFocusable<Button, VButton>, FluentComponent<VButton>, FluentHasElement<VButton> {
+        FluentHasText<VButton>, FluentFocusable<Button, VButton>, FluentComponent<VButton>, FluentHasElement<VButton>,
+        FluentHasStyle<VButton> {
 
     private ButtonSize size;
     private ButtonType type;
