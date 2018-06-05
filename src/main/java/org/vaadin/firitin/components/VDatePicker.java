@@ -51,4 +51,14 @@ public class VDatePicker extends DatePicker implements FluentHasSize<VDatePicker
         setId(id);
         return this;
     }
+
+    public VDatePicker withRange(LocalDate min, LocalDate max) {
+        if (min != null) {
+            setMin(min);
+        }
+        if (max != null) {
+            setMax(max);
+        }
+        return this;
+    }
 }

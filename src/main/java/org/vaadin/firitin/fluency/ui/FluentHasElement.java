@@ -11,5 +11,8 @@ public interface FluentHasElement<S extends FluentHasElement<S>>
         return (S) this;
     }
 
-    ;
+    default S withVisible(boolean visible) {
+        getElement().setVisible(visible);
+        return (S) this;
+    }
 }
