@@ -1,14 +1,15 @@
 package org.vaadin.firitin.components;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.textfield.TextField;
 import org.vaadin.firitin.fluency.ui.*;
 
 public class VTextField extends TextField
         implements FluentHasSize<VTextField>, FluentHasValidation<VTextField>,
-        FluentHasStyle<VTextField>, FluentFocusable<TextField, VTextField>, FluentComponent<VTextField>, FluentAttachNotifier<VTextField>, FluentDetachNotifier<VTextField>, // from the parent classes
-        FluentHasElement<VTextField>
-
-    // TODO Fluent implementation of HasValueChangeMode, HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete, HasAutocapitalize, HasAutocorrect
+        FluentHasStyle<VTextField>, FluentFocusable<TextField, VTextField>, FluentComponent<VTextField>,
+        FluentAttachNotifier<VTextField>, FluentDetachNotifier<VTextField>,
+        FluentHasValueAndElement<VTextField, AbstractField.ComponentValueChangeEvent<TextField, String>, String>
+        // TODO Fluent implementation of HasValueChangeMode, HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete, HasAutocapitalize, HasAutocorrect
 {
     public VTextField() {
         super();

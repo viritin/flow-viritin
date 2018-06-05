@@ -4,7 +4,7 @@ import com.vaadin.flow.component.orderedlayout.BoxSizing;
 import com.vaadin.flow.component.orderedlayout.ThemableLayout;
 
 public interface FluentThemableLayout<S extends FluentThemableLayout<S>> extends ThemableLayout {
-    
+
     @SuppressWarnings("unchecked")
     default S withMargin(boolean margin) {
         setMargin(margin);

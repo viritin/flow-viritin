@@ -6,6 +6,7 @@ import com.vaadin.flow.component.HasStyle;
 public interface FluentHasStyle<S extends FluentHasStyle<S>> extends HasStyle {
 
     // Javadoc copied form Vaadin Framework
+
     /**
      * Changes the primary style name of the component.
      *
@@ -16,8 +17,7 @@ public interface FluentHasStyle<S extends FluentHasStyle<S>> extends HasStyle {
      * component not working as intended.
      * </p>
      *
-     * @param className
-     *            The new primary style name
+     * @param className The new primary style name
      * @return this (for method chaining)
      * @see #setClassName(String)
      */
@@ -27,6 +27,7 @@ public interface FluentHasStyle<S extends FluentHasStyle<S>> extends HasStyle {
     }
 
     // Javadoc copied form Vaadin Framework
+
     /**
      * Sets one or more user-defined style names of the component, replacing any
      * previous user-defined styles. Multiple styles can be specified as a
@@ -66,9 +67,8 @@ public interface FluentHasStyle<S extends FluentHasStyle<S>> extends HasStyle {
      * removing those defined in other layers.
      * </p>
      *
-     * @param classNames
-     *            the new style or styles of the component as a space-separated
-     *            list
+     * @param classNames the new style or styles of the component as a space-separated
+     *                   list
      * @return this (for method chaining)
      * @see #getClassName()
      * @see #addClassName(String)

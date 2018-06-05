@@ -1,5 +1,6 @@
 package org.vaadin.firitin.components;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import org.vaadin.firitin.fluency.ui.*;
 
@@ -7,8 +8,8 @@ import java.time.LocalDate;
 import java.util.Locale;
 
 public class VDatePicker extends DatePicker implements FluentHasSize<VDatePicker>, FluentHasValidation<VDatePicker>,
-        FluentHasStyle<VDatePicker>, FluentFocusable<DatePicker, VDatePicker>, FluentComponent<VDatePicker>, FluentHasElement<VDatePicker>
-{
+        FluentHasStyle<VDatePicker>, FluentFocusable<DatePicker, VDatePicker>, FluentComponent<VDatePicker>,
+        FluentHasValueAndElement<VDatePicker, AbstractField.ComponentValueChangeEvent<DatePicker, LocalDate>, LocalDate> {
     public VDatePicker() {
         super();
     }

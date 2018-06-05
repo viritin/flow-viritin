@@ -26,6 +26,7 @@ public interface FluentHasSize<S extends FluentHasSize<S>> extends HasSize {
     }
 
     // Javadoc copied form Vaadin Framework
+
     /**
      * Sets the width to 100%.
      *
@@ -36,6 +37,7 @@ public interface FluentHasSize<S extends FluentHasSize<S>> extends HasSize {
     }
 
     // Javadoc copied form Vaadin Framework
+
     /**
      * Sets the height to 100%.
      *
@@ -46,8 +48,10 @@ public interface FluentHasSize<S extends FluentHasSize<S>> extends HasSize {
     }
 
     // Javadoc copied form Vaadin Framework
+
     /**
      * Clears any size settings.
+     *
      * @return this (for method chaining)
      * @see #setSizeUndefined()
      */

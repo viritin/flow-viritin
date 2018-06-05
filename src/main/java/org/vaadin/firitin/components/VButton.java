@@ -1,14 +1,13 @@
 package org.vaadin.firitin.components;
 
-import static org.vaadin.firitin.util.VStyleUtil.applyOrElse;
-
-import org.vaadin.firitin.fluency.ui.*;
-import org.vaadin.firitin.util.VStyleUtil.ThemeStyle;
-
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
+import org.vaadin.firitin.fluency.ui.*;
+import org.vaadin.firitin.util.VStyleUtil.ThemeStyle;
+
+import static org.vaadin.firitin.util.VStyleUtil.applyOrElse;
 
 public class VButton extends Button
         implements FluentHasSize<VButton>, FluentHasEnabled<VButton>, FluentClickNotifier<Button, VButton>,

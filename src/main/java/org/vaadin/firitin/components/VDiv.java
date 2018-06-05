@@ -5,8 +5,7 @@ import org.vaadin.firitin.fluency.ui.*;
 
 public class VDiv extends GenericDiv
         implements FluentComponent<VDiv>, FluentClickNotifier<GenericDiv, VDiv>, FluentHasComponents<VDiv>,
-        FluentHasStyle<VDiv>, FluentThemableLayout<VDiv>
-{
+        FluentHasStyle<VDiv>, FluentThemableLayout<VDiv> {
     public VDiv() {
         super();
     }

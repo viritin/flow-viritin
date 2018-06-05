@@ -8,6 +8,8 @@ public interface FluentHasElement<S extends FluentHasElement<S>>
 
     default S withDescription(String description) {
         getElement().setAttribute("title", description); // TODO find the Vaadin implementation of a tooltip
-        return (S)this;
-    };
+        return (S) this;
+    }
+
+    ;
 }
