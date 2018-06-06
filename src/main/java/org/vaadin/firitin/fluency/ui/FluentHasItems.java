@@ -1,9 +1,9 @@
 package org.vaadin.firitin.fluency.ui;
 
+import com.vaadin.flow.data.binder.HasItems;
+
 import java.util.Collection;
 import java.util.stream.Stream;
-
-import com.vaadin.flow.data.binder.HasItems;
 
 @SuppressWarnings("unchecked")
 public interface FluentHasItems<S extends FluentHasItems<S, T>, T> extends HasItems<T> {
@@ -22,5 +22,5 @@ public interface FluentHasItems<S extends FluentHasItems<S, T>, T> extends HasIt
         setItems(items);
         return (S) this;
     }
-    
+
 }

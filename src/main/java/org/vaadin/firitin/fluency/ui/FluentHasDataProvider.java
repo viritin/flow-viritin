@@ -7,7 +7,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 public interface FluentHasDataProvider<S extends FluentHasDataProvider<S, T>, T>
         extends HasDataProvider<T>, FluentHasItems<S, T> {
 
-    default S withDataProvider(DataProvider<T,?> dataProvider) {
+    default S withDataProvider(DataProvider<T, ?> dataProvider) {
         setDataProvider(dataProvider);
         return (S) this;
     }
