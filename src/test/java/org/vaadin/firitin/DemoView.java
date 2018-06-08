@@ -6,6 +6,7 @@ import org.vaadin.firitin.components.VButton.ButtonSize;
 import org.vaadin.firitin.components.VButton.ButtonType;
 import org.vaadin.firitin.components.VCheckBox;
 import org.vaadin.firitin.components.VComboBox;
+import org.vaadin.firitin.components.VTextField;
 import org.vaadin.firitin.testdomain.Person;
 
 import com.vaadin.flow.component.notification.Notification;
@@ -36,5 +37,9 @@ public class DemoView extends VerticalLayout {
                         .withProperty("name", Person::getLastName))
                 .withValueChangeListener(v -> Notification.show("Selected " + v.getValue().getLastName()));
         add(comboBox);
+
+        VTextField textField = new VTextField().withPlaceholder("This field don't give you NPE with null value");
+        textField.setValue(null);
+        add(textField);
     }
 }
