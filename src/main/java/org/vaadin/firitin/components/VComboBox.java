@@ -1,26 +1,21 @@
 package org.vaadin.firitin.components;
 
-import java.util.Collection;
-
-import org.vaadin.firitin.fluency.ui.FluentComponent;
-import org.vaadin.firitin.fluency.ui.FluentFocusable;
-import org.vaadin.firitin.fluency.ui.FluentHasDataProvider;
-import org.vaadin.firitin.fluency.ui.FluentHasSize;
-import org.vaadin.firitin.fluency.ui.FluentHasValidation;
-import org.vaadin.firitin.fluency.ui.FluentHasValue;
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
+import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.data.renderer.Renderer;
+import org.vaadin.firitin.fluency.ui.*;
 import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
 import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
-import com.vaadin.flow.component.ItemLabelGenerator;
+import java.util.Collection;
 
 @SuppressWarnings("unchecked")
 public class VComboBox<T> extends ComboBox<T> implements FluentHasSize<VComboBox<T>>, FluentHasValidation<VComboBox<T>>,
         FluentHasDataProvider<VComboBox<T>, T>, FluentFocusable<ComboBox<T>, VComboBox<T>>,
-        FluentHasValue<VComboBox<T>, ComponentValueChangeEvent<ComboBox<T>, T>, T>, FluentComponent<VComboBox<T>>,
-        FluentHasLabel<VComboBox<T>>, FluentHasAutofocus<VComboBox<T>> {
+        FluentComponent<VComboBox<T>>, FluentHasLabel<VComboBox<T>>, FluentHasAutofocus<VComboBox<T>>,
+        FluentHasStyle<VComboBox<T>>,
+        FluentHasValueAndElement<VComboBox<T>, ComponentValueChangeEvent<ComboBox<T>, T>, T> {
 
     public VComboBox() {
         super();
@@ -88,4 +83,9 @@ public class VComboBox<T> extends ComboBox<T> implements FluentHasSize<VComboBox
         return this;
     }
 
+    @Override
+    public VComboBox<T> withId(String id) {
+        setId(id);
+        return this;
+    }
 }

@@ -1,12 +1,12 @@
 package org.vaadin.firitin.util;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Stream;
-
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.dom.ThemeList;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public final class VStyleUtil {
     private VStyleUtil() {
@@ -15,17 +15,17 @@ public final class VStyleUtil {
 
     public interface ThemeStyle<T extends Enum<T>> {
         public String getThemeName();
-        
+
         default void applyTheme(HasElement component) {
             clearThemes(component);
             ThemeList themes = component.getElement().getThemeList();
-            
+
             String themeName = getThemeName();
             if (!themeName.isEmpty()) {
                 themes.add(themeName);
             }
         }
-        
+
         default void clearThemes(HasElement component) {
             Objects.requireNonNull(component);
             Objects.requireNonNull(component.getElement());
@@ -34,7 +34,7 @@ public final class VStyleUtil {
             Stream.of(getClass().getEnumConstants()).forEach(theme -> themes.remove(theme.getThemeName()));
         }
     }
-    
+
     public static <T extends Enum<T>> void applyOrElse(ThemeStyle<T> value, ThemeStyle<T> defaultValue, HasElement component) {
         Optional.ofNullable(value).orElse(defaultValue).applyTheme(component);
     }

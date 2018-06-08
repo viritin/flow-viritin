@@ -8,18 +8,17 @@ import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentFocusable;
 import org.vaadin.firitin.fluency.ui.FluentHasDataProvider;
 import org.vaadin.firitin.fluency.ui.FluentHasSize;
+import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 import org.vaadin.firitin.fluency.ui.FluentHasValidation;
 import org.vaadin.firitin.fluency.ui.FluentHasValue;
 import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
 import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
-import java.util.Collection;
-
 @SuppressWarnings("unchecked")
 public class VTextField extends TextField implements FluentHasSize<VTextField>, FluentHasValidation<VTextField>,
         FluentFocusable<TextField, VTextField>,
         FluentHasValue<VTextField, ComponentValueChangeEvent<TextField, String>, String>, FluentComponent<VTextField>,
-        FluentHasLabel<VTextField>, FluentHasAutofocus<VTextField> {
+        FluentHasLabel<VTextField>, FluentHasAutofocus<VTextField>, FluentHasStyle<VTextField> {
 
     public VTextField() {
         super();
@@ -27,6 +26,26 @@ public class VTextField extends TextField implements FluentHasSize<VTextField>, 
 
     public VTextField(String label) {
         super(label);
+    }
+
+    public VTextField(String label, String placeholder) {
+        super(label, placeholder);
+    }
+
+    public VTextField(String label, String initialValue, String placeholder) {
+        super(label, initialValue, placeholder);
+    }
+
+    public VTextField(ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
+        super(listener);
+    }
+
+    public VTextField(String label, ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
+        super(label, listener);
+    }
+
+    public VTextField(String label, String initialValue, ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
+        super(label, initialValue, listener);
     }
 
     public VTextField withRequired(boolean required) {
@@ -52,6 +71,11 @@ public class VTextField extends TextField implements FluentHasSize<VTextField>, 
             value = "";
         }
         super.setValue(value);
+    }
+
+    public VTextField withId(String id) {
+        setId(id);
+        return this;
     }
 
 }

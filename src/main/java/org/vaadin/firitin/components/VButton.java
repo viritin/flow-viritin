@@ -1,23 +1,18 @@
 package org.vaadin.firitin.components;
 
-import static org.vaadin.firitin.util.VStyleUtil.applyOrElse;
-
-import org.vaadin.firitin.fluency.ui.FluentClickNotifier;
-import org.vaadin.firitin.fluency.ui.FluentComponent;
-import org.vaadin.firitin.fluency.ui.FluentFocusable;
-import org.vaadin.firitin.fluency.ui.FluentHasEnabled;
-import org.vaadin.firitin.fluency.ui.FluentHasSize;
-import org.vaadin.firitin.fluency.ui.FluentHasText;
-import org.vaadin.firitin.util.VStyleUtil.ThemeStyle;
-
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
+import org.vaadin.firitin.fluency.ui.*;
+import org.vaadin.firitin.util.VStyleUtil.ThemeStyle;
+
+import static org.vaadin.firitin.util.VStyleUtil.applyOrElse;
 
 public class VButton extends Button
         implements FluentHasSize<VButton>, FluentHasEnabled<VButton>, FluentClickNotifier<Button, VButton>,
-        FluentHasText<VButton>, FluentFocusable<Button, VButton>, FluentComponent<VButton> {
+        FluentHasText<VButton>, FluentFocusable<Button, VButton>, FluentComponent<VButton>, FluentHasElement<VButton>,
+        FluentHasStyle<VButton> {
 
     private ButtonSize size;
     private ButtonType type;
@@ -171,6 +166,12 @@ public class VButton extends Button
 
     public VButton withAutofocus(boolean autofocus) {
         setAutofocus(autofocus);
+        return this;
+    }
+
+    @Override
+    public VButton withId(String id) {
+        setId(id);
         return this;
     }
 }
