@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
  * @author Matti Tahvonen
  */
 public class Address {
-    
+
     public enum AddressType {
         Home, Work, Leisure, Other
     }
@@ -42,7 +42,8 @@ public class Address {
     /**
      * Set the value of street
      *
-     * @param street new value of street
+     * @param street
+     *            new value of street
      */
     public void setStreet(String street) {
         this.street = street;
@@ -60,7 +61,8 @@ public class Address {
     /**
      * Set the value of city
      *
-     * @param city new value of city
+     * @param city
+     *            new value of city
      */
     public void setCity(String city) {
         this.city = city;
@@ -78,7 +80,8 @@ public class Address {
     /**
      * Set the value of zipCode
      *
-     * @param zipCode new value of zipCode
+     * @param zipCode
+     *            new value of zipCode
      */
     public void setZipCode(Integer zipCode) {
         this.zipCode = zipCode;
@@ -89,6 +92,4 @@ public class Address {
         return "Address{" + "type=" + type + ", street=" + street + ", city=" + city + ", zipCode=" + zipCode + '}';
     }
 
-    
-    
 }

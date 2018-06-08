@@ -33,7 +33,7 @@ public class DemoView extends VerticalLayout {
 
         VComboBox<Person> comboBox = new VComboBox<Person>().withItems(EnhancedRandom.randomListOf(100, Person.class))
                 .withAllowCustomValue(false).withLabel("Person").withItemLabelGenerator(Person::getLastName)
-                .withRenderer(TemplateRenderer.<Person>of("<span style=\"background:yellow\">[[item.name]]</span>")
+                .withRenderer(TemplateRenderer.<Person> of("<span style=\"background:yellow\">[[item.name]]</span>")
                         .withProperty("name", Person::getLastName))
                 .withValueChangeListener(v -> Notification.show("Selected " + v.getValue().getLastName()));
         add(comboBox);

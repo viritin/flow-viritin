@@ -35,13 +35,13 @@ public final class VStyleUtil {
         }
     }
 
-    public static <T extends Enum<T>> void applyOrElse(ThemeStyle<T> value, ThemeStyle<T> defaultValue, HasElement component) {
+    public static <T extends Enum<T>> void applyOrElse(ThemeStyle<T> value, ThemeStyle<T> defaultValue,
+            HasElement component) {
         Optional.ofNullable(value).orElse(defaultValue).applyTheme(component);
     }
 
     public enum FlexDirection {
-        ROW,
-        COLUMN
+        ROW, COLUMN
     }
 
     public static void setFlexShrink(double shrink, HasStyle component) {

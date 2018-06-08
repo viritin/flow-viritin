@@ -23,5 +23,5 @@ import java.util.Locale;
  */
 public interface LocaleAware {
 
-	Locale getLocale();
+    Locale getLocale();
 }

@@ -16,9 +16,8 @@ public class Service {
 
     static final Random r = new Random(0);
 
-    static final List<Group> groups = Arrays.asList(new Group("Athletes"),
-            new Group("Nerds"), new Group("Collegues"), new Group("Students"),
-            new Group("Hunting club members"));
+    static final List<Group> groups = Arrays.asList(new Group("Athletes"), new Group("Nerds"), new Group("Collegues"),
+            new Group("Students"), new Group("Hunting club members"));
 
     public static Person getPerson() {
         Person p = new Person(123, "Matti", "Meikäläinen", 6);
@@ -73,7 +72,7 @@ public class Service {
         if (pagedBase == null) {
             pagedBase = getListOfPersons((int) COUNT);
         }
-        return pagedBase.stream().filter(p->p.getFirstName().contains(filter)).count();
+        return pagedBase.stream().filter(p -> p.getFirstName().contains(filter)).count();
     }
 
     public static List<Person> findByFirstName(String filter, long start, long maxResults) {
@@ -81,9 +80,10 @@ public class Service {
         if (pagedBase == null) {
             pagedBase = getListOfPersons((int) COUNT);
         }
-        
-        List<Person> filtered = pagedBase.stream().filter(p->p.getFirstName().contains(filter)).collect(Collectors.toList());
-        
+
+        List<Person> filtered = pagedBase.stream().filter(p -> p.getFirstName().contains(filter))
+                .collect(Collectors.toList());
+
         int end = (int) (start + maxResults);
         if (end > filtered.size()) {
             end = filtered.size();

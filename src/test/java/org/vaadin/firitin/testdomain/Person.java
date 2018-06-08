@@ -32,7 +32,7 @@ public class Person {
     @Size(min = 3, max = 15)
     private String firstName;
     private String lastName;
-    
+
     @NotNull
     private Integer age;
 
@@ -100,8 +100,7 @@ public class Person {
 
     @Override
     public String toString() {
-        return "Person [id=" + id + ", name=" + firstName + " "
-                + lastName + ", age=" + age + ", addresses=" + addresses
+        return "Person [id=" + id + ", name=" + firstName + " " + lastName + ", age=" + age + ", addresses=" + addresses
                 + ", groups=" + groups + "]";
     }
 

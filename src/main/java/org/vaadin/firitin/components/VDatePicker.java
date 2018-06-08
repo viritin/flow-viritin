@@ -34,11 +34,13 @@ public class VDatePicker extends DatePicker implements FluentHasSize<VDatePicker
         super(label, listener);
     }
 
-    public VDatePicker(LocalDate initialDate, ValueChangeListener<ComponentValueChangeEvent<DatePicker, LocalDate>> listener) {
+    public VDatePicker(LocalDate initialDate,
+            ValueChangeListener<ComponentValueChangeEvent<DatePicker, LocalDate>> listener) {
         super(initialDate, listener);
     }
 
-    public VDatePicker(String label, LocalDate initialDate, ValueChangeListener<ComponentValueChangeEvent<DatePicker, LocalDate>> listener) {
+    public VDatePicker(String label, LocalDate initialDate,
+            ValueChangeListener<ComponentValueChangeEvent<DatePicker, LocalDate>> listener) {
         super(label, initialDate, listener);
     }
 

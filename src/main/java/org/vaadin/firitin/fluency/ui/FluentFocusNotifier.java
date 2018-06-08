@@ -4,8 +4,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.FocusNotifier;
 
-public interface FluentFocusNotifier<T extends Component, S extends FluentBlurNotifier<T, S>>
-        extends FocusNotifier<T> {
+public interface FluentFocusNotifier<T extends Component, S extends FluentBlurNotifier<T, S>> extends FocusNotifier<T> {
 
     @SuppressWarnings("unchecked")
     default S withFocusListener(ComponentEventListener<FocusEvent<T>> listener) {

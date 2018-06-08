@@ -6,9 +6,9 @@ package org.vaadin.firitin.testdomain;
  * @author Matti Tahvonen
  */
 public class Group {
-    
+
     static int counter = 0;
-    
+
     private String name;
     private int iidee = counter++;
 
@@ -26,7 +26,7 @@ public class Group {
     public void setIidee(int iidee) {
         this.iidee = iidee;
     }
-    
+
     public String getName() {
         return name;
     }

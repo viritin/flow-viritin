@@ -9,20 +9,16 @@ import org.vaadin.firitin.util.VStyleUtil.ThemeStyle;
 
 import static org.vaadin.firitin.util.VStyleUtil.applyOrElse;
 
-public class VButton extends Button
-        implements FluentHasSize<VButton>, FluentHasEnabled<VButton>, FluentClickNotifier<Button, VButton>,
-        FluentHasText<VButton>, FluentFocusable<Button, VButton>, FluentComponent<VButton>, FluentHasElement<VButton>,
-        FluentHasStyle<VButton> {
+public class VButton extends Button implements FluentHasSize<VButton>, FluentHasEnabled<VButton>,
+        FluentClickNotifier<Button, VButton>, FluentHasText<VButton>, FluentFocusable<Button, VButton>,
+        FluentComponent<VButton>, FluentHasElement<VButton>, FluentHasStyle<VButton> {
 
     private ButtonSize size;
     private ButtonType type;
     private ButtonColor color;
 
     public enum ButtonType implements ThemeStyle<ButtonType> {
-        PRIMARY("primary"),
-        SECONDARY,
-        TERTIARY("tertiary"),
-        TERTIARY_INLINE("tertiary-inline");
+        PRIMARY("primary"), SECONDARY, TERTIARY("tertiary"), TERTIARY_INLINE("tertiary-inline");
 
         private String themeName;
 
@@ -41,10 +37,7 @@ public class VButton extends Button
     }
 
     public enum ButtonColor implements ThemeStyle<ButtonColor> {
-        NONE,
-        CONTRAST("contrast"),
-        SUCCESS("success"),
-        ERROR("error");
+        NONE, CONTRAST("contrast"), SUCCESS("success"), ERROR("error");
 
         private String color;
 
@@ -64,9 +57,7 @@ public class VButton extends Button
     }
 
     public enum ButtonSize implements ThemeStyle<ButtonSize> {
-        SMALL("small"),
-        NORMAL,
-        LARGE("large");
+        SMALL("small"), NORMAL, LARGE("large");
 
         private String size;
 

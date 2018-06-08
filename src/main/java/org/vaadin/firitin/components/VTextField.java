@@ -15,8 +15,8 @@ import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
 import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
 @SuppressWarnings("unchecked")
-public class VTextField extends TextField implements FluentHasSize<VTextField>, FluentHasValidation<VTextField>,
-        FluentFocusable<TextField, VTextField>,
+public class VTextField extends TextField
+        implements FluentHasSize<VTextField>, FluentHasValidation<VTextField>, FluentFocusable<TextField, VTextField>,
         FluentHasValue<VTextField, ComponentValueChangeEvent<TextField, String>, String>, FluentComponent<VTextField>,
         FluentHasLabel<VTextField>, FluentHasAutofocus<VTextField>, FluentHasStyle<VTextField> {
 
@@ -40,11 +40,13 @@ public class VTextField extends TextField implements FluentHasSize<VTextField>, 
         super(listener);
     }
 
-    public VTextField(String label, ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
+    public VTextField(String label,
+            ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
         super(label, listener);
     }
 
-    public VTextField(String label, String initialValue, ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
+    public VTextField(String label, String initialValue,
+            ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
         super(label, initialValue, listener);
     }
 
@@ -67,7 +69,7 @@ public class VTextField extends TextField implements FluentHasSize<VTextField>, 
     public void setValue(String value) {
         // avoid NPE's with null values and just show empty fields
         // like all users would expect
-        if(value == null) {
+        if (value == null) {
             value = "";
         }
         super.setValue(value);

@@ -30,10 +30,10 @@ public class Dude {
     @Size(min = 3, max = 15)
     private String firstName;
     private String lastName;
-    
+
     @NotNull
     private Integer age;
-    
+
     private Address address = new Address();
 
     public Dude() {
@@ -88,8 +88,8 @@ public class Dude {
 
     @Override
     public String toString() {
-        return "Person [id=" + id + ", name=" + firstName + " "
-                + lastName + ", age=" + age + ", address=" + address + "]";
+        return "Person [id=" + id + ", name=" + firstName + " " + lastName + ", age=" + age + ", address=" + address
+                + "]";
     }
 
     @Override
@@ -132,11 +132,9 @@ public class Dude {
         final int prime = 31;
         int result = 1;
         result = prime * result + age;
-        result = prime * result
-                + ((firstName == null) ? 0 : firstName.hashCode());
+        result = prime * result + ((firstName == null) ? 0 : firstName.hashCode());
         result = prime * result + id;
-        result = prime * result
-                + ((lastName == null) ? 0 : lastName.hashCode());
+        result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
         return result;
     }
 

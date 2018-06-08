@@ -40,7 +40,8 @@ public class GenericDiv extends HtmlContainer implements ClickNotifier<GenericDi
     /**
      * Creates a new div with the given child components.
      *
-     * @param components the child components
+     * @param components
+     *            the child components
      */
     public GenericDiv(Component... components) {
         super(components);
