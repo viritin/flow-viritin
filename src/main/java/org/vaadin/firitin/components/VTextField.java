@@ -1,16 +1,26 @@
 package org.vaadin.firitin.components;
 
-import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
+import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.textfield.TextField;
-import org.vaadin.firitin.fluency.ui.*;
+import com.vaadin.flow.data.renderer.Renderer;
+import org.vaadin.firitin.fluency.ui.FluentComponent;
+import org.vaadin.firitin.fluency.ui.FluentFocusable;
+import org.vaadin.firitin.fluency.ui.FluentHasDataProvider;
+import org.vaadin.firitin.fluency.ui.FluentHasSize;
+import org.vaadin.firitin.fluency.ui.FluentHasValidation;
+import org.vaadin.firitin.fluency.ui.FluentHasValue;
+import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
+import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
-public class VTextField extends TextField
-        implements FluentHasSize<VTextField>, FluentHasValidation<VTextField>,
-        FluentHasStyle<VTextField>, FluentFocusable<TextField, VTextField>, FluentComponent<VTextField>,
-        FluentAttachNotifier<VTextField>, FluentDetachNotifier<VTextField>,
-        FluentHasValueAndElement<VTextField, AbstractField.ComponentValueChangeEvent<TextField, String>, String>
-        // TODO Fluent implementation of HasValueChangeMode, HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete, HasAutocapitalize, HasAutocorrect
-{
+import java.util.Collection;
+
+@SuppressWarnings("unchecked")
+public class VTextField extends TextField implements FluentHasSize<VTextField>, FluentHasValidation<VTextField>,
+        FluentFocusable<TextField, VTextField>,
+        FluentHasValue<VTextField, ComponentValueChangeEvent<TextField, String>, String>, FluentComponent<VTextField>,
+        FluentHasLabel<VTextField>, FluentHasAutofocus<VTextField>, FluentHasStyle<VTextField> {
+
     public VTextField() {
         super();
     }
@@ -55,6 +65,15 @@ public class VTextField extends TextField
     }
 
     @Override
+    public void setValue(String value) {
+        // avoid NPE's with null values and just show empty fields
+        // like all users would expect
+        if(value == null) {
+            value = "";
+        }
+        super.setValue(value);
+    }
+
     public VTextField withId(String id) {
         setId(id);
         return this;
