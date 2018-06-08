@@ -109,11 +109,6 @@ public class VTabSheet extends Composite<FlexLayout> {
 		tabs.setFlexGrowForEnclosedTabs(flexGrow);
 	}
 
-	public <T extends ComponentEvent<?>> Registration addListener(Class<T> eventType,
-			ComponentEventListener<T> listener) {
-		return tabs.addListener(eventType, listener);
-	}
-
 	private void onTabChanged(SelectedChangeEvent e) {
 		Tab selectedTab = e.getSource().getSelectedTab();
 		content.removeAll();
