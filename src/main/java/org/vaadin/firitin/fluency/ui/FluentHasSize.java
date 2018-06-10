@@ -47,19 +47,6 @@ public interface FluentHasSize<S extends FluentHasSize<S>> extends HasSize {
         return withHeight("100%");
     }
 
-    // Javadoc copied form Vaadin Framework
-
-    /**
-     * Clears any size settings.
-     *
-     * @return this (for method chaining)
-     * @see #setSizeUndefined()
-     */
-    public default S withUndefinedSize() {
-        setSizeUndefined();
-        return (S) this;
-    }
-
     default S withSize(String width, String height) {
         setWidth(width);
         setHeight(height);
