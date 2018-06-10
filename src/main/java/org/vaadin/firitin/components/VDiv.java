@@ -20,10 +20,4 @@ public class VDiv extends HtmlContainer implements FluentComponent<VDiv>, Fluent
     public VDiv(Component... components) {
         super(components);
     }
-
-    @Override
-    public VDiv withId(String id) {
-        setId(id);
-        return this;
-    }
 }

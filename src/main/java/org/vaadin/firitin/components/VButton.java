@@ -159,10 +159,4 @@ public class VButton extends Button implements FluentHasSize<VButton>, FluentHas
         setAutofocus(autofocus);
         return this;
     }
-
-    @Override
-    public VButton withId(String id) {
-        setId(id);
-        return this;
-    }
 }

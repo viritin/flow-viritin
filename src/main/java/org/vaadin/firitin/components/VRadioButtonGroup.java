@@ -24,12 +24,6 @@ public class VRadioButtonGroup<T> extends RadioButtonGroup<T> implements FluentH
         add(new Label(label));
     }
 
-    @Override
-    public VRadioButtonGroup<T> withId(String id) {
-        setId(id);
-        return this;
-    }
-
     public VRadioButtonGroup<T> withTextRenderer(ItemLabelGenerator<T> itemLabelGenerator) {
         setRenderer(new TextRenderer<>(itemLabelGenerator));
         return this;

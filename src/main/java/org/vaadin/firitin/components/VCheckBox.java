@@ -40,10 +40,4 @@ public class VCheckBox extends Checkbox implements FluentHasSize<VCheckBox>, Flu
         setIndeterminate(indeterminate);
         return this;
     }
-
-    @Override
-    public VCheckBox withId(String id) {
-        setId(id);
-        return this;
-    }
 }

@@ -82,10 +82,4 @@ public class VComboBox<T> extends ComboBox<T> implements FluentHasSize<VComboBox
         setPattern(pattern);
         return this;
     }
-
-    @Override
-    public VComboBox<T> withId(String id) {
-        setId(id);
-        return this;
-    }
 }

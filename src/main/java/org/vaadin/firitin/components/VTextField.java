@@ -1,12 +1,7 @@
 package org.vaadin.firitin.components;
 
-import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
-import com.vaadin.flow.component.ItemLabelGenerator;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.renderer.Renderer;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentFocusable;
-import org.vaadin.firitin.fluency.ui.FluentHasDataProvider;
 import org.vaadin.firitin.fluency.ui.FluentHasSize;
 import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 import org.vaadin.firitin.fluency.ui.FluentHasValidation;
@@ -14,7 +9,9 @@ import org.vaadin.firitin.fluency.ui.FluentHasValue;
 import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
 import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
-@SuppressWarnings("unchecked")
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
+import com.vaadin.flow.component.textfield.TextField;
+
 public class VTextField extends TextField
         implements FluentHasSize<VTextField>, FluentHasValidation<VTextField>, FluentFocusable<TextField, VTextField>,
         FluentHasValue<VTextField, ComponentValueChangeEvent<TextField, String>, String>, FluentComponent<VTextField>,
@@ -73,11 +70,6 @@ public class VTextField extends TextField
             value = "";
         }
         super.setValue(value);
-    }
-
-    public VTextField withId(String id) {
-        setId(id);
-        return this;
     }
 
 }

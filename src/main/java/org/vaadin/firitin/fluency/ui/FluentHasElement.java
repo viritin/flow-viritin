@@ -9,9 +9,4 @@ public interface FluentHasElement<S extends FluentHasElement<S>> extends HasElem
         getElement().setAttribute("title", description); // TODO find the Vaadin implementation of a tooltip
         return (S) this;
     }
-
-    default S withVisible(boolean visible) {
-        getElement().setVisible(visible);
-        return (S) this;
-    }
 }
