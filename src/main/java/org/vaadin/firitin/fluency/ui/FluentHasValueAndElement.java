@@ -5,7 +5,7 @@ import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 
 @SuppressWarnings("unchecked")
 public interface FluentHasValueAndElement<S extends FluentHasValueAndElement<S, E, V>, E extends ValueChangeEvent<V>, V>
-        extends HasValue<E, V>, FluentHasElement<S>, FluentHasEnabled<S> {
+        extends HasValue<E, V>, FluentHasEnabled<S> {
 
     default S withReadOnly(boolean readOnly) {
         setReadOnly(readOnly);
