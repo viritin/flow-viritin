@@ -1,20 +1,20 @@
 package org.vaadin.firitin.components;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.H4;
 import org.vaadin.firitin.fluency.ui.FluentHasComponents;
 import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 
-public class VH3 extends H3 implements FluentHasComponents<VH3>, FluentHasStyle<VH3> {
-    public VH3() {
+public class VH4 extends H4 implements FluentHasComponents<VH4>, FluentHasStyle<VH4> {
+    public VH4() {
         super();
     }
 
-    public VH3(Component... components) {
+    public VH4(Component... components) {
         super(components);
     }
 
-    public VH3(String text) {
+    public VH4(String text) {
         super(text);
     }
 }
