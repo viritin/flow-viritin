@@ -1,5 +1,6 @@
 package org.vaadin.firitin.components;
 
+import com.vaadin.flow.component.Text;
 import org.vaadin.firitin.fluency.ui.FluentClickNotifier;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentHasComponents;
@@ -15,6 +16,11 @@ public class VDiv extends HtmlContainer implements FluentComponent<VDiv>, Fluent
         FluentHasComponents<VDiv>, FluentHasStyle<VDiv>, FluentThemableLayout<VDiv> {
     public VDiv() {
         super();
+    }
+
+    public VDiv(String text) {
+        super();
+        add(new Text(text));
     }
 
     public VDiv(Component... components) {
