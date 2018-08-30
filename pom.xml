@@ -4,7 +4,7 @@
 
     <groupId>org.vaadin</groupId>
     <artifactId>flow-viritin</artifactId>
-    <version>0.1.5</version>
+    <version>0.1.6-SNAPSHOT</version>
     <name>Flow Viritin</name>
 
     <properties>
@@ -23,7 +23,7 @@
         <url>https://github.com/viritin/flow-viritin</url>
         <connection>scm:git:git://github.com/viritin/flow-viritin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:/viritin/flow-viritin.git</developerConnection>
-      <tag>flow-viritin-0.1.5</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <issueManagement>
