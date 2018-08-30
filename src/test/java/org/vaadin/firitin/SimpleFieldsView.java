@@ -1,5 +1,6 @@
 package org.vaadin.firitin;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.router.Route;
 import org.vaadin.firitin.components.VFormLayout;
@@ -22,9 +23,9 @@ public class SimpleFieldsView extends VFormLayout {
             Notification.show(e.getValue().toString());
         });
 
-        addFormItem(commaSeparatedStringField, "Comma separated field for a set of strings");
-
-
+        addFormItem(commaSeparatedStringField, "Comma separated field for a set of strings", 2);
+        commaSeparatedStringField.setWidth("100%");
 
     }
+
 }
