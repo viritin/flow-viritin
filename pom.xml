@@ -19,6 +19,17 @@
     <organization>
         <name>Viritin</name>
     </organization>
+
+    <scm>
+        <url>https://github.com/viritin/flow-viritin</url>
+        <connection>scm:git:git://github.com/viritin/flow-viritin.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:/viritin/flow-viritin.git</developerConnection>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/viritin/flow-viritin/issues</url>
+    </issueManagement>
     <licenses>
         <license>
             <name>Apache 2</name>
