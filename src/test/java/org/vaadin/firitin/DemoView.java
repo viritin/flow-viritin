@@ -16,7 +16,7 @@ import com.vaadin.flow.router.Route;
 
 import io.github.benas.randombeans.api.EnhancedRandom;
 
-@Route("")
+@Route
 public class DemoView extends VerticalLayout {
 
     public DemoView() {
