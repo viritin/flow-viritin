@@ -5,11 +5,11 @@
 
     <groupId>org.vaadin</groupId>
     <artifactId>flow-viritin</artifactId>
-    <version>0.1.3-SNAPSHOT</version>
-    <name>flow viritin</name>
+    <version>0.1.4</version>
+    <name>Flow Viritin</name>
 
     <properties>
-        <vaadin.version>10.0.0.rc1</vaadin.version>
+        <vaadin.version>10.0.4</vaadin.version>
 
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -59,10 +59,6 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.benas</groupId>
@@ -121,6 +117,9 @@
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>9.3.7.v20160115</version>
                 <configuration>
+                    <httpConnector>
+                        <port>9998</port>
+                    </httpConnector>
                     <scanIntervalSeconds>2</scanIntervalSeconds>
                     <!-- Use test scope because the UI/demo classes are in 
                         the test package. -->
