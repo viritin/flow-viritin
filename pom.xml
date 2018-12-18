@@ -4,7 +4,7 @@
 
     <groupId>org.vaadin</groupId>
     <artifactId>flow-viritin</artifactId>
-    <version>0.1.6-SNAPSHOT</version>
+    <version>0.1.6</version>
     <name>Flow Viritin</name>
     <packaging>jar</packaging>
 
@@ -24,8 +24,8 @@
         <url>https://github.com/viritin/flow-viritin</url>
         <connection>scm:git:git://github.com/viritin/flow-viritin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:/viritin/flow-viritin.git</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>flow-viritin-0.1.6</tag>
+    </scm>
 
     <issueManagement>
         <system>GitHub</system>
@@ -60,7 +60,7 @@
             <url>http://maven.vaadin.com/vaadin-prereleases</url>
         </repository>
         <!-- The bintray repository contain webjars immediately after generation. If the webjar is available
-             in Maven central, you do not need this repository -->
+        in Maven central, you do not need this repository -->
         <repository>
             <id>webjars</id>
             <url>https://dl.bintray.com/webjars/maven</url>
@@ -72,6 +72,12 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
+        </dependency>    
         <dependency>
             <groupId>io.github.benas</groupId>
             <artifactId>random-beans</artifactId>
@@ -135,11 +141,11 @@
                     <reload>manual</reload>
                     <scanIntervalSeconds>2</scanIntervalSeconds>
                     <!-- Use test scope because the UI/demo classes are in 
-                        the test package. -->
+                    the test package. -->
                     <useTestScope>true</useTestScope>
                     <webAppConfig>
                         <!-- This is only needed to be able to unzip webjars 
-                            directly into src/test/webjar-debug and modify them for testing -->
+                        directly into src/test/webjar-debug and modify them for testing -->
                         <resourceBase>src/test/webjar-debug/META-INF/resources</resourceBase>
                     </webAppConfig>
                 </configuration>
