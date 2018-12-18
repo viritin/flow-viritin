@@ -8,7 +8,6 @@ import org.vaadin.firitin.util.VStyleUtil;
 import org.vaadin.firitin.util.VStyleUtil.FlexDirection;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
