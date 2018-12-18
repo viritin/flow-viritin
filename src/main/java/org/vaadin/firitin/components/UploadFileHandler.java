@@ -24,7 +24,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
 /**
- * An upload implementation that just pass the input stream (and name & mime
+ * An upload implementation that just pass the input stream (and name and mime
  * type) of the uploaded file for developer to handle.
  * <p>
  * Note, then FileHandler you pass in is not executed in the UI thread. If you
