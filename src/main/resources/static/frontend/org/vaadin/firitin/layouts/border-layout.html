@@ -1,0 +1,61 @@
+<link rel="import" href="../../polymer/polymer-element.html">
+
+<dom-module id="border-layout">
+  <template>
+    <style>
+      :host {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      ::slotted(.north) {
+        grid-row: 1;
+        grid-column: 2;
+      }
+
+      ::slotted(.south) {
+        grid-row: 3;
+        grid-column: 2;
+      }
+
+      ::slotted(.east) {
+        grid-row: 2;
+        grid-column: 3;
+      }
+
+      ::slotted(.west) {
+        grid-row: 2;
+        grid-column: 1;
+      }
+
+      ::slotted(.center) {
+        grid-row: 2;
+        grid-column: 2;
+      }
+    </style>
+    <slot></slot>
+  </template>
+
+  <script>
+    if (!Polymer.Element) {
+      throw new Error(`Unexpected Polymer version ${Polymer.version} is used, expected v2.0.0 or later.`);
+    }
+
+    (() => {
+      class BorderLayoutElement extends Polymer.Element {
+        static get is() {
+          return 'border-layout';
+        }
+      }
+
+      customElements.define(BorderLayoutElement.is, BorderLayoutElement);
+
+      window.Viritin = window.Viritin || {};
+
+      /**
+       * @namespace Viritin
+       */
+      window.Viritin.BorderLayoutElement = BorderLayoutElement;
+    })();
+  </script>
+</dom-module>
