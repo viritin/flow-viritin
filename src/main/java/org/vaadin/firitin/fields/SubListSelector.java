@@ -5,6 +5,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
@@ -56,6 +57,10 @@ public class SubListSelector<T> extends Composite<VerticalLayout>
 
         getContent().setPadding(false);
         getContent().add(addToSelectionCb, grid);
+    }
+    
+    public void setItemLabelGenerator(ItemLabelGenerator<T> itemLabelGenerator) {
+        addToSelectionCb.setItemLabelGenerator(itemLabelGenerator);
     }
 
     protected T createValueFromString(String detail) {
