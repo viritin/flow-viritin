@@ -38,16 +38,6 @@ public class VComboBox<T> extends ComboBox<T> implements FluentHasSize<VComboBox
         return this;
     }
 
-    public VComboBox<T> withFilteredItems(T... filteredItems) {
-        setFilteredItems(filteredItems);
-        return this;
-    }
-
-    public VComboBox<T> withFilteredItems(Collection<T> filteredItems) {
-        setFilteredItems(filteredItems);
-        return this;
-    }
-
     public VComboBox<T> withItemLabelGenerator(ItemLabelGenerator<T> itemLabelGenerator) {
         setItemLabelGenerator(itemLabelGenerator);
         return this;
