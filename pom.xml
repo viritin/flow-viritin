@@ -9,12 +9,14 @@
     <packaging>jar</packaging>
 
     <properties>
-        <vaadin.version>10.0.4</vaadin.version>
+        <vaadin.version>10.0.9</vaadin.version>
 
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!-- Doing release by manullay uploading to vaadin.com/directory -->
+        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
     <organization>
         <name>Viritin</name>
@@ -55,16 +57,6 @@
             <id>Vaadin Directory</id>
             <url>http://maven.vaadin.com/vaadin-addons</url>
         </repository>
-        <repository>
-            <id>Vaadin prereleases</id>
-            <url>http://maven.vaadin.com/vaadin-prereleases</url>
-        </repository>
-        <!-- The bintray repository contain webjars immediately after generation. If the webjar is available
-        in Maven central, you do not need this repository -->
-        <repository>
-            <id>webjars</id>
-            <url>https://dl.bintray.com/webjars/maven</url>
-        </repository>
     </repositories>
 
     <dependencies>
@@ -84,6 +76,7 @@
             <version>3.7.0</version>
             <scope>test</scope>
         </dependency>
+        
     </dependencies>
 
     <build>
@@ -96,7 +89,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
+                <version>3.1.1</version>
                 <configuration>
                     <archive>
                         <index>true</index>
@@ -113,7 +106,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.6</version>
+                <version>3.1.0</version>
                 <configuration>
                     <appendAssemblyId>false</appendAssemblyId>
                     <descriptors>
@@ -143,11 +136,9 @@
                     <!-- Use test scope because the UI/demo classes are in 
                     the test package. -->
                     <useTestScope>true</useTestScope>
-                    <webAppConfig>
-                        <!-- This is only needed to be able to unzip webjars 
-                        directly into src/test/webjar-debug and modify them for testing -->
-                        <resourceBase>src/test/webjar-debug/META-INF/resources</resourceBase>
-                    </webAppConfig>
+                    <webApp>
+                        <resourceBases>${project.basedir}/src/main/resources/META-INF/resources</resourceBases>
+                    </webApp>
                 </configuration>
             </plugin>
             <plugin>
@@ -156,21 +147,8 @@
                 <version>2.5.3</version>
             </plugin>
         </plugins>
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>3.1.0</version>
-            </extension>
-        </extensions>
     </build>
 
-    <distributionManagement>
-        <repository>
-            <id>v4</id>
-            <url>sftp://wf.virit.in/home/dev/maven2/</url>
-        </repository>
-    </distributionManagement>
 </project>
 
 
