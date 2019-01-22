@@ -23,6 +23,7 @@ import org.apache.commons.lang3.ObjectUtils;
 /**
  *
  */
+@FieldMatch(first = "email", second = "emailConfirm")
 public class Dude {
     private int id;
 
@@ -35,6 +36,9 @@ public class Dude {
     private Integer age;
 
     private Address address = new Address();
+    
+    private String email;
+    private String emailConfirm;
 
     public Dude() {
     }
@@ -84,6 +88,22 @@ public class Dude {
 
     public Address getAddress() {
         return address;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getEmailConfirm() {
+        return emailConfirm;
+    }
+
+    public void setEmailConfirm(String emailConfirm) {
+        this.emailConfirm = emailConfirm;
     }
 
     @Override
