@@ -17,6 +17,8 @@ public class DeleteButton extends Composite<VButton> {
     private String confirmText = "OK";
     private String cancelText = "Cancel";
 
+    private ConfirmDialog dialog = new ConfirmDialog();
+
     private ComponentEventListener<ConfirmEvent> confirmListener = e -> {};
     private ComponentEventListener<CancelEvent> cancelListener = e -> {};
 
@@ -26,8 +28,11 @@ public class DeleteButton extends Composite<VButton> {
     }
 
     private void confirm() {
-        new ConfirmDialog(headerText, promptText,
-            confirmText, confirmListener, cancelText, cancelListener).open();
+        dialog.setHeader(headerText);
+        dialog.setText(promptText);
+        dialog.setConfirmButton(confirmText, confirmListener);
+        dialog.setCancelButton(cancelText, cancelListener);
+        dialog.open();
     }
 
     public void setConfirmListener(final ComponentEventListener<ConfirmEvent> confirmListener) {
