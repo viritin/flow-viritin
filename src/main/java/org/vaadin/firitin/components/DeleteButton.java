@@ -1,11 +1,16 @@
 package org.vaadin.firitin.components;
 
+import static org.claspina.confirmdialog.ButtonOption.caption;
+import static org.claspina.confirmdialog.ButtonOption.focus;
+import static org.vaadin.firitin.components.VButton.ButtonSize.SMALL;
+
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog.CancelEvent;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog.ConfirmEvent;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import org.claspina.confirmdialog.ButtonType;
+import org.claspina.confirmdialog.ConfirmDialog;
+import org.vaadin.firitin.util.VStyleUtil;
 
 /**
  * @author Panos Bariamis (pbaris)
@@ -17,10 +22,10 @@ public class DeleteButton extends Composite<VButton> {
     private String confirmText = "OK";
     private String cancelText = "Cancel";
 
-    private ConfirmDialog dialog = new ConfirmDialog();
+    private ConfirmDialog dialog;
 
-    private ComponentEventListener<ConfirmEvent> confirmListener = e -> {};
-    private ComponentEventListener<CancelEvent> cancelListener = e -> {};
+    private Runnable confirmHandler;
+    private Runnable cancelHandler;
 
     public DeleteButton() {
         getContent().withColor(VButton.ButtonColor.ERROR);
@@ -28,32 +33,39 @@ public class DeleteButton extends Composite<VButton> {
     }
 
     private void confirm() {
-        dialog.setHeader(headerText);
-        dialog.setText(promptText);
-        dialog.setConfirmButton(confirmText, confirmListener);
-        dialog.setCancelButton(cancelText, cancelListener);
+        if (dialog == null) {
+            dialog = ConfirmDialog.create()
+                .withCaption(headerText)
+                .withMessage(new Span(promptText))
+                .withOkButton(confirmHandler, focus(), caption(confirmText))
+                .withCancelButton(cancelHandler, caption(cancelText));
+
+            adjustDialogButton(dialog.getButton(ButtonType.OK));
+            adjustDialogButton(dialog.getButton(ButtonType.CANCEL));
+        }
         dialog.open();
     }
 
-    public void setConfirmListener(final ComponentEventListener<ConfirmEvent> confirmListener) {
-        if (confirmListener != null) {
-            this.confirmListener = confirmListener;
-        }
+    private void adjustDialogButton(Button button) {
+        button.setIcon(null);
+        VStyleUtil.applyOrElse(SMALL, SMALL, button);
     }
 
-    public DeleteButton withConfirmListener(final ComponentEventListener<ConfirmEvent> confirmListener) {
-        setConfirmListener(confirmListener);
+    public void setConfirmHandler(final Runnable confirmHandler) {
+        this.confirmHandler = confirmHandler;
+    }
+
+    public DeleteButton withConfirmHandler(final Runnable confirmHandler) {
+        setConfirmHandler(confirmHandler);
         return this;
     }
 
-    public void setCancelListener(final ComponentEventListener<CancelEvent> cancelListener) {
-        if (cancelListener != null) {
-            this.cancelListener = cancelListener;
-        }
+    public void setCancelHandler(final Runnable cancelHandler) {
+        this.cancelHandler = cancelHandler;
     }
 
-    public DeleteButton withCancelListener(final ComponentEventListener<CancelEvent> cancelListener) {
-        setCancelListener(cancelListener);
+    public DeleteButton withCancelHandler(final Runnable cancelHandler) {
+        setCancelHandler(cancelHandler);
         return this;
     }
 

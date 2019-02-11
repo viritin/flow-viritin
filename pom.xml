@@ -65,9 +65,9 @@
             <artifactId>vaadin-core</artifactId>
         </dependency>
 		<dependency>
-			<groupId>com.vaadin</groupId>
-			<artifactId>vaadin-confirm-dialog-flow</artifactId>
-			<version>1.2.0</version>
+			<groupId>org.claspina</groupId>
+			<artifactId>confirm-dialog</artifactId>
+			<version>1.0.0</version>
 		</dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
