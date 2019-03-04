@@ -17,7 +17,7 @@ import org.vaadin.firitin.util.VStyleUtil;
 /**
  * @author Panos Bariamis (pbaris)
  */
-public class DeleteButton extends Composite<VButton> implements FluentHasEnabled, FluentComponent {
+public class DeleteButton extends Composite<VButton> implements FluentHasEnabled<DeleteButton>, FluentComponent<DeleteButton> {
 
     private String headerText = "";
     private String promptText = "Are you sure?";
