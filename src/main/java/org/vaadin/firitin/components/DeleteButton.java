@@ -10,12 +10,14 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import org.claspina.confirmdialog.ButtonType;
 import org.claspina.confirmdialog.ConfirmDialog;
+import org.vaadin.firitin.fluency.ui.FluentComponent;
+import org.vaadin.firitin.fluency.ui.FluentHasEnabled;
 import org.vaadin.firitin.util.VStyleUtil;
 
 /**
  * @author Panos Bariamis (pbaris)
  */
-public class DeleteButton extends Composite<VButton> {
+public class DeleteButton extends Composite<VButton> implements FluentHasEnabled, FluentComponent {
 
     private String headerText = "";
     private String promptText = "Are you sure?";
@@ -126,15 +128,6 @@ public class DeleteButton extends Composite<VButton> {
 
     public DeleteButton withRejectText(final String rejectText) {
         setCancelText(rejectText);
-        return this;
-    }
-
-    public void setEnabled(final boolean enabled) {
-        getContent().setEnabled(enabled);
-    }
-
-    public DeleteButton withEnabled(final boolean enabled) {
-        setEnabled(enabled);
         return this;
     }
 }
