@@ -1,4 +1,4 @@
-package org.vaadin.firitin.components.hmtl;
+package org.vaadin.firitin.components.html;
 
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.server.AbstractStreamResource;

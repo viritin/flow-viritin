@@ -1,4 +1,4 @@
-package org.vaadin.firitin.components.hmtl;
+package org.vaadin.firitin.components.html;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
