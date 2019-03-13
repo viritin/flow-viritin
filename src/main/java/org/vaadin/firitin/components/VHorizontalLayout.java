@@ -16,9 +16,14 @@ public class VHorizontalLayout extends HorizontalLayout implements FluentThemabl
     public VHorizontalLayout(Component... children) {
         super(children);
     }
-    
+
     public VHorizontalLayout alignAll(Alignment alignment) {
         setDefaultVerticalComponentAlignment(alignment);
+        return this;
+    }
+
+    public VHorizontalLayout withJustifyContentMode(final JustifyContentMode justifyContentMode) {
+        setJustifyContentMode(justifyContentMode);
         return this;
     }
 }

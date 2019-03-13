@@ -13,4 +13,9 @@ public class VFlexLayout extends FlexLayout implements FluentComponent<VFlexLayo
     public VFlexLayout(Component... children) {
         super(children);
     }
+
+    public VFlexLayout withJustifyContentMode(final JustifyContentMode justifyContentMode) {
+        setJustifyContentMode(justifyContentMode);
+        return this;
+    }
 }
