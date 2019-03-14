@@ -1,18 +1,17 @@
-package org.vaadin.firitin.components;
+package org.vaadin.firitin.button;
 
 import static org.claspina.confirmdialog.ButtonOption.caption;
 import static org.claspina.confirmdialog.ButtonOption.focus;
-import static org.vaadin.firitin.components.VButton.ButtonSize.SMALL;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import org.claspina.confirmdialog.ButtonType;
 import org.claspina.confirmdialog.ConfirmDialog;
+import org.vaadin.firitin.components.VButton;
+import org.vaadin.firitin.components.VButton.ButtonSize;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentHasEnabled;
-import org.vaadin.firitin.util.VStyleUtil;
 
 /**
  * @author Panos Bariamis (pbaris)
@@ -50,7 +49,7 @@ public class DeleteButton extends Composite<VButton> implements FluentHasEnabled
 
     private void adjustDialogButton(Button button) {
         button.setIcon(null);
-        VStyleUtil.applyOrElse(SMALL, SMALL, button);
+        ButtonSize.SMALL.applyTheme(button);
     }
 
     public void setConfirmHandler(final Runnable confirmHandler) {
