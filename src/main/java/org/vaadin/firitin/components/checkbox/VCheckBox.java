@@ -1,4 +1,4 @@
-package org.vaadin.firitin.components;
+package org.vaadin.firitin.components.checkbox;
 
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.checkbox.Checkbox;

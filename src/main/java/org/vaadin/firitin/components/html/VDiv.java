@@ -1,7 +1,6 @@
-package org.vaadin.firitin.components;
+package org.vaadin.firitin.components.html;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import org.vaadin.firitin.fluency.ui.FluentClickNotifierWithoutTypedSource;
 import org.vaadin.firitin.fluency.ui.FluentHtmlContainer;

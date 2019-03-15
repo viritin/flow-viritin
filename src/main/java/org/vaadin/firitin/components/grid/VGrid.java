@@ -1,4 +1,4 @@
-package org.vaadin.firitin.components;
+package org.vaadin.firitin.components.grid;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSelectionModel;

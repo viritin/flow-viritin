@@ -1,4 +1,4 @@
-package org.vaadin.firitin.components;
+package org.vaadin.firitin.components.combobox;
 
 import java.util.Locale;
 

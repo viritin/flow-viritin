@@ -1,4 +1,4 @@
-package org.vaadin.firitin.components;
+package org.vaadin.firitin.components.orderedlayout;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;

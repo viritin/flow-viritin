@@ -1,4 +1,4 @@
-package org.vaadin.firitin.components;
+package org.vaadin.firitin.components.button;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;

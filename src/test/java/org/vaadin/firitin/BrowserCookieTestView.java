@@ -2,7 +2,7 @@ package org.vaadin.firitin;
 
 import java.util.Date;
 
-import org.vaadin.firitin.components.VButton;
+import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.util.BrowserCookie;
 import org.vaadin.firitin.util.BrowserCookie.Callback;
 

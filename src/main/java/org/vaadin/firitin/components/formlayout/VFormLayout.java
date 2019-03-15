@@ -1,8 +1,7 @@
-package org.vaadin.firitin.components;
+package org.vaadin.firitin.components.formlayout;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import org.vaadin.firitin.fluency.ui.FluentFlexComponent;
 import org.vaadin.firitin.fluency.ui.FluentHasComponents;
 import org.vaadin.firitin.fluency.ui.FluentThemableLayout;
