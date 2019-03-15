@@ -1,5 +1,7 @@
 package org.vaadin.firitin.components.textfield;
 
+import com.vaadin.flow.component.textfield.TextAreaVariant;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentFocusable;
 import org.vaadin.firitin.fluency.ui.FluentHasSize;
@@ -70,6 +72,11 @@ public class VTextField extends TextField
             value = "";
         }
         super.setValue(value);
+    }
+
+    public VTextField withThemeVariants(TextFieldVariant... variants) {
+        addThemeVariants(variants);
+        return this;
     }
 
 }

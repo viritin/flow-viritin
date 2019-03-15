@@ -1,6 +1,7 @@
 package org.vaadin.firitin.components.progressbar;
 
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.progressbar.ProgressBarVariant;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentHasSize;
 import org.vaadin.firitin.fluency.ui.FluentHasStyle;
@@ -33,5 +34,11 @@ public class VProgressBar extends ProgressBar implements FluentComponent<VProgre
         setMin(min);
         return this;
     }
-    
+
+
+    public VProgressBar withThemeVariants(ProgressBarVariant... variants) {
+        addThemeVariants(variants);
+        return this;
+    }
+
 }

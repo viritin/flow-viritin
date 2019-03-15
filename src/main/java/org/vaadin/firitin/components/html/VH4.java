@@ -2,10 +2,10 @@ package org.vaadin.firitin.components.html;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.H4;
-import org.vaadin.firitin.fluency.ui.FluentClickNotifierWithoutTypedSource;
+import org.vaadin.firitin.fluency.ui.FluentClickNotifier;
 import org.vaadin.firitin.fluency.ui.FluentHtmlContainer;
 
-public class VH4 extends H4 implements FluentHtmlContainer<VH4>, FluentClickNotifierWithoutTypedSource<VH4> {
+public class VH4 extends H4 implements FluentHtmlContainer<VH4>, FluentClickNotifier<H4, VH4> {
     public VH4() {
         super();
     }

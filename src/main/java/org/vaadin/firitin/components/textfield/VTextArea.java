@@ -1,16 +1,11 @@
 package org.vaadin.firitin.components.textfield;
 
-import org.vaadin.firitin.fluency.ui.FluentComponent;
-import org.vaadin.firitin.fluency.ui.FluentFocusable;
-import org.vaadin.firitin.fluency.ui.FluentHasSize;
-import org.vaadin.firitin.fluency.ui.FluentHasStyle;
-import org.vaadin.firitin.fluency.ui.FluentHasValidation;
-import org.vaadin.firitin.fluency.ui.FluentHasValue;
-import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
-import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
-
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextAreaVariant;
+import org.vaadin.firitin.fluency.ui.*;
+import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
+import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
 public class VTextArea extends TextArea
         implements FluentHasSize<VTextArea>, FluentHasValidation<VTextArea>, FluentFocusable<TextArea, VTextArea>, FluentHasValue<VTextArea, ComponentValueChangeEvent<TextArea, String>, String>, FluentComponent<VTextArea>, FluentHasLabel<VTextArea>, FluentHasAutofocus<VTextArea>, FluentHasStyle<VTextArea> {
@@ -36,12 +31,12 @@ public class VTextArea extends TextArea
     }
 
     public VTextArea(String label,
-            ValueChangeListener<? super ComponentValueChangeEvent<TextArea, String>> listener) {
+                     ValueChangeListener<? super ComponentValueChangeEvent<TextArea, String>> listener) {
         super(label, listener);
     }
 
     public VTextArea(String label, String initialValue,
-            ValueChangeListener<? super ComponentValueChangeEvent<TextArea, String>> listener) {
+                     ValueChangeListener<? super ComponentValueChangeEvent<TextArea, String>> listener) {
         super(label, initialValue, listener);
     }
 
@@ -63,6 +58,11 @@ public class VTextArea extends TextArea
             value = "";
         }
         super.setValue(value);
+    }
+
+    public VTextArea withThemeVariants(TextAreaVariant... variants) {
+        addThemeVariants(variants);
+        return this;
     }
 
 }

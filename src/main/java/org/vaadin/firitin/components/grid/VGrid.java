@@ -2,6 +2,7 @@ package org.vaadin.firitin.components.grid;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSelectionModel;
+import com.vaadin.flow.component.grid.GridVariant;
 import org.vaadin.firitin.fluency.ui.FluentFocusable;
 import org.vaadin.firitin.fluency.ui.FluentHasDataProvider;
 import org.vaadin.firitin.fluency.ui.FluentHasSize;
@@ -30,6 +31,11 @@ public class VGrid<T> extends Grid<T>
 
     public VGrid<T> withSelectionModel(GridSelectionModel<T> selectionModel, Grid.SelectionMode selectionMode) {
         setSelectionModel(selectionModel, selectionMode);
+        return this;
+    }
+
+    public VGrid<T> withThemeVariants(GridVariant... variants) {
+        addThemeVariants(variants);
         return this;
     }
 }

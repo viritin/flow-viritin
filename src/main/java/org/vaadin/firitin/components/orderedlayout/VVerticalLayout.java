@@ -16,4 +16,26 @@ public class VVerticalLayout extends VerticalLayout implements FluentThemableLay
     public VVerticalLayout(Component... children) {
         super(children);
     }
+
+    public VVerticalLayout withPadding(boolean padding) {
+        setPadding(padding);
+        return this;
+    }
+
+    public VVerticalLayout withDefaultHorizontalComponentAlignment(Alignment alignment) {
+        setDefaultHorizontalComponentAlignment(alignment);
+        return this;
+    }
+
+    public VVerticalLayout withComponent(Component component) {
+        add(component);
+        return this;
+    }
+
+    public VVerticalLayout withComponent(Component component, Alignment alignment) {
+        add(component);
+        setHorizontalComponentAlignment(alignment, component);
+        return this;
+    }
+
 }
