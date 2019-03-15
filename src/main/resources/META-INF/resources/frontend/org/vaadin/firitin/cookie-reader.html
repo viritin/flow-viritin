@@ -1,0 +1,38 @@
+<dom-module id="cookie-reader">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+  </template>
+
+  <script>
+    class CookieReader extends Polymer.Element {
+      static get is() {
+        return "cookie-reader";
+      }
+
+      readCookie(nameEQ) {
+        nameEQ += "=";
+        let found = false;
+        let ca = document.cookie.split(";");
+        for (let i = 0; i < ca.length; i++) {
+          let c = ca[i];
+          while (c.charAt(0) == " ") c = c.substring(1, c.length);
+          if (c.indexOf(nameEQ) == 0) {
+            this.$server.call(c.substring(nameEQ.length, c.length));
+            found = true;
+            break;
+          }
+        }
+
+        if (!found) {
+            this.$server.call("");
+        }
+      }
+    }
+
+    window.customElements.define(CookieReader.is, CookieReader);
+  </script>
+</dom-module>

@@ -2,10 +2,10 @@ package org.vaadin.firitin.components;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.H1;
-import org.vaadin.firitin.fluency.ui.FluentHasComponents;
-import org.vaadin.firitin.fluency.ui.FluentHasStyle;
+import org.vaadin.firitin.fluency.ui.FluentClickNotifierWithoutTypedSource;
+import org.vaadin.firitin.fluency.ui.FluentHtmlContainer;
 
-public class VH1 extends H1 implements FluentHasComponents<VH1>, FluentHasStyle<VH1> {
+public class VH1 extends H1 implements FluentHtmlContainer<VH1>, FluentClickNotifierWithoutTypedSource<VH1> {
     public VH1() {
         super();
     }
