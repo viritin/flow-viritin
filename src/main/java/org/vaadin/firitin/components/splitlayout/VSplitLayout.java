@@ -3,6 +3,7 @@ package org.vaadin.firitin.components.splitlayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
 import org.vaadin.firitin.fluency.ui.FluentClickNotifier;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentHasSize;
@@ -42,6 +43,11 @@ public class VSplitLayout extends SplitLayout implements FluentComponent<VSplitL
 
     public VSplitLayout withSplitterDragendListener(ComponentEventListener<SplitterDragendEvent<SplitLayout>> listener) {
         addSplitterDragendListener(listener);
+        return this;
+    }
+
+    public VSplitLayout withThemeVariants(SplitLayoutVariant... variants) {
+        addThemeVariants(variants);
         return this;
     }
 }

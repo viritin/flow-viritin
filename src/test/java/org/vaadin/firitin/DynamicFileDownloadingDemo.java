@@ -20,7 +20,7 @@ import com.vaadin.flow.router.Route;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.vaadin.firitin.components.DynamicFileDownloader;
+import org.vaadin.firitin.components.html.DynamicFileDownloader;
 
 /**
  *
