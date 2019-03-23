@@ -6,11 +6,11 @@
     <groupId>org.vaadin</groupId>
     <artifactId>flow-viritin</artifactId>
     <version>0.1.9-SNAPSHOT</version>
-    <name>Flow Viritin Latest</name>
+    <name>Flow Viritin</name>
     <packaging>jar</packaging>
 
     <properties>
-        <vaadin.version>13.0.0</vaadin.version>
+        <vaadin.version>13.0.1</vaadin.version>
 
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
