@@ -32,4 +32,10 @@ public class VGrid<T> extends Grid<T>
         setSelectionModel(selectionModel, selectionMode);
         return this;
     }
+
+    public VGrid<T> withProperties(String... propertyNames) {
+        setColumns(propertyNames);
+        return this;
+    }
+
 }
