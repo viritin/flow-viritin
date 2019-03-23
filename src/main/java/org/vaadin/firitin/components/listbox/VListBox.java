@@ -5,7 +5,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.function.SerializablePredicate;
-import org.vaadin.firitin.components.VComboBox;
+import org.vaadin.firitin.components.combobox.VComboBox;
 import org.vaadin.firitin.fluency.ui.*;
 
 public class VListBox<T> extends ListBox<T> implements FluentComponent<VListBox<T>>, FluentHasStyle<VListBox<T>>, FluentHasDataProvider<VListBox<T>, T>,

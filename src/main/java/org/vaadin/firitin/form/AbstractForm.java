@@ -18,9 +18,9 @@ package org.vaadin.firitin.form;
 import java.io.Serializable;
 import java.util.Iterator;
 
-import org.vaadin.firitin.components.VButton;
-import org.vaadin.firitin.components.VButton.ButtonColor;
-import org.vaadin.firitin.components.VButton.ButtonType;
+import org.vaadin.firitin.components.button.VButton;
+import org.vaadin.firitin.components.button.VButton.ButtonColor;
+import org.vaadin.firitin.components.button.VButton.ButtonType;
 import org.vaadin.firitin.util.VStyles;
 
 import com.vaadin.flow.component.ClickEvent;

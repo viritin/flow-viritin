@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.vaadin</groupId>
     <artifactId>flow-viritin</artifactId>
     <version>0.1.9-SNAPSHOT</version>
-    <name>Flow Viritin</name>
+    <name>Flow Viritin Latest</name>
     <packaging>jar</packaging>
 
     <properties>
-        <vaadin.version>10.0.9</vaadin.version>
+        <vaadin.version>13.0.0</vaadin.version>
 
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -64,11 +65,11 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-core</artifactId>
         </dependency>
-		<dependency>
-			<groupId>org.claspina</groupId>
-			<artifactId>confirm-dialog</artifactId>
-			<version>1.0.0</version>
-		</dependency>
+        <dependency>
+            <groupId>org.claspina</groupId>
+            <artifactId>confirm-dialog</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
