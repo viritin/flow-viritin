@@ -2,13 +2,11 @@ package org.vaadin.firitin;
 
 import org.vaadin.firitin.form.AbstractForm;
 import org.vaadin.firitin.testdomain.Person;
-import org.vaadin.firitin.util.VStyleUtil;
 import org.vaadin.firitin.util.style.Padding;
 import org.vaadin.firitin.util.style.Padding.Side;
 import org.vaadin.firitin.util.style.Padding.Size;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;

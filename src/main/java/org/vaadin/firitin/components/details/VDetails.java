@@ -8,10 +8,6 @@ import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentHasEnabled;
 import org.vaadin.firitin.fluency.ui.FluentHasTheme;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 public class VDetails extends Details implements FluentComponent<VDetails>, FluentHasEnabled<VDetails>, FluentHasTheme<VDetails> {
 
     public VDetails() {

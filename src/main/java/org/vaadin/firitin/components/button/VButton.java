@@ -8,9 +8,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import org.vaadin.firitin.fluency.ui.*;
 import org.vaadin.firitin.util.VStyleUtil.ThemeStyle;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static org.vaadin.firitin.util.VStyleUtil.applyOrElse;
 
 public class VButton extends Button implements FluentHasSize<VButton>, FluentHasEnabled<VButton>,
