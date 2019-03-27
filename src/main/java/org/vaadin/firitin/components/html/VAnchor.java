@@ -5,6 +5,18 @@ import com.vaadin.flow.server.AbstractStreamResource;
 import org.vaadin.firitin.fluency.ui.FluentHtmlContainer;
 
 public class VAnchor extends Anchor implements FluentHtmlContainer<VAnchor> {
+    public enum AnchorTarget {
+        DEFAULT("_self"),
+        BLANK("_blank"),
+        PARENT("_parent"),
+        TOP("_top");
+        
+        private String value;
+
+        private AnchorTarget(String target) {
+            this.value = target;
+        }
+    }
 
     public VAnchor() {
         super();
@@ -31,5 +43,9 @@ public class VAnchor extends Anchor implements FluentHtmlContainer<VAnchor> {
     public VAnchor withTarget(String target) {
         setTarget(target);
         return this;
+    }
+    
+    public VAnchor withTarget(AnchorTarget target) {
+        return withTarget(target.value);
     }
 }
