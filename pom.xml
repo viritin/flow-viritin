@@ -196,7 +196,7 @@
                     <arguments>
                       <argument>-F</argument>
                       <argument>file=@target/${project.artifactId}-${project.version}.zip</argument>
-                      <argument>https://vaadin.com/vaadincom/directory-service/upload/${project.artifactId}?authKey=${vaadindirectory.flow-viritin.apikey}&amp;releaseNotes=NewFeaturesAndBugFixes</argument>
+                      <argument>https://vaadin.com/vaadincom/directory-service/upload/${project.artifactId}?authKey=${vaadindirectory.flow-viritin.apikey}&amp;releaseNotes=NewFeaturesAndBugFixes&amp;publish=true</argument>
                     </arguments>
                   </configuration>
                 </execution>
