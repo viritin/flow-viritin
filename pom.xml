@@ -180,6 +180,29 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <version>2.5.3</version>
             </plugin>
+              <!-- Experimental publishing to Directory -->
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>exec-maven-plugin</artifactId>
+              <version>1.2</version>
+              <executions>
+                <execution>
+                  <id>upload-to-directory</id>
+                  <phase>deploy</phase>
+                  <goals>
+                    <goal>exec</goal>
+                  </goals>
+                  <configuration>
+                    <executable>curl</executable>
+                    <arguments>
+                      <argument>-F</argument>
+                      <argument>file=@target/${project.artifactId}-${project.version}.zip</argument>
+                      <argument>https://vaadin.com/vaadincom/directory-service/upload/${project.artifactId}?authKey=${vaadindirectory.flow-viritin.apikey}&amp;releaseNotes=NewFeaturesAndBugFixes</argument>
+                    </arguments>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
         </plugins>
     </build>
 
