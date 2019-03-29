@@ -16,6 +16,7 @@
 
 package org.vaadin.firitin.testdomain;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.NotNull;
@@ -35,6 +36,8 @@ public class Person {
 
     @NotNull
     private Integer age;
+    
+    private LocalDateTime joinTime;
 
     private List<Address> addresses = new ArrayList<>();
 
@@ -96,6 +99,14 @@ public class Person {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public LocalDateTime getJoinTime() {
+        return joinTime;
+    }
+
+    public void setJoinTime(LocalDateTime joinTime) {
+        this.joinTime = joinTime;
     }
 
     @Override

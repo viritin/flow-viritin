@@ -157,7 +157,7 @@
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.3.25.v20180904</version>
+                <version>9.4.15.v20190215</version>
                 <configuration>
                     <httpConnector>
                         <port>9998</port>
@@ -167,6 +167,9 @@
                     <!-- Use test scope because the UI/demo classes are in
                     the test package. -->
                     <useTestScope>true</useTestScope>
+                    <supportedPackagings>
+                        <supportedPackaging>jar</supportedPackaging>
+                    </supportedPackagings>
                     <webApp>
                         <resourceBases>${project.basedir}/src/main/resources/META-INF/resources</resourceBases>
                     </webApp>

@@ -13,11 +13,16 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.data.validator.BeanValidator;
+import com.vaadin.flow.router.Route;
+import java.time.LocalDateTime;
+import org.vaadin.firitin.fields.LocalDateTimeField;
 
+@Route
 public class PersonForm extends AbstractForm<Person> {
 
     private TextField firstName = new TextField();
     private TextField lastName = new TextField();
+    private LocalDateTimeField joinTime = new LocalDateTimeField();
 
     public PersonForm() {
         super(Person.class);
@@ -25,6 +30,9 @@ public class PersonForm extends AbstractForm<Person> {
         setSavedHandler(this::handleSave);
         setResetHandler(this::handleReset);
         bindFields();
+        final Person person = new Person();
+        person.setJoinTime(LocalDateTime.now());
+        setEntity(person);
     }
 
     private void bindFields() {
@@ -58,6 +66,7 @@ public class PersonForm extends AbstractForm<Person> {
         
         formContents.add(firstName);
         formContents.add(lastName);
+        formContents.add(joinTime);
 
         content.add(formContents);
 
