@@ -61,7 +61,7 @@ public class LocalDateTimeField extends CustomField<LocalDateTime> {
             }
         };
         hour.addValueChangeListener(listener);
-        hour.addValueChangeListener(listener);
+        minute.addValueChangeListener(listener);
         datePicker.addValueChangeListener(listener);
     }
 
