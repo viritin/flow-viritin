@@ -20,6 +20,7 @@ import java.time.LocalTime;
 
 import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 
@@ -61,7 +62,7 @@ public class LocalDateTimeField extends CustomField<LocalDateTime> {
             }
         };
         hour.addValueChangeListener(listener);
-        hour.addValueChangeListener(listener);
+        minute.addValueChangeListener(listener);
         datePicker.addValueChangeListener(listener);
     }
 
@@ -78,8 +79,8 @@ public class LocalDateTimeField extends CustomField<LocalDateTime> {
     @Override
     protected void setPresentationValue(LocalDateTime newValue) {
         datePicker.setValue(newValue.toLocalDate());
-        hour.setValue("" + newValue.getHour());
-        minute.setValue("" + newValue.getMinute());
+        hour.setValue(String.format("%02d", newValue.getHour()));
+        minute.setValue(String.format("%02d",newValue.getMinute()));
         this.value = newValue;
     }
 
@@ -88,7 +89,12 @@ public class LocalDateTimeField extends CustomField<LocalDateTime> {
             value = LocalDateTime.of(datePicker.getValue(), LocalTime.of(Integer.valueOf(hour.getValue()), Integer.valueOf(minute.getValue())));
         } catch (Exception e) {
             // No way to disallow invalid input :-(
+            reportInvalidFormat(e);
         }
+    }
+
+    protected void reportInvalidFormat(Exception e) {
+        Notification.show("Please fill time in proper 24h format");
     }
 
 }
