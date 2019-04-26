@@ -17,10 +17,11 @@ package org.vaadin.firitin;
 
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+import org.vaadin.firitin.components.DynamicFileDownloader;
+
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.vaadin.firitin.components.html.DynamicFileDownloader;
 
 /**
  *
