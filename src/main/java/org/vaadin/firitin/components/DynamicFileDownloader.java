@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.vaadin.firitin.components.html;
+package org.vaadin.firitin.components;
 
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
