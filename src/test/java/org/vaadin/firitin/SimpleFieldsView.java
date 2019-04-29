@@ -6,7 +6,10 @@ import org.vaadin.firitin.components.formlayout.VFormLayout;
 import org.vaadin.firitin.fields.CommaSeparatedStringField;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import org.vaadin.firitin.fields.StringToDoubleMapField;
 
 /**
  * Created by mstahv
@@ -24,6 +27,20 @@ public class SimpleFieldsView extends VFormLayout {
 
         addFormItem(commaSeparatedStringField, "Comma separated field for a set of strings", 2);
         commaSeparatedStringField.setWidth("100%");
+        
+        
+        StringToDoubleMapField strToDouble = new StringToDoubleMapField();
+        Map<String,Double> map = new HashMap<>();
+        map.put("foo", 1.0);
+        map.put("bar", 2.1);
+        strToDouble.setValue(map);
+        strToDouble.addValueChangeListener(e-> {
+            Notification.show(e.getValue().toString());
+        });
+
+        addFormItem(strToDouble, "String to Double map field", 2);
+        commaSeparatedStringField.setWidth("100%");
+
 
     }
 
