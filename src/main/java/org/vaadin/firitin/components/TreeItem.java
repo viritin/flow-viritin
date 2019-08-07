@@ -18,6 +18,7 @@ package org.vaadin.firitin.components;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -28,7 +29,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
  *
  * @author mstahv
  */
-public class TreeItem extends HorizontalLayout implements ComponentEventListener<ClickEvent<Span>> {
+public class TreeItem extends Composite<HorizontalLayout> implements ComponentEventListener<ClickEvent<Span>> {
 
 	private Span expander;
 	private boolean expanded = false;
@@ -47,15 +48,15 @@ public class TreeItem extends HorizontalLayout implements ComponentEventListener
 
 		VerticalLayout verticalLayout = new VerticalLayout(c, children);
 		verticalLayout.setPadding(false);
-		this.add(expander, verticalLayout);
+		getContent().add(expander, verticalLayout);
 	}
 
 	public TreeItem(String stringContent) {
 		this(new Span(stringContent));
 	}
 
-	public TreeItem addChild(Component c) {
-		TreeItem i = new TreeItem(c);
+	public TreeItem addChild(Component childComponent) {
+		TreeItem i = new TreeItem(childComponent);
 		this.expander.setVisible(true);
 		this.children.add(i);
 		return i;
