@@ -19,8 +19,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
-import org.vaadin.firitin.components.Tree;
-import org.vaadin.firitin.components.Tree.TreeItem;
+import org.vaadin.firitin.components.TreeItem;
 
 /**
  *
@@ -31,13 +30,12 @@ public class TreeExampleView extends VerticalLayout {
     
     public TreeExampleView() {
         
-        Tree tree = new Tree();
-        Tree.TreeItem child = tree.addChild(new Span("Moro"));
-        TreeItem poro = child.addChild(new Span("Poro!"));
+        TreeItem root = new TreeItem("Moro");
+        TreeItem poro = root.addChild(new Span("Poro!"));
         
         poro.addChild(new Span("Vasa"));
         
-        add(tree);
+        add(root);
         
     }
     
