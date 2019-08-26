@@ -2,11 +2,14 @@ package org.vaadin.firitin.testdomain;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import org.apache.commons.beanutils.BeanComparator;
 
 /**
  *
@@ -90,5 +93,21 @@ public class Service {
         }
         return filtered.subList((int) start, end);
     }
+
+	public static List<Person> findAll(int start, int pageSize, String propertyId, boolean asc) {
+        System.err.println("findAll " + start + " " + pageSize + " sort " + propertyId + " asc:" + asc );
+        if (pagedBase == null) {
+            pagedBase = getListOfPersons((int) COUNT);
+        }
+        int end = (int) (start + pageSize);
+        if (end > pagedBase.size()) {
+            end = pagedBase.size();
+        }
+        Collections.sort(pagedBase, new BeanComparator<Person>(propertyId));
+        if(!asc) {
+        	Collections.reverse(pagedBase);
+        }
+        return pagedBase.subList((int) start, end);
+	}
 
 }
