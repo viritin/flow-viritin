@@ -5,6 +5,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.shared.Registration;
+import java.io.Serializable;
 import org.vaadin.firitin.fluency.ui.*;
 import org.vaadin.firitin.util.VStyleUtil.ThemeStyle;
 
@@ -13,7 +15,7 @@ import static org.vaadin.firitin.util.VStyleUtil.applyOrElse;
 public class VButton extends Button implements FluentHasSize<VButton>, FluentHasEnabled<VButton>,
         FluentClickNotifier<Button, VButton>, FluentHasText<VButton>, FluentFocusable<Button, VButton>,
         FluentComponent<VButton>, FluentHasStyle<VButton> {
-    
+
     private ButtonSize size;
     private ButtonType type;
     private ButtonColor color;
@@ -76,12 +78,21 @@ public class VButton extends Button implements FluentHasSize<VButton>, FluentHas
         }
     }
 
+    public interface BasicClickListener extends Serializable {
+
+        void onClick();
+    }
+
     public VButton() {
         super();
     }
 
     public VButton(Component icon, ComponentEventListener<ClickEvent<Button>> clickListener) {
         super(icon, clickListener);
+    }
+
+    public VButton(Component icon, BasicClickListener clickListener) {
+        super(icon, e -> clickListener.onClick());
     }
 
     public VButton(Component icon) {
@@ -92,12 +103,20 @@ public class VButton extends Button implements FluentHasSize<VButton>, FluentHas
         super(text, icon, clickListener);
     }
 
+    public VButton(String text, Component icon, BasicClickListener clickListener) {
+        super(text, icon, e -> clickListener.onClick());
+    }
+
     public VButton(String text, Component icon) {
         super(text, icon);
     }
 
     public VButton(String text, ComponentEventListener<ClickEvent<Button>> clickListener) {
         super(text, clickListener);
+    }
+
+    public VButton(String text, BasicClickListener clickListener) {
+        super(text, e -> clickListener.onClick());
     }
 
     public VButton(String text) {
@@ -163,6 +182,15 @@ public class VButton extends Button implements FluentHasSize<VButton>, FluentHas
 
     public VButton withThemeVariants(ButtonVariant... variants) {
         addThemeVariants(variants);
+        return this;
+    }
+
+    public Registration addClickListener(BasicClickListener clickListener) {
+        return super.addClickListener(e -> clickListener.onClick());
+    }
+
+    public VButton onClick(BasicClickListener clickListener) {
+        super.addClickListener(e -> clickListener.onClick());
         return this;
     }
 }
