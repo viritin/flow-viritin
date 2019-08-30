@@ -46,5 +46,11 @@ public class VVerticalLayout extends VerticalLayout implements FluentThemableLay
         setHorizontalComponentAlignment(alignment, component);
         return this;
     }
+    
+    public VVerticalLayout addExpanded(Component... components) {
+        add(components);
+        setFlexGrow(1, components);
+        return this;
+    }
 
 }
