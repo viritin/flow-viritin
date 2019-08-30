@@ -3,6 +3,8 @@ package org.vaadin.firitin.components.grid;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
 import org.vaadin.firitin.fluency.ui.FluentFocusable;
 import org.vaadin.firitin.fluency.ui.FluentHasDataProvider;
 import org.vaadin.firitin.fluency.ui.FluentHasSize;
@@ -41,6 +43,12 @@ public class VGrid<T> extends Grid<T>
 
     public VGrid<T> withThemeVariants(GridVariant... variants) {
         addThemeVariants(variants);
+        return this;
+    }
+    
+    public VGrid<T> setDataProvider(CallbackDataProvider.FetchCallback<T, Void> fetchCallback,
+            CallbackDataProvider.CountCallback<T, Void> countCallback) {
+        setDataProvider(DataProvider.fromCallbacks(fetchCallback, countCallback));
         return this;
     }
 
