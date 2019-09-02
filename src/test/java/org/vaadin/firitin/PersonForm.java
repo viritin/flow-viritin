@@ -7,6 +7,7 @@ import org.vaadin.firitin.util.style.Padding.Side;
 import org.vaadin.firitin.util.style.Padding.Size;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -72,6 +73,10 @@ public class PersonForm extends AbstractForm<Person> {
 
         HorizontalLayout toolbar = getToolbar();
         Padding.of(Side.HORIZONTAL, Size.SMALL).apply(toolbar);
+        
+        toolbar.add(new Button("Open another in a modal popup", e->{
+            new PersonForm().openInModalPopup().setCloseOnOutsideClick(true);
+        }));
         
         content.add(toolbar);
         return content;

@@ -29,6 +29,7 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
@@ -40,7 +41,7 @@ import com.vaadin.flow.data.binder.Binder;
  *
  * @author mstahv
  */
-@HtmlImport(VStyles.STYLE_MODULE_PATH)
+@CssImport(value=VStyles.STYLE_PADDING_FIX_FOR_DIALOG, id = "dialog-overlay-styles", themeFor = "vaadin-dialog-overlay")
 public abstract class AbstractForm<T> extends Composite<Div> {
 
     private boolean settingBean;

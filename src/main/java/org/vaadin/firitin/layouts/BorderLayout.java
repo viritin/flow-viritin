@@ -15,7 +15,7 @@ import java.util.Map;
  * Similar to https://docs.oracle.com/javase/7/docs/api/java/awt/BorderLayout.html
  */
 @Tag("border-layout")
-@JsModule("org/vaadin/firitin/layouts/border-layout.js")
+@JsModule("./org/vaadin/firitin/layouts/border-layout.js")
 public class BorderLayout extends Component implements HasComponents {
 
     public enum Region {
