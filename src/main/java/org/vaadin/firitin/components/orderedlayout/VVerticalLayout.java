@@ -50,6 +50,9 @@ public class VVerticalLayout extends VerticalLayout implements FluentThemableLay
     public VVerticalLayout addExpanded(Component... components) {
         add(components);
         setFlexGrow(1, components);
+        if(getHeight() == null) {
+            setHeight("100%");
+        }
         return this;
     }
 
