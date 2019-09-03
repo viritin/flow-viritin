@@ -18,11 +18,6 @@ package org.vaadin.firitin.form;
 import java.io.Serializable;
 import java.util.Iterator;
 
-import org.vaadin.firitin.components.button.VButton;
-import org.vaadin.firitin.components.button.VButton.ButtonColor;
-import org.vaadin.firitin.components.button.VButton.ButtonType;
-import org.vaadin.firitin.util.VStyles;
-
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
@@ -30,12 +25,15 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
+import org.vaadin.firitin.components.button.VButton;
+import org.vaadin.firitin.components.button.VButton.ButtonColor;
+import org.vaadin.firitin.components.button.VButton.ButtonType;
+import org.vaadin.firitin.util.VStyles;
 
 /**
  *
@@ -237,7 +235,7 @@ public abstract class AbstractForm<T> extends Composite<Div> {
      *
      * Use setEntity(T entity) to fill in the data. Am example implementation could
      * look like this:
-     * 
+     *
      * <pre>
      * <code>
      * public class PersonForm extends AbstractForm&lt;Person&gt; {
@@ -325,7 +323,7 @@ public abstract class AbstractForm<T> extends Composite<Div> {
     }
 
     protected void adjustResetButtonState() {
-        if (popup != null && popup.getParent() != null) {
+        if (popup != null && popup.getParent().isPresent()) {
             // Assume cancel button in a form opened to a popup also closes
             // it, allows closing via cancel button by default
             getResetButton().setEnabled(true);
@@ -395,7 +393,7 @@ public abstract class AbstractForm<T> extends Composite<Div> {
     private boolean findFieldAndFocus(Component compositionRoot) {
         for (Iterator<Component> iter = compositionRoot.getChildren().iterator();iter.hasNext();) {
             Component component = iter.next();
-            
+
             if (component instanceof Focusable<?>) {
                 if (isReadOnly(component)) {
                     ((Focusable) component).focus();
