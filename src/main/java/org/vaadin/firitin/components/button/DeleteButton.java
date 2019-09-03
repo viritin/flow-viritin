@@ -1,4 +1,4 @@
-package org.vaadin.firitin.button;
+package org.vaadin.firitin.components.button;
 
 import static org.claspina.confirmdialog.ButtonOption.caption;
 import static org.claspina.confirmdialog.ButtonOption.focus;
@@ -8,7 +8,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import org.claspina.confirmdialog.ButtonType;
 import org.claspina.confirmdialog.ConfirmDialog;
-import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.button.VButton.ButtonSize;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentHasEnabled;
