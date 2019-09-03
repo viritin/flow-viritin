@@ -323,7 +323,7 @@ public abstract class AbstractForm<T> extends Composite<Div> {
     }
 
     protected void adjustResetButtonState() {
-        if (popup != null && popup.getParent().isPresent()) {
+        if (getPopup() != null && getPopup().getParent().isPresent()) {
             // Assume cancel button in a form opened to a popup also closes
             // it, allows closing via cancel button by default
             getResetButton().setEnabled(true);
@@ -331,7 +331,7 @@ public abstract class AbstractForm<T> extends Composite<Div> {
         }
         if (isBound()) {
             boolean modified = hasChanges();
-            getResetButton().setEnabled(modified || popup != null);
+            getResetButton().setEnabled(modified || getPopup() != null);
         }
     }
 
