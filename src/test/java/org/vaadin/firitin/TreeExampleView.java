@@ -15,11 +15,22 @@
  */
 package org.vaadin.firitin;
 
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+
+import org.hibernate.validator.internal.engine.ValueContext.ValueState;
+import org.vaadin.firitin.components.Tree;
 
 import org.vaadin.firitin.components.TreeItem;
+import org.vaadin.firitin.testdomain.Dude;
 
 /**
  *
@@ -30,6 +41,7 @@ public class TreeExampleView extends VerticalLayout {
     
     public TreeExampleView() {
         
+        add(new H2("Low level tree item usage..."));
         TreeItem root = new TreeItem("Moro");
         TreeItem poro = root.addChild(new Span("Poro!"));
         
@@ -37,6 +49,44 @@ public class TreeExampleView extends VerticalLayout {
         
         add(root);
         
+        
+        add(new H2("Tree:"));
+        
+        Random random = new Random(0);
+        
+        Tree<Dude> dudeTree = new Tree<>();
+
+        // Configure how items labels are generated
+        dudeTree.setItemLabelGenerator(item -> item.getFirstName());
+        // Configure an icon for items
+        dudeTree.setItemIconGenerator(item ->  {
+        	VaadinIcon[] values = VaadinIcon.values();
+        	return values[random.nextInt(values.length)].create();
+        });
+        
+        // following would completely customise what is used as "node representation"
+        // This also overrides itemLabelGenerator and itemIconGenerator
+        // dudeTree.setItemGenerator(item -> new Div());
+        
+        dudeTree.setItems(getRootNodes(), Dude::getSubordinates);
+        
+        add(dudeTree);
+        
+    }
+    
+    private List<Dude> getRootNodes() {
+        Dude ceo = new Dude("Joonas");
+        
+        Dude cfo = new Dude("Jurka");
+        ceo.getSubordinates().add(cfo);
+        
+        Dude vpom = new Dude("Niko");
+        ceo.getSubordinates().add(vpom);
+
+        Dude community = new Dude("Marcus");
+        vpom.getSubordinates().add(community);
+
+        return Arrays.asList(ceo);
     }
     
 }

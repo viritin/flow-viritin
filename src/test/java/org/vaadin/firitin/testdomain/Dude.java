@@ -16,6 +16,8 @@
 
 package org.vaadin.firitin.testdomain;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import org.apache.commons.lang3.ObjectUtils;
@@ -39,6 +41,10 @@ public class Dude {
     
     private String email;
     private String emailConfirm;
+    
+    private Dude supervisor;
+    
+    private List<Dude> subordinates = new ArrayList<Dude>();
 
     public Dude() {
     }
@@ -48,6 +54,10 @@ public class Dude {
         this.firstName = firstName;
         this.lastName = lastName;
         this.age = age;
+    }
+
+    public Dude(String name) {
+        this.firstName = name;
     }
 
     public String getFirstName() {
@@ -104,6 +114,22 @@ public class Dude {
 
     public void setEmailConfirm(String emailConfirm) {
         this.emailConfirm = emailConfirm;
+    }
+
+    public Dude getSupervisor() {
+        return supervisor;
+    }
+
+    public void setSupervisor(Dude supervisor) {
+        this.supervisor = supervisor;
+    }
+
+    public List<Dude> getSubordinates() {
+        return subordinates;
+    }
+
+    public void setSubordinates(List<Dude> subordinates) {
+        this.subordinates = subordinates;
     }
 
     @Override

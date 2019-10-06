@@ -9,7 +9,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <vaadin.version>14.0.2</vaadin.version>
+        <vaadin.version>14.0.7</vaadin.version>
 
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -119,8 +119,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.1.2</version>
                 <configuration>
+                    <excludes>
+                        <exclude>META-INF/VAADIN/config/flow-build-info.json</exclude>
+                    </excludes>
                     <archive>
                         <index>true</index>
                         <manifest>
@@ -214,7 +217,7 @@
                     <plugin>
                         <groupId>com.vaadin</groupId>
                         <artifactId>vaadin-maven-plugin</artifactId>
-                        <version>14.0.1</version>
+                        <version>14.0.7</version>
                         <executions>
                             <execution>
                                 <goals>
