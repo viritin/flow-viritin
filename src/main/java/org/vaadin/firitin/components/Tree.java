@@ -15,7 +15,10 @@
  */
 package org.vaadin.firitin.components;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
@@ -34,6 +37,18 @@ import com.vaadin.flow.function.SerializableFunction;
  */
 @StyleSheet("org/vaadin/firitin/components/tree.css")
 public class Tree<T> extends Composite<VerticalLayout> {
+
+	/**
+	 * This can be used to further configure the created TreeItem instances. For
+	 * example to add additional click listeners or context menus.
+	 * 
+	 * @author mstahv
+	 *
+	 * @param <T>
+	 */
+	public interface ItemDecorator<T> extends BiConsumer<T, TreeItem> {
+
+	}
 
 	/**
 	 * {@link ItemIconGenerator} can be used to customize the icon shown before the
@@ -71,7 +86,7 @@ public class Tree<T> extends Composite<VerticalLayout> {
 		/**
 		 * Gets a component for the {@code item}.
 		 *
-		 * @param component the item 
+		 * @param component the item
 		 * @return the component for the item, not {@code null}
 		 */
 		@Override
@@ -81,13 +96,15 @@ public class Tree<T> extends Composite<VerticalLayout> {
 	private ItemLabelGenerator<T> itemLabelGenerator = o -> o.toString();
 	private ItemIconGenerator<T> itemIconGenerator;
 	private ItemGenerator<T> itemGenerator = item -> {
-		if(itemIconGenerator != null) {
+		if (itemIconGenerator != null) {
 			return new Span(itemIconGenerator.apply(item), new Text(itemToString(item)));
 		} else {
 			return new Span(itemToString(item));
 		}
 	};
-	
+
+	private List<ItemDecorator<T>> itemDecorators = new ArrayList<>();
+
 	public Tree() {
 		getElement().getClassList().add("viritin-tree");
 //		getContent().setWidth("0");
@@ -111,18 +128,40 @@ public class Tree<T> extends Composite<VerticalLayout> {
 
 	public void setItems(List<T> items, ChildrenProvider<T> childrenProvider) {
 		for (T item : items) {
-			final TreeItem treeItem = new TreeItem(itemGenerator.apply(item));
+			final TreeItem treeItem = createTreeItem(item);
 			getContent().add(treeItem);
 			fillTree(childrenProvider, item, treeItem);
 		}
 	}
 
+	protected TreeItem createTreeItem(T item) {
+		final TreeItem treeItem = new TreeItem(itemGenerator.apply(item));
+		itemDecorators.forEach(d -> d.accept(item, treeItem));
+		return treeItem;
+	}
+
 	protected void fillTree(ChildrenProvider<T> childrenProvider, T item, final TreeItem treeItem) {
 		List<T> children = childrenProvider.getChildren(item);
 		for (T t : children) {
-			TreeItem child = treeItem.addChild(itemGenerator.apply(t));
+			final TreeItem child = createTreeItem(t);
+			treeItem.addChild(child);
 			fillTree(childrenProvider, t, child);
 		}
+	}
+
+	/**
+	 * Adds an {@link ItemDecorator} to further configure {@link TreeItem}s
+	 * generated automatically when {@link #setItems(List, ChildrenProvider)} method
+	 * is called.
+	 * 
+	 * @param decorator the {@link ItemDecorator}
+	 */
+	public void addItemDecorator(ItemDecorator<T> decorator) {
+		itemDecorators.add(decorator);
+	}
+
+	public void removeItemDecorator(ItemDecorator<T> decorator) {
+		itemDecorators.remove(decorator);
 	}
 
 	/**
@@ -142,11 +181,12 @@ public class Tree<T> extends Composite<VerticalLayout> {
 	public void setItemIconGenerator(ItemIconGenerator<T> itemIconGenerator) {
 		this.itemIconGenerator = itemIconGenerator;
 	}
-	
+
 	/**
 	 * Sets the strategy to generate component for for the items.
 	 * <p>
-	 * Note that this overrides possibly configured {@link ItemIconGenerator} and {@link ItemLabelGenerator}.
+	 * Note that this overrides possibly configured {@link ItemIconGenerator} and
+	 * {@link ItemLabelGenerator}.
 	 * 
 	 * @param itemGenerator the {@link ItemGenerator}
 	 */

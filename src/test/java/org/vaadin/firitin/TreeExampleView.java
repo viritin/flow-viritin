@@ -15,22 +15,23 @@
  */
 package org.vaadin.firitin;
 
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.Route;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import org.hibernate.validator.internal.engine.ValueContext.ValueState;
 import org.vaadin.firitin.components.Tree;
-
 import org.vaadin.firitin.components.TreeItem;
 import org.vaadin.firitin.testdomain.Dude;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.Route;
 
 /**
  *
@@ -50,9 +51,9 @@ public class TreeExampleView extends VerticalLayout {
         add(root);
         
         
-        add(new H2("Tree:"));
-        
         Random random = new Random(0);
+
+        add(new H2("Tree:"));
         
         Tree<Dude> dudeTree = new Tree<>();
 
@@ -68,6 +69,30 @@ public class TreeExampleView extends VerticalLayout {
         // This also overrides itemLabelGenerator and itemIconGenerator
         // dudeTree.setItemGenerator(item -> new Div());
         
+        // we can also use ItemDecorator to customize the generated tree nodes
+        // here, we add context menu to the content part (icon + caption)
+        dudeTree.addItemDecorator((dude, treeItem) -> {
+			Component nodeContent = treeItem.getNodeContent();
+			
+		    ContextMenu contextMenu = new ContextMenu();
+		    
+		    contextMenu.addItem("First menu item for " + dude.getFirstName(),
+		            e1 -> Notification.show("Clicked on the first item"));
+
+		    contextMenu.addItem("Second menu item",
+		            e2 -> Notification.show("Clicked on the second item"));
+
+		    // The created MenuItem component can be saved for later use
+		    MenuItem item = contextMenu.addItem("Disabled menu item",
+		            e3 -> Notification.show("This cannot happen"));
+		    item.setEnabled(false);
+		    
+		    contextMenu.setTarget(nodeContent);
+			
+		});
+        
+        // Now actually populate the tree, assign a list of root nodes and 
+        // a strategy to get children
         dudeTree.setItems(getRootNodes(), Dude::getSubordinates);
         
         add(dudeTree);

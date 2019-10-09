@@ -22,9 +22,13 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.dom.DomEventListener;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -32,32 +36,33 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author mstahv
  */
-public class TreeItem extends Composite<HorizontalLayout> implements ComponentEventListener<ClickEvent<Div>> {
+public class TreeItem extends Component {
 
-	private Div expander;
+	private Element expander;
 	private boolean expanded = false;
-	private VerticalLayout children;
-	private Registration clickListenerReg;
+	private Div children;
+	private Component nodeContent;
 
-	public TreeItem(Component c) {
-		super();
-		expander = new Div();
-		expander.setWidth("3em");
+	public TreeItem(Component nodeContent) {
+		super(new Element("table"));
+		Element tr = new Element("tr");
+		
+		expander = new Element("td");
+		expander.getClassList().add("expander");
+		expander.addEventListener("click", e -> toggleNode());
 
-		children = new VerticalLayout();
-		children.setPadding(false);
+		children = new Div();
 		children.setVisible(false);
-
-		VerticalLayout verticalLayout = new VerticalLayout(c, children);
 		
-		verticalLayout.setPadding(false);
-		verticalLayout.setSpacing(false);
-		getContent().add(expander, verticalLayout);
+		Element content = new Element("td");
+		content.getClassList().add("node-content");
 		
-		getContent().setPadding(false);
-		getContent().setSpacing(false);
-		getContent().setFlexGrow(0, expander);
+		content.appendChild(nodeContent.getElement(), children.getElement());
 		
+		tr.appendChild(expander, content);
+		
+		getElement().appendChild(tr);
+		this.nodeContent = nodeContent;
 	}
 
 	public TreeItem(String stringContent) {
@@ -66,13 +71,21 @@ public class TreeItem extends Composite<HorizontalLayout> implements ComponentEv
 
 	public TreeItem addChild(Component childComponent) {
 		TreeItem i = new TreeItem(childComponent);
-		this.expander.setVisible(true);
-		this.children.add(i);
-		if(children.getComponentCount() == 1) {
-			expander.add(VaadinIcon.CARET_RIGHT.create());
-			clickListenerReg = expander.addClickListener(this);
-		}
+		addChild(i);
 		return i;
+	}
+	
+	public Component getNodeContent() {
+		return nodeContent;
+	}
+	
+	public void addChild(TreeItem treeItem) {
+		this.expander.setVisible(true);
+		this.children.add(treeItem);
+		if(children.getChildren().count() == 1) {
+			Icon icon = VaadinIcon.CARET_RIGHT.create();
+			expander.appendChild(icon.getElement());
+		}
 	}
 
 	public TreeItem addChild(String stringContent) {
@@ -81,17 +94,15 @@ public class TreeItem extends Composite<HorizontalLayout> implements ComponentEv
 
 	public void removeChild(TreeItem c) {
 		this.children.remove(c);
-		if(children.getComponentCount() == 0) {
-			expander.removeAll();
-			clickListenerReg.remove();
+		if(children.getChildren().count() == 0) {
+			expander.removeAllChildren();
 		}
 	}
-
-	@Override
-	public void onComponentEvent(ClickEvent<Div> e) {
+	
+	public void toggleNode() {
 		expanded = !expanded;
-		expander.removeAll();
-		expander.add(expanded ? VaadinIcon.CARET_DOWN.create() : VaadinIcon.CARET_RIGHT.create());
+		expander.removeAllChildren();
+		expander.appendChild(expanded ? VaadinIcon.CARET_DOWN.create().getElement() : VaadinIcon.CARET_RIGHT.create().getElement());
 		children.setVisible(expanded);
 	}
 

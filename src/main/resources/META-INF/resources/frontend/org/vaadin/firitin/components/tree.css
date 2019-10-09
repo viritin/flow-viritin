@@ -1,0 +1,14 @@
+.viritin-tree {
+	padding:0;
+}
+
+.viritin-tree td {
+	vertical-align:top;
+}
+
+.viritin-tree .expander  {
+	width: 24px;
+}
+.viritin-tree .node-content>span>iron-icon {
+	margin-right: 0.5em;
+}
