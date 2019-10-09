@@ -90,6 +90,7 @@ public class BrowserCookie {
      * value is updated via a ValueChangeListener.
      *
      * @param <V> The value-type of the HasValue&lt;&gt;
+     * @param <E> the type of the value change event fired by field
      * @param field The HasValue&lt;V&gt; that gets bound.
      * @param name The name of the cookie
      * @param cb A BrowserCookie.Callback that gets called with the actual value

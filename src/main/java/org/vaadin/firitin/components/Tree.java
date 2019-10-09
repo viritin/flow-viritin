@@ -44,7 +44,7 @@ public class Tree<T> extends Composite<VerticalLayout> {
 	 * 
 	 * @author mstahv
 	 *
-	 * @param <T>
+	 * @param <T> the type of items in the Tree
 	 */
 	public interface ItemDecorator<T> extends BiConsumer<T, TreeItem> {
 
@@ -86,7 +86,7 @@ public class Tree<T> extends Composite<VerticalLayout> {
 		/**
 		 * Gets a component for the {@code item}.
 		 *
-		 * @param component the item
+		 * @param item the item
 		 * @return the component for the item, not {@code null}
 		 */
 		@Override
