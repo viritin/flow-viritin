@@ -100,10 +100,12 @@ public class TreeItem extends Component {
 	}
 	
 	public void toggleNode() {
-		expanded = !expanded;
-		expander.removeAllChildren();
-		expander.appendChild(expanded ? VaadinIcon.CARET_DOWN.create().getElement() : VaadinIcon.CARET_RIGHT.create().getElement());
-		children.setVisible(expanded);
+		if(getChildren().findFirst().isPresent()) {
+			expanded = !expanded;
+			expander.removeAllChildren();
+			expander.appendChild(expanded ? VaadinIcon.CARET_DOWN.create().getElement() : VaadinIcon.CARET_RIGHT.create().getElement());
+			children.setVisible(expanded);
+		}
 	}
 
 }
