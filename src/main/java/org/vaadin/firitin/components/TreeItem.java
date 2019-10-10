@@ -100,7 +100,7 @@ public class TreeItem extends Component {
 	}
 	
 	public void toggleNode() {
-		if(getChildren().findFirst().isPresent()) {
+		if(children.getChildren().findFirst().isPresent()) {
 			expanded = !expanded;
 			expander.removeAllChildren();
 			expander.appendChild(expanded ? VaadinIcon.CARET_DOWN.create().getElement() : VaadinIcon.CARET_RIGHT.create().getElement());
