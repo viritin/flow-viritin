@@ -90,14 +90,13 @@ public class TreeItem extends Component implements ClickNotifier<TreeItem> {
 		this.expander.setVisible(true);
 		this.children.add(treeItem);
 		if(children.getChildren().count() == 1) {
-			showOpenToggle();
+			updateExpanderToggle();
 		}
 	}
 
-	private void showOpenToggle() {
+	private void updateExpanderToggle() {
 		expander.removeAllChildren();
-		Icon icon = VaadinIcon.CARET_RIGHT.create();
-		expander.appendChild(icon.getElement());
+		expander.appendChild(open ? VaadinIcon.CARET_DOWN.create().getElement() : VaadinIcon.CARET_RIGHT.create().getElement());
 	}
 
 	public TreeItem addChild(String stringContent) {
@@ -114,8 +113,7 @@ public class TreeItem extends Component implements ClickNotifier<TreeItem> {
 	public void toggleNode() {
 		if(hasChildren()) {
 			open = !open;
-			expander.removeAllChildren();
-			expander.appendChild(open ? VaadinIcon.CARET_DOWN.create().getElement() : VaadinIcon.CARET_RIGHT.create().getElement());
+			updateExpanderToggle();
 			children.setVisible(open);
 			if(open && populateSubtreeHandler != null) {
 				populateSubtreeHandler.onExpand();
@@ -124,9 +122,29 @@ public class TreeItem extends Component implements ClickNotifier<TreeItem> {
 		}
 	}
 	
+	public void showChildren() {
+		if(!open) {
+			toggleNode();
+		}
+	}
+	
+	public void closeChildren() {
+		if(open) {
+			toggleNode();
+		}
+	}
+	
+	public void showChildrenRecursively() {
+		showChildren();
+		children.getChildren().forEach(c -> {
+			TreeItem treeItem = (TreeItem) c;
+			treeItem.showChildrenRecursively();
+		});
+	}
+	
 	public void setPopulateSubreeHandler(PopulateSubtreeHandler handler) {
 		this.populateSubtreeHandler = handler;
-		showOpenToggle();
+		updateExpanderToggle();
 	}
 	
 	public boolean isOpen() {

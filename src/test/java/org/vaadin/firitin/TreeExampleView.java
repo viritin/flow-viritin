@@ -91,7 +91,7 @@ public class TreeExampleView extends VerticalLayout {
     		    item.setEnabled(false);
     		    
     		    contextMenu.setTarget(nodeContent);
-			
+    		    
 		});
         
         dudeTree.addSelectionListener(
@@ -102,20 +102,18 @@ public class TreeExampleView extends VerticalLayout {
         // Now actually populate the tree, assign a list of root nodes and 
         // a strategy to get children
         
-        System.out.println(LocalTime.now());
+        List<Dude> rootNodes = getRootNodes();
+		dudeTree.setItems(rootNodes, Dude::getSubordinates);
+		
+		// recursively show whole subtree of the first node (whole tree in this case)
+		dudeTree.showChildrenRecursively(rootNodes.get(0));
         
-        dudeTree.setItems(getRootNodes(), Dude::getSubordinates);
-        
-        //dudeTree.setItems(getRootNodesForPerformanceTesting(), Dude::getSubordinates);
+//        List<Dude> rootNodesForPerformanceTesting = getRootNodesForPerformanceTesting();
+//        dudeTree.setItems(rootNodesForPerformanceTesting, Dude::getSubordinates);
+//        dudeTree.showChildrenRecursively(rootNodesForPerformanceTesting.get(0));
         
         add(dudeTree);
-        System.out.println(LocalTime.now());
         
-//        Grid<Dude> grid = new Grid<>(Dude.class);
-//        grid.setItems(getRootNodes());
-//        add(grid);
-//        grid.setSelectionMode(SelectionMode.SINGLE);
-//        
     }
     
     private List<Dude> getRootNodes() {

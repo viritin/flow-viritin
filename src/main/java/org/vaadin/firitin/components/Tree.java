@@ -17,6 +17,7 @@ package org.vaadin.firitin.components;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -120,8 +121,10 @@ public class Tree<T> extends Composite<VerticalLayout> {
 
 	private List<ItemDecorator<T>> itemDecorators = new ArrayList<>();
 	private Set<SelectionListener<T>> selectionListeners = new LinkedHashSet<>();
-	
+	private HashMap<T, TreeItem> domainObjectToTreeItem = new HashMap<>();
+
 	private TreeItem selectedItem;
+
 	public Tree() {
 		getElement().getClassList().add("viritin-tree");
 //		getContent().setWidth("0");
@@ -153,8 +156,9 @@ public class Tree<T> extends Composite<VerticalLayout> {
 
 	protected TreeItem createTreeItem(T item) {
 		final TreeItem treeItem = new TreeItem(itemGenerator.apply(item));
+		domainObjectToTreeItem.put(item, treeItem);
 		treeItem.addClickListener(e -> {
-			if(selectedItem != null) {
+			if (selectedItem != null) {
 				selectedItem.setSelected(false);
 			}
 			selectedItem = treeItem;
@@ -167,7 +171,7 @@ public class Tree<T> extends Composite<VerticalLayout> {
 
 	protected void fillTree(ChildrenProvider<T> childrenProvider, T item, final TreeItem treeItem) {
 		List<T> children = childrenProvider.getChildren(item);
-		if(!children.isEmpty()) {
+		if (!children.isEmpty()) {
 			treeItem.setPopulateSubreeHandler(() -> {
 				for (T t : children) {
 					final TreeItem child = createTreeItem(t);
@@ -175,7 +179,7 @@ public class Tree<T> extends Composite<VerticalLayout> {
 					fillTree(childrenProvider, t, child);
 				}
 			});
-			
+
 		}
 	}
 
@@ -223,18 +227,47 @@ public class Tree<T> extends Composite<VerticalLayout> {
 	public void setItemGenerator(ItemGenerator<T> itemGenerator) {
 		this.itemGenerator = itemGenerator;
 	}
-	
+
 	/**
 	 * Adds selection listener to nodes.
 	 * 
 	 * @param listener the listener to be called when selected item changes
 	 */
 	public void addSelectionListener(SelectionListener<T> listener) {
-		selectionListeners .add(listener);
+		selectionListeners.add(listener);
 	}
-	
+
 	public void removeSelectionListener(SelectionListener<T> listener) {
 		selectionListeners.remove(listener);
 	}
 
+	/**
+	 * Shows children of the node in UI. Same as user would click on the caret in
+	 * the UI.
+	 * 
+	 * @param item the item whose children should be visible in the UI
+	 */
+	public void showChildren(T item) {
+		domainObjectToTreeItem.get(item).showChildren();
+	}
+
+	/**
+	 * Shows children of the node in UI recursively. Same as user would click on the caret in
+	 * the UI.
+	 * 
+	 * @param item the item whose children should be visible in the UI
+	 */
+	public void showChildrenRecursively(T item) {
+		domainObjectToTreeItem.get(item).showChildrenRecursively();
+	}
+
+	/**
+	 * Hides children of the node in UI. Same as user would click on the caret in
+	 * the UI when children are visible.
+	 * 
+	 * @param item the item whose children should be hidden in the UI
+	 */
+	public void hideChildren(T item) {
+		domainObjectToTreeItem.get(item).closeChildren();
+	}
 }
