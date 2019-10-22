@@ -224,7 +224,7 @@ public class Tree<T> extends Composite<VerticalLayout> {
 	/**
 	 * Adds selection listener to nodes.
 	 * 
-	 * @param listener
+	 * @param listener the listener to be called when selected item changes
 	 */
 	public void addSelectionListener(SelectionListener<T> listener) {
 		selectionListeners .add(listener);
