@@ -15,6 +15,8 @@
  */
 package org.vaadin.firitin;
 
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -26,8 +28,6 @@ import org.vaadin.firitin.testdomain.Dude;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -101,15 +101,21 @@ public class TreeExampleView extends VerticalLayout {
         
         // Now actually populate the tree, assign a list of root nodes and 
         // a strategy to get children
+        
+        System.out.println(LocalTime.now());
+        
         dudeTree.setItems(getRootNodes(), Dude::getSubordinates);
         
+        //dudeTree.setItems(getRootNodesForPerformanceTesting(), Dude::getSubordinates);
+        
         add(dudeTree);
+        System.out.println(LocalTime.now());
         
-        Grid<Dude> grid = new Grid<>(Dude.class);
-        grid.setItems(getRootNodes());
-        add(grid);
-        grid.setSelectionMode(SelectionMode.SINGLE);
-        
+//        Grid<Dude> grid = new Grid<>(Dude.class);
+//        grid.setItems(getRootNodes());
+//        add(grid);
+//        grid.setSelectionMode(SelectionMode.SINGLE);
+//        
     }
     
     private List<Dude> getRootNodes() {
@@ -126,5 +132,23 @@ public class TreeExampleView extends VerticalLayout {
 
         return Arrays.asList(ceo);
     }
-    
+
+    private List<Dude> getRootNodesForPerformanceTesting() {
+    	ArrayList<Dude> dudes = new ArrayList<>();
+    	for(int i =0; i < 100; i++) {
+    		Dude d = new Dude("Root " + i); 
+    		for(int j= 0; j <10;j++) {
+    			Dude e = new Dude("Child " + i + "-" +j);
+    			d.getSubordinates().add(e);
+    			for(int k = 0; k <10; k++) {
+    				Dude f = new Dude("Child" + i + "-" + j + "-" + k); 
+    				e.getSubordinates().add(f);
+    			}
+    		}
+    		dudes.add(d);
+    	}
+    	
+        return dudes;
+    }
+
 }

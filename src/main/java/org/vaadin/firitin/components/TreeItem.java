@@ -20,18 +20,12 @@ import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -42,11 +36,17 @@ import com.vaadin.flow.shared.Registration;
 public class TreeItem extends Component implements ClickNotifier<TreeItem> {
 
 	private Element expander;
-	private boolean expanded = false;
+	private boolean open = false;
 	private Div children;
 	private Component nodeContent;
 	private Element contentTD;
 	private Div contentDiv;
+	
+	private PopulateSubtreeHandler populateSubtreeHandler;
+	
+	public interface PopulateSubtreeHandler {
+		public void onExpand();
+	}
 
 	public TreeItem(Component nodeContent) {
 		super(new Element("table"));
@@ -90,9 +90,14 @@ public class TreeItem extends Component implements ClickNotifier<TreeItem> {
 		this.expander.setVisible(true);
 		this.children.add(treeItem);
 		if(children.getChildren().count() == 1) {
-			Icon icon = VaadinIcon.CARET_RIGHT.create();
-			expander.appendChild(icon.getElement());
+			showOpenToggle();
 		}
+	}
+
+	private void showOpenToggle() {
+		expander.removeAllChildren();
+		Icon icon = VaadinIcon.CARET_RIGHT.create();
+		expander.appendChild(icon.getElement());
 	}
 
 	public TreeItem addChild(String stringContent) {
@@ -107,14 +112,34 @@ public class TreeItem extends Component implements ClickNotifier<TreeItem> {
 	}
 	
 	public void toggleNode() {
-		if(children.getChildren().findFirst().isPresent()) {
-			expanded = !expanded;
+		if(hasChildren()) {
+			open = !open;
 			expander.removeAllChildren();
-			expander.appendChild(expanded ? VaadinIcon.CARET_DOWN.create().getElement() : VaadinIcon.CARET_RIGHT.create().getElement());
-			children.setVisible(expanded);
+			expander.appendChild(open ? VaadinIcon.CARET_DOWN.create().getElement() : VaadinIcon.CARET_RIGHT.create().getElement());
+			children.setVisible(open);
+			if(open && populateSubtreeHandler != null) {
+				populateSubtreeHandler.onExpand();
+				populateSubtreeHandler = null;
+			}
 		}
 	}
 	
+	public void setPopulateSubreeHandler(PopulateSubtreeHandler handler) {
+		this.populateSubtreeHandler = handler;
+		showOpenToggle();
+	}
+	
+	public boolean isOpen() {
+		return open;
+	}
+
+	private boolean hasChildren() {
+		if(populateSubtreeHandler != null) {
+			return true;
+		}
+		return children.getChildren().findFirst().isPresent();
+	}
+		
 	public void setSelected(boolean selected) {
 		nodeContent.getElement().getClassList().set("selected", selected);
 	}

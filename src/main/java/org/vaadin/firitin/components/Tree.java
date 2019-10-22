@@ -22,9 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Text;
@@ -145,8 +143,8 @@ public class Tree<T> extends Composite<VerticalLayout> {
 		List<T> getChildren(T parent);
 	}
 
-	public void setItems(List<T> items, ChildrenProvider<T> childrenProvider) {
-		for (T item : items) {
+	public void setItems(List<T> rootNodes, ChildrenProvider<T> childrenProvider) {
+		for (T item : rootNodes) {
 			final TreeItem treeItem = createTreeItem(item);
 			getContent().add(treeItem);
 			fillTree(childrenProvider, item, treeItem);
@@ -169,10 +167,15 @@ public class Tree<T> extends Composite<VerticalLayout> {
 
 	protected void fillTree(ChildrenProvider<T> childrenProvider, T item, final TreeItem treeItem) {
 		List<T> children = childrenProvider.getChildren(item);
-		for (T t : children) {
-			final TreeItem child = createTreeItem(t);
-			treeItem.addChild(child);
-			fillTree(childrenProvider, t, child);
+		if(!children.isEmpty()) {
+			treeItem.setPopulateSubreeHandler(() -> {
+				for (T t : children) {
+					final TreeItem child = createTreeItem(t);
+					treeItem.addChild(child);
+					fillTree(childrenProvider, t, child);
+				}
+			});
+			
 		}
 	}
 
