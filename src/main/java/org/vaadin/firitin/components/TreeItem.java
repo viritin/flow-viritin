@@ -16,9 +16,12 @@
 package org.vaadin.firitin.components;
 
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -36,12 +39,14 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author mstahv
  */
-public class TreeItem extends Component {
+public class TreeItem extends Component implements ClickNotifier<TreeItem> {
 
 	private Element expander;
 	private boolean expanded = false;
 	private Div children;
 	private Component nodeContent;
+	private Element contentTD;
+	private Div contentDiv;
 
 	public TreeItem(Component nodeContent) {
 		super(new Element("table"));
@@ -54,19 +59,21 @@ public class TreeItem extends Component {
 		children = new Div();
 		children.setVisible(false);
 		
-		Element content = new Element("td");
-		content.getClassList().add("node-content");
+		contentTD = new Element("td");
+		contentDiv = new Div();
+		contentDiv.addClassName("node-content");
+		contentDiv.getElement().appendChild(nodeContent.getElement());
 		
-		content.appendChild(nodeContent.getElement(), children.getElement());
+		contentTD.appendChild(contentDiv.getElement(), children.getElement());
 		
-		tr.appendChild(expander, content);
+		tr.appendChild(expander, contentTD);
 		
 		getElement().appendChild(tr);
 		this.nodeContent = nodeContent;
 	}
 
 	public TreeItem(String stringContent) {
-		this(new Span(stringContent));
+		this(new Div(new Text(stringContent)));
 	}
 
 	public TreeItem addChild(Component childComponent) {
@@ -107,5 +114,13 @@ public class TreeItem extends Component {
 			children.setVisible(expanded);
 		}
 	}
-
+	
+	public void setSelected(boolean selected) {
+		nodeContent.getElement().getClassList().set("selected", selected);
+	}
+	
+	@Override
+	public Registration addClickListener(ComponentEventListener<ClickEvent<TreeItem>> listener) {
+        return ComponentUtil.addListener(nodeContent, ClickEvent.class,
+                (ComponentEventListener) listener);	}
 }

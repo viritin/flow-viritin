@@ -15,12 +15,16 @@
  */
 package org.vaadin.firitin.components;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 
+import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Text;
@@ -30,7 +34,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.function.SerializableFunction;
 
 /**
- *
+ * A Tree component to display hierarchical data sets.
+ * 
  * @author mstahv
  * @param <T> the type of items listed as nodes of Tree. Use Object if nothing
  *            else.
@@ -48,6 +53,18 @@ public class Tree<T> extends Composite<VerticalLayout> {
 	 */
 	public interface ItemDecorator<T> extends BiConsumer<T, TreeItem> {
 
+	}
+
+	/**
+	 * A listener to track when the selected node is changed.
+	 * 
+	 * @author mstahv
+	 *
+	 * @param <T> the type of the selected domain object
+	 */
+	@FunctionalInterface
+	public interface SelectionListener<T> extends Serializable {
+		public void selected(T selected, TreeItem item);
 	}
 
 	/**
@@ -104,7 +121,9 @@ public class Tree<T> extends Composite<VerticalLayout> {
 	};
 
 	private List<ItemDecorator<T>> itemDecorators = new ArrayList<>();
-
+	private Set<SelectionListener<T>> selectionListeners = new LinkedHashSet<>();
+	
+	private TreeItem selectedItem;
 	public Tree() {
 		getElement().getClassList().add("viritin-tree");
 //		getContent().setWidth("0");
@@ -136,6 +155,14 @@ public class Tree<T> extends Composite<VerticalLayout> {
 
 	protected TreeItem createTreeItem(T item) {
 		final TreeItem treeItem = new TreeItem(itemGenerator.apply(item));
+		treeItem.addClickListener(e -> {
+			if(selectedItem != null) {
+				selectedItem.setSelected(false);
+			}
+			selectedItem = treeItem;
+			selectedItem.setSelected(true);
+			selectionListeners.forEach(l -> l.selected(item, treeItem));
+		});
 		itemDecorators.forEach(d -> d.accept(item, treeItem));
 		return treeItem;
 	}
@@ -192,6 +219,19 @@ public class Tree<T> extends Composite<VerticalLayout> {
 	 */
 	public void setItemGenerator(ItemGenerator<T> itemGenerator) {
 		this.itemGenerator = itemGenerator;
+	}
+	
+	/**
+	 * Adds selection listener to nodes.
+	 * 
+	 * @param listener
+	 */
+	public void addSelectionListener(SelectionListener<T> listener) {
+		selectionListeners .add(listener);
+	}
+	
+	public void removeSelectionListener(SelectionListener<T> listener) {
+		selectionListeners.remove(listener);
 	}
 
 }

@@ -26,6 +26,8 @@ import org.vaadin.firitin.testdomain.Dude;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -72,30 +74,41 @@ public class TreeExampleView extends VerticalLayout {
         // we can also use ItemDecorator to customize the generated tree nodes
         // here, we add context menu to the content part (icon + caption)
         dudeTree.addItemDecorator((dude, treeItem) -> {
-			Component nodeContent = treeItem.getNodeContent();
-			
-		    ContextMenu contextMenu = new ContextMenu();
-		    
-		    contextMenu.addItem("First menu item for " + dude.getFirstName(),
-		            e1 -> Notification.show("Clicked on the first item"));
+        	
+    			Component nodeContent = treeItem.getNodeContent();
+    			
+    		    ContextMenu contextMenu = new ContextMenu();
+    		    
+    		    contextMenu.addItem("First menu item for " + dude.getFirstName(),
+    		            e1 -> Notification.show("Clicked on the first item"));
 
-		    contextMenu.addItem("Second menu item",
-		            e2 -> Notification.show("Clicked on the second item"));
+    		    contextMenu.addItem("Second menu item",
+    		            e2 -> Notification.show("Clicked on the second item"));
 
-		    // The created MenuItem component can be saved for later use
-		    MenuItem item = contextMenu.addItem("Disabled menu item",
-		            e3 -> Notification.show("This cannot happen"));
-		    item.setEnabled(false);
-		    
-		    contextMenu.setTarget(nodeContent);
+    		    // The created MenuItem component can be saved for later use
+    		    MenuItem item = contextMenu.addItem("Disabled menu item",
+    		            e3 -> Notification.show("This cannot happen"));
+    		    item.setEnabled(false);
+    		    
+    		    contextMenu.setTarget(nodeContent);
 			
 		});
+        
+        dudeTree.addSelectionListener(
+        		(Dude selected, TreeItem item) -> 
+        		Notification.show("Selected tree node for " + selected)
+        		);
         
         // Now actually populate the tree, assign a list of root nodes and 
         // a strategy to get children
         dudeTree.setItems(getRootNodes(), Dude::getSubordinates);
         
         add(dudeTree);
+        
+        Grid<Dude> grid = new Grid<>(Dude.class);
+        grid.setItems(getRootNodes());
+        add(grid);
+        grid.setSelectionMode(SelectionMode.SINGLE);
         
     }
     

@@ -12,3 +12,20 @@
 .viritin-tree .node-content>span>iron-icon {
 	margin-right: 0.5em;
 }
+
+.viritin-tree .node-content {
+	padding: 0 0.5em;
+	position:relative;
+	cursor: default;
+}
+
+.viritin-tree .selected:before {
+  content:"";
+  background: rgba(22, 118, 243, 0.0980392);
+  position: absolute;
+  top:-0.15em;
+  right:-0.15em;
+  bottom:-0.15em;
+  left:-0.15em;
+  z-index: -1;
+}
