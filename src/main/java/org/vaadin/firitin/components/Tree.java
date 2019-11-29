@@ -171,7 +171,7 @@ public class Tree<T> extends Composite<VerticalLayout> {
 
 	protected void fillTree(ChildrenProvider<T> childrenProvider, T item, final TreeItem treeItem) {
 		List<T> children = childrenProvider.getChildren(item);
-		if (!children.isEmpty()) {
+		if (children != null && !children.isEmpty()) {
 			treeItem.setPopulateSubreeHandler(() -> {
 				for (T t : children) {
 					final TreeItem child = createTreeItem(t);
