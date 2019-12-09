@@ -26,6 +26,7 @@ import org.vaadin.firitin.components.TreeItem;
 import org.vaadin.firitin.testdomain.Dude;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.H2;
@@ -111,11 +112,20 @@ public class TreeExampleView extends VerticalLayout {
 //        List<Dude> rootNodesForPerformanceTesting = getRootNodesForPerformanceTesting();
 //        dudeTree.setItems(rootNodesForPerformanceTesting, Dude::getSubordinates);
 //        dudeTree.showChildrenRecursively(rootNodesForPerformanceTesting.get(0));
+		
+		Button b = new Button("Scroll to Marcus");
+		b.addClickListener(e->{
+			dudeTree.scrollItemToView(community);
+		});
+		
+		addComponentAsFirst(b);
         
         add(dudeTree);
         
     }
     
+    Dude community = new Dude("Marcus");
+
     private List<Dude> getRootNodes() {
         Dude ceo = new Dude("Joonas");
         
@@ -125,7 +135,6 @@ public class TreeExampleView extends VerticalLayout {
         Dude vpom = new Dude("Niko");
         ceo.getSubordinates().add(vpom);
 
-        Dude community = new Dude("Marcus");
         vpom.getSubordinates().add(community);
 
         return Arrays.asList(ceo);
