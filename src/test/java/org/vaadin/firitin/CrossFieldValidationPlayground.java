@@ -15,17 +15,19 @@
  */
 package org.vaadin.firitin;
 
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+
+import org.vaadin.firitin.testdomain.Dude;
+
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
-import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
-import java.util.Set;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import org.vaadin.firitin.testdomain.Dude;
 
 /**
  *
@@ -42,7 +44,7 @@ public class CrossFieldValidationPlayground extends VerticalLayout {
         
         Dude d = new Dude(0, "Jorma", "Jormala", 0);
         
-        BeanValidationBinder b = new BeanValidationBinder(Dude.class);
+        BeanValidationBinder<Dude> b = new BeanValidationBinder<>(Dude.class);
         b.bindInstanceFields(this);
         
         b.setBean(d);

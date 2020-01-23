@@ -15,10 +15,10 @@
  */
 package org.vaadin.firitin;
 
-import com.vaadin.flow.component.dependency.HtmlImport;
+import org.vaadin.firitin.layouts.BorderLayout;
+
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
-import org.vaadin.firitin.layouts.BorderLayout;
 
 /**
  *

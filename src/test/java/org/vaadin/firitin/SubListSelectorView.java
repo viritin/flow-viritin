@@ -3,7 +3,7 @@ package org.vaadin.firitin;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.router.Route;
-import org.vaadin.firitin.components.VFormLayout;
+import org.vaadin.firitin.components.formlayout.VFormLayout;
 import org.vaadin.firitin.fields.SubListSelector;
 import org.vaadin.firitin.testdomain.Person;
 import org.vaadin.firitin.testdomain.Service;

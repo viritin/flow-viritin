@@ -4,6 +4,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +15,7 @@ import java.util.Map;
  * Similar to https://docs.oracle.com/javase/7/docs/api/java/awt/BorderLayout.html
  */
 @Tag("border-layout")
-@HtmlImport("org/vaadin/firitin/layouts/border-layout.html")
+@JsModule("./org/vaadin/firitin/layouts/border-layout.js")
 public class BorderLayout extends Component implements HasComponents {
 
     public enum Region {

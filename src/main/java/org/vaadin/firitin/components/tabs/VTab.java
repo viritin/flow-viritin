@@ -2,6 +2,7 @@ package org.vaadin.firitin.components.tabs;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.TabVariant;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentHasComponents;
 import org.vaadin.firitin.fluency.ui.FluentHasStyle;
@@ -27,6 +28,11 @@ public class VTab extends Tab implements FluentComponent<VTab>, FluentHasStyle<V
 
     public VTab withFlexGrow(double flexGrow) {
         setFlexGrow(flexGrow);
+        return this;
+    }
+
+    public VTab withThemeVariants(TabVariant... variants) {
+        addThemeVariants(variants);
         return this;
     }
 }

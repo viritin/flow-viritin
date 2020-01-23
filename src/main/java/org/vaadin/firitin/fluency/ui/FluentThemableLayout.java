@@ -1,10 +1,12 @@
 package org.vaadin.firitin.fluency.ui;
 
+import org.vaadin.firitin.util.style.HasPadding;
+
 import com.vaadin.flow.component.orderedlayout.BoxSizing;
 import com.vaadin.flow.component.orderedlayout.ThemableLayout;
 
 @SuppressWarnings("unchecked")
-public interface FluentThemableLayout<S extends FluentThemableLayout<S>> extends ThemableLayout {
+public interface FluentThemableLayout<S extends FluentThemableLayout<S>> extends ThemableLayout, HasPadding<S> {
 
     default S withMargin(boolean margin) {
         setMargin(margin);
@@ -25,5 +27,4 @@ public interface FluentThemableLayout<S extends FluentThemableLayout<S>> extends
         setBoxSizing(boxSizing);
         return (S) this;
     }
-
 }

@@ -1,12 +1,12 @@
 package org.vaadin.firitin;
 
-import org.vaadin.firitin.components.VButton;
-import org.vaadin.firitin.components.VButton.ButtonColor;
-import org.vaadin.firitin.components.VButton.ButtonSize;
-import org.vaadin.firitin.components.VButton.ButtonType;
-import org.vaadin.firitin.components.VCheckBox;
-import org.vaadin.firitin.components.VComboBox;
-import org.vaadin.firitin.components.VTextField;
+import org.vaadin.firitin.components.button.VButton;
+import org.vaadin.firitin.components.button.VButton.ButtonColor;
+import org.vaadin.firitin.components.button.VButton.ButtonSize;
+import org.vaadin.firitin.components.button.VButton.ButtonType;
+import org.vaadin.firitin.components.checkbox.VCheckBox;
+import org.vaadin.firitin.components.combobox.VComboBox;
+import org.vaadin.firitin.components.textfield.VTextField;
 import org.vaadin.firitin.testdomain.Person;
 
 import com.vaadin.flow.component.notification.Notification;
