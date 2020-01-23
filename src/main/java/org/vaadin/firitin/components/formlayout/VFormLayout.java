@@ -2,14 +2,12 @@ package org.vaadin.firitin.components.formlayout;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import org.vaadin.firitin.fluency.ui.FluentFlexComponent;
-import org.vaadin.firitin.fluency.ui.FluentHasComponents;
-import org.vaadin.firitin.fluency.ui.FluentThemableLayout;
+import org.vaadin.firitin.fluency.ui.*;
 
 import java.util.List;
 
 public class VFormLayout extends FormLayout implements FluentThemableLayout<VFormLayout>,
-        FluentFlexComponent<VFormLayout>, FluentHasComponents<VFormLayout> {
+        FluentHasStyle<VFormLayout>, FluentHasSize<VFormLayout>, FluentHasComponents<VFormLayout> {
 
     public VFormLayout() {
         super();
