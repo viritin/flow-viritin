@@ -52,4 +52,36 @@ public interface FluentHasSize<S extends FluentHasSize<S>> extends HasSize {
         setHeight(height);
         return (S) this;
     }
+
+    default S withMinWidth(String minWidth) {
+        setMinWidth(minWidth);
+        return (S) this;
+    }
+
+    default S withMaxWidth(String maxWidth) {
+        setMaxWidth(maxWidth);
+        return (S) this;
+    }
+
+    default S withMinHeight(String minHeight) {
+        setMinHeight(minHeight);
+        return (S) this;
+    }
+
+    default S withMaxHeight(String maxHeight) {
+        setMaxHeight(maxHeight);
+        return (S) this;
+    }
+
+    default S withMinSize(String width, String height) {
+        setMinWidth(width);
+        setMinHeight(height);
+        return (S) this;
+    }
+
+    default S withMaxSize(String width, String height) {
+        setMaxWidth(width);
+        setMaxWidth(height);
+        return (S) this;
+    }
 }
