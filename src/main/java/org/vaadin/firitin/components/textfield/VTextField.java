@@ -1,23 +1,17 @@
 package org.vaadin.firitin.components.textfield;
 
-import com.vaadin.flow.component.textfield.TextFieldVariant;
-import org.vaadin.firitin.fluency.ui.FluentComponent;
-import org.vaadin.firitin.fluency.ui.FluentFocusable;
-import org.vaadin.firitin.fluency.ui.FluentHasSize;
-import org.vaadin.firitin.fluency.ui.FluentHasStyle;
-import org.vaadin.firitin.fluency.ui.FluentHasValidation;
-import org.vaadin.firitin.fluency.ui.FluentHasValue;
-import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
-import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
-
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import org.vaadin.firitin.fluency.ui.*;
+import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
+import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
 public class VTextField extends TextField
         implements FluentHasSize<VTextField>, FluentHasValidation<VTextField>, FluentFocusable<TextField, VTextField>,
         FluentHasValue<VTextField, ComponentValueChangeEvent<TextField, String>, String>, FluentComponent<VTextField>,
-        FluentHasLabel<VTextField>, FluentHasAutofocus<VTextField>, FluentHasStyle<VTextField> {
+        FluentHasLabel<VTextField>, FluentHasAutofocus<VTextField>, FluentHasStyle<VTextField>, FluentHasPrefixAndSuffix<VTextField> {
 
     public VTextField() {
         super();

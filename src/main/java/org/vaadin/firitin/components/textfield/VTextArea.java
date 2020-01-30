@@ -8,7 +8,9 @@ import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
 import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
 public class VTextArea extends TextArea
-        implements FluentHasSize<VTextArea>, FluentHasValidation<VTextArea>, FluentFocusable<TextArea, VTextArea>, FluentHasValue<VTextArea, ComponentValueChangeEvent<TextArea, String>, String>, FluentComponent<VTextArea>, FluentHasLabel<VTextArea>, FluentHasAutofocus<VTextArea>, FluentHasStyle<VTextArea> {
+        implements FluentHasSize<VTextArea>, FluentHasValidation<VTextArea>, FluentFocusable<TextArea, VTextArea>,
+        FluentHasValue<VTextArea, ComponentValueChangeEvent<TextArea, String>, String>,
+        FluentComponent<VTextArea>, FluentHasLabel<VTextArea>, FluentHasAutofocus<VTextArea>, FluentHasStyle<VTextArea>, FluentHasPrefixAndSuffix<VTextArea> {
 
     public VTextArea() {
         super();

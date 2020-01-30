@@ -36,7 +36,7 @@ import java.io.PipedOutputStream;
  *
  * @author mstahv
  */
-public class UploadFileHandler extends Upload implements Receiver {
+public class UploadFileHandler extends VUpload implements Receiver {
 
     @FunctionalInterface
     public interface FileHandler {
@@ -48,7 +48,7 @@ public class UploadFileHandler extends Upload implements Receiver {
          * You can read the file contents from the given InputStream.
          * <p>
          * Note, that this method is not executed in the UI thread. If you want
-         * to modify the UI from it, by sure to use UI.access (and possibly Push 
+         * to modify the UI from it, by sure to use UI.access (and possibly Push
          * annotation) to handle locking properly.
          *
          * @param content the file content

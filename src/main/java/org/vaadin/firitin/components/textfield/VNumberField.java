@@ -9,7 +9,7 @@ import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
 public class VNumberField extends NumberField implements FluentHasSize<VNumberField>, FluentHasValidation<VNumberField>, FluentFocusable<NumberField, VNumberField>,
         FluentHasValue<VNumberField, AbstractField.ComponentValueChangeEvent<NumberField, Double>, Double>, FluentComponent<VEmailField>,
-        FluentHasLabel<VNumberField>, FluentHasAutofocus<VNumberField>, FluentHasStyle<VNumberField> {
+        FluentHasLabel<VNumberField>, FluentHasAutofocus<VNumberField>, FluentHasStyle<VNumberField>, FluentHasPrefixAndSuffix<VNumberField> {
 
     public VNumberField() {
         super();
