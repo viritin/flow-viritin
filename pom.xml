@@ -92,13 +92,13 @@
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>6.0.2.Final</version>
+            <version>6.1.0.Final</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator-annotation-processor</artifactId>
-            <version>6.0.2.Final</version>
+            <version>6.1.0.Final</version>
             <scope>test</scope>
         </dependency>
         <dependency>

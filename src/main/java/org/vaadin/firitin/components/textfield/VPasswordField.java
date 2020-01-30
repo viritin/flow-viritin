@@ -9,7 +9,7 @@ import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
 public class VPasswordField extends PasswordField implements FluentHasSize<VPasswordField>, FluentHasValidation<VPasswordField>, FluentFocusable<PasswordField, VPasswordField>,
         FluentHasValue<VPasswordField, AbstractField.ComponentValueChangeEvent<PasswordField, String>, String>, FluentComponent<VPasswordField>,
-        FluentHasLabel<VPasswordField>, FluentHasAutofocus<VPasswordField>, FluentHasStyle<VPasswordField> {
+        FluentHasLabel<VPasswordField>, FluentHasAutofocus<VPasswordField>, FluentHasStyle<VPasswordField>, FluentHasPrefixAndSuffix<VPasswordField> {
 
     public VPasswordField() {
         super();

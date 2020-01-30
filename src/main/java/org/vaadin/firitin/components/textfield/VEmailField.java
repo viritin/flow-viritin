@@ -9,7 +9,7 @@ import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
 public class VEmailField extends EmailField implements FluentHasSize<VEmailField>, FluentHasValidation<VEmailField>, FluentFocusable<EmailField, VEmailField>,
         FluentHasValue<VEmailField, ComponentValueChangeEvent<EmailField, String>, String>, FluentComponent<VEmailField>,
-        FluentHasLabel<VEmailField>, FluentHasAutofocus<VEmailField>, FluentHasStyle<VEmailField> {
+        FluentHasLabel<VEmailField>, FluentHasAutofocus<VEmailField>, FluentHasStyle<VEmailField>, FluentHasPrefixAndSuffix<VEmailField> {
 
 
     public VEmailField() {

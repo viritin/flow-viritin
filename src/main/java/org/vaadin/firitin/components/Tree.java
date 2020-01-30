@@ -171,7 +171,7 @@ public class Tree<T> extends Composite<VerticalLayout> {
 
 	protected void fillTree(ChildrenProvider<T> childrenProvider, T item, final TreeItem treeItem) {
 		List<T> children = childrenProvider.getChildren(item);
-		if (!children.isEmpty()) {
+		if (children != null && !children.isEmpty()) {
 			treeItem.setPopulateSubreeHandler(() -> {
 				for (T t : children) {
 					final TreeItem child = createTreeItem(t);
@@ -270,4 +270,17 @@ public class Tree<T> extends Composite<VerticalLayout> {
 	public void hideChildren(T item) {
 		domainObjectToTreeItem.get(item).closeChildren();
 	}
+	
+	/**
+	 * Scrolls the tree item representing given item to be visible in the UI.
+	 * <p>
+	 * Note, the item needs to be visible for the method to work.
+	 * 
+	 * @param item the item to be shown in the UI
+	 */
+	public void scrollItemToView(T item) {
+		TreeItem treeItem = domainObjectToTreeItem.get(item);
+		treeItem.getElement().executeJs("this.scrollIntoView()");
+	}
+
 }

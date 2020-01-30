@@ -33,6 +33,7 @@ import com.vaadin.flow.data.binder.Binder;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.button.VButton.ButtonColor;
 import org.vaadin.firitin.components.button.VButton.ButtonType;
+import org.vaadin.firitin.components.dialog.VDialog;
 import org.vaadin.firitin.util.VStyles;
 
 /**
@@ -67,7 +68,7 @@ public abstract class AbstractForm<T> extends Composite<Div> {
     private String saveCaption = "Save";
     private String deleteCaption = "Delete";
     private String cancelCaption = "Cancel";
-    private Dialog popup;
+    private VDialog popup;
     private Binder<T> binder;
     private boolean hasChanges = false;
 
@@ -121,6 +122,19 @@ public abstract class AbstractForm<T> extends Composite<Div> {
             setVisible(false);
         }
         settingBean = false;
+    }
+
+    /**
+     * by default only save button get's enabled when form has any changes<br>
+     * you can use this method in case the prefilled entity is already valid and save should be possible to press without any changes<br>
+     * if entity is not valid saveButton will stay disabled!
+     * @param entity
+     *            the object to be edited by this form
+     */
+    public void setEntityWithEnabledSave(T entity) {
+        setEntity(entity);
+        setHasChanges(true);
+        adjustSaveButtonState();
     }
 
     /**
@@ -373,8 +387,8 @@ public abstract class AbstractForm<T> extends Composite<Div> {
         return new HorizontalLayout(getSaveButton(), getResetButton(), getDeleteButton());
     }
 
-    public Dialog openInModalPopup() {
-        popup = new Dialog();
+    public VDialog openInModalPopup() {
+        popup = new VDialog();
         VStyles.applyDialogNoPaddingStyle(popup);
         popup.add(this);
         focusFirst();
