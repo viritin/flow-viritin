@@ -5,12 +5,12 @@
 
     <groupId>org.vaadin</groupId>
     <artifactId>flow-viritin</artifactId>
-    <version>0.3.3-SNAPSHOT</version>
+    <version>0.3.4-SNAPSHOT</version>
     <name>Flow Viritin</name>
     <packaging>jar</packaging>
 
     <properties>
-        <vaadin.version>14.1.0</vaadin.version>
+        <vaadin.version>14.1.16</vaadin.version>
 
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -184,7 +184,7 @@
                 <version>2.5.3</version>
             </plugin>
 
-            <!-- Experimental publishing to Directory 
+            <!-- Experimental publishing to Directory
             <plugin>
               <groupId>org.codehaus.mojo</groupId>
               <artifactId>exec-maven-plugin</artifactId>
@@ -232,5 +232,4 @@
         </profile>
     </profiles>
 </project>
-
 
