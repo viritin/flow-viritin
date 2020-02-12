@@ -3,10 +3,12 @@ package org.vaadin.firitin.components.notification;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentHasComponents;
+import org.vaadin.firitin.fluency.ui.FluentHasTheme;
 
-public class VNotification extends Notification implements FluentComponent<VNotification>, FluentHasComponents<VNotification> {
+public class VNotification extends Notification implements FluentComponent<VNotification>, FluentHasComponents<VNotification>, FluentHasTheme<VNotification> {
 
     public VNotification(String text) {
         super(text);
@@ -46,6 +48,11 @@ public class VNotification extends Notification implements FluentComponent<VNoti
 
     public VNotification withOpenedChangeListener(ComponentEventListener<OpenedChangeEvent<Notification>> listener) {
         addOpenedChangeListener(listener);
+        return this;
+    }
+
+    public VNotification withThemeVariants(NotificationVariant... variants) {
+        addThemeVariants();
         return this;
     }
 }

@@ -6,7 +6,7 @@ import org.vaadin.firitin.fluency.ui.*;
 
 import java.util.List;
 
-public class VFormLayout extends FormLayout implements FluentThemableLayout<VFormLayout>,
+public class VFormLayout extends FormLayout implements FluentComponent<VFormLayout>, FluentThemableLayout<VFormLayout>,
         FluentHasStyle<VFormLayout>, FluentHasSize<VFormLayout>, FluentHasComponents<VFormLayout> {
 
     public VFormLayout() {
