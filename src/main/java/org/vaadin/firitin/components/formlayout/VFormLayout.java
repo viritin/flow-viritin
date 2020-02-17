@@ -24,10 +24,12 @@ public class VFormLayout extends FormLayout implements FluentComponent<VFormLayo
      * @param component the component
      * @param label     the label for component
      * @param colspan   the amount of columns this component should consume
+     * @return added FormItem
      */
-    public void addFormItem(Component component, String label, int colspan) {
+    public FormItem addFormItem(Component component, String label, int colspan) {
         FormItem formItem = addFormItem(component, label);
         formItem.getElement().setAttribute("colspan", "" + colspan);
+        return formItem;
     }
 
     public VFormLayout withFormItem(Component component, String label, int colspan) {
