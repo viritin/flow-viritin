@@ -1,31 +1,39 @@
 .viritin-tree {
-	padding:0;
+    padding: 0;
 }
 
 .viritin-tree td {
-	vertical-align:top;
+    vertical-align: top;
 }
 
-.viritin-tree .expander  {
-	width: 24px;
+.viritin-tree .expander {
+    width: 18px;
+    --iron-icon-height: 18px;
+    --iron-icon-width: 18px;
 }
+
 .viritin-tree .node-content>span>iron-icon {
-	margin-right: 0.5em;
+    margin-right: 0.5em;
 }
 
 .viritin-tree .node-content {
-	padding: 0 0.5em;
-	position:relative;
-	cursor: default;
+    padding: 0 0.5em 0 -0.5em;
+    position: relative;
+    cursor: default;
+    font-size : small;
 }
 
 .viritin-tree .selected:before {
-  content:"";
-  background: rgba(22, 118, 243, 0.0980392);
-  position: absolute;
-  top:-0.15em;
-  right:-0.15em;
-  bottom:-0.15em;
-  left:-0.15em;
-  z-index: -1;
+    content: "";
+    background: rgba(22, 118, 243, 0.0980392);
+    position: absolute;
+    top: -0.15em;
+    right: -0.15em;
+    bottom: -0.15em;
+    left: -0.15em;
+    /* z-index: -1; */
+}
+
+.viritin-tree .item-text {
+    padding: 0.5em;
 }

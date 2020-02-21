@@ -15,7 +15,6 @@
  */
 package org.vaadin.firitin;
 
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,9 +29,11 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
@@ -42,119 +43,154 @@ import com.vaadin.flow.router.Route;
  */
 @Route
 public class TreeExampleView extends VerticalLayout {
-    
+
     public TreeExampleView() {
-        
+
         add(new H2("Low level tree item usage..."));
         TreeItem root = new TreeItem("Moro");
         TreeItem poro = root.addChild(new Span("Poro!"));
-        
+
         poro.addChild(new Span("Vasa"));
-        
+
         add(root);
-        
-        
+
+
         Random random = new Random(0);
 
         add(new H2("Tree:"));
-        
+
         Tree<Dude> dudeTree = new Tree<>();
 
         // Configure how items labels are generated
         dudeTree.setItemLabelGenerator(item -> item.getFirstName());
         // Configure an icon for items
         dudeTree.setItemIconGenerator(item ->  {
-        	VaadinIcon[] values = VaadinIcon.values();
-        	return values[random.nextInt(values.length)].create();
+            VaadinIcon[] values = VaadinIcon.values();
+            return values[random.nextInt(values.length)].create();
         });
-        
+
         // following would completely customise what is used as "node representation"
         // This also overrides itemLabelGenerator and itemIconGenerator
         // dudeTree.setItemGenerator(item -> new Div());
-        
+
         // we can also use ItemDecorator to customize the generated tree nodes
         // here, we add context menu to the content part (icon + caption)
         dudeTree.addItemDecorator((dude, treeItem) -> {
-        	
-    			Component nodeContent = treeItem.getNodeContent();
-    			
-    		    ContextMenu contextMenu = new ContextMenu();
-    		    
-    		    contextMenu.addItem("First menu item for " + dude.getFirstName(),
-    		            e1 -> Notification.show("Clicked on the first item"));
 
-    		    contextMenu.addItem("Second menu item",
-    		            e2 -> Notification.show("Clicked on the second item"));
+                Component nodeContent = treeItem.getNodeContent();
 
-    		    // The created MenuItem component can be saved for later use
-    		    MenuItem item = contextMenu.addItem("Disabled menu item",
-    		            e3 -> Notification.show("This cannot happen"));
-    		    item.setEnabled(false);
-    		    
-    		    contextMenu.setTarget(nodeContent);
-    		    
-		});
-        
+                ContextMenu contextMenu = new ContextMenu();
+
+                contextMenu.addItem("First menu item for " + dude.getFirstName(),
+                        e1 -> Notification.show("Clicked on the first item"));
+
+                contextMenu.addItem("Second menu item",
+                        e2 -> Notification.show("Clicked on the second item"));
+
+                // The created MenuItem component can be saved for later use
+                MenuItem item = contextMenu.addItem("Disabled menu item",
+                        e3 -> Notification.show("This cannot happen"));
+                item.setEnabled(false);
+
+                contextMenu.addItem(new Hr(), e -> { }).setEnabled(false);
+
+                contextMenu.addItem("Add subordinate", e1 -> {
+                    Dude child = new Dude("Child of " + dude.getFirstName());
+
+                    dude.getSubordinates().add(child);
+                    child.setSupervisor(dude);
+
+                    dudeTree.addChild(dude, child);
+                });
+
+                contextMenu.addItem("Edit subordinate", e1 -> {
+                    dude.setFirstName(dude.getFirstName() + " (edited)");
+
+                    dudeTree.editChild(dude);
+                    dudeTree.styleChild(dude, "font-style", "italic");
+                });
+
+                contextMenu.addItem("Remove from supervisor", e1 -> {
+                    dudeTree.removeChild(dude.getSupervisor(), dude);
+                });
+
+                contextMenu.setTarget(nodeContent);
+
+        });
+
         dudeTree.addSelectionListener(
-        		(Dude selected, TreeItem item) -> 
-        		Notification.show("Selected tree node for " + selected)
-        		);
-        
-        // Now actually populate the tree, assign a list of root nodes and 
+                (Dude selected, TreeItem item) ->
+                Notification.show("Selected tree node for " + selected)
+                );
+
+        // Now actually populate the tree, assign a list of root nodes and
         // a strategy to get children
-        
+
         List<Dude> rootNodes = getRootNodes();
-		dudeTree.setItems(rootNodes, Dude::getSubordinates);
-		
-		// recursively show whole subtree of the first node (whole tree in this case)
-		dudeTree.showChildrenRecursively(rootNodes.get(0));
-        
+        dudeTree.setItems(rootNodes, Dude::getSubordinates);
+
+        // recursively show whole subtree of the first node (whole tree in this case)
+        dudeTree.showChildrenRecursively(rootNodes.get(0));
+
 //        List<Dude> rootNodesForPerformanceTesting = getRootNodesForPerformanceTesting();
 //        dudeTree.setItems(rootNodesForPerformanceTesting, Dude::getSubordinates);
 //        dudeTree.showChildrenRecursively(rootNodesForPerformanceTesting.get(0));
-		
-		Button b = new Button("Scroll to Marcus");
-		b.addClickListener(e->{
-			dudeTree.scrollItemToView(community);
-		});
-		
-		addComponentAsFirst(b);
-        
+
+        Button b1 = new Button("Scroll to Marcus");
+        b1.addClickListener(e->{
+            dudeTree.scrollItemToView(community);
+        });
+
+        Button b2 = new Button("Select Marcus");
+        b2.addClickListener(e->{
+            dudeTree.selectItem(community, true);
+        });
+
+        Button b3 = new Button("Deselect All");
+        b3.addClickListener(e->{
+            dudeTree.deselectAllItems();
+        });
+
+        addComponentAsFirst(new HorizontalLayout(b1, b2, b3));
+
         add(dudeTree);
-        
+
     }
-    
+
     Dude community = new Dude("Marcus");
 
     private List<Dude> getRootNodes() {
         Dude ceo = new Dude("Joonas");
-        
+
         Dude cfo = new Dude("Jurka");
         ceo.getSubordinates().add(cfo);
-        
+        cfo.setSupervisor(ceo);
+
         Dude vpom = new Dude("Niko");
         ceo.getSubordinates().add(vpom);
+        vpom.setSupervisor(ceo);
 
         vpom.getSubordinates().add(community);
+        community.setSupervisor(vpom);
 
         return Arrays.asList(ceo);
     }
 
     private List<Dude> getRootNodesForPerformanceTesting() {
-    	ArrayList<Dude> dudes = new ArrayList<>();
-    	for(int i =0; i < 100; i++) {
-    		Dude d = new Dude("Root " + i); 
-    		for(int j= 0; j <10;j++) {
-    			Dude e = new Dude("Child " + i + "-" +j);
-    			d.getSubordinates().add(e);
-    			for(int k = 0; k <10; k++) {
-    				Dude f = new Dude("Child" + i + "-" + j + "-" + k); 
-    				e.getSubordinates().add(f);
-    			}
-    		}
-    		dudes.add(d);
-    	}
-    	
+        ArrayList<Dude> dudes = new ArrayList<>();
+        for(int i =0; i < 100; i++) {
+            Dude d = new Dude("Root " + i);
+            for(int j= 0; j <10;j++) {
+                Dude e = new Dude("Child " + i + "-" +j);
+                d.getSubordinates().add(e);
+                for(int k = 0; k <10; k++) {
+                    Dude f = new Dude("Child" + i + "-" + j + "-" + k);
+                    e.getSubordinates().add(f);
+                }
+            }
+            dudes.add(d);
+        }
+
         return dudes;
     }
 
