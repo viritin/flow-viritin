@@ -104,9 +104,4 @@ public class VPasswordField extends PasswordField implements FluentHasSize<VPass
         setClearButtonVisible(clearButtonVisible);
         return this;
     }
-
-    public VPasswordField withRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        setRequiredIndicatorVisible(requiredIndicatorVisible);
-        return this;
-    }
 }
