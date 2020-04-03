@@ -58,10 +58,10 @@ public class DynamicFileDownloader extends Anchor implements FluentComponent<Dyn
                     if (request.getPathInfo().endsWith(identifier)) {
 
                         response.setStatus(200);
-                        response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+                        response.setHeader("Content-Disposition", "attachment; filename=\"" + getFileName(session, request) + "\"");
                         contentWriter.accept(response.getOutputStream());
                         return true;
-                    }
+                     }
                     return false;
                 }
             };
@@ -84,6 +84,18 @@ public class DynamicFileDownloader extends Anchor implements FluentComponent<Dyn
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    /**
+     * Gets the filename of downloaded file. Override if you want to generate the 
+     * name dynamically.
+     * 
+     * @param session
+     * @param request
+     * @return the file name
+     */
+    protected String getFileName(VaadinSession session, VaadinRequest request) {
+        return fileName;
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
