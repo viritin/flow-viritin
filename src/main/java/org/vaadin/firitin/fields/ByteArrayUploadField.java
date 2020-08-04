@@ -15,88 +15,114 @@
  */
 package org.vaadin.firitin.fields;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.internal.AbstractFieldSupport;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.upload.Receiver;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.shared.Registration;
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 
 /**
  *
  * @author mstahv
  */
-public class ByteArrayUploadField extends Composite<Upload> implements HasValue<HasValue.ValueChangeEvent<byte[]>, byte[]> {
+public class ByteArrayUploadField extends Composite<Upload>
+		implements HasValue<ComponentValueChangeEvent<ByteArrayUploadField, byte[]>, byte[]> {
+	private static final long serialVersionUID = -188233227963143771L;
 
-    private byte[] value;
+	@SuppressWarnings("unused")
+	private byte[] value;
 
-    private ByteArrayOutputStream bout;
+	private ByteArrayOutputStream bout;
 
-    private Receiver receiver = new Receiver() {
-        @Override
-        public OutputStream receiveUpload(String filename, String mimetype) {
-            bout = new ByteArrayOutputStream();
-            return bout;
-        }
-    };
+	private final AbstractFieldSupport<ByteArrayUploadField, byte[]> fieldSupport;
 
-    public ByteArrayUploadField() {
-        getContent().setReceiver(receiver);
-        getContent().setMaxFiles(1);
+	private Receiver receiver = new Receiver() {
+		private static final long serialVersionUID = 5809889357612029151L;
 
-        getContent().addFinishedListener(e -> {
-            Notification.show("Finished");
-            value = bout.toByteArray();
-            // TODO fire value change event
-            getContent().getChildren().forEach(c -> System.out.println(c.getElement().getTag()));
-        }
-        );
+		@Override
+		public OutputStream receiveUpload(String filename, String mimetype) {
+			bout = new ByteArrayOutputStream();
+			return bout;
+		}
+	};
 
-        getContent().addSucceededListener(e -> {
-            Notification.show("Finished");
-            value = bout.toByteArray();
-            // TODO fire value change event
-            getContent().getChildren().forEach(c -> System.out.println(c.getElement().getTag()));
-        }
-        );
+	public ByteArrayUploadField() {
+		getContent().setReceiver(receiver);
+		getContent().setMaxFiles(1);
 
+		getContent().addFinishedListener(e -> {
+			Notification.show("Finished");
+			setValue(bout.toByteArray());
+		});
+
+		getContent().addSucceededListener(e -> {
+			Notification.show("Finished");
+			setValue(bout.toByteArray());
+		});
+
+		fieldSupport = createFieldSupport(new byte[0]);
+	}
+	
+	private AbstractFieldSupport<ByteArrayUploadField, byte[]> createFieldSupport(byte[] defaultValue) {
+        return new AbstractFieldSupport<>(this, defaultValue, this::valueEquals, this::setPresentatinoValue);
     }
 
-    @Override
-    public Registration addValueChangeListener(ValueChangeListener<? super ValueChangeEvent<byte[]>> vl) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+	private boolean valueEquals(byte[] v1, byte[] v2) {
+		if (v1 == null && v2 == null) {
+			return true;
+		} else if (v1 == null) {
+			return false;
+		}
+		return v1.equals(v2);
+	}
+	
+	private void setPresentatinoValue(byte[] value) {
+		this.value = value;
+	}
 
-    @Override
-    public void setReadOnly(boolean bln) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+	@Override
+	public Registration addValueChangeListener(
+			ValueChangeListener<? super ComponentValueChangeEvent<ByteArrayUploadField, byte[]>> listener) {
+		return fieldSupport.addValueChangeListener(listener);
+	}
 
-    @Override
-    public boolean isReadOnly() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+	@Override
+	public void setReadOnly(boolean bln) {
+		throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose
+																		// Tools | Templates.
+	}
 
-    @Override
-    public void setRequiredIndicatorVisible(boolean bln) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+	@Override
+	public boolean isReadOnly() {
+		throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose
+																		// Tools | Templates.
+	}
 
-    @Override
-    public boolean isRequiredIndicatorVisible() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+	@Override
+	public void setRequiredIndicatorVisible(boolean bln) {
+		throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose
+																		// Tools | Templates.
+	}
 
-    @Override
-    public void setValue(byte[] v) {
-        value = v;
-    }
+	@Override
+	public boolean isRequiredIndicatorVisible() {
+		throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose
+																		// Tools | Templates.
+	}
 
-    @Override
-    public byte[] getValue() {
-        return value;
-    }
+	@Override
+	public void setValue(byte[] v) {
+		fieldSupport.setValue(v);
+	}
 
+	@Override
+	public byte[] getValue() {
+		return fieldSupport.getValue();
+	}
 }
