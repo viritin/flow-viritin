@@ -38,12 +38,12 @@ public class Dude {
     private Integer age;
 
     private Address address = new Address();
-    
+
     private String email;
     private String emailConfirm;
-    
+
     private Dude supervisor;
-    
+
     private List<Dude> subordinates = new ArrayList<Dude>();
 
     public Dude() {

@@ -17,9 +17,12 @@ package org.vaadin.firitin;
 
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinSession;
 import org.vaadin.firitin.components.DynamicFileDownloader;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,6 +46,22 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
         
         add(downloadButton);
         
+        DynamicFileDownloader downloadButton2 = new DynamicFileDownloader("Downlload file with timestamp in name", "foobar/",
+        outputStream -> {
+            try {
+                outputStream.write("HelloWorld".getBytes());
+            } catch (IOException ex) {
+                Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }) {
+            @Override
+            protected String getFileName(VaadinSession session, VaadinRequest request) {
+                return LocalDateTime.now() + "foobar.txt";
+            }
+        };
+        
+        add(downloadButton2);
+
     }
     
     
