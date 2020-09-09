@@ -8,7 +8,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import org.vaadin.firitin.fluency.ui.*;
 
 public class VGrid<T> extends Grid<T>
-        implements FluentComponent<VGrid<T>>, FluentHasDataProvider<VGrid<T>, T>, FluentHasStyle<VGrid<T>>, FluentHasSize<VGrid<T>>,
+        implements FluentComponent<VGrid<T>>, FluentHasItems<VGrid<T>, T>, FluentHasStyle<VGrid<T>>, FluentHasSize<VGrid<T>>,
         FluentFocusable<Grid<T>, VGrid<T>>, FluentHasTheme<VGrid<T>> {
 
     public VGrid() {
@@ -42,9 +42,9 @@ public class VGrid<T> extends Grid<T>
         addThemeVariants(variants);
         return this;
     }
-    
+
     public VGrid<T> setDataProvider(CallbackDataProvider.FetchCallback<T, Void> fetchCallback,
-            CallbackDataProvider.CountCallback<T, Void> countCallback) {
+                                    CallbackDataProvider.CountCallback<T, Void> countCallback) {
         setDataProvider(DataProvider.fromCallbacks(fetchCallback, countCallback));
         return this;
     }

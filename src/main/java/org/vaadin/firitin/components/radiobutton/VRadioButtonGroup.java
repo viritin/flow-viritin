@@ -7,16 +7,12 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
-import org.vaadin.firitin.fluency.ui.FluentComponent;
-import org.vaadin.firitin.fluency.ui.FluentHasDataProvider;
-import org.vaadin.firitin.fluency.ui.FluentHasStyle;
-import org.vaadin.firitin.fluency.ui.FluentHasValueAndElement;
+import com.vaadin.flow.function.SerializablePredicate;
+import org.vaadin.firitin.fluency.ui.*;
 
 public class VRadioButtonGroup<T> extends RadioButtonGroup<T> implements FluentHasDataProvider<VRadioButtonGroup<T>, T>,
-        FluentHasStyle<VRadioButtonGroup<T>>, FluentComponent<VRadioButtonGroup<T>>,
-        FluentHasValueAndElement<VRadioButtonGroup<T>, ComponentValueChangeEvent<RadioButtonGroup<T>, T>, T>
-// TODO fluent HasItemsAndComponents<T>, SingleSelect<RadioButtonGroup<T>, T>
-{
+        FluentHasStyle<VRadioButtonGroup<T>>, FluentComponent<VRadioButtonGroup<T>>, FluentHasValueAndElement<VRadioButtonGroup<T>, ComponentValueChangeEvent<RadioButtonGroup<T>, T>, T>, FluentHasValidation<VRadioButtonGroup<T>> {
+
     public VRadioButtonGroup() {
         super();
     }
@@ -30,9 +26,19 @@ public class VRadioButtonGroup<T> extends RadioButtonGroup<T> implements FluentH
         setRenderer(renderer);
         return this;
     }
-    
+
     public VRadioButtonGroup<T> withTextRenderer(ItemLabelGenerator<T> itemLabelGenerator) {
         setRenderer(new TextRenderer<>(itemLabelGenerator));
+        return this;
+    }
+
+    public VRadioButtonGroup<T> withItemEnabledProvider(SerializablePredicate<T> itemEnabledProvider) {
+        setItemEnabledProvider(itemEnabledProvider);
+        return this;
+    }
+
+    public VRadioButtonGroup<T> withRequired(boolean required) {
+        setRequired(required);
         return this;
     }
 }

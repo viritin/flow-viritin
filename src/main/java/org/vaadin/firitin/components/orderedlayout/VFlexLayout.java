@@ -6,7 +6,8 @@ import org.vaadin.firitin.fluency.ui.FluentClickNotifier;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentFlexComponent;
 
-public class VFlexLayout extends FlexLayout implements FluentComponent<VFlexLayout>, FluentClickNotifier<FlexLayout, VFlexLayout>, FluentFlexComponent<FlexLayout, VFlexLayout> {
+public class VFlexLayout extends FlexLayout implements FluentComponent<VFlexLayout>,
+        FluentClickNotifier<FlexLayout, VFlexLayout>, FluentFlexComponent<FlexLayout, VFlexLayout> {
 
     public VFlexLayout() {
         super();
@@ -16,8 +17,9 @@ public class VFlexLayout extends FlexLayout implements FluentComponent<VFlexLayo
         super(children);
     }
 
-    public VFlexLayout withJustifyContentMode(final JustifyContentMode justifyContentMode) {
-        setJustifyContentMode(justifyContentMode);
+    public VFlexLayout withWrapMode(FlexLayout.WrapMode wrapMode) {
+        setWrapMode(wrapMode);
         return this;
     }
+
 }

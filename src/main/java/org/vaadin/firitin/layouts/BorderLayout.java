@@ -3,7 +3,6 @@ package org.vaadin.firitin.layouts;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 
 import java.util.HashMap;
@@ -18,19 +17,21 @@ import java.util.Map;
 @JsModule("./org/vaadin/firitin/layouts/border-layout.js")
 public class BorderLayout extends Component implements HasComponents {
 
-    public enum Region {
-
-        NORTH,
-        SOUTH,
-        EAST,
-        WEST,
-        CENTER
-    }
-
     private final Map<Region, Component> children = new HashMap<>(Region.values().length);
 
     public BorderLayout() {
         super();
+    }
+
+    private static void applyStyle(Component component, Region region) {
+        stripStyle(component);
+        component.getElement().getClassList().add(region.name().toLowerCase());
+    }
+
+    private static void stripStyle(Component component) {
+        for (Region region : Region.values()) {
+            component.getElement().getClassList().remove(region.name().toLowerCase());
+        }
     }
 
     public void setChildAt(Region region, Component component) {
@@ -55,14 +56,12 @@ public class BorderLayout extends Component implements HasComponents {
         children.remove(region);
     }
 
-    private static void applyStyle(Component component, Region region) {
-        stripStyle(component);
-        component.getElement().getClassList().add(region.name().toLowerCase());
-    }
+    public enum Region {
 
-    private static void stripStyle(Component component) {
-        for (Region region : Region.values()) {
-            component.getElement().getClassList().remove(region.name().toLowerCase());
-        }
+        NORTH,
+        SOUTH,
+        EAST,
+        WEST,
+        CENTER
     }
 }

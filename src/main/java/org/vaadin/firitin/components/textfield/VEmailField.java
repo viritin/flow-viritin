@@ -1,16 +1,9 @@
 package org.vaadin.firitin.components.textfield;
 
-import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import org.vaadin.firitin.fluency.ui.*;
-import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
-import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
-public class VEmailField extends EmailField implements FluentHasSize<VEmailField>, FluentHasValidation<VEmailField>, FluentFocusable<EmailField, VEmailField>,
-        FluentHasValue<VEmailField, ComponentValueChangeEvent<EmailField, String>, String>, FluentComponent<VEmailField>,
-        FluentHasLabel<VEmailField>, FluentHasAutofocus<VEmailField>, FluentHasStyle<VEmailField>, FluentHasPrefixAndSuffix<VEmailField> {
-
+public class VEmailField extends EmailField implements FluentVaadinTextField<VEmailField, EmailField, String> {
 
     public VEmailField() {
         super();
@@ -39,18 +32,6 @@ public class VEmailField extends EmailField implements FluentHasSize<VEmailField
 
     public VEmailField withValueChangeMode(ValueChangeMode valueChangeMode) {
         setValueChangeMode(valueChangeMode);
-        return this;
-    }
-
-
-    public VEmailField withErrorMessage(String errorMessage) {
-        setErrorMessage(errorMessage);
-        return this;
-    }
-
-
-    public VEmailField withInvalid(boolean invalid) {
-        setInvalid(invalid);
         return this;
     }
 
@@ -94,6 +75,10 @@ public class VEmailField extends EmailField implements FluentHasSize<VEmailField
         return this;
     }
 
+    public VEmailField withRequired(boolean required) {
+        setRequired(required);
+        return this;
+    }
 
     public VEmailField withClearButtonVisible(boolean clearButtonVisible) {
         setClearButtonVisible(clearButtonVisible);

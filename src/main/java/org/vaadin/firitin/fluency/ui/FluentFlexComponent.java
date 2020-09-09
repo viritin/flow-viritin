@@ -20,4 +20,16 @@ public interface FluentFlexComponent<T extends Component, S extends FluentFlexCo
         setFlexGrow(flexGrow, elementContainers);
         return (S) this;
     }
+
+    default S withJustifyContentMode(FlexComponent.JustifyContentMode justifyContentMode) {
+        setJustifyContentMode(justifyContentMode);
+        return (S) this;
+    }
+
+    default S withExpand(Component... componentsToExpand) {
+        expand(componentsToExpand);
+        return (S) this;
+    }
+
+
 }

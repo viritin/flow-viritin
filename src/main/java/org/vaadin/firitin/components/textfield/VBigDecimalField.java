@@ -2,14 +2,11 @@ package org.vaadin.firitin.components.textfield;
 
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import org.vaadin.firitin.fluency.ui.*;
-import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
-import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 
-public class VBigDecimalField extends BigDecimalField implements FluentHasSize<VBigDecimalField>, FluentHasValidation<VBigDecimalField>, FluentFocusable<BigDecimalField, VBigDecimalField>,
-        FluentHasLabel<VBigDecimalField>, FluentHasAutofocus<VBigDecimalField>, FluentHasStyle<VBigDecimalField>, FluentHasPrefixAndSuffix<VBigDecimalField> {
+public class VBigDecimalField extends BigDecimalField implements FluentVaadinTextField<VBigDecimalField, BigDecimalField, BigDecimal> {
 
     public VBigDecimalField() {
         super();
@@ -40,13 +37,8 @@ public class VBigDecimalField extends BigDecimalField implements FluentHasSize<V
         return this;
     }
 
-    public VBigDecimalField withErrorMessage(String errorMessage) {
-        setErrorMessage(errorMessage);
-        return this;
-    }
-
-    public VBigDecimalField withInvalid(boolean invalid) {
-        setInvalid(invalid);
+    public VBigDecimalField withValueChangeTimeout(int valueChangeTimeout) {
+        setValueChangeTimeout(valueChangeTimeout);
         return this;
     }
 
@@ -55,8 +47,8 @@ public class VBigDecimalField extends BigDecimalField implements FluentHasSize<V
         return this;
     }
 
-    public VBigDecimalField withAutofocus(boolean autofocus) {
-        setAutofocus(autofocus);
+    public VBigDecimalField withAutoselect(boolean autoselect) {
+        setAutoselect(autoselect);
         return this;
     }
 
@@ -80,23 +72,13 @@ public class VBigDecimalField extends BigDecimalField implements FluentHasSize<V
         return this;
     }
 
-    public VBigDecimalField withReadOnly(boolean readOnly) {
-        setReadOnly(readOnly);
+    public VBigDecimalField withLocale(Locale locale) {
+        setLocale(locale);
         return this;
     }
 
-    public VBigDecimalField withRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        setRequiredIndicatorVisible(requiredIndicatorVisible);
-        return this;
-    }
-
-    public VBigDecimalField withValue(BigDecimal value) {
-        setValue(value);
-        return this;
-    }
-
-    public VBigDecimalField withValueChangeListener(ValueChangeListener<? super ValueChangeEvent<BigDecimal>> listener) {
-        addValueChangeListener(listener);
+    public VBigDecimalField withRequired(boolean required) {
+        setRequired(required);
         return this;
     }
 }

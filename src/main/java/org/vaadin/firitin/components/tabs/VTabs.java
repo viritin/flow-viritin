@@ -1,5 +1,6 @@
 package org.vaadin.firitin.components.tabs;
 
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
@@ -39,6 +40,21 @@ public class VTabs extends Tabs implements FluentComponent<VTab>, FluentHasStyle
 
     public VTabs withThemeVariants(TabsVariant... variants) {
         addThemeVariants(variants);
+        return this;
+    }
+
+    public VTabs withSelectedIndex(int selectedIndex) {
+        setSelectedIndex(selectedIndex);
+        return this;
+    }
+
+    public VTabs withAutoselect(boolean autoselect) {
+        setAutoselect(autoselect);
+        return this;
+    }
+
+    public VTabs withSelectedChangeListener(ComponentEventListener<SelectedChangeEvent> listener) {
+        addSelectedChangeListener(listener);
         return this;
     }
 

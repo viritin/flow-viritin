@@ -1,15 +1,9 @@
 package org.vaadin.firitin.components.textfield;
 
-import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import org.vaadin.firitin.fluency.ui.*;
-import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
-import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
-public class VNumberField extends NumberField implements FluentHasSize<VNumberField>, FluentHasValidation<VNumberField>, FluentFocusable<NumberField, VNumberField>,
-        FluentHasValue<VNumberField, AbstractField.ComponentValueChangeEvent<NumberField, Double>, Double>, FluentComponent<VNumberField>,
-        FluentHasLabel<VNumberField>, FluentHasAutofocus<VNumberField>, FluentHasStyle<VNumberField>, FluentHasPrefixAndSuffix<VNumberField> {
+public class VNumberField extends NumberField implements FluentVaadinTextField<VNumberField, NumberField, Double> {
 
     public VNumberField() {
         super();
@@ -37,16 +31,6 @@ public class VNumberField extends NumberField implements FluentHasSize<VNumberFi
 
     public VNumberField withValueChangeMode(ValueChangeMode valueChangeMode) {
         setValueChangeMode(valueChangeMode);
-        return this;
-    }
-
-    public VNumberField withErrorMessage(String errorMessage) {
-        setErrorMessage(errorMessage);
-        return this;
-    }
-
-    public VNumberField withInvalid(boolean invalid) {
-        setInvalid(invalid);
         return this;
     }
 
@@ -80,22 +64,31 @@ public class VNumberField extends NumberField implements FluentHasSize<VNumberFi
         return this;
     }
 
+    public VNumberField withRequired(boolean required) {
+        setRequired(required);
+        return this;
+    }
+
+    @Deprecated
     public VNumberField withMaxLength(int maxLength) {
         setMaxLength(maxLength);
         return this;
     }
 
 
+    @Deprecated
     public VNumberField withMinLength(int minLength) {
         setMinLength(minLength);
         return this;
     }
 
+    @Deprecated
     public VNumberField withPreventInvalidInput(boolean preventInvalidInput) {
         setPreventInvalidInput(preventInvalidInput);
         return this;
     }
 
+    @Deprecated
     public VNumberField withPattern(String pattern) {
         setPattern(pattern);
         return this;
@@ -106,18 +99,8 @@ public class VNumberField extends NumberField implements FluentHasSize<VNumberFi
         return this;
     }
 
-    public VNumberField withAutoselect(boolean autoselect) {
-        setAutoselect(autoselect);
-        return this;
-    }
-
     public VNumberField withClearButtonVisible(boolean clearButtonVisible) {
         setClearButtonVisible(clearButtonVisible);
-        return this;
-    }
-
-    public VNumberField withRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        setRequiredIndicatorVisible(requiredIndicatorVisible);
         return this;
     }
 }

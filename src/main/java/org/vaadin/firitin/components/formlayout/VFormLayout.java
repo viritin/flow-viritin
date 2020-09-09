@@ -28,7 +28,7 @@ public class VFormLayout extends FormLayout implements FluentComponent<VFormLayo
      */
     public FormItem addFormItem(Component component, String label, int colspan) {
         FormItem formItem = addFormItem(component, label);
-        formItem.getElement().setAttribute("colspan", "" + colspan);
+        setColspan(formItem, colspan);
         return formItem;
     }
 
@@ -45,6 +45,16 @@ public class VFormLayout extends FormLayout implements FluentComponent<VFormLayo
     public VFormLayout withResponsiveSteps(List<ResponsiveStep> steps) {
         setResponsiveSteps(steps);
         return this;
+    }
+
+    /**
+     * shorthand for one col configuration
+     *
+     * @param position TOP or ASIDE
+     * @return itself for fluent writing
+     */
+    public VFormLayout withResponsiveStepsOneCol(ResponsiveStep.LabelsPosition position) {
+        return withResponsiveSteps(new ResponsiveStep("0", 1, position));
     }
 
     /**
@@ -71,5 +81,20 @@ public class VFormLayout extends FormLayout implements FluentComponent<VFormLayo
         return withResponsiveSteps(new ResponsiveStep("0", 1, position),
                 new ResponsiveStep(minWidthTwoCol, 2, position),
                 new ResponsiveStep(minWidthThreeCol, 3, position));
+    }
+
+    /**
+     * shorthand for three col configuration
+     *
+     * @param position         TOP or ASIDE
+     * @param minWidthTwoCol   good value 21em
+     * @param minWidthThreeCol good value 14em
+     * @return itself for fluent writing
+     */
+    public VFormLayout withResponsiveStepsFourCols(ResponsiveStep.LabelsPosition position, String minWidthTwoCol, String minWidthThreeCol, String minWidthFourthCol) {
+        return withResponsiveSteps(new ResponsiveStep("0", 1, position),
+                new ResponsiveStep(minWidthTwoCol, 2, position),
+                new ResponsiveStep(minWidthThreeCol, 3, position),
+                new ResponsiveStep(minWidthFourthCol, 4, position));
     }
 }

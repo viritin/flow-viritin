@@ -5,7 +5,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import org.vaadin.firitin.fluency.ui.*;
 
 public class VHorizontalLayout extends HorizontalLayout implements FluentThemableLayout<VHorizontalLayout>,
-        FluentComponent<VHorizontalLayout>, FluentHasStyle<VHorizontalLayout>, FluentHasSize<VHorizontalLayout>, FluentHasComponents<VHorizontalLayout>, FluentClickNotifier<HorizontalLayout, VHorizontalLayout>, FluentFlexComponent<HorizontalLayout, VHorizontalLayout> {
+        FluentComponent<VHorizontalLayout>, FluentHasStyle<VHorizontalLayout>, FluentHasSize<VHorizontalLayout>, FluentHasComponents<VHorizontalLayout>, FluentClickNotifier<HorizontalLayout, VHorizontalLayout>,
+        FluentFlexComponent<HorizontalLayout, VHorizontalLayout> {
     public VHorizontalLayout() {
         super();
     }

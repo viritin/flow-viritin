@@ -6,8 +6,9 @@ import com.vaadin.flow.component.tabs.TabVariant;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentHasComponents;
 import org.vaadin.firitin.fluency.ui.FluentHasStyle;
+import org.vaadin.firitin.fluency.ui.FluentHasTheme;
 
-public class VTab extends Tab implements FluentComponent<VTab>, FluentHasStyle<VTab>, FluentHasComponents<VTab> {
+public class VTab extends Tab implements FluentComponent<VTab>, FluentHasStyle<VTab>, FluentHasComponents<VTab>, FluentHasTheme<VTab> {
 
     public VTab() {
         super();
@@ -33,6 +34,11 @@ public class VTab extends Tab implements FluentComponent<VTab>, FluentHasStyle<V
 
     public VTab withThemeVariants(TabVariant... variants) {
         addThemeVariants(variants);
+        return this;
+    }
+
+    public VTab withSelected(boolean selected) {
+        setSelected(selected);
         return this;
     }
 }
