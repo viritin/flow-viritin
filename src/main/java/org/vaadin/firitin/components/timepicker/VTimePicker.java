@@ -109,9 +109,4 @@ public class VTimePicker extends TimePicker implements FluentHasSize<VTimePicker
         return this;
     }
 
-    public VTimePicker withAutoOpen(boolean autoOpen) {
-        setAutoOpen(autoOpen);
-        return this;
-    }
-
 }

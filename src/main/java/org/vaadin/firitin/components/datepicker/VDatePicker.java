@@ -99,9 +99,4 @@ public class VDatePicker extends DatePicker implements FluentHasSize<VDatePicker
         setRequiredIndicatorVisible(requiredIndicatorVisible);
         return this;
     }
-
-    public VDatePicker withAutoOpen(boolean autoOpen) {
-        setAutoOpen(autoOpen);
-        return this;
-    }
 }

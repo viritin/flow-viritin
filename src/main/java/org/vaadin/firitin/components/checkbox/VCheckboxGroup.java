@@ -10,12 +10,14 @@ import com.vaadin.flow.function.SerializablePredicate;
 import org.vaadin.firitin.fluency.ui.*;
 import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
+import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class VCheckboxGroup<T> extends CheckboxGroup<T> implements
         FluentComponent<VCheckboxGroup<T>>, FluentHasStyle<VCheckboxGroup<T>>,
         FluentHasValueAndElement<VCheckboxGroup<T>, ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>, Set<T>>,
-        FluentHasItems<VCheckboxGroup<T>, T>, FluentHasSize<VCheckboxGroup<T>>, FluentHasValidation<VCheckboxGroup<T>>,
+        FluentHasSize<VCheckboxGroup<T>>, FluentHasValidation<VCheckboxGroup<T>>,
         FluentHasLabel<VCheckboxGroup<T>> {
 
     public VCheckboxGroup<T> withDataProvider(DataProvider<T, ?> dataProvider) {
@@ -65,6 +67,22 @@ public class VCheckboxGroup<T> extends CheckboxGroup<T> implements
 
     public VCheckboxGroup<T> withInvalid(boolean invalid) {
         setInvalid(invalid);
+        return this;
+    }
+
+    public VCheckboxGroup<T> withItems(Collection<T> items) {
+        setItems(items);
+        return this;
+    }
+
+    @Deprecated
+    public VCheckboxGroup<T> withItems(Stream<T> streamOfItems) {
+        setItems(streamOfItems);
+        return this;
+    }
+
+    public VCheckboxGroup<T> withItems(T... items) {
+        setItems(items);
         return this;
     }
 }

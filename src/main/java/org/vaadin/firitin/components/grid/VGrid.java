@@ -7,8 +7,11 @@ import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import org.vaadin.firitin.fluency.ui.*;
 
+import java.util.Collection;
+import java.util.stream.Stream;
+
 public class VGrid<T> extends Grid<T>
-        implements FluentComponent<VGrid<T>>, FluentHasItems<VGrid<T>, T>, FluentHasStyle<VGrid<T>>, FluentHasSize<VGrid<T>>,
+        implements FluentComponent<VGrid<T>>, FluentHasStyle<VGrid<T>>, FluentHasSize<VGrid<T>>,
         FluentFocusable<Grid<T>, VGrid<T>>, FluentHasTheme<VGrid<T>> {
 
     public VGrid() {
@@ -49,4 +52,19 @@ public class VGrid<T> extends Grid<T>
         return this;
     }
 
+    public VGrid<T> withItems(Collection<T> items) {
+        setItems(items);
+        return this;
+    }
+
+    @Deprecated
+    public VGrid<T> withItems(Stream<T> streamOfItems) {
+        setItems(streamOfItems);
+        return this;
+    }
+
+    public VGrid<T> withItems(T... items) {
+        setItems(items);
+        return this;
+    }
 }

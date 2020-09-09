@@ -1,11 +1,13 @@
 package org.vaadin.firitin.components.orderedlayout;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import org.vaadin.firitin.fluency.ui.*;
 
 public class VVerticalLayout extends VerticalLayout implements FluentThemableLayout<VVerticalLayout>,
-        FluentComponent<VVerticalLayout>, FluentHasStyle<VVerticalLayout>, FluentHasSize<VVerticalLayout>, FluentHasComponents<VVerticalLayout>, FluentClickNotifier<VerticalLayout, VVerticalLayout>, FluentFlexComponent<VerticalLayout, VVerticalLayout> {
+        FluentComponent<VVerticalLayout>, FluentHasStyle<VVerticalLayout>, FluentHasSize<VVerticalLayout>, FluentHasComponents<VVerticalLayout>, FluentClickNotifier<VerticalLayout, VVerticalLayout> {
     public VVerticalLayout() {
         super();
     }
@@ -55,6 +57,26 @@ public class VVerticalLayout extends VerticalLayout implements FluentThemableLay
         if (getHeight() == null) {
             setHeight("100%");
         }
+        return this;
+    }
+
+    public VVerticalLayout withAlignItems(FlexComponent.Alignment alignment) {
+        setAlignItems(alignment);
+        return this;
+    }
+
+    public VVerticalLayout withAlignSelf(FlexComponent.Alignment alignment, HasElement... elementContainers) {
+        setAlignSelf(alignment, elementContainers);
+        return this;
+    }
+
+    public VVerticalLayout withFlexGrow(double flexGrow, HasElement... elementContainers) {
+        setFlexGrow(flexGrow, elementContainers);
+        return this;
+    }
+
+    public VVerticalLayout withExpand(Component... componentsToExpand) {
+        expand(componentsToExpand);
         return this;
     }
 

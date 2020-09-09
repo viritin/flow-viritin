@@ -90,9 +90,4 @@ public class VDateTimePicker extends DateTimePicker implements FluentHasSize<VDa
         return this;
     }
 
-    public VDateTimePicker withAutoOpen(boolean autoOpen) {
-        setAutoOpen(autoOpen);
-        return this;
-    }
-
 }

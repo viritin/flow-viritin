@@ -4,13 +4,17 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.function.SerializablePredicate;
 import org.vaadin.firitin.fluency.ui.*;
 import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
+import java.util.Collection;
+import java.util.stream.Stream;
+
 public class VSelect<T> extends Select<T> implements
-        FluentHasDataProvider<VSelect<T>, T>, FluentHasItems<VSelect<T>, T>, FluentHasComponents<VSelect<T>>, FluentHasSize<VSelect<T>>, FluentHasValidation<VSelect<T>>,
+        FluentHasComponents<VSelect<T>>, FluentHasSize<VSelect<T>>, FluentHasValidation<VSelect<T>>,
         FluentHasStyle<VSelect<T>>, FluentFocusable<Select<T>, VSelect<T>>, FluentHasValueAndElement<VSelect<T>, AbstractField.ComponentValueChangeEvent<Select<T>, T>, T>, FluentHasLabel<VSelect<T>> {
 
     public VSelect() {
@@ -73,6 +77,27 @@ public class VSelect<T> extends Select<T> implements
 
     public VSelect<T> withPrependComponents(T beforeItem, Component... components) {
         prependComponents(beforeItem, components);
+        return this;
+    }
+
+    public VSelect<T> withDataProvider(DataProvider<T, ?> dataProvider) {
+        setDataProvider(dataProvider);
+        return this;
+    }
+
+    public VSelect<T> withItems(Collection<T> items) {
+        setItems(items);
+        return this;
+    }
+
+    @Deprecated
+    public VSelect<T> withItems(Stream<T> streamOfItems) {
+        setItems(streamOfItems);
+        return this;
+    }
+
+    public VSelect<T> withItems(T... items) {
+        setItems(items);
         return this;
     }
 }
