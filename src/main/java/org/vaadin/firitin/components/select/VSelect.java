@@ -14,15 +14,27 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 public class VSelect<T> extends Select<T> implements
-        FluentHasComponents<VSelect<T>>, FluentHasSize<VSelect<T>>, FluentHasValidation<VSelect<T>>,
+        FluentHasComponents<VSelect<T>>, FluentHasSize<VSelect<T>>, FluentHasValidation<VSelect<T>>, FluentHasItems<VSelect<T>, T>,
         FluentHasStyle<VSelect<T>>, FluentFocusable<Select<T>, VSelect<T>>, FluentHasValueAndElement<VSelect<T>, AbstractField.ComponentValueChangeEvent<Select<T>, T>, T>, FluentHasLabel<VSelect<T>> {
 
     public VSelect() {
         super();
     }
 
-    public VSelect(T... items) {
+    public VSelect(String label, Collection<T> items) {
+        super();
+        setLabel(label);
+        setItems(items);
+    }
+
+    public VSelect(String label, T... items) {
         super(items);
+        setLabel(label);
+    }
+
+    public VSelect(String label) {
+        super();
+        setLabel(label);
     }
 
     public VSelect<T> withRenderer(ComponentRenderer<? extends Component, T> renderer) {
