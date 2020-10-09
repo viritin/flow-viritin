@@ -104,11 +104,19 @@ public class VButton extends Button implements FluentHasSize<VButton>, FluentHas
         super(text, icon, clickListener);
     }
 
+    public VButton(Component icon, String text, ComponentEventListener<ClickEvent<Button>> clickListener) {
+        super(text, icon, clickListener);
+    }
+
     public VButton(String text, Component icon, BasicClickListener clickListener) {
         super(text, icon, e -> clickListener.onClick());
     }
 
     public VButton(String text, Component icon) {
+        super(text, icon);
+    }
+
+    public VButton(Component icon, String text) {
         super(text, icon);
     }
 
