@@ -13,7 +13,8 @@ import java.util.Locale;
 
 
 public class VTimePicker extends TimePicker implements FluentHasSize<VTimePicker>, FluentHasValidation<VTimePicker>, FluentHasEnabled<VTimePicker>, FluentComponent<VTimePicker>,
-        FluentThemableLayout<VDateTimePicker>, FluentHasValueAndElement<VTimePicker, ComponentValueChangeEvent<TimePicker, LocalTime>, LocalTime>, FluentHasLabel<VTimePicker>, FluentFocusable<TimePicker, VTimePicker> {
+        FluentThemableLayout<VDateTimePicker>, FluentHasValueAndElement<VTimePicker, ComponentValueChangeEvent<TimePicker, LocalTime>, LocalTime>, FluentHasLabel<VTimePicker>, FluentFocusable<TimePicker, VTimePicker>,
+        FluentHasHelper<VTimePicker> {
 
 
     public VTimePicker() {

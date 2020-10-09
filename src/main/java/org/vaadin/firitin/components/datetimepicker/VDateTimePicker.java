@@ -11,7 +11,8 @@ import java.util.Locale;
 
 public class VDateTimePicker extends DateTimePicker implements FluentHasSize<VDateTimePicker>, FluentHasValidation<VDateTimePicker>,
         FluentHasStyle<VDateTimePicker>, FluentFocusable<DateTimePicker, VDateTimePicker>, FluentComponent<VDateTimePicker>,
-        FluentThemableLayout<VDateTimePicker>, FluentHasValueAndElement<VDateTimePicker, AbstractField.ComponentValueChangeEvent<DateTimePicker, LocalDateTime>, LocalDateTime> {
+        FluentThemableLayout<VDateTimePicker>, FluentHasValueAndElement<VDateTimePicker, AbstractField.ComponentValueChangeEvent<DateTimePicker, LocalDateTime>, LocalDateTime>,
+        FluentHasHelper<VDateTimePicker> {
 
     public VDateTimePicker(String label) {
         super(label);

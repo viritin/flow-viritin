@@ -20,5 +20,6 @@ public interface FluentVaadinTextField<S extends FluentVaadinTextField<S, F, T>,
         FluentHasAutocomplete<S>,
         FluentHasAutocorrect<S>,
         FluentCompositionNotifier<S>,
-        FluentHasTheme<S> {
+        FluentHasTheme<S>,
+        FluentHasHelper<S> {
 }
