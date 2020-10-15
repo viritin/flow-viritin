@@ -52,7 +52,7 @@ public class VNotification extends Notification implements FluentComponent<VNoti
     }
 
     public VNotification withThemeVariants(NotificationVariant... variants) {
-        addThemeVariants();
+        addThemeVariants(variants);
         return this;
     }
 }
