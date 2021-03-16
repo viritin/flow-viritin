@@ -1,15 +1,9 @@
 package org.vaadin.firitin.components.textfield;
 
-import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import org.vaadin.firitin.fluency.ui.*;
-import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
-import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
-public class VIntegerField extends IntegerField implements FluentHasSize<VIntegerField>, FluentHasValidation<VIntegerField>, FluentFocusable<IntegerField, VIntegerField>,
-        FluentHasValue<VIntegerField, AbstractField.ComponentValueChangeEvent<IntegerField, Integer>, Integer>, FluentComponent<VIntegerField>,
-        FluentHasLabel<VIntegerField>, FluentHasAutofocus<VIntegerField>, FluentHasStyle<VIntegerField>, FluentHasPrefixAndSuffix<VIntegerField> {
+public class VIntegerField extends IntegerField implements FluentVaadinTextField<VIntegerField, IntegerField, Integer> {
 
     public VIntegerField() {
         super();
@@ -40,28 +34,13 @@ public class VIntegerField extends IntegerField implements FluentHasSize<VIntege
         return this;
     }
 
-    public VIntegerField withErrorMessage(String errorMessage) {
-        setErrorMessage(errorMessage);
+    public VIntegerField withHasControls(boolean hasControls) {
+        setHasControls(hasControls);
         return this;
     }
 
-    public VIntegerField withInvalid(boolean invalid) {
-        setInvalid(invalid);
-        return this;
-    }
-
-    public VIntegerField withMax(double max) {
-        setMax(max);
-        return this;
-    }
-
-    public VIntegerField withMin(double min) {
-        setMin(min);
-        return this;
-    }
-
-    public VIntegerField withStep(double step) {
-        setStep(step);
+    public VIntegerField withValueChangeTimeout(int valueChangeTimeout) {
+        setValueChangeTimeout(valueChangeTimeout);
         return this;
     }
 
@@ -70,13 +49,8 @@ public class VIntegerField extends IntegerField implements FluentHasSize<VIntege
         return this;
     }
 
-    public VIntegerField withHasControls(boolean hasControls) {
-        setHasControls(hasControls);
-        return this;
-    }
-
-    public VIntegerField withAutofocus(boolean autofocus) {
-        setAutofocus(autofocus);
+    public VIntegerField withAutoselect(boolean autoselect) {
+        setAutoselect(autoselect);
         return this;
     }
 
@@ -95,8 +69,8 @@ public class VIntegerField extends IntegerField implements FluentHasSize<VIntege
         return this;
     }
 
-    public VIntegerField withAutoselect(boolean autoselect) {
-        setAutoselect(autoselect);
+    public VIntegerField withRequired(boolean required) {
+        setRequired(required);
         return this;
     }
 

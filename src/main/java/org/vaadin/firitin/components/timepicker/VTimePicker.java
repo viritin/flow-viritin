@@ -3,6 +3,7 @@ package org.vaadin.firitin.components.timepicker;
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.timepicker.TimePicker;
+import org.vaadin.firitin.components.datetimepicker.VDateTimePicker;
 import org.vaadin.firitin.fluency.ui.*;
 import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
@@ -12,7 +13,8 @@ import java.util.Locale;
 
 
 public class VTimePicker extends TimePicker implements FluentHasSize<VTimePicker>, FluentHasValidation<VTimePicker>, FluentHasEnabled<VTimePicker>, FluentComponent<VTimePicker>,
-        FluentHasValueAndElement<VTimePicker, ComponentValueChangeEvent<TimePicker, LocalTime>, LocalTime>, FluentHasLabel<VTimePicker>, FluentFocusable<TimePicker, VTimePicker> {
+        FluentThemableLayout<VDateTimePicker>, FluentHasValueAndElement<VTimePicker, ComponentValueChangeEvent<TimePicker, LocalTime>, LocalTime>, FluentHasLabel<VTimePicker>, FluentFocusable<TimePicker, VTimePicker>,
+        FluentHasHelper<VTimePicker> {
 
 
     public VTimePicker() {
@@ -75,13 +77,36 @@ public class VTimePicker extends TimePicker implements FluentHasSize<VTimePicker
         return this;
     }
 
+    @Deprecated
     public VTimePicker withMin(String min) {
         setMin(min);
         return this;
     }
 
+    public VTimePicker withMinTime(LocalTime min) {
+        setMinTime(min);
+        return this;
+    }
+
+
+    @Deprecated
     public VTimePicker withMax(String max) {
         setMax(max);
+        return this;
+    }
+
+    public VTimePicker withMaxTime(LocalTime max) {
+        setMaxTime(max);
+        return this;
+    }
+
+    public VTimePicker withClearButtonVisible(boolean clearButtonVisible) {
+        setClearButtonVisible(clearButtonVisible);
+        return this;
+    }
+
+    public VTimePicker withRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+        setRequiredIndicatorVisible(requiredIndicatorVisible);
         return this;
     }
 

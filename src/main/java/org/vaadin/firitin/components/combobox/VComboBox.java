@@ -1,6 +1,7 @@
 package org.vaadin.firitin.components.combobox;
 
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -13,7 +14,7 @@ import java.util.Collection;
 @SuppressWarnings("unchecked")
 public class VComboBox<T> extends ComboBox<T> implements FluentHasSize<VComboBox<T>>, FluentHasValidation<VComboBox<T>>, FluentHasItems<VComboBox<T>, T>, FluentFocusable<ComboBox<T>, VComboBox<T>>,
         FluentComponent<VComboBox<T>>, FluentHasLabel<VComboBox<T>>, FluentHasAutofocus<VComboBox<T>>,
-        FluentHasStyle<VComboBox<T>>, FluentHasValueAndElement<VComboBox<T>, ComponentValueChangeEvent<ComboBox<T>, T>, T> {
+        FluentHasStyle<VComboBox<T>>, FluentHasValueAndElement<VComboBox<T>, ComponentValueChangeEvent<ComboBox<T>, T>, T>, FluentHasHelper<VComboBox<T>> {
 
     public VComboBox() {
         super();
@@ -68,6 +69,46 @@ public class VComboBox<T> extends ComboBox<T> implements FluentHasSize<VComboBox
 
     public VComboBox<T> withPattern(String pattern) {
         setPattern(pattern);
+        return this;
+    }
+
+    public VComboBox<T> withPageSize(int pageSize) {
+        setPageSize(pageSize);
+        return this;
+    }
+
+    public VComboBox<T> withCustomValueSetListener(ComponentEventListener<CustomValueSetEvent<ComboBox<T>>> listener) {
+        addCustomValueSetListener(listener);
+        return this;
+    }
+
+    public VComboBox<T> withClearButtonVisible(boolean clearButtonVisible) {
+        setClearButtonVisible(clearButtonVisible);
+        return this;
+    }
+
+    public VComboBox<T> withAlignLeft() {
+        getElement().setAttribute("theme", "align-left");
+        return this;
+    }
+
+    public VComboBox<T> withAlignCenter() {
+        getElement().setAttribute("theme", "align-center");
+        return this;
+    }
+
+    public VComboBox<T> withAlignRight() {
+        getElement().setAttribute("theme", "align-right");
+        return this;
+    }
+
+    public VComboBox<T> withThemeSmall() {
+        getElement().setAttribute("theme", "small");
+        return this;
+    }
+
+    public VComboBox<T> withTheme(String theme) {
+        getElement().setAttribute("theme", theme);
         return this;
     }
 }

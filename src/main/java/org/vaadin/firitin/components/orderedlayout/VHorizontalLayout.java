@@ -1,11 +1,13 @@
 package org.vaadin.firitin.components.orderedlayout;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import org.vaadin.firitin.fluency.ui.*;
 
 public class VHorizontalLayout extends HorizontalLayout implements FluentThemableLayout<VHorizontalLayout>,
-        FluentComponent<VHorizontalLayout>, FluentHasStyle<VHorizontalLayout>, FluentHasSize<VHorizontalLayout>, FluentHasComponents<VHorizontalLayout>, FluentClickNotifier<HorizontalLayout, VHorizontalLayout>, FluentFlexComponent<HorizontalLayout, VHorizontalLayout> {
+        FluentComponent<VHorizontalLayout>, FluentHasStyle<VHorizontalLayout>, FluentHasSize<VHorizontalLayout>, FluentHasComponents<VHorizontalLayout>, FluentClickNotifier<HorizontalLayout, VHorizontalLayout> {
     public VHorizontalLayout() {
         super();
     }
@@ -50,6 +52,27 @@ public class VHorizontalLayout extends HorizontalLayout implements FluentThemabl
         if (getWidth() == null) {
             setWidth("100%");
         }
+        return this;
+    }
+
+
+    public VHorizontalLayout withAlignItems(FlexComponent.Alignment alignment) {
+        setAlignItems(alignment);
+        return this;
+    }
+
+    public VHorizontalLayout withAlignSelf(FlexComponent.Alignment alignment, HasElement... elementContainers) {
+        setAlignSelf(alignment, elementContainers);
+        return this;
+    }
+
+    public VHorizontalLayout withFlexGrow(double flexGrow, HasElement... elementContainers) {
+        setFlexGrow(flexGrow, elementContainers);
+        return this;
+    }
+
+    public VHorizontalLayout withExpand(Component... componentsToExpand) {
+        expand(componentsToExpand);
         return this;
     }
 }

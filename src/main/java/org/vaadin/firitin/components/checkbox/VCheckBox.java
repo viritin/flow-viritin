@@ -9,7 +9,8 @@ import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 public class VCheckBox extends Checkbox implements FluentHasSize<VCheckBox>, FluentFocusable<Checkbox, VCheckBox>,
         FluentClickNotifier<Checkbox, VCheckBox>, FluentHasEnabled<VCheckBox>, FluentComponent<VCheckBox>,
         FluentHasLabel<VCheckBox>, FluentHasAutofocus<VCheckBox>, FluentHasStyle<VCheckBox>,
-        FluentHasValueAndElement<VCheckBox, ComponentValueChangeEvent<Checkbox, Boolean>, Boolean> {
+        FluentHasValueAndElement<VCheckBox, ComponentValueChangeEvent<Checkbox, Boolean>, Boolean>,
+        FluentHasHelper<VCheckBox> {
 
     public VCheckBox() {
         super();

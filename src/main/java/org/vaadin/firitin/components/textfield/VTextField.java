@@ -1,26 +1,14 @@
 package org.vaadin.firitin.components.textfield;
 
-import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import org.vaadin.firitin.fluency.ui.*;
-import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
-import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
-public class VTextField extends TextField
-        implements FluentHasSize<VTextField>, FluentHasValidation<VTextField>, FluentFocusable<TextField, VTextField>,
-        FluentHasValue<VTextField, ComponentValueChangeEvent<TextField, String>, String>, FluentComponent<VTextField>,
-        FluentHasLabel<VTextField>, FluentHasAutofocus<VTextField>, FluentHasStyle<VTextField>, FluentHasPrefixAndSuffix<VTextField> {
+public class VTextField extends TextField implements FluentVaadinTextField<VTextField, TextField, String> {
 
     public VTextField() {
         super();
         initializeSettings();
-    }
-
-    protected void initializeSettings() {
-        // make validations work properly
-        setValueChangeMode(ValueChangeMode.LAZY);
     }
 
     public VTextField(String label) {
@@ -48,17 +36,22 @@ public class VTextField extends TextField
     }
 
     public VTextField(String label,
-            ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
+                      ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
         super(label, listener);
         // make validations work properly
         initializeSettings();
     }
 
     public VTextField(String label, String initialValue,
-            ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
+                      ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
         super(label, initialValue, listener);
         // make validations work properly
         initializeSettings();
+    }
+
+    protected void initializeSettings() {
+        // make validations work properly
+        setValueChangeMode(ValueChangeMode.LAZY);
     }
 
     public VTextField withRequired(boolean required) {
@@ -88,6 +81,52 @@ public class VTextField extends TextField
 
     public VTextField withThemeVariants(TextFieldVariant... variants) {
         addThemeVariants(variants);
+        return this;
+    }
+
+
+    public VTextField withValueChangeMode(ValueChangeMode valueChangeMode) {
+        setValueChangeMode(valueChangeMode);
+        return this;
+    }
+
+    public VTextField withValueChangeTimeout(int valueChangeTimeout) {
+        setValueChangeTimeout(valueChangeTimeout);
+        return this;
+    }
+
+    public VTextField withAutoselect(boolean autoselect) {
+        setAutoselect(autoselect);
+        return this;
+    }
+
+    public VTextField withPreventInvalidInput(boolean preventInvalidInput) {
+        setPreventInvalidInput(preventInvalidInput);
+        return this;
+    }
+
+    public VTextField withTitle(String title) {
+        setTitle(title);
+        return this;
+    }
+
+    public VTextField withClearButtonVisible(boolean clearButtonVisible) {
+        setClearButtonVisible(clearButtonVisible);
+        return this;
+    }
+
+    public VTextField withReadOnly(boolean readOnly) {
+        setReadOnly(readOnly);
+        return this;
+    }
+
+    public VTextField withMaxLength(int maxLength) {
+        setMaxLength(maxLength);
+        return this;
+    }
+
+    public VTextField withMinLength(int minLength) {
+        setMinLength(minLength);
         return this;
     }
 

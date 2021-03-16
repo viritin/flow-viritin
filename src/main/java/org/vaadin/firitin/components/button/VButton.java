@@ -6,15 +6,16 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.shared.Registration;
-import java.io.Serializable;
 import org.vaadin.firitin.fluency.ui.*;
 import org.vaadin.firitin.util.VStyleUtil.ThemeStyle;
+
+import java.io.Serializable;
 
 import static org.vaadin.firitin.util.VStyleUtil.applyOrElse;
 
 public class VButton extends Button implements FluentHasSize<VButton>, FluentHasEnabled<VButton>,
         FluentClickNotifier<Button, VButton>, FluentHasText<VButton>, FluentFocusable<Button, VButton>,
-        FluentComponent<VButton>, FluentHasStyle<VButton> {
+        FluentComponent<VButton>, FluentHasStyle<VButton>, FluentThemableLayout<VButton> {
 
     private ButtonSize size;
     private ButtonType type;
@@ -103,11 +104,19 @@ public class VButton extends Button implements FluentHasSize<VButton>, FluentHas
         super(text, icon, clickListener);
     }
 
+    public VButton(Component icon, String text, ComponentEventListener<ClickEvent<Button>> clickListener) {
+        super(text, icon, clickListener);
+    }
+
     public VButton(String text, Component icon, BasicClickListener clickListener) {
         super(text, icon, e -> clickListener.onClick());
     }
 
     public VButton(String text, Component icon) {
+        super(text, icon);
+    }
+
+    public VButton(Component icon, String text) {
         super(text, icon);
     }
 

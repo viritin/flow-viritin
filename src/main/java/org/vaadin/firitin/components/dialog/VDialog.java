@@ -34,4 +34,30 @@ public class VDialog extends Dialog implements FluentComponent<VDialog>, FluentH
         return this;
     }
 
+    public VDialog withComponentAtIndex(int index, Component component) {
+        addComponentAtIndex(index, component);
+        return this;
+    }
+
+    public VDialog withCloseOnEsc(boolean closeOnEsc) {
+        setCloseOnEsc(closeOnEsc);
+        return this;
+    }
+
+    public VDialog withModal(boolean modal) {
+        setModal(modal);
+        return this;
+    }
+
+    public VDialog withDraggable(boolean draggable) {
+        setDraggable(draggable);
+        return this;
+    }
+
+    public VDialog withResizable(boolean resizable) {
+        setResizable(resizable);
+        return this;
+    }
+
+
 }

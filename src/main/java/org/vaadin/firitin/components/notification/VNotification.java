@@ -10,6 +10,8 @@ import org.vaadin.firitin.fluency.ui.FluentHasTheme;
 
 public class VNotification extends Notification implements FluentComponent<VNotification>, FluentHasComponents<VNotification>, FluentHasTheme<VNotification> {
 
+    public static final int DEFAULT_DURATION = 5000;
+
     public VNotification(String text) {
         super(text);
     }
@@ -24,6 +26,20 @@ public class VNotification extends Notification implements FluentComponent<VNoti
 
     public VNotification(Component... components) {
         super(components);
+    }
+
+    public static VNotification show(String text, int duration, Notification.Position position) {
+        VNotification notification = new VNotification(text, duration, position);
+        notification.open();
+        return notification;
+    }
+
+    public static VNotification show(String text, Notification.Position position) {
+        return show(text, DEFAULT_DURATION, position);
+    }
+
+    public static VNotification show(String text) {
+        return show(text, DEFAULT_DURATION, Notification.Position.BOTTOM_START);
     }
 
     public VNotification withText(String text) {
@@ -52,7 +68,7 @@ public class VNotification extends Notification implements FluentComponent<VNoti
     }
 
     public VNotification withThemeVariants(NotificationVariant... variants) {
-        addThemeVariants();
+        addThemeVariants(variants);
         return this;
     }
 }
