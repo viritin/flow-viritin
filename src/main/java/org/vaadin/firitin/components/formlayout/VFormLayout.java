@@ -89,6 +89,7 @@ public class VFormLayout extends FormLayout implements FluentComponent<VFormLayo
      * @param position         TOP or ASIDE
      * @param minWidthTwoCol   good value 21em
      * @param minWidthThreeCol good value 14em
+     * @param minWidthFourthCol the minimum width of the fourth column
      * @return itself for fluent writing
      */
     public VFormLayout withResponsiveStepsFourCols(ResponsiveStep.LabelsPosition position, String minWidthTwoCol, String minWidthThreeCol, String minWidthFourthCol) {

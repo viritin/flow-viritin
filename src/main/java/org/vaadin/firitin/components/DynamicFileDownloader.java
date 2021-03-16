@@ -90,8 +90,8 @@ public class DynamicFileDownloader extends Anchor implements FluentComponent<Dyn
      * Gets the filename of downloaded file. Override if you want to generate the 
      * name dynamically.
      * 
-     * @param session
-     * @param request
+     * @param session the vaadin session
+     * @param request the vaadin request
      * @return the file name
      */
     protected String getFileName(VaadinSession session, VaadinRequest request) {
