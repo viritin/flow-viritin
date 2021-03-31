@@ -9,8 +9,8 @@ import org.vaadin.firitin.fluency.ui.*;
 
 import java.util.Set;
 
-public class VMultiSelectListBox<T> extends MultiSelectListBox<T> implements FluentComponent<VMultiSelectListBox<T>>, FluentHasStyle<VMultiSelectListBox<T>>, FluentHasDataProvider<VMultiSelectListBox<T>, T>,
-        FluentHasSize<VMultiSelectListBox<T>>, FluentHasItems<VMultiSelectListBox<T>, T>, FluentFocusable<VMultiSelectListBox<T>, VMultiSelectListBox<T>> {
+public class VMultiSelectListBox<T> extends MultiSelectListBox<T> implements FluentComponent<VMultiSelectListBox<T>>, FluentHasStyle<VMultiSelectListBox<T>>,
+        FluentHasSize<VMultiSelectListBox<T>>, FluentFocusable<VMultiSelectListBox<T>, VMultiSelectListBox<T>> {
 
     public VMultiSelectListBox<T> withRenderer(ComponentRenderer<? extends Component, T> itemRenderer) {
         setRenderer(itemRenderer);

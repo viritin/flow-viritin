@@ -17,6 +17,7 @@ package org.vaadin.firitin;
 
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinSession;
 import org.vaadin.firitin.components.DynamicFileDownloader;
@@ -43,6 +44,8 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
                 Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
+        
+        downloadButton.setTarget("_new");
         
         add(downloadButton);
         

@@ -31,11 +31,12 @@ public class DemoView extends VerticalLayout {
 
         add(checkbox);
 
-        VComboBox<Person> comboBox = new VComboBox<Person>().withItems(EnhancedRandom.randomListOf(100, Person.class))
+        VComboBox<Person> comboBox = new VComboBox<Person>()
                 .withAllowCustomValue(false).withLabel("Person").withItemLabelGenerator(Person::getLastName)
                 .withRenderer(TemplateRenderer.<Person> of("<span style=\"background:yellow\">[[item.name]]</span>")
                         .withProperty("name", Person::getLastName))
                 .withValueChangeListener(v -> Notification.show("Selected " + v.getValue().getLastName()));
+        comboBox.setItems(EnhancedRandom.randomListOf(100, Person.class)); // TODO add back fluent setItems methods via new interfaces: .withItems(EnhancedRandom.randomListOf(100, Person.class))
         add(comboBox);
 
         VTextField textField = new VTextField().withPlaceholder("This field don't give you NPE with null value");

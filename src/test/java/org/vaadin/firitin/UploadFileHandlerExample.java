@@ -37,7 +37,6 @@ import org.vaadin.firitin.components.upload.UploadFileHandler;
  * @author mstahv
  */
 @Route
-@Push
 public class UploadFileHandlerExample extends VerticalLayout {
 
     private static final String DELIMITER = ";";
