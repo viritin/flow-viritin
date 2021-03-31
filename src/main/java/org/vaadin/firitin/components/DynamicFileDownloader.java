@@ -69,6 +69,11 @@ public class DynamicFileDownloader extends Anchor implements FluentComponent<Dyn
             ui.getSession().addRequestHandler(requestHandler);
 
             setHref("./" + identifier);
+            if(fileName != null) {
+                getElement().setAttribute("download", fileName);
+            } else {
+                getElement().setAttribute("download", "");
+            }
         });
     }
 
