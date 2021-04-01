@@ -4,7 +4,7 @@
 
     <groupId>org.vaadin</groupId>
     <artifactId>flow-viritin</artifactId>
-    <version>0.4.1-SNAPSHOT</version>
+    <version>0.5.10-SNAPSHOT</version>
     <name>Flow Viritin</name>
     <packaging>jar</packaging>
 
