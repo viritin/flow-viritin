@@ -9,7 +9,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <vaadin.version>19.0.2</vaadin.version>
+        <vaadin.version>19.0.6</vaadin.version>
 
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -55,7 +55,7 @@
     <repositories>
         <repository>
             <id>Vaadin Directory</id>
-            <url>http://maven.vaadin.com/vaadin-addons</url>
+            <url>https://maven.vaadin.com/vaadin-addons</url>
         </repository>
     </repositories>
 
