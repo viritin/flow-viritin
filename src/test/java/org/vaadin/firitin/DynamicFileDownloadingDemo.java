@@ -15,7 +15,10 @@
  */
 package org.vaadin.firitin;
 
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinRequest;
@@ -33,6 +36,8 @@ import java.util.logging.Logger;
  */
 @Route
 public class DynamicFileDownloadingDemo extends VerticalLayout {
+
+    private DynamicFileDownloader downloadThatNotifiesWhenReady;
 
     public DynamicFileDownloadingDemo() {
         
@@ -64,6 +69,28 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
         };
         
         add(downloadButton2);
+
+
+        UI ui = UI.getCurrent();
+        ui.setPollInterval(500); // simulate Push, not needed if using Push
+        downloadThatNotifiesWhenReady = new DynamicFileDownloader("Download that notifies the UI when finished", "foobar/",
+                outputStream -> {
+                    try {
+                        outputStream.write("HelloWorld".getBytes());
+                        // TODO create an API to simplify doing something like this
+                        ui.access(() -> {
+                            Notification.show("Download is now finished");
+                            // you could do something else here as well, like removing the downloader
+                            remove(downloadThatNotifiesWhenReady);
+                        });
+                    } catch (IOException ex) {
+                        Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+        );
+
+        add(downloadThatNotifiesWhenReady);
+
 
     }
     
