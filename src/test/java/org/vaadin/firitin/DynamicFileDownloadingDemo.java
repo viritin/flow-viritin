@@ -77,17 +77,16 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
                 outputStream -> {
                     try {
                         outputStream.write("HelloWorld".getBytes());
-                        // TODO create an API to simplify doing something like this
-                        ui.access(() -> {
-                            Notification.show("Download is now finished");
-                            // you could do something else here as well, like removing the downloader
-                            remove(downloadThatNotifiesWhenReady);
-                        });
                     } catch (IOException ex) {
                         Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
         );
+        downloadThatNotifiesWhenReady.addDownloadFinishedListener(e->{
+            Notification.show("Download is now finished");
+            // you could do something else here as well, like removing the downloader
+            remove(downloadThatNotifiesWhenReady);
+        });
 
         add(downloadThatNotifiesWhenReady);
 
