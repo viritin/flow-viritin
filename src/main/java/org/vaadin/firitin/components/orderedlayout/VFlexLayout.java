@@ -18,8 +18,8 @@ public class VFlexLayout extends FlexLayout implements FluentComponent<VFlexLayo
         super(children);
     }
 
-    public VFlexLayout withWrapMode(FlexLayout.WrapMode wrapMode) {
-        setWrapMode(wrapMode);
+    public VFlexLayout withFlexWrap(FlexLayout.FlexWrap wrapMode) {
+        setFlexWrap(wrapMode);
         return this;
     }
 
