@@ -122,6 +122,7 @@ public abstract class AbstractForm<T> extends Composite<Div> {
             setVisible(false);
         }
         settingBean = false;
+        adjustSaveButtonState();
     }
 
     /**
@@ -337,16 +338,17 @@ public abstract class AbstractForm<T> extends Composite<Div> {
     }
 
     protected void adjustResetButtonState() {
+        getResetButton().setEnabled(true);
+        /*
         if (getPopup() != null && getPopup().getParent().isPresent()) {
             // Assume cancel button in a form opened to a popup also closes
             // it, allows closing via cancel button by default
-            getResetButton().setEnabled(true);
             return;
         }
         if (isBound()) {
             boolean modified = hasChanges();
             getResetButton().setEnabled(modified || getPopup() != null);
-        }
+        } */
     }
 
     public void setSaveButton(Button button) {
@@ -409,7 +411,7 @@ public abstract class AbstractForm<T> extends Composite<Div> {
             Component component = iter.next();
 
             if (component instanceof Focusable<?>) {
-                if (isReadOnly(component)) {
+                if (!isReadOnly(component)) {
                     ((Focusable) component).focus();
                     return true;
                 }

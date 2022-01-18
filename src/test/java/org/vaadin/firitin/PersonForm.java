@@ -1,6 +1,11 @@
 package org.vaadin.firitin;
 
+import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.textfield.IntegerField;
+import org.vaadin.firitin.components.textfield.VTextField;
+import org.vaadin.firitin.fields.ElementCollectionField;
 import org.vaadin.firitin.form.AbstractForm;
+import org.vaadin.firitin.testdomain.Address;
 import org.vaadin.firitin.testdomain.Person;
 import org.vaadin.firitin.util.style.Padding;
 import org.vaadin.firitin.util.style.Padding.Side;
@@ -17,13 +22,35 @@ import com.vaadin.flow.data.validator.BeanValidator;
 import com.vaadin.flow.router.Route;
 import java.time.LocalDateTime;
 import org.vaadin.firitin.fields.LocalDateTimeField;
+import org.vaadin.stefan.table.TableRow;
 
 @Route
 public class PersonForm extends AbstractForm<Person> {
 
-    private TextField firstName = new TextField();
-    private TextField lastName = new TextField();
+    private TextField firstName = new VTextField();
+    private TextField lastName = new VTextField();
     private LocalDateTimeField joinTime = new LocalDateTimeField();
+
+    public static class AddressEditor extends AbstractForm<Address> {
+        Select<Address.AddressType> type = new Select<>();
+        TextField street = new VTextField();
+        TextField city = new VTextField();
+        IntegerField zipCode = new IntegerField();
+
+        public AddressEditor() {
+            super(Address.class);
+            type.setItems(Address.AddressType.values());
+        }
+
+        @Override
+        protected Component createContent() {
+            TableRow tr = new TableRow();
+            tr.addCells(type,street,city,zipCode);
+            return tr;
+        }
+    }
+
+    private ElementCollectionField<Address> addresses = new ElementCollectionField<Address>(Address.class, AddressEditor.class);
 
     public PersonForm() {
         super(Person.class);
@@ -32,6 +59,7 @@ public class PersonForm extends AbstractForm<Person> {
         setResetHandler(this::handleReset);
         bindFields();
         final Person person = new Person();
+        person.setFirstName("Jorma");
         person.setJoinTime(LocalDateTime.now());
         setEntity(person);
     }
@@ -42,7 +70,7 @@ public class PersonForm extends AbstractForm<Person> {
     }
 
     private void handleSave(Person person) {
-        Notification.show("Handle Save");
+        Notification.show("Handle Save. Person: " + person.toString());
         BinderValidationStatus<Person> validate = getBinder().validate();
         if (validate.isOk()) {
             closePopup();
@@ -68,6 +96,7 @@ public class PersonForm extends AbstractForm<Person> {
         formContents.add(firstName);
         formContents.add(lastName);
         formContents.add(joinTime);
+        formContents.add(addresses);
 
         content.add(formContents);
 

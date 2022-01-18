@@ -7,26 +7,37 @@ public class VIntegerField extends IntegerField implements FluentVaadinTextField
 
     public VIntegerField() {
         super();
+        initializeSettings();
     }
 
     public VIntegerField(String label) {
         super(label);
+        initializeSettings();
     }
 
     public VIntegerField(String label, String placeholder) {
         super(label, placeholder);
+        initializeSettings();
     }
 
     public VIntegerField(ValueChangeListener<? super ComponentValueChangeEvent<IntegerField, Integer>> listener) {
         super(listener);
+        initializeSettings();
     }
 
     public VIntegerField(String label, ValueChangeListener<? super ComponentValueChangeEvent<IntegerField, Integer>> listener) {
         super(label, listener);
+        initializeSettings();
     }
 
     public VIntegerField(String label, Integer initialValue, ValueChangeListener<? super ComponentValueChangeEvent<IntegerField, Integer>> listener) {
         super(label, initialValue, listener);
+        initializeSettings();
+    }
+
+    protected void initializeSettings() {
+        // make validations work properly
+        setValueChangeMode(ValueChangeMode.LAZY);
     }
 
     public VIntegerField withValueChangeMode(ValueChangeMode valueChangeMode) {

@@ -1,11 +1,8 @@
 package org.vaadin.firitin.appframework;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
-import org.apache.commons.lang3.StringUtils;
 import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
 import org.vaadin.firitin.util.style.Padding;
 
@@ -20,7 +17,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouteBaseData;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouterLayout;
@@ -38,6 +34,10 @@ public abstract class MainLayout extends AppLayout {
 
 	private List<NavigationItem> navigationItems = new ArrayList<>();
 
+	private Stack<Component> viewStack = new Stack<>();
+
+	private Map<Component,String> explicitViewTitles = new WeakHashMap<>();
+
 	public MainLayout() {
 		setPrimarySection(Section.DRAWER);
 		addToNavbar(true, createHeaderContent());
@@ -53,7 +53,7 @@ public abstract class MainLayout extends AppLayout {
 		}).forEach(rd -> {
 			Class<? extends Component> routeClass = rd.getNavigationTarget();
 			if (!Modifier.isAbstract(routeClass.getModifiers())) {
-				navigationItems.add(new NavigationItem(getMenuTitle(routeClass), routeClass));
+				navigationItems.add(new NavigationItem(routeClass));
 			}
 		});
 
@@ -79,7 +79,7 @@ public abstract class MainLayout extends AppLayout {
 			}).forEach(rd -> {
 				Class<? extends Component> routeClass = rd.getNavigationTarget();
 				if (!Modifier.isAbstract(routeClass.getModifiers())) {
-					navigationItems.add(new NavigationItem(getMenuTitle(routeClass), routeClass));
+					navigationItems.add(new NavigationItem(routeClass));
 				}
 			});
 			sortMenuItems();
@@ -92,12 +92,29 @@ public abstract class MainLayout extends AppLayout {
 	}
 
 	protected void sortMenuItems() {
-		navigationItems.sort((o1, o2) -> o1.getText().compareTo(o2.getText()));
-	}
 
-	protected String getMenuTitle(Class<? extends Component> routeClass) {
-		return detectTitleFromAnnotationOrClassName(routeClass);
-	};
+		Collections.sort(navigationItems, new Comparator<NavigationItem>() {
+
+			@Override
+			public int compare(NavigationItem o1, NavigationItem o2) {
+				MenuItem a1 = o1.getNavigationTarget().
+						getAnnotation(MenuItem.class);
+				MenuItem a2 = o2.getNavigationTarget().
+						getAnnotation(MenuItem.class);
+				if (a1 == null && a2 == null) {
+					return o1.getText().compareTo(o2.getText());
+				} else {
+					int order1 = a1 == null ? MenuItem.DEFAULT : a1.order();
+					int order2 = a2 == null ? MenuItem.DEFAULT : a2.order();
+					if (order1 == order2) {
+						return o1.getText().compareTo(o2.getText());
+					} else {
+						return order1 - order2;
+					}
+				}
+			}
+		});
+	}
 
 	/**
 	 * @return A List of {@link NavigationItem} objects to be shown in the menu.
@@ -164,24 +181,69 @@ public abstract class MainLayout extends AppLayout {
 		super.afterNavigation();
 		getNavigationItems().stream().filter(ni -> ni.getNavigationTarget().equals(getContent().getClass())).findFirst()
 				.ifPresent(ni -> menu.setSelectedTab(ni));
-		viewTitle.setText(getCurrentPageTitle());
+		updateViewTitle();
 	}
 
-	protected String getCurrentPageTitle() {
-		Class<? extends Component> clazz = getContent().getClass();
-		return detectTitleFromAnnotationOrClassName(clazz);
-	}
-
-	private String detectTitleFromAnnotationOrClassName(Class<? extends Component> clazz) {
-		PageTitle title = clazz.getAnnotation(PageTitle.class);
-		if (title == null) {
-			String simpleName = clazz.getSimpleName();
-			if (simpleName.endsWith("View")) {
-				simpleName = simpleName.substring(0, simpleName.length() - 4);
+	private void updateViewTitle() {
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0 ; i < viewStack.size(); i++) {
+			if(i > 0) {
+				sb.append(" / ");
 			}
-			return StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(simpleName), ' ');
+			Component component = viewStack.get(i);
+			if(explicitViewTitles.containsKey(component)) {
+				sb.append(explicitViewTitles.get(component));
+			} else {
+				sb.append(NavigationItem.getMenuTextFromClass(component.getClass()));
+			}
 		}
-		return title == null ? "" : title.value();
+		viewTitle.setText(sb.toString());
+	}
+
+	@Override
+	public void setContent(Component content) {
+		while(viewStack.size() > 1) {
+			closeSubView();
+		}
+		super.setContent(content);
+		viewStack.clear();
+		viewStack.push(content);
+	}
+
+	public void openSubView(Component component, String viewTitle) {
+		viewStack.push(component);
+		if(viewTitle != null) {
+			explicitViewTitles.put(component, viewTitle);
+		}
+		super.setContent(component);
+		updateViewTitle();
+	}
+
+	public void openSubView(Component component) {
+		openSubView(component, null);
+		viewStack.push(component);
+		super.setContent(component);
+	}
+
+	public void closeSubView(Component component) {
+		Component pop = viewStack.pop();
+		if(pop != component) {
+			throw new IllegalStateException();
+		}
+		if(pop == null) {
+			throw new IllegalStateException();
+		}
+		super.setContent(viewStack.peek());
+		updateViewTitle();
+	}
+
+	public void closeSubView() {
+		Component pop = viewStack.pop();
+		if(pop == null) {
+			throw new IllegalStateException();
+		}
+		super.setContent(viewStack.peek());
+		updateViewTitle();
 	}
 
 }

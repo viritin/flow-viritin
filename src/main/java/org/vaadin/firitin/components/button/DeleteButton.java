@@ -1,21 +1,19 @@
 package org.vaadin.firitin.components.button;
 
-import static org.claspina.confirmdialog.ButtonOption.caption;
-import static org.claspina.confirmdialog.ButtonOption.focus;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import org.claspina.confirmdialog.ButtonType;
 import org.claspina.confirmdialog.ConfirmDialog;
-import org.vaadin.firitin.components.button.VButton.ButtonSize;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentHasEnabled;
+
+import static org.claspina.confirmdialog.ButtonOption.caption;
 
 /**
  * @author Panos Bariamis (pbaris)
  */
-public class DeleteButton extends Composite<VButton> implements FluentHasEnabled<DeleteButton>, FluentComponent<DeleteButton> {
+public class DeleteButton extends Button implements FluentHasEnabled<DeleteButton>, FluentComponent<DeleteButton> {
 
     private String headerText = "";
     private String promptText = "Are you sure?";
@@ -28,8 +26,8 @@ public class DeleteButton extends Composite<VButton> implements FluentHasEnabled
     private Runnable cancelHandler;
 
     public DeleteButton() {
-        getContent().withColor(VButton.ButtonColor.ERROR);
-        getContent().addClickListener(e -> this.confirm());
+        VButton.ButtonColor.ERROR.applyTheme(this);
+        addClickListener(e -> this.confirm());
     }
 
     private void confirm() {
@@ -37,7 +35,7 @@ public class DeleteButton extends Composite<VButton> implements FluentHasEnabled
             dialog = ConfirmDialog.create()
                 .withCaption(headerText)
                 .withMessage(new Span(promptText))
-                .withOkButton(confirmHandler, focus(), caption(confirmText))
+                .withOkButton(confirmHandler, caption(confirmText))
                 .withCancelButton(cancelHandler, caption(cancelText));
 
             adjustDialogButton(dialog.getButton(ButtonType.OK));
@@ -48,7 +46,7 @@ public class DeleteButton extends Composite<VButton> implements FluentHasEnabled
 
     private void adjustDialogButton(Button button) {
         button.setIcon(null);
-        ButtonSize.SMALL.applyTheme(button);
+        VButton.ButtonSize.SMALL.applyTheme(button);
     }
 
     public void setConfirmHandler(final Runnable confirmHandler) {
@@ -69,27 +67,23 @@ public class DeleteButton extends Composite<VButton> implements FluentHasEnabled
         return this;
     }
 
-    public void setText(final String text) {
-        getContent().setText(text);
-    }
-
     public DeleteButton withText(final String text) {
         setText(text);
         return this;
     }
 
     public DeleteButton withType(final VButton.ButtonType type) {
-        getContent().withType(type);
+        type.applyTheme(this);
         return this;
     }
 
     public DeleteButton withSize(final VButton.ButtonSize size) {
-        getContent().withSize(size);
+        size.applyTheme(this);
         return this;
     }
 
     public DeleteButton withIcon(final Component icon) {
-        getContent().withIcon(icon);
+        setIcon(icon);
         return this;
     }
 
