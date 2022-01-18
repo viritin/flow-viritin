@@ -15,11 +15,11 @@
  */
 package org.vaadin.firitin;
 
-import org.vaadin.firitin.fields.ByteArrayUploadField;
-
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
+import org.vaadin.firitin.fields.ByteArrayUploadField;
 
 /**
  *
@@ -33,7 +33,12 @@ public class ByteArrayUploadFieldExample extends VerticalLayout {
 
     public ByteArrayUploadFieldExample() {
         final ByteArrayUploadField byteArrayUploadField = new ByteArrayUploadField();
-        
+
+		Upload uplooad = byteArrayUploadField.getUpload();
+		uplooad.setDropAllowed(true); // this is false by default to make the field more compact
+		byteArrayUploadField.setUploadCaption("Upload new template");
+		byteArrayUploadField.setFileDownloadText("Download current template ( %s )");
+
         add(byteArrayUploadField);
         
         binder.forField(byteArrayUploadField).bind(Entity::getContent, Entity::setContent);

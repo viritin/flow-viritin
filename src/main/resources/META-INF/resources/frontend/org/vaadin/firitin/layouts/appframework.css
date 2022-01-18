@@ -43,3 +43,7 @@ vaadin-tab[selected] {
   background-color: var(--lumo-primary-color-10pct);
   color: var(--lumo-primary-text-color);
 }
+
+vaadin-tab vaadin-icon {
+    margin-right: var(--lumo-space-m);
+}
