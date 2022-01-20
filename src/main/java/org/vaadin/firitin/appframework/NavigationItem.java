@@ -1,15 +1,17 @@
 package org.vaadin.firitin.appframework;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.html.ListItem;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouterLink;
 import org.apache.commons.lang3.StringUtils;
 
-public class NavigationItem extends Tab {
+/**
+ * A component to reprecent an main view in the navigation menu
+ */
+public class NavigationItem extends ListItem {
     private final Class<? extends Component> navigationTarget;
     private final String text;
 
@@ -17,15 +19,28 @@ public class NavigationItem extends Tab {
         super(new RouterLink("", navigationTarget));
         text = getMenuTextFromClass(navigationTarget);
         RouterLink rl = ((RouterLink) getChildren().findFirst().get());
+        // Don't ask what these do, copied from start.vaadin.com template
+        rl.addClassNames("flex", "mx-s", "p-s", "relative", "text-secondary");
         MenuItem me = navigationTarget.getAnnotation(MenuItem.class);
         if (me != null) {
+            // TODO figure out how to make icon type configurable, because apparently
+            // the cool kids don't use Icon class any more.
             rl.add(new Icon(me.icon()));
         }
-        rl.add(new Text(" " +text));
+        // TODO figure out how to let users intercept this for i18n
+        Span text = new Span(this.text);
+        text.addClassNames("font-medium", "text-s");
+        rl.add(text);
 
         this.navigationTarget = navigationTarget;
     }
 
+    /**
+     * Detects a menu item text for a view class, based on various annotations and falling back to genearing one from
+     * the class name.
+     * @param navigationTarget the view class
+     * @return string used in the menu/breadcrump for the view
+     */
     public static String getMenuTextFromClass(Class<? extends Component> navigationTarget) {
         final String text;
         MenuItem me = navigationTarget.getAnnotation(MenuItem.class);

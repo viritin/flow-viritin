@@ -41,18 +41,19 @@ public class ByteArrayUploadFieldExample extends VerticalLayout {
 
         add(byteArrayUploadField);
         
-        binder.forField(byteArrayUploadField).bind(Entity::getContent, Entity::setContent);
+        binder.forField(byteArrayUploadField).bind(Entity::getTemplate, Entity::setTemplate);
+
     }
     
     private static class Entity {
-    	private byte[] content;
+    	private byte[] template;
     	
-    	public byte[] getContent() {
-			return content;
+    	public byte[] getTemplate() {
+			return template;
 		}
     	
-    	public void setContent(byte[] content) {
-			this.content = content;
+    	public void setTemplate(byte[] template) {
+			this.template = template;
 		}
     }
     

@@ -3,6 +3,8 @@ package org.vaadin.firitin.appframework;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.*;
 import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
 import org.vaadin.firitin.util.style.Padding;
 
@@ -11,7 +13,6 @@ import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -22,14 +23,20 @@ import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouterLayout;
 
 /**
- * The main view is a top-level placeholder for other views.
+ * The main view is a top-level placeholder for other views. This version is based on a one
+ * produced by start.vaadin.com service, but add a bit structure to it and populates
+ * main views automatically to it.
+ * <p>Suites as such for small apps that has no special needs for the main layout.
+ * Menu items can be configured (override caption, order, icon) using {@link MenuItem} annotation</p>
+ * <p>Check usage example from the text package org.vaadin.firitin.appframework</p>
  */
 @CssImport("./org/vaadin/firitin/layouts/appframework.css")
 @CssImport("lumo-css-framework/all-classes.css")
 @NpmPackage(value = "lumo-css-framework", version = "3.0.11")
 public abstract class MainLayout extends AppLayout {
 
-	private final Tabs menu;
+	private UnorderedList menu;
+
 	private H1 viewTitle;
 
 	private List<NavigationItem> navigationItems = new ArrayList<>();
@@ -39,10 +46,10 @@ public abstract class MainLayout extends AppLayout {
 	private Map<Component,String> explicitViewTitles = new WeakHashMap<>();
 
 	public MainLayout() {
+
 		setPrimarySection(Section.DRAWER);
 		addToNavbar(true, createHeaderContent());
-		menu = createMenu();
-		addToDrawer(createDrawerContent(menu));
+		addToDrawer(createDrawerContent());
 		RouteConfiguration.forSessionScope().getAvailableRoutes().stream().filter(routeData -> {
 			Class<? extends RouterLayout> parentLayout = routeData.getParentLayout();
 			if (parentLayout != null) {
@@ -68,22 +75,25 @@ public abstract class MainLayout extends AppLayout {
 					}
 				}
 			});
-			List<RouteBaseData<?>> addedRoutes = event.getAddedRoutes();
-			addedRoutes.stream().filter(routeData -> {
-				Class<? extends RouterLayout> parentLayout = routeData.getParentLayout();
-				if (parentLayout != null) {
-					boolean assignableFrom = MainLayout.class.isAssignableFrom(parentLayout);
-					return assignableFrom;
-				}
-				return false;
-			}).forEach(rd -> {
-				Class<? extends Component> routeClass = rd.getNavigationTarget();
-				if (!Modifier.isAbstract(routeClass.getModifiers())) {
-					navigationItems.add(new NavigationItem(routeClass));
-				}
+			// UI access used to support reload by JRebel etc
+			MainLayout.this.getUI().get().access(()->{
+				List<RouteBaseData<?>> addedRoutes = event.getAddedRoutes();
+				addedRoutes.stream().filter(routeData -> {
+					Class<? extends RouterLayout> parentLayout = routeData.getParentLayout();
+					if (parentLayout != null) {
+						boolean assignableFrom = MainLayout.class.isAssignableFrom(parentLayout);
+						return assignableFrom;
+					}
+					return false;
+				}).forEach(rd -> {
+					Class<? extends Component> routeClass = rd.getNavigationTarget();
+					if (!Modifier.isAbstract(routeClass.getModifiers()) && routeClass != null) {
+						navigationItems.add(new NavigationItem(routeClass));
+					}
+				});
+				sortMenuItems();
+				buildMenu();
 			});
-			sortMenuItems();
-			buildMenu();
 		});
 
 		sortMenuItems();
@@ -138,49 +148,51 @@ public abstract class MainLayout extends AppLayout {
 	}
 
 	protected Component createHeaderContent() {
-		VHorizontalLayout layout = new VHorizontalLayout().withPadding(Padding.Side.RIGHT);
-		layout.setId("header");
-		layout.getThemeList().set("dark", true);
-		layout.setWidthFull();
-		layout.setSpacing(false);
-		layout.setAlignItems(FlexComponent.Alignment.CENTER);
-		layout.add(new DrawerToggle());
+		DrawerToggle toggle = new DrawerToggle();
+		toggle.addClassName("text-secondary");
+		toggle.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+		toggle.getElement().setAttribute("aria-label", "Menu toggle");
+
 		viewTitle = new H1();
-		layout.add(viewTitle);
-		layout.addAndExpand(viewTitle);
-		return layout;
+		viewTitle.addClassNames("m-0", "text-l");
+
+		Header header = new Header(toggle, viewTitle);
+		header.addClassNames("bg-base", "border-b", "border-contrast-10", "box-border", "flex", "h-xl", "items-center",
+				"w-full");
+		return header;
 	}
 
-	protected Component createDrawerContent(Tabs menu) {
-		VerticalLayout layout = new VerticalLayout();
-		layout.setSizeFull();
-		layout.setPadding(false);
-		layout.setSpacing(false);
-		layout.getThemeList().set("spacing-s", true);
-		layout.setAlignItems(FlexComponent.Alignment.STRETCH);
-		HorizontalLayout logoLayout = new HorizontalLayout();
-		logoLayout.setId("logo");
-		logoLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-		logoLayout.add(getDrawerHeader());
-		layout.add(logoLayout, menu);
-		return layout;
+	protected Component createDrawerContent() {
+		H2 appName = new H2(getDrawerHeader());
+		appName.addClassNames("flex", "items-center", "h-xl", "m-0", "px-m", "text-m");
+		com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(
+				appName,
+				createNavigation(),
+				createFooter());
+		section.addClassNames("flex", "flex-col", "items-stretch", "max-h-full", "min-h-full");
+		return section;
 	}
 
-	protected abstract Component[] getDrawerHeader();
+	private Nav createNavigation() {
+		Nav nav = new Nav();
+		nav.addClassNames("border-b", "border-contrast-10", "flex-grow", "overflow-auto");
+		nav.getElement().setAttribute("aria-labelledby", "views");
 
-	private Tabs createMenu() {
-		final Tabs tabs = new Tabs();
-		tabs.setOrientation(Tabs.Orientation.VERTICAL);
-		tabs.addThemeVariants(TabsVariant.LUMO_MINIMAL);
-		tabs.setId("tabs");
-		return tabs;
+		// Wrap the links in a list; improves accessibility
+		menu = new UnorderedList();
+		menu.addClassNames("list-none", "m-0", "p-0");
+		nav.add(menu);
+
+		return nav;
 	}
+
+	protected abstract String getDrawerHeader();
 
 	@Override
 	protected void afterNavigation() {
 		super.afterNavigation();
-		getNavigationItems().stream().filter(ni -> ni.getNavigationTarget().equals(getContent().getClass())).findFirst()
-				.ifPresent(ni -> menu.setSelectedTab(ni));
+//		getNavigationItems().stream().filter(ni -> ni.getNavigationTarget().equals(getContent().getClass())).findFirst()
+//				.ifPresent(ni -> menu.setSelectedTab(ni));
 		updateViewTitle();
 	}
 
@@ -245,5 +257,13 @@ public abstract class MainLayout extends AppLayout {
 		super.setContent(viewStack.peek());
 		updateViewTitle();
 	}
+
+	protected Footer createFooter() {
+		Footer layout = new Footer();
+		layout.addClassNames("flex", "items-center", "my-s", "px-m", "py-xs");
+
+		return layout;
+	}
+
 
 }
