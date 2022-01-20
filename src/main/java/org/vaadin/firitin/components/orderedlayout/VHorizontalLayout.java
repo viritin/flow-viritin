@@ -2,8 +2,10 @@ package org.vaadin.firitin.components.orderedlayout;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import org.vaadin.firitin.components.select.VSelect;
 import org.vaadin.firitin.fluency.ui.*;
 
 public class VHorizontalLayout extends HorizontalLayout implements FluentThemableLayout<VHorizontalLayout>,
@@ -73,6 +75,16 @@ public class VHorizontalLayout extends HorizontalLayout implements FluentThemabl
 
     public VHorizontalLayout withExpand(Component... componentsToExpand) {
         expand(componentsToExpand);
+        return this;
+    }
+
+    /**
+     * Adds a spacer component that consumes all available space. Handy for example to add
+     * components to both ends of a row, but leave space between them.
+     * @return self with the spacer
+     */
+    public VHorizontalLayout space() {
+        addAndExpand(new Div());
         return this;
     }
 }

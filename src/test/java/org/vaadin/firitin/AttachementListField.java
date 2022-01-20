@@ -13,6 +13,7 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.Json;
+import org.vaadin.firitin.components.button.ConfirmButton;
 import org.vaadin.firitin.components.button.DeleteButton;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
@@ -135,15 +136,13 @@ public class AttachementListField extends Composite<VerticalLayout>
             fireValueChange();
         });
 
-        DeleteButton deleteButton = new DeleteButton()
-                .withConfirmHandler(() -> {
+        ConfirmButton deleteButton = new DeleteButton(() -> {
                     value.remove(editor.getEntity());
                     editor.getEntity().getPath().toFile().delete();
                     existingValues.remove(row);
                     fireValueChange();
                 })
-                .withIcon(VaadinIcon.TRASH.create())
-                .withPromptText("Are you sure you want to delete file " + newValue.getName());
+                .withConfirmationPrompt("Are you sure you want to delete file " + newValue.getName());
         row.add(editor, deleteButton);
         editor.setEntity(newValue);
         existingValues.add(row);

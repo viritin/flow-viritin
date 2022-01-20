@@ -76,7 +76,7 @@ public abstract class MainLayout extends AppLayout {
 				}
 			});
 			// UI access used to support reload by JRebel etc
-			MainLayout.this.getUI().get().access(()->{
+			MainLayout.this.getUI().ifPresent(ui -> ui.access(()->{
 				List<RouteBaseData<?>> addedRoutes = event.getAddedRoutes();
 				addedRoutes.stream().filter(routeData -> {
 					Class<? extends RouterLayout> parentLayout = routeData.getParentLayout();
@@ -93,7 +93,7 @@ public abstract class MainLayout extends AppLayout {
 				});
 				sortMenuItems();
 				buildMenu();
-			});
+			}));
 		});
 
 		sortMenuItems();
