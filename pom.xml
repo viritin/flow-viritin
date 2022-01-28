@@ -9,7 +9,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <vaadin.version>22.0.3</vaadin.version>
+        <vaadin.version>22.0.4</vaadin.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
