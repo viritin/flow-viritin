@@ -3,6 +3,8 @@ package org.vaadin.firitin.appframework;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.*;
 import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
@@ -46,7 +48,19 @@ public abstract class MainLayout extends AppLayout {
 	private Map<Component,String> explicitViewTitles = new WeakHashMap<>();
 
 	public MainLayout() {
+	}
 
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+		init();
+		super.onAttach(attachEvent);
+	}
+
+	protected void init() {
+		// lazy init
+		if(viewTitle != null) {
+			return;
+		}
 		setPrimarySection(Section.DRAWER);
 		addToNavbar(true, createHeaderContent());
 		addToDrawer(createDrawerContent());
@@ -144,7 +158,18 @@ public abstract class MainLayout extends AppLayout {
 	 */
 	public void buildMenu() {
 		menu.removeAll();
-		navigationItems.forEach(menu::add);
+		navigationItems.stream().filter(this::checkAccess).forEach(menu::add);
+	}
+
+	/**
+	 * Application that has access control can limit the appearance of the
+	 * navigation item in the menu by returning false here.
+	 *
+	 * @param navigationItem the navigation item
+	 * @return true if item should be visible or not
+	 */
+	protected boolean checkAccess(NavigationItem navigationItem) {
+		return true;
 	}
 
 	protected Component createHeaderContent() {
@@ -190,6 +215,7 @@ public abstract class MainLayout extends AppLayout {
 
 	@Override
 	protected void afterNavigation() {
+		init();
 		super.afterNavigation();
 //		getNavigationItems().stream().filter(ni -> ni.getNavigationTarget().equals(getContent().getClass())).findFirst()
 //				.ifPresent(ni -> menu.setSelectedTab(ni));
@@ -233,8 +259,6 @@ public abstract class MainLayout extends AppLayout {
 
 	public void openSubView(Component component) {
 		openSubView(component, null);
-		viewStack.push(component);
-		super.setContent(component);
 	}
 
 	public void closeSubView(Component component) {
@@ -245,6 +269,7 @@ public abstract class MainLayout extends AppLayout {
 		if(pop == null) {
 			throw new IllegalStateException();
 		}
+		explicitViewTitles.remove(pop);
 		super.setContent(viewStack.peek());
 		updateViewTitle();
 	}
@@ -254,6 +279,7 @@ public abstract class MainLayout extends AppLayout {
 		if(pop == null) {
 			throw new IllegalStateException();
 		}
+		explicitViewTitles.remove(pop);
 		super.setContent(viewStack.peek());
 		updateViewTitle();
 	}
