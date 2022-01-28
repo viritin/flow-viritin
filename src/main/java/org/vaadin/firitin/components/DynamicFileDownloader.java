@@ -21,6 +21,7 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.RequestHandler;
 import com.vaadin.flow.server.VaadinRequest;
@@ -45,6 +46,19 @@ import org.vaadin.firitin.fluency.ui.FluentComponent;
 public class DynamicFileDownloader extends Anchor implements FluentComponent<DynamicFileDownloader> {
 
     private Button button;
+    private DomListenerRegistration disableOnclick;
+
+
+    public void setDisableOnClick(boolean disableOnClick) {
+        if(disableOnclick != null) {
+            disableOnclick.remove();
+        }
+        if(disableOnClick) {
+            disableOnclick = getElement().addEventListener("click", e -> {
+                setEnabled(false);
+            });
+        }
+    }
 
     public static class DownloadFinishedEvent extends ComponentEvent<DynamicFileDownloader> {
 

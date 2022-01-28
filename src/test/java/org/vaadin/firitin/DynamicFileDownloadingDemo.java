@@ -94,6 +94,35 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
 
         add(downloadThatNotifiesWhenReady);
 
+        // Note, the styling of disabled download (read anchor) is currently broken,
+        // ought to be fixed in Vaadin 23
+        DynamicFileDownloader disableOnClick = new DynamicFileDownloader("Allow just one download per 10 secs", "foobar.txt",
+                outputStream -> {
+                    try {
+                        outputStream.write("HelloWorld".getBytes());
+                    } catch (IOException ex) {
+                        Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                });
+        disableOnClick.setDisableOnClick(true);
+        disableOnClick.addDownloadFinishedListener(e-> {
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(10000);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+                    disableOnClick.getUI().ifPresent(ui -> {
+                           ui.access(() -> disableOnClick.setEnabled(true));
+                    });
+                }
+            }.start();
+        });
+        add(disableOnClick);
+
+
         UI.getCurrent().setPollInterval(500);
 
         actaulButtonLikeDownloadButton = new DynamicFileDownloader("Download foobar.txt", "foobar.txt",
@@ -105,19 +134,15 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        actaulButtonLikeDownloadButton.getUI().ifPresent(u -> u.access(() -> {
-                            actaulButtonLikeDownloadButton.setEnabled(true);
-                            actaulButtonLikeDownloadButton.getButton().setEnabled(true);
-                        }));
                     } catch (IOException ex) {
                         Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }).asButton();
-        actaulButtonLikeDownloadButton.getButton().setIcon(VaadinIcon.DOWNLOAD.create());
-        actaulButtonLikeDownloadButton.getButton().addClickListener(e -> {
-            actaulButtonLikeDownloadButton.setEnabled(false);
+        actaulButtonLikeDownloadButton.setDisableOnClick(true);
+        actaulButtonLikeDownloadButton.addDownloadFinishedListener(e -> {
+            actaulButtonLikeDownloadButton.setEnabled(true);
         });
-        actaulButtonLikeDownloadButton.getButton().setDisableOnClick(true);
+        actaulButtonLikeDownloadButton.getButton().setIcon(VaadinIcon.DOWNLOAD.create());
 
         add(actaulButtonLikeDownloadButton);
 
