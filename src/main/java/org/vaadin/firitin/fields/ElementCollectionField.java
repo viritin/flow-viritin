@@ -3,6 +3,8 @@ package org.vaadin.firitin.fields;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.binder.BeanValidationBinder;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.Registration;
 import org.apache.commons.lang3.StringUtils;
@@ -22,17 +24,17 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
         implements HasValue<HasValue.ValueChangeEvent<List<T>>, List<T>>, HasSize {
 
     private final Class<T> clazz;
-    private final Class<? extends AbstractForm<T>> editorClass;
+    private final Class<?> editorClass;
 
     private List<T> value;
 
     protected Table table;
     private T newItem;
-    private AbstractForm<T> newItemForm;
+    private Binder newItemForm;
 
     private SerializableSupplier<AbstractForm<T>> editorInstantiator;
 
-    public ElementCollectionField(Class<T> clazz, Class<? extends AbstractForm<T>> editorClass) {
+    public ElementCollectionField(Class<T> clazz, Class<?> editorClass) {
         this.clazz = clazz;
         this.editorClass = editorClass;
         table = new Table();
@@ -90,15 +92,36 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
         return lastRow.getCells().get(lastRow.getCells().size() - 1);
     }
 
-    private AbstractForm<T> addNewRow(T item) {
-        AbstractForm<T> form = instantiateForm();
-        form.setEntity(item);
-        TableRow component = (TableRow) form.getContent().getChildren().findFirst().get();
-        addDeleteButtonColumn(component, item);
-        form.getBinder().addValueChangeListener(e -> {
-            if(form == newItemForm) {
+    private BeanValidationBinder<T> addNewRow(T item) {
+        BeanValidationBinder<T> binder = new BeanValidationBinder<>(clazz);
+        Object row = instantiateRowObject();
+        binder.bindInstanceFields(row);
+        binder.setBean(item);
+        TableRow tr;
+        if (row instanceof AbstractForm) {
+            AbstractForm form = (AbstractForm) row;
+            ((AbstractForm<T>) row).setEntity(item);
+            tr = (TableRow) form.getContent().getChildren().findFirst().get();
+        } else {
+            Field[] fields = editorClass.getDeclaredFields();
+            Component[] components = new Component[fields.length];
+            for (int i = 0; i < fields.length; i++) {
+                Field field = fields[i];
+                field.setAccessible(true);
+                try {
+                    components[i] =  (Component) field.get(row);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            tr = new TableRow(components);
+        }
+        binder.setBean(item);
+        addDeleteButtonColumn(tr, item);
+        binder.addValueChangeListener(e -> {
+            if(binder == newItemForm) {
                 // TODO add as new row if valid
-                if(e.isFromClient() && newItemForm.getBinder().isValid()) {
+                if(e.isFromClient() && newItemForm.isValid()) {
                     value.add(newItem);
                     // display the delete button column
                     getLastCell().setVisible(true);
@@ -109,8 +132,8 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
                 fireValueChange();
             }
         });
-        table.addRows(component);
-        return form;
+        table.addRows(tr);
+        return binder;
     }
 
     protected T instantiateNewItem() {
@@ -121,7 +144,7 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
         }
     }
 
-    private AbstractForm<T> instantiateForm() {
+    private Object instantiateRowObject() {
         try {
             if(editorInstantiator != null) {
                 return editorInstantiator.get();

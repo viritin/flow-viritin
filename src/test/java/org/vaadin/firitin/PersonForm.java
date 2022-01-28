@@ -2,6 +2,7 @@ package org.vaadin.firitin;
 
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.IntegerField;
+import org.vaadin.firitin.components.textfield.VIntegerField;
 import org.vaadin.firitin.components.textfield.VTextField;
 import org.vaadin.firitin.fields.ElementCollectionField;
 import org.vaadin.firitin.form.AbstractForm;
@@ -31,23 +32,11 @@ public class PersonForm extends AbstractForm<Person> {
     private TextField lastName = new VTextField();
     private LocalDateTimeField joinTime = new LocalDateTimeField();
 
-    public static class AddressEditor extends AbstractForm<Address> {
+    public static class AddressEditor {
         Select<Address.AddressType> type = new Select<>();
         TextField street = new VTextField();
         TextField city = new VTextField();
-        IntegerField zipCode = new IntegerField();
-
-        public AddressEditor() {
-            super(Address.class);
-            type.setItems(Address.AddressType.values());
-        }
-
-        @Override
-        protected Component createContent() {
-            TableRow tr = new TableRow();
-            tr.addCells(type,street,city,zipCode);
-            return tr;
-        }
+        IntegerField zipCode = new VIntegerField();
     }
 
     private ElementCollectionField<Address> addresses = new ElementCollectionField<Address>(Address.class, AddressEditor.class);
