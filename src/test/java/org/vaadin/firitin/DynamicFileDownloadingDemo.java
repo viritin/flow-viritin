@@ -39,6 +39,8 @@ import java.util.logging.Logger;
 @Route
 public class DynamicFileDownloadingDemo extends VerticalLayout {
 
+    private DynamicFileDownloader actaulButtonLikeDownloadButton = null;
+
     private DynamicFileDownloader downloadThatNotifiesWhenReady;
 
     public DynamicFileDownloadingDemo() {
@@ -92,20 +94,37 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
 
         add(downloadThatNotifiesWhenReady);
 
-        DynamicFileDownloader actaulButtonLikeDownloadButton = new DynamicFileDownloader("Download foobar.txt", "foobar.txt",
+        UI.getCurrent().setPollInterval(500);
+
+        actaulButtonLikeDownloadButton = new DynamicFileDownloader("Download foobar.txt", "foobar.txt",
                 outputStream -> {
                     try {
                         outputStream.write("HelloWorld".getBytes());
+                        try {
+                            Thread.sleep(4000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        actaulButtonLikeDownloadButton.getUI().ifPresent(u -> u.access(() -> {
+                            actaulButtonLikeDownloadButton.setEnabled(true);
+                            actaulButtonLikeDownloadButton.getButton().setEnabled(true);
+                        }));
                     } catch (IOException ex) {
                         Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }).asButton();
         actaulButtonLikeDownloadButton.getButton().setIcon(VaadinIcon.DOWNLOAD.create());
+        actaulButtonLikeDownloadButton.getButton().addClickListener(e -> {
+            actaulButtonLikeDownloadButton.setEnabled(false);
+        });
+        actaulButtonLikeDownloadButton.getButton().setDisableOnClick(true);
 
         add(actaulButtonLikeDownloadButton);
 
+        Button b = new Button("B");
+        add(b);
 
     }
-    
-    
+
+
 }
