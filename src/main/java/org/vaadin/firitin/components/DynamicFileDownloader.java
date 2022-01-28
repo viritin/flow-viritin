@@ -19,6 +19,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.RequestHandler;
@@ -42,6 +43,8 @@ import org.vaadin.firitin.fluency.ui.FluentComponent;
  * @see #setFileHandler(com.vaadin.flow.function.SerializableConsumer)
  */
 public class DynamicFileDownloader extends Anchor implements FluentComponent<DynamicFileDownloader> {
+
+    private Button button;
 
     public static class DownloadFinishedEvent extends ComponentEvent<DynamicFileDownloader> {
 
@@ -145,4 +148,26 @@ public class DynamicFileDownloader extends Anchor implements FluentComponent<Dyn
                 .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
+    /**
+     * Makes the download look like a button instead of a normal link.
+     *
+     * @return the same instance, fluent method
+     */
+    public DynamicFileDownloader asButton() {
+        String text = getText();
+        setText(null);
+        this.button = new Button(text);
+        add(button);
+        return this;
+    }
+
+    /**
+     * @return a Button component wrapped inside the file downloader, if configured as a Button
+     */
+    public Button getButton() {
+        if(button == null) {
+            throw new IllegalStateException("asButton() is not called!");
+        }
+        return button;
+    }
 }

@@ -16,6 +16,8 @@
 package org.vaadin.firitin;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Push;
@@ -89,6 +91,18 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
         });
 
         add(downloadThatNotifiesWhenReady);
+
+        DynamicFileDownloader actaulButtonLikeDownloadButton = new DynamicFileDownloader("Download foobar.txt", "foobar.txt",
+                outputStream -> {
+                    try {
+                        outputStream.write("HelloWorld".getBytes());
+                    } catch (IOException ex) {
+                        Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }).asButton();
+        actaulButtonLikeDownloadButton.getButton().setIcon(VaadinIcon.DOWNLOAD.create());
+
+        add(actaulButtonLikeDownloadButton);
 
 
     }
