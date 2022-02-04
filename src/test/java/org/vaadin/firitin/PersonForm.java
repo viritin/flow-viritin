@@ -23,7 +23,6 @@ import com.vaadin.flow.data.validator.BeanValidator;
 import com.vaadin.flow.router.Route;
 import java.time.LocalDateTime;
 import org.vaadin.firitin.fields.LocalDateTimeField;
-import org.vaadin.stefan.table.TableRow;
 
 @Route
 public class PersonForm extends AbstractForm<Person> {
@@ -39,7 +38,12 @@ public class PersonForm extends AbstractForm<Person> {
         IntegerField zipCode = new VIntegerField();
     }
 
-    private ElementCollectionField<Address> addresses = new ElementCollectionField<Address>(Address.class, AddressEditor.class);
+    private ElementCollectionField<Address> addresses = new ElementCollectionField<Address>(Address.class, AddressEditor.class)
+            .withEditorInstantiator(() -> {
+                AddressEditor e = new AddressEditor();
+                e.type.setItems(Address.AddressType.values());
+                return e;
+            });
 
     public PersonForm() {
         super(Person.class);

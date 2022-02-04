@@ -32,7 +32,7 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
     private T newItem;
     private Binder newItemForm;
 
-    private SerializableSupplier<AbstractForm<T>> editorInstantiator;
+    private SerializableSupplier<Object> editorInstantiator;
 
     public ElementCollectionField(Class<T> clazz, Class<?> editorClass) {
         this.clazz = clazz;
@@ -42,7 +42,7 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
         getContent().add(table);
     }
 
-    public ElementCollectionField<T> withEditorInstantiator(SerializableSupplier<AbstractForm<T>> editorInstantiator) {
+    public ElementCollectionField<T> withEditorInstantiator(SerializableSupplier<Object> editorInstantiator) {
         this.editorInstantiator = editorInstantiator;
         return this;
     }
