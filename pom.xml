@@ -4,7 +4,7 @@
 
     <groupId>in.virit</groupId>
     <artifactId>viritin</artifactId>
-    <version>0.8.3-SNAPSHOT</version>
+    <version>0.9.0-SNAPSHOT</version>
     <name>Flow Viritin</name>
     <packaging>jar</packaging>
 
@@ -14,13 +14,10 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <!-- Doing release by manullay uploading to vaadin.com/directory -->
-        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
     <organization>
         <name>Viritin</name>
     </organization>
-
     <scm>
         <url>https://github.com/viritin/flow-viritin</url>
         <connection>scm:git:git://github.com/viritin/flow-viritin.git</connection>
@@ -130,7 +127,7 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.7</version>
+                <version>1.6.8</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>
@@ -164,26 +161,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version>
-                <configuration>
-                    <appendAssemblyId>false</appendAssemblyId>
-                    <descriptors>
-                        <descriptor>src/assembly/src.xml</descriptor>
-                    </descriptors>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>directory-package</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>9.4.31.v20200723</version>
@@ -208,32 +185,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
                 <version>2.5.3</version>
+                <configuration>
+                    <releaseProfiles>release</releaseProfiles>
+                </configuration>
             </plugin>
 
-            <!-- Experimental publishing to Directory
-            <plugin>
-              <groupId>org.codehaus.mojo</groupId>
-              <artifactId>exec-maven-plugin</artifactId>
-              <version>1.2</version>
-              <executions>
-                <execution>
-                  <id>upload-to-directory</id>
-                  <phase>deploy</phase>
-                  <goals>
-                    <goal>exec</goal>
-                  </goals>
-                  <configuration>
-                    <executable>curl</executable>
-                    <arguments>
-                      <argument>-F</argument>
-                      <argument>file=@target/${project.artifactId}-${project.version}.zip</argument>
-                      <argument>https://vaadin.com/vaadincom/directory-service/upload/${project.artifactId}?authKey=${vaadindirectory.flow-viritin.apikey}&amp;releaseNotes=NewFeaturesAndBugFixes&amp;publish=true</argument>
-                    </arguments>
-                  </configuration>
-                </execution>
-              </executions>
-            </plugin>
-            -->
         </plugins>
     </build>
     <profiles>
