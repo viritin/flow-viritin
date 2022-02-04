@@ -4,7 +4,7 @@
 
     <groupId>in.virit</groupId>
     <artifactId>viritin</artifactId>
-    <version>0.9.1-SNAPSHOT</version>
+    <version>0.9.0-SNAPSHOT</version>
     <name>Flow Viritin</name>
     <packaging>jar</packaging>
 
@@ -22,8 +22,7 @@
         <url>https://github.com/viritin/flow-viritin</url>
         <connection>scm:git:git://github.com/viritin/flow-viritin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:/viritin/flow-viritin.git</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
+    </scm>
 
     <issueManagement>
         <system>GitHub</system>
