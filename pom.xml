@@ -7,6 +7,7 @@
     <version>0.9.0-SNAPSHOT</version>
     <name>Flow Viritin</name>
     <packaging>jar</packaging>
+    <description>General purpose helpers for Vaadin Flow users.</description>
 
     <properties>
         <vaadin.version>22.0.4</vaadin.version>
@@ -18,6 +19,12 @@
     <organization>
         <name>Viritin</name>
     </organization>
+    <url>https://github.com/viritin/flow-viritin</url>
+    <developers>
+        <developer>
+            <name>Matti Tahvonen</name>
+        </developer>
+    </developers>
     <scm>
         <url>https://github.com/viritin/flow-viritin</url>
         <connection>scm:git:git://github.com/viritin/flow-viritin.git</connection>
