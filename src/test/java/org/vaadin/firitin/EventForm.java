@@ -42,8 +42,9 @@ public class EventForm extends AbstractForm<Event> {
 
     }
 
-    private void handleSave(Event person) {
+    private void handleSave(Event event) {
         Notification.show("Handle Save");
+        System.err.println(event);
         BinderValidationStatus<Event> validate = getBinder().validate();
         if (validate.isOk()) {
             closePopup();

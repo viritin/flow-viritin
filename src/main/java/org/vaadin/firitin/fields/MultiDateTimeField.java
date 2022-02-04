@@ -4,6 +4,7 @@ import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -46,15 +47,16 @@ public class MultiDateTimeField extends Composite<VerticalLayout>
         value = new ArrayList<>();
 
         next.setWidth("260px");
-
+        next.setLabel("Add new date (+)");
+        addEntry.getElement().setAttribute("title", "Click to add new date(s) to selection");
         HorizontalLayout newRowForm = new VHorizontalLayout(
                 next, repeat,
                 repeatTimes, repeatTimesText,
-                repeatMode, addEntry).withDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+                repeatMode, addEntry).withDefaultVerticalComponentAlignment(FlexComponent.Alignment.BASELINE);
+        //newRowForm.getStyle().set("border-top", "1px solid #ddd");
         getContent().setPadding(false);
         getContent().add(
                 existingValues,
-                new Span("New date"),
                 newRowForm);
 
         next.setValue(LocalDateTime.now().withMinute(0).withNano(0));
@@ -72,11 +74,12 @@ public class MultiDateTimeField extends Composite<VerticalLayout>
         repeat.setValue(false);
         addEntry.addClickListener(e -> {
             LocalDateTime newValue = next.getValue();
-            this.value.add(newValue);
+            value.add(newValue);
             addRow(newValue);
             if (repeat.getValue()) {
                 for (int i = 0; i < repeatTimes.getValue(); i++) {
                     newValue = newValue.plusDays(repeatMode.getValue() == RepeatMode.daily ? 1 : 7);
+                    value.add(newValue);
                     addRow(newValue);
                 }
                 next.setValue(newValue);

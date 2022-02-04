@@ -77,4 +77,15 @@ public class Event {
     public void setAttachments(List<Attachment> attachments) {
         this.attachments = attachments;
     }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", dates=" + dates +
+                ", links=" + links +
+                ", attachments=" + attachments +
+                '}';
+    }
 }
