@@ -10,11 +10,14 @@ import com.vaadin.flow.shared.Registration;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.form.AbstractForm;
-import org.vaadin.stefan.table.*;
+import org.vaadin.firitin.fields.internalhtmltable.Table;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import org.vaadin.firitin.fields.internalhtmltable.TableCell;
+import org.vaadin.firitin.fields.internalhtmltable.TableDataCell;
+import org.vaadin.firitin.fields.internalhtmltable.TableRow;
 
 /**
  * A field to pick a list of objects from a superset.
