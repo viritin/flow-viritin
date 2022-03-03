@@ -164,7 +164,7 @@ public class PagingGrid<T> extends VGrid<T> {
 		void setSize(Long s) {
 			this.size = s;
 			if (sizeKnown()) {
-				pages = (size / getPageSize());
+				pages = (long) Math.ceil(1.0 * size / getPageSize()) ;
 			}
 		}
 
