@@ -10,7 +10,7 @@
     <description>General purpose helpers for Vaadin Flow users.</description>
 
     <properties>
-        <vaadin.version>22.0.4</vaadin.version>
+        <vaadin.version>23.0.0</vaadin.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
