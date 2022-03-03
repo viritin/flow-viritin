@@ -5,6 +5,7 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import org.vaadin.firitin.components.textfield.VIntegerField;
 import org.vaadin.firitin.components.textfield.VTextField;
 import org.vaadin.firitin.fields.ElementCollectionField;
+import org.vaadin.firitin.fields.EnumSelect;
 import org.vaadin.firitin.form.AbstractForm;
 import org.vaadin.firitin.testdomain.Address;
 import org.vaadin.firitin.testdomain.Person;
@@ -32,7 +33,7 @@ public class PersonForm extends AbstractForm<Person> {
     private LocalDateTimeField joinTime = new LocalDateTimeField();
 
     public static class AddressEditor {
-        Select<Address.AddressType> type = new Select<>();
+        EnumSelect<Address.AddressType> type = new EnumSelect<>(Address.AddressType.class);
         TextField street = new VTextField();
         TextField city = new VTextField();
         IntegerField zipCode = new VIntegerField();
@@ -41,7 +42,8 @@ public class PersonForm extends AbstractForm<Person> {
     private ElementCollectionField<Address> addresses = new ElementCollectionField<Address>(Address.class, AddressEditor.class)
             .withEditorInstantiator(() -> {
                 AddressEditor e = new AddressEditor();
-                e.type.setItems(Address.AddressType.values());
+                // This is optional but sometimes handy in more complex cases
+                // to configure fields. Do whatever configuraiton for the fields you need.
                 return e;
             });
 

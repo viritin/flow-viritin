@@ -1,4 +1,4 @@
-package com.niafikra.dimension.commons.ui.field;
+package org.vaadin.firitin.fields;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.combobox.ComboBox;

@@ -41,7 +41,7 @@ import org.vaadin.firitin.util.VStyles;
  *
  * @author mstahv
  */
-@CssImport(value=VStyles.STYLE_PADDING_FIX_FOR_DIALOG, id = "dialog-overlay-styles", themeFor = "vaadin-dialog-overlay")
+@CssImport(value=VStyles.STYLE_PADDING_FIX_FOR_DIALOG, /*id = "dialog-overlay-styles",*/ themeFor = "vaadin-dialog-overlay")
 public abstract class AbstractForm<T> extends Composite<Div> {
 
     private boolean settingBean;
