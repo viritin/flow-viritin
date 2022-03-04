@@ -1,13 +1,17 @@
 package org.vaadin.firitin.components.button;
 
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.server.Command;
+import com.vaadin.flow.shared.Registration;
 import org.vaadin.firitin.components.dialog.ConfirmationDialog;
 
 /**
- * A button whose action is action is executed ofter showing a confirmation dialog.
+ * A button whose action is executed ofter showing a confirmation dialog.
  */
-public class ConfirmButton extends Composite<VButton> {
+public class ConfirmButton extends VButton {
 
     private Command action;
     private String confirmationPrompt = "Are you sure?";
@@ -17,8 +21,20 @@ public class ConfirmButton extends Composite<VButton> {
 
     public ConfirmButton(String buttonCaption, Command action) {
         this.action = action;
-        getContent().setText(buttonCaption);
-        getContent().addClickListener(e->this.prompt());
+        setText(buttonCaption);
+        super.addClickListener(e->this.prompt());
+    }
+
+    @Override
+    public Registration addClickListener(ComponentEventListener<ClickEvent<Button>> listener) {
+        action = () -> listener.onComponentEvent(null);
+        return () -> action = () -> {};
+    }
+
+    @Override
+    public Registration addClickListener(BasicClickListener clickListener) {
+        action = () -> clickListener.onClick();
+        return () -> action = () -> {};
     }
 
     public ConfirmButton withConfirmHandler(Command handler) {

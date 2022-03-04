@@ -8,14 +8,14 @@ import org.vaadin.firitin.components.dialog.ConfirmationDialog;
 public class DeleteButton extends ConfirmButton {
     public DeleteButton(String buttonCaption, Command action) {
         super(buttonCaption, action);
-        getContent().withThemeVariants(ButtonVariant.LUMO_ERROR);
+        withThemeVariants(ButtonVariant.LUMO_ERROR);
         setConfirmationPrompt("Are you sure you want to delete this item?");
         setOkText("Delete");
     }
 
     public DeleteButton(Command action) {
         this(null, action);
-        getContent().setIcon(VaadinIcon.TRASH.create());
+        setIcon(VaadinIcon.TRASH.create());
     }
 
     public DeleteButton() {
@@ -35,10 +35,10 @@ public class DeleteButton extends ConfirmButton {
     }
 
     public void setButtonCaption(String text) {
-        getContent().setText(text);
+        setText(text);
     }
 
     public String getButtonCaption() {
-        return getContent().getText();
+        return getText();
     }
 }

@@ -31,6 +31,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import org.vaadin.firitin.components.button.DefaultButton;
+import org.vaadin.firitin.components.button.DeleteButton;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.button.VButton.ButtonColor;
 import org.vaadin.firitin.components.button.VButton.ButtonType;
@@ -321,7 +322,7 @@ public abstract class AbstractForm<T> extends Composite<Div> {
     }
 
     protected Button createDeleteButton() {
-        return new VButton(getDeleteCaption()).withColor(ButtonColor.ERROR).withVisible(false);
+        return new DeleteButton();
     }
 
     private Button deleteButton;

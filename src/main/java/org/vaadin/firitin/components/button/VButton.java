@@ -80,7 +80,6 @@ public class VButton extends Button implements FluentHasSize<VButton>, FluentHas
     }
 
     public interface BasicClickListener extends Serializable {
-
         void onClick();
     }
 
