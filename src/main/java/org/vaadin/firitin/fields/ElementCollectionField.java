@@ -51,15 +51,31 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
     }
 
     protected void configureColumneHeaders() {
-        Field[] declaredFields = clazz.getDeclaredFields();
+        Field[] declaredFields;
+        if(editorClass != null) {
+            declaredFields = editorClass.getDeclaredFields();
+        } else {
+            declaredFields = clazz.getDeclaredFields();
+        }
         TableRow tr = new TableRow();
         for (int i = 0; i < declaredFields.length; i++) {
-            tr.addHeaderCells(StringUtils.capitalize(
-                    StringUtils.join(
-                            StringUtils.splitByCharacterTypeCamelCase(
-                                    declaredFields[i].getName()), " ")));
+            String fieldName = declaredFields[i].getName();
+            tr.addHeaderCells(getHeaderForField(fieldName));
         }
         table.addRows(tr);
+    }
+
+    /**
+     * Translatest raw field name to header name. By default decamelcases the name.
+     * Override for e.g. localization.
+     *
+     * @param fieldName the raw field name of the row property
+     * @return a string to be used as a header in the editor
+     */
+    protected String getHeaderForField(String fieldName) {
+        return StringUtils.capitalize(
+                StringUtils.join(
+                        StringUtils.splitByCharacterTypeCamelCase(fieldName), " "));
     }
 
     protected void addDeleteButtonColumn(TableRow row, T item) {

@@ -3,7 +3,7 @@
 
 # Flow Viritin
 
-A similar helper library as Viritin was for Vaadin 8 and earlier. See Directory page for more details.
+A similar helper library as Viritin was for Vaadin 8 and earlier. See [the Directory page](https://vaadin.com/directory/component/flow-viritin) for more details.
 
 ## Development instructions
 
