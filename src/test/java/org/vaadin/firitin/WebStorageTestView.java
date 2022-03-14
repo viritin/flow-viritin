@@ -15,19 +15,29 @@ import java.time.LocalDateTime;
 public class WebStorageTestView extends Div {
 
     public WebStorageTestView() {
-        
+
         VTextField value = new VTextField("Value to set");
         value.setValue(LocalDateTime.now().toString());
-        
+
         VButton setData = new VButton().withText("Set value").withClickListener(e -> {
             WebStorage.setItem("test", value.getValue());
         });
-        
+
         VButton detect = new VButton().withText("Detect").withClickListener(e -> {
-            WebStorage.getItem("test", v -> Notification.show(v));
+            WebStorage.getItem("test", v -> {
+                if(v == null) {
+                    Notification.show("Value is not currently set for the key");
+                } else {
+                    Notification.show(v);
+                }
+            });
         });
-        
-        add(value, setData, detect);
+
+
+        VButton remove = new VButton("Remove 'test'").withClickListener(e -> WebStorage.removeItem("test"));
+        VButton clear = new VButton("Clear all").withClickListener(e -> WebStorage.clear());
+
+        add(value, setData, detect, remove, clear);
 
     }
 }
