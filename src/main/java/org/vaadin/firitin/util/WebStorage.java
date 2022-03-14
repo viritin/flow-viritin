@@ -115,14 +115,35 @@ public class WebStorage {
         ui.getPage().executeJs("window[$0].clear()", storage.toString());
     }
 
+    /**
+     * Asynchronously gets an item from the Storage.localStorage
+     *
+     * @param key      the key for which the value will be fetched
+     * @param callback the callback that gets the value once transferred from the client side
+     */
     public static void getItem(String key, Callback callback) {
         getItem(Storage.localStorage, key, callback);
     }
 
+    /**
+     * Asynchronously gets an item from the given storage
+     *
+     * @param storage the storage
+     * @param key      the key for which the value will be fetched
+     * @param callback the callback that gets the value once transferred from the client side
+     */
     public static void getItem(Storage storage, String key, Callback callback) {
         getItem(UI.getCurrent(), storage, key, callback);
     }
 
+    /**
+     * Asynchronously gets an item from the given storage
+     *
+     * @param ui      the UI for which the storage is related to
+     * @param storage the storage
+     * @param key      the key for which the value will be fetched
+     * @param callback the callback that gets the value once transferred from the client side
+     */
     public static void getItem(UI ui, Storage storage, String key, Callback callback) {
         UI.getCurrent().getPage()
                 .executeJs("return window[$0].getItem($1);", storage.toString(), key)
