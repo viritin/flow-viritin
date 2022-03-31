@@ -11,7 +11,7 @@ import com.vaadin.flow.component.UI;
  */
 public class WebStorage {
 
-    enum Storage {
+    public enum Storage {
         /**
          * Web storage saved in the browser "permanently".
          */
@@ -145,7 +145,7 @@ public class WebStorage {
      * @param callback the callback that gets the value once transferred from the client side
      */
     public static void getItem(UI ui, Storage storage, String key, Callback callback) {
-        UI.getCurrent().getPage()
+        ui.getPage()
                 .executeJs("return window[$0].getItem($1);", storage.toString(), key)
                 .then(String.class, callback::onValueDetected, s -> {
                     // for error (most likely non-existing mapping), return null
