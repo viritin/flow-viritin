@@ -17,12 +17,14 @@ package org.vaadin.firitin.fields;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Locale;
 
 import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import org.vaadin.firitin.components.datepicker.VDatePicker;
 
 /**
  * Simple LocalDateTimeField.
@@ -33,7 +35,7 @@ import com.vaadin.flow.component.textfield.TextField;
  */
 public class LocalDateTimeField extends CustomField<LocalDateTime> {
 
-    private DatePicker datePicker = new DatePicker();
+    private DatePicker datePicker = new VDatePicker();
     private TextField hour = new TextField();
     private TextField minute = new TextField();
     private LocalDateTime value;

@@ -2,6 +2,7 @@ package org.vaadin.firitin;
 
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.IntegerField;
+import org.vaadin.firitin.components.datetimepicker.VDateTimePicker;
 import org.vaadin.firitin.components.textfield.VIntegerField;
 import org.vaadin.firitin.components.textfield.VTextField;
 import org.vaadin.firitin.fields.ElementCollectionField;
@@ -23,6 +24,8 @@ import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.data.validator.BeanValidator;
 import com.vaadin.flow.router.Route;
 import java.time.LocalDateTime;
+import java.util.Locale;
+
 import org.vaadin.firitin.fields.LocalDateTimeField;
 
 @Route
@@ -30,7 +33,7 @@ public class PersonForm extends AbstractForm<Person> {
 
     private TextField firstName = new VTextField();
     private TextField lastName = new VTextField();
-    private LocalDateTimeField joinTime = new LocalDateTimeField();
+    private VDateTimePicker joinTime = new VDateTimePicker();
 
     public static class AddressEditor {
         EnumSelect<Address.AddressType> type = new EnumSelect<>(Address.AddressType.class);
@@ -57,6 +60,7 @@ public class PersonForm extends AbstractForm<Person> {
         person.setFirstName("Jorma");
         person.setJoinTime(LocalDateTime.now());
         setEntity(person);
+        joinTime.setLocale(new Locale("fi", "FI"));
     }
 
     private void bindFields() {

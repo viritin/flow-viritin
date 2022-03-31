@@ -14,6 +14,7 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.shared.Registration;
 import org.vaadin.firitin.components.button.VButton;
+import org.vaadin.firitin.components.datetimepicker.VDateTimePicker;
 import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 
@@ -31,7 +32,7 @@ public class MultiDateTimeField extends Composite<VerticalLayout>
         daily, weekly
     }
 
-    DateTimePicker next = new DateTimePicker();
+    DateTimePicker next = new VDateTimePicker();
     Button addEntry = new Button(VaadinIcon.PLUS.create());
     Checkbox repeat = new Checkbox("Repeat");
     Select<RepeatMode> repeatMode = new Select<>();
@@ -91,7 +92,7 @@ public class MultiDateTimeField extends Composite<VerticalLayout>
 
     private void addRow(LocalDateTime newValue) {
         VHorizontalLayout row = new VHorizontalLayout();
-        DateTimePicker dateTimePicker = new DateTimePicker(newValue, event -> {
+        DateTimePicker dateTimePicker = new VDateTimePicker(newValue, event -> {
             LocalDateTime oldValue = event.getOldValue();
             value.set(value.indexOf(oldValue), event.getValue());
             fireValueChange();
