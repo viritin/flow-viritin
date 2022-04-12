@@ -45,7 +45,22 @@ public class SelectionApiView extends VVerticalLayout {
             textField.setCursorPosition(4);
         });
 
-        add(textField, b, b2, b3);
+        var b4 = new Button("Get selection");
+        b4.addClickListener(e -> {
+            textField.getSelectionRange((start, end, content) -> {
+                Notification.show("Selection: " + start + "-" +end
+                + ": " +content);
+            });
+        });
+
+        var b5 = new Button("Get cursor position");
+        b5.addClickListener(e -> {
+            textField.getCursorPosition(cursorPosition -> {
+                Notification.show("Cursor position: " + cursorPosition);
+            });
+        });
+
+        add(textField, b, b2, b3, b4, b5);
 
 
     }
