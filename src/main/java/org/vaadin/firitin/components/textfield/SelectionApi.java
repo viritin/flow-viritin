@@ -22,4 +22,13 @@ public interface SelectionApi extends HasElement {
         getElement().executeJs("this.inputElement.setSelectionRange($0,$1);",selectionStart,selectionEnd);
     };
 
+    /**
+     * Sets the cursor position to given index.
+     *
+     * @param cursorPosition the cursor position
+     */
+    default void setCursorPosition(int cursorPosition) {
+        setSelectionRange(cursorPosition, cursorPosition);
+    };
+
 }

@@ -40,7 +40,12 @@ public class SelectionApiView extends VVerticalLayout {
             textField.selectAll();
         });
 
-        add(textField, b, b2);
+        var b3 = new Button("Set cursor position 4");
+        b3.addClickListener(e -> {
+            textField.setCursorPosition(4);
+        });
+
+        add(textField, b, b2, b3);
 
 
     }
