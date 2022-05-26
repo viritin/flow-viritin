@@ -44,10 +44,19 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
     private DynamicFileDownloader downloadThatNotifiesWhenReady;
 
     public DynamicFileDownloadingDemo() {
-        
+
         DynamicFileDownloader downloadButton = new DynamicFileDownloader("Download foobar.txt", "foobar.txt",
         outputStream -> {
             try {
+                /**
+                 * Note that the filename in this example is static.
+                 * Also setting filename here wouldn't affect anymore
+                 * as the http headers have already been sent.
+                 * downloadButton.setFileName("too-late.txt");
+                 *
+                 * Check the next example to see how t define the name
+                 * when the actual download is happening.
+                 */
                 outputStream.write("HelloWorld".getBytes());
             } catch (IOException ex) {
                 Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
@@ -66,6 +75,17 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
                 Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
             }
         }) {
+            /**
+             * To define the name of file dynamically for each download,
+             * we need to override this method. It gets called just before
+             * the actual content will be written.
+             *
+             * @param session the vaadin session
+             * @param request the vaadin request
+             * @return the name of the file on the end users computer. In this
+             * example we just prefix "foobar.txt" with timestamp.
+             *
+             */
             @Override
             protected String getFileName(VaadinSession session, VaadinRequest request) {
                 return LocalDateTime.now() + "foobar.txt";
