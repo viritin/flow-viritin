@@ -48,6 +48,7 @@ public abstract class MainLayout extends AppLayout {
 	private Map<Component,String> explicitViewTitles = new WeakHashMap<>();
 
 	public MainLayout() {
+		getElement().getClassList().add("v-applayout");
 	}
 
 	@Override

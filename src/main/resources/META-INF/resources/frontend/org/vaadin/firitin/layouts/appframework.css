@@ -1,19 +1,19 @@
-[slot='drawer'] {
+.v-applayout [slot='drawer'] {
   background-image: linear-gradient(0deg, var(--lumo-shade-5pct), var(--lumo-shade-5pct));
 }
 
-[slot='drawer'] nav a {
+.v-applayout [slot='drawer'] nav a {
   text-decoration: none;
   transition: color 140ms;
 }
 
-[slot='drawer'] nav a vaadin-icon {
+.v-applayout [slot='drawer'] nav a vaadin-icon {
   font-size:small;
   margin-top: calc(var(--lumo-space-xs) * 0.5);
   margin-right: calc(var(--lumo-space-s));
 }
 
-[slot='drawer'] nav a::before {
+.v-applayout [slot='drawer'] nav a::before {
   border-radius: var(--lumo-border-radius);
   bottom: calc(var(--lumo-space-xs) * 0.5);
   content: '';
@@ -24,15 +24,15 @@
   transition: background-color 140ms;
 }
 
-[slot='drawer'] nav a[highlight] {
+.v-applayout [slot='drawer'] nav a[highlight] {
   color: var(--lumo-primary-text-color);
 }
 
-[slot='drawer'] nav a[highlight]::before {
+.v-applayout [slot='drawer'] nav a[highlight]::before {
   background-color: var(--lumo-primary-color-10pct);
 }
 
-[slot='drawer'] footer vaadin-context-menu {
+.v-applayout [slot='drawer'] footer vaadin-context-menu {
   align-items: center;
   display: flex;
 }
