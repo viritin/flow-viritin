@@ -76,11 +76,11 @@ public class VComboBox<T> extends ComboBox<T> implements FluentHasSize<VComboBox
         setPageSize(pageSize);
         return this;
     }
-
-    public VComboBox<T> withCustomValueSetListener(ComponentEventListener<CustomValueSetEvent<ComboBox<T>>> listener) {
-        addCustomValueSetListener(listener);
-        return this;
-    }
+    
+//    public VComboBox<T> withCustomValueSetListener(ComponentEventListener<CustomValueSetEvent<ComboBox<T>>> listener) {
+//        addCustomValueSetListener(listener);
+//        return this;
+//    }
 
     public VComboBox<T> withClearButtonVisible(boolean clearButtonVisible) {
         setClearButtonVisible(clearButtonVisible);

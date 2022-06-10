@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
-import org.jsoup.safety.Whitelist;
+import org.jsoup.safety.Safelist;
 import org.markdown4j.Markdown4jProcessor;
 
 /**
@@ -38,7 +38,7 @@ public class RichText extends Div {
 
     private static final long serialVersionUID = -6926829115110918731L;
 
-    transient private Whitelist whitelist;
+    transient private Safelist whitelist;
     private String richText;
 
     public RichText() {
@@ -89,9 +89,9 @@ public class RichText extends Div {
         return setRichText(text.replaceAll("(\\r|\\n|\\r\\n)+", "<br />"));
     }
 
-    public Whitelist getWhitelist() {
+    public Safelist getWhitelist() {
         if (whitelist == null) {
-            return Whitelist.relaxed();
+            return Safelist.relaxed();
         }
         return whitelist;
     }
@@ -104,7 +104,7 @@ public class RichText extends Div {
      * if you need to support serialiazation
      */
     @Deprecated
-    public RichText setWhitelist(Whitelist whitelist) {
+    public RichText setWhitelist(Safelist whitelist) {
         this.whitelist = whitelist;
         return this;
     }

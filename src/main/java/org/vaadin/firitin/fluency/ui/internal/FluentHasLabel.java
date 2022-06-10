@@ -1,12 +1,17 @@
 package org.vaadin.firitin.fluency.ui.internal;
 
-import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.HasLabel;
 
 @SuppressWarnings("unchecked")
-public interface FluentHasLabel<S extends FluentHasLabel<S>> extends HasElement {
-    void setLabel(String label);
+public interface FluentHasLabel<S extends FluentHasLabel<S>> extends HasLabel {
+    default void setLabel(String label) {
+    
+    };
 
-    String getLabel();
+    default String getLabel() {
+        return "";
+    };
+    
 
     default S withLabel(String label) {
         setLabel(label);
