@@ -31,14 +31,14 @@ import org.markdown4j.Markdown4jProcessor;
  * XSS safe rich text label with either Markdown syntax or raw html (sanitized
  * with Jsoup).
  *
- * By default jsoups Whitelist.relaxed is used for sanitizing. This can be
- * overridden by returning custom whitelist with getWhitelist method.
+ * By default jsoups Safelist.relaxed is used for sanitizing. This can be
+ * overridden by returning custom safelist with getSafelist method.
  */
 public class RichText extends Div {
 
     private static final long serialVersionUID = -6926829115110918731L;
 
-    transient private Safelist whitelist;
+    transient private Safelist safelist;
     private String richText;
 
     public RichText() {
@@ -89,11 +89,20 @@ public class RichText extends Div {
         return setRichText(text.replaceAll("(\\r|\\n|\\r\\n)+", "<br />"));
     }
 
+    /**
+     * 
+     * @return 
+     * @deprecated use getSafelist instead
+     */
     public Safelist getWhitelist() {
-        if (whitelist == null) {
+        return getSafelist();
+    }
+
+    public Safelist getSafelist() {
+        if (safelist == null) {
             return Safelist.relaxed();
         }
-        return whitelist;
+        return safelist;
     }
 
     /**
@@ -104,8 +113,8 @@ public class RichText extends Div {
      * if you need to support serialiazation
      */
     @Deprecated
-    public RichText setWhitelist(Safelist whitelist) {
-        this.whitelist = whitelist;
+    public RichText setSafelist(Safelist whitelist) {
+        this.safelist = whitelist;
         return this;
     }
 
