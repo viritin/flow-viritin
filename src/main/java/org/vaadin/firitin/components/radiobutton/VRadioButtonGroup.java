@@ -9,10 +9,11 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.function.SerializablePredicate;
 import org.vaadin.firitin.fluency.ui.*;
+import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
 public class VRadioButtonGroup<T> extends RadioButtonGroup<T> implements
         FluentHasStyle<VRadioButtonGroup<T>>, FluentComponent<VRadioButtonGroup<T>>, FluentHasValueAndElement<VRadioButtonGroup<T>, ComponentValueChangeEvent<RadioButtonGroup<T>, T>, T>, FluentHasValidation<VRadioButtonGroup<T>>,
-        FluentHasHelper<VRadioButtonGroup<T>> {
+        FluentHasHelper<VRadioButtonGroup<T>>, FluentHasLabel<VRadioButtonGroup<T>> {
 
     public VRadioButtonGroup() {
         super();
