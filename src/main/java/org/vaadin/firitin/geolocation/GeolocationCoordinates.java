@@ -45,7 +45,7 @@ public class GeolocationCoordinates {
     }
 
     /**
-     * @return denotes the direction of travel of the hosting device and is specified in degrees, where 0° ≤ heading < 360°, counting clockwise relative to the true north.
+     * @return denotes the direction of travel of the hosting device and is specified in degrees, where 0° ≤ heading &lt; 360°, counting clockwise relative to the true north.
      */
     public Double getHeading() {
         return heading;
