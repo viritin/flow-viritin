@@ -29,6 +29,21 @@ public class DeleteButton extends ConfirmButton {
         return prompt;
     }
 
+    @Override
+    public DeleteButton withConfirmationPrompt(String confirmationPrompt) {
+        return (DeleteButton) super.withConfirmationPrompt(confirmationPrompt);
+    }
+
+    @Override
+    public DeleteButton withConfirmationDescription(String description) {
+        return (DeleteButton) super.withConfirmationDescription(description);
+    }
+
+    @Override
+    public DeleteButton withConfirmHandler(Command handler) {
+        return (DeleteButton) super.withConfirmHandler(handler);
+    }
+
     public DeleteButton withButttonCaption(String text) {
         setButtonCaption(text);
         return this;
@@ -41,4 +56,12 @@ public class DeleteButton extends ConfirmButton {
     public String getButtonCaption() {
         return getText();
     }
+
+    @Override
+    public DeleteButton onClick(BasicClickListener clickListener) {
+        return (DeleteButton) super.onClick(clickListener);
+    }
+    
+    
+    
 }
