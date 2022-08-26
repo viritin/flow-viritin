@@ -1,6 +1,11 @@
 package org.vaadin.firitin.geolocation;
 
+/**
+ * The data coming from the browser on geolocation requests
+ * @author mstahv
+ */
 public class GeolocationCoordinates {
+    
     private Double latitude;
     private Double longitude;
     private Double accuracy;

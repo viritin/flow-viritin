@@ -5,8 +5,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.DomListenerRegistration;
 
-import java.io.IOException;
-
+/**
+ * A helper class to detect the geographical position of the end users.
+ * 
+ * <p>
+ * This class uses the 
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API">Geolocation API</a> 
+ * in the browser to detect the position of the user. The API mimics the JS 
+ * counterpart.
+ * </p>
+ * <p>
+ * Note that the availability and quality of the position data can vary a lot.
+ * Users can decline the geolocation request in the browser altogether, but 
+ * developers can also affect the settings using GeolocationOptions.
+ * </p>
+ * @author mstahv
+ */
 public class Geolocation {
 
     private static ObjectMapper om = new ObjectMapper();
@@ -25,28 +39,78 @@ public class Geolocation {
         void geolocationError(String browserError);
     }
 
+    /**
+     * Starts to repeatedly watch the geolocation of the device and notifies 
+     * listener with the data.
+     * 
+     * @param listener the listener called on succesful geolocation request
+     * @param errorListener the listener called in case the request failed (e.g. user declined the request in the browser)
+     * @return a Geolocation instance that can be used to cancel requesting the data
+     */
     public static Geolocation watchPosition(UpdateListener listener, ErrorListener errorListener) {
         return watchPosition(listener, errorListener, new GeolocationOptions());
     }
 
+    /**
+     * 
+     * Starts to repeatedly watch the geolocation of the device and notifies 
+     * listener with the data.
+     * 
+     * @param listener the listener called on succesful geolocation request
+     * @param errorListener the listener called in case the request failed (e.g. user declined the request in the browser)
+     * @param options options for the geolocation request
+     * @return a Geolocation instance that can be used to cancel requesting the data
+     */
     public static Geolocation watchPosition(UpdateListener listener, ErrorListener errorListener, GeolocationOptions options) {
         UI ui = UI.getCurrent();
         return watchPosition(ui, listener, errorListener, options);
     }
 
+    /**
+     * Starts to repeatedly watch the geolocation of the device and notifies 
+     * listener with the data.
+     * 
+     * @param ui the UI in which context the geolocation request is to be executed
+     * @param listener the listener called on succesful geolocation request
+     * @param errorListener the listener called in case the request failed (e.g. user declined the request in the browser)
+     * @param options options for the geolocation request
+     * @return a Geolocation instance that can be used to cancel requesting the data
+     */
     public static Geolocation watchPosition(UI ui, UpdateListener listener, ErrorListener errorListener, GeolocationOptions options) {
         return checkPosition(ui,listener,errorListener,options,false);
     }
 
-    public static void getPosition(UpdateListener listener, ErrorListener errorListener, GeolocationOptions options) {
+    /**
+     * Determines the device's current location once and notifies listener with the data.
+     * 
+     * @param listener the listener called on succesful geolocation request
+     * @param errorListener the listener called in case the request failed (e.g. user declined the request in the browser)
+     * @param options options for the geolocation request
+     */
+    public static void getCurrentPosition(UpdateListener listener, ErrorListener errorListener, GeolocationOptions options) {
         checkPosition(UI.getCurrent(), listener, errorListener, options, true);
     }
-    public static void getPosition(UI ui, UpdateListener listener, ErrorListener errorListener, GeolocationOptions options) {
+    
+    /**
+     * Determines the device's current location once and notifies listener with the data.
+     * 
+     * @param ui the UI in which context the geolocation request is to be executed
+     * @param listener the listener called on succesful geolocation request
+     * @param errorListener the listener called in case the request failed (e.g. user declined the request in the browser)
+     * @param options options for the geolocation request
+     */
+    public static void getCurrentPosition(UI ui, UpdateListener listener, ErrorListener errorListener, GeolocationOptions options) {
         checkPosition(ui,listener,errorListener,options, true);
     }
 
-    public static void getPosition(UpdateListener listener, ErrorListener errorListener) {
-        getPosition(listener, errorListener, new GeolocationOptions());
+    /**
+     * Determines the device's current location once and notifies listener with the data.
+     * 
+     * @param listener the listener called on succesful geolocation request
+     * @param errorListener the listener called in case the request failed (e.g. user declined the request in the browser)
+     */
+    public static void getCurrentPosition(UpdateListener listener, ErrorListener errorListener) {
+        getCurrentPosition(listener, errorListener, new GeolocationOptions());
     }
 
     private static Geolocation checkPosition(UI ui, UpdateListener listener, ErrorListener errorListener, GeolocationOptions options, boolean get) {
@@ -128,8 +192,12 @@ public class Geolocation {
         this.id = id;
     }
 
+    /**
+     * Stops polling the listeners with the new geolocation data.
+     */
     public void cancel() {
         ui.getElement().executeJs("navigator.geolocation.clearWatch($1);", id);
+        clearListeners();
     };
 
     private void clearListeners() {
@@ -141,6 +209,7 @@ public class Geolocation {
             geoupdate.remove();
             geoupdate = null;
         }
+        id = null;
     }
 
 }

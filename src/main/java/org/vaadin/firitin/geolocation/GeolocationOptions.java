@@ -4,6 +4,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.io.Serializable;
 
+/**
+ * A class to configure options for geolocation requests.
+ * 
+ * @author mstahv
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GeolocationOptions implements Serializable {
 
