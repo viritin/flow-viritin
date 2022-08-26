@@ -4,7 +4,7 @@
 
     <groupId>in.virit</groupId>
     <artifactId>viritin</artifactId>
-    <version>1.5.1-SNAPSHOT</version>
+    <version>1.5.1</version>
     <name>Flow Viritin</name>
     <packaging>jar</packaging>
     <description>General purpose helpers for Vaadin Flow users.</description>
@@ -29,7 +29,7 @@
         <url>https://github.com/viritin/flow-viritin</url>
         <connection>scm:git:git://github.com/viritin/flow-viritin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:/viritin/flow-viritin.git</developerConnection>
-      <tag>HEAD</tag>
+      <tag>viritin-1.5.1</tag>
   </scm>
 
     <issueManagement>
