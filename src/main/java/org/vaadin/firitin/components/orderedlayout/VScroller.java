@@ -21,6 +21,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.DomListenerRegistration;
@@ -137,9 +138,9 @@ public class VScroller extends Scroller implements
         if (scrollreg == null) {
             scrollreg = getElement().addEventListener("scroll", (DomEvent de) -> {
                 getEventBus().fireEvent(new ScrollEvent(
-                            this, 
-                            (int) de.getEventData().getNumber("event.target.scrollTop"), 
-                            (int) de.getEventData().getNumber("event.target.scrollLeft")
+                        this,
+                        (int) de.getEventData().getNumber("event.target.scrollTop"),
+                        (int) de.getEventData().getNumber("event.target.scrollLeft")
                 ));
             });
             scrollreg.debounce(100); // use reasonable debouncing
@@ -147,6 +148,26 @@ public class VScroller extends Scroller implements
             scrollreg.addEventData("event.target.scrollLeft");
         }
         return addListener(ScrollEvent.class, listener);
+    }
+
+    public void scrollToTop() {
+        setScrollTop(0);
+    }
+
+    public void scrollToBottom() {
+        getElement().executeJs("this.scrollTop = this.scrollHeight");
+    }
+
+    public void setScrollTop(int pixelsFromTop) {
+        getElement().executeJs("this.scrollTop = $0", pixelsFromTop);
+    }
+
+    public void setScrollLeft(int pixelsFromLeft) {
+        getElement().executeJs("this.scrollLeft = $0", pixelsFromLeft);
+    }
+    
+    public void scrollIntoView(Component c) {
+        c.scrollIntoView();
     }
 
 }
