@@ -1,6 +1,7 @@
 package org.vaadin.firitin;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
@@ -12,8 +13,11 @@ import com.vaadin.flow.router.Route;
 import org.vaadin.firitin.fields.internalhtmltable.Table;
 import org.vaadin.firitin.fields.internalhtmltable.TableRow;
 
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Route
 public class HugeGrid extends VerticalLayout {
@@ -46,6 +50,50 @@ public class HugeGrid extends VerticalLayout {
         b.addClickListener(e -> customLayout());
         add(b);
 
+        b = new Button("Cookbook customlayout with components");
+        b.addClickListener(e -> cookbookCustomLayout());
+        add(b);
+
+    }
+
+    private void cookbookCustomLayout() {
+        long currentTimeMillis = System.currentTimeMillis();
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table>");
+        sb.append("<tr>");
+        int cols = dataset.get(0).size();
+        sb.append("<th>");
+        sb.append("Component column ");
+        sb.append("</th>");
+        for(int i = 0; i < cols; i++) {
+            sb.append("<th>");
+            sb.append("Col " + i);
+            sb.append("</th>");
+        }
+        sb.append("</tr>");
+
+        for(int i = 0; i < dataset.size(); i++) {
+            sb.append("<tr>");
+            sb.append("<td location=\"component-"+i+"\"></td>");
+            int finalI = i;
+            List<String> row = dataset.get(i);
+            for(int j = 0; j < cols; j++) {
+                sb.append("<td>");
+                sb.append(row.get(j));
+                sb.append("</td>");
+            }
+            sb.append("</tr>");
+        }
+        sb.append("</table>");
+        CookbookCustomLayout customLayout = new CookbookCustomLayout(sb.toString());
+
+        for(int i = 0 ; i < dataset.size(); i++) {
+            final int finalI = i;
+            customLayout.add( new Button("Hello", e -> Notification.show("This is row" + finalI)), "component-" + i);
+        }
+
+        reportTime(currentTimeMillis);
+        add(customLayout);
     }
 
     private void customLayout() {
@@ -195,6 +243,51 @@ public class HugeGrid extends VerticalLayout {
 
     static class GridUsingTemplate extends LitTemplate {
         public GridUsingTemplate() {
+        }
+    }
+
+
+    public static class CookbookCustomLayout extends Html {
+        private Map<String, Component> locations = new HashMap<>();
+
+        public CookbookCustomLayout(String template) {
+            super(template);
+        }
+
+        public CookbookCustomLayout(InputStream stream) {
+            super(stream);
+        }
+
+        public void add(Component child, String location) {
+            remove(location);
+            locations.put(location, child);
+
+            // Establish parent-child relationship, but leave DOM attaching to us
+            getElement().appendVirtualChild(child.getElement());
+
+            // Attach to the specified location in the actual DOM
+            getElement().executeJs("this.querySelector('[location=\"'+$0+'\"]').appendChild($1)", location,
+                    child.getElement());
+
+            // Ensure the element is removed from the DOM when it's detached
+            child.addDetachListener(detachEvent -> {
+                detachEvent.unregisterListener();
+                getElement().executeJs("this.querySelector && this.querySelector('[location=\"'+$0+'\"]').lastChild.remove()", location);
+
+                // Also clear the bookkeeping
+                locations.remove(location, child);
+            });
+        }
+
+        public void remove(String location) {
+            Component oldChild = locations.remove(location);
+            if (oldChild != null) {
+                remove(oldChild);
+            }
+        }
+
+        public void remove(Component child) {
+            getElement().removeVirtualChild(child.getElement());
         }
     }
 }
