@@ -1,7 +1,7 @@
 package org.vaadin.firitin;
 
+import org.vaadin.firitin.components.CustomLayout;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -12,16 +12,12 @@ import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.treegrid.TreeGrid;
-import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.lumo.Lumo;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.vaadin.firitin.fields.internalhtmltable.Table;
 import org.vaadin.firitin.fields.internalhtmltable.TableRow;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -352,32 +348,6 @@ public class HugeGrid extends VerticalLayout {
         reportTime(currentTimeMillis);
     }
 
-    static class CustomLayout extends Composite<Div> {
-
-        public CustomLayout() {
-        }
-
-        public CustomLayout(String htmlTemplate) {
-            this();
-            setTemplate(htmlTemplate);
-        }
-
-        public void addComponent(String slot, Component c) {
-            // Establish parent-child relationship, but leave DOM attaching to us
-            getElement().appendVirtualChild(c.getElement());
-            getElement().executeJs("document.getElementById(\""+slot+"\").appendChild($0);", c.getElement());
-        }
-
-        public void remove(Component child) {
-            child.getElement().executeJs("this.remove();").then(j -> {
-                getElement().removeVirtualChild(child.getElement());
-            });
-        }
-
-        public void setTemplate(String htmlTemplate) {
-            getElement().setProperty("innerHTML", htmlTemplate);
-        }
-    };
 
     static class GridUsingTemplate extends LitTemplate {
         public GridUsingTemplate() {
