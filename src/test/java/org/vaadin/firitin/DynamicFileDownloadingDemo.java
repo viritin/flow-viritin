@@ -39,6 +39,8 @@ import java.util.logging.Logger;
 @Route
 public class DynamicFileDownloadingDemo extends VerticalLayout {
 
+    private boolean cancelled = false;
+
     private DynamicFileDownloader actaulButtonLikeDownloadButton = null;
 
     private DynamicFileDownloader downloadThatNotifiesWhenReady;
@@ -171,8 +173,33 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
 
         add(actaulButtonLikeDownloadButton);
 
-        Button b = new Button("B");
-        add(b);
+
+        DynamicFileDownloader interruptable = new DynamicFileDownloader("Download foobar.txt (interrupt-able)", "foobar.txt",
+                outputStream -> {
+                    try {
+
+                        for (int i = 0; i < 10; i++) {
+                            if (cancelled) {
+                                throw new RuntimeException("Die");
+                            }
+                            outputStream.write("HelloWorld".getBytes());
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+
+                    } catch (IOException ex) {
+                        Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }).asButton();
+
+        Button b = new Button("Cancel file generation");
+        b.addClickListener( e -> {
+            cancelled = true;
+        });
+        add(interruptable, b);
 
     }
 
