@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import com.vaadin.flow.shared.Registration;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
@@ -50,10 +51,10 @@ public class DynamicFileDownloader extends Anchor implements FluentComponent<Dyn
 
 
     public void setDisableOnClick(boolean disableOnClick) {
-        if(disableOnclick != null) {
+        if (disableOnclick != null) {
             disableOnclick.remove();
         }
-        if(disableOnClick) {
+        if (disableOnClick) {
             disableOnclick = getElement().addEventListener("click", e -> {
                 setEnabled(false);
             });
@@ -94,11 +95,15 @@ public class DynamicFileDownloader extends Anchor implements FluentComponent<Dyn
                 @Override
                 public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) throws IOException {
                     if (request.getPathInfo().endsWith(identifier)) {
-
                         response.setStatus(200);
                         response.setHeader("Content-Disposition", "attachment; filename=\"" + getFileName(session, request) + "\"");
-                        contentWriter.accept(response.getOutputStream());
-                        getUI().ifPresent(ui -> ui.access(()->{
+                        try {
+                            contentWriter.accept(response.getOutputStream());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return true;
+                        }
+                        getUI().ifPresent(ui -> ui.access(() -> {
                             DynamicFileDownloader.this.getEventBus().fireEvent(new DownloadFinishedEvent(DynamicFileDownloader.this, false));
                         }));
                         return true;
@@ -179,7 +184,7 @@ public class DynamicFileDownloader extends Anchor implements FluentComponent<Dyn
      * @return a Button component wrapped inside the file downloader, if configured as a Button
      */
     public Button getButton() {
-        if(button == null) {
+        if (button == null) {
             throw new IllegalStateException("asButton() is not called!");
         }
         return button;

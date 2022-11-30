@@ -154,6 +154,11 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
+                        outputStream.write("HelloWorld".getBytes());
+                        if(true)
+                            throw new RuntimeException("Die");
+                        outputStream.write("HelloWorld".getBytes());
+
                     } catch (IOException ex) {
                         Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
                     }
