@@ -51,8 +51,8 @@ public class PagingGrid<T> extends VGrid<T> {
 
 	private void init() {
 		addSortListener(this.sortListener);
-		setHeightByRows(true);
 		setPageSize(10);
+		setAllRowsVisible(true);
 	}
 
 	public PagingGrid(Class<T> beanType) {

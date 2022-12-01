@@ -21,7 +21,7 @@ public class VRadioButtonGroup<T> extends RadioButtonGroup<T> implements
 
     public VRadioButtonGroup(String label) {
         super();
-        add(new Label(label));
+        setLabel(label);
     }
 
     public VRadioButtonGroup<T> withRenderer(ComponentRenderer<? extends Component, T> renderer) {

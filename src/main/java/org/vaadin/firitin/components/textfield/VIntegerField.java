@@ -46,7 +46,7 @@ public class VIntegerField extends IntegerField implements FluentVaadinTextField
     }
 
     public VIntegerField withHasControls(boolean hasControls) {
-        setHasControls(hasControls);
+        setStepButtonsVisible(hasControls);
         return this;
     }
 
@@ -62,16 +62,6 @@ public class VIntegerField extends IntegerField implements FluentVaadinTextField
 
     public VIntegerField withAutoselect(boolean autoselect) {
         setAutoselect(autoselect);
-        return this;
-    }
-
-    public VIntegerField withPreventInvalidInput(boolean preventInvalidInput) {
-        setPreventInvalidInput(preventInvalidInput);
-        return this;
-    }
-
-    public VIntegerField withPattern(String pattern) {
-        setPattern(pattern);
         return this;
     }
 

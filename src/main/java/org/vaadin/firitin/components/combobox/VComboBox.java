@@ -52,11 +52,6 @@ public class VComboBox<T> extends ComboBox<T> implements FluentHasSize<VComboBox
         return this;
     }
 
-    public VComboBox<T> withPreventInvalidInput(boolean preventInvalidInput) {
-        setPreventInvalidInput(preventInvalidInput);
-        return this;
-    }
-
     public VComboBox<T> withRequired(boolean required) {
         setRequired(required);
         return this;

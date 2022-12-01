@@ -84,7 +84,7 @@ public class VTimePicker extends TimePicker implements FluentHasSize<VTimePicker
     }
 
     public VTimePicker withMinTime(LocalTime min) {
-        setMinTime(min);
+        setMin(min);
         return this;
     }
 
@@ -96,7 +96,7 @@ public class VTimePicker extends TimePicker implements FluentHasSize<VTimePicker
     }
 
     public VTimePicker withMaxTime(LocalTime max) {
-        setMaxTime(max);
+        setMax(max);
         return this;
     }
 

@@ -1,6 +1,6 @@
 package org.vaadin.firitin.testdomain;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 /**
  *

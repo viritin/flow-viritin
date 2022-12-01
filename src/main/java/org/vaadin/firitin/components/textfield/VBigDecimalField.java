@@ -52,16 +52,6 @@ public class VBigDecimalField extends BigDecimalField implements FluentVaadinTex
         return this;
     }
 
-    public VBigDecimalField withPreventInvalidInput(boolean preventInvalidInput) {
-        setPreventInvalidInput(preventInvalidInput);
-        return this;
-    }
-
-    public VBigDecimalField withPattern(String pattern) {
-        setPattern(pattern);
-        return this;
-    }
-
     public VBigDecimalField withTitle(String title) {
         setTitle(title);
         return this;

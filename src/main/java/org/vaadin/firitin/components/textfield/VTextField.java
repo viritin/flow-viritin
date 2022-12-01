@@ -100,11 +100,6 @@ public class VTextField extends TextField implements FluentVaadinTextField<VText
         return this;
     }
 
-    public VTextField withPreventInvalidInput(boolean preventInvalidInput) {
-        setPreventInvalidInput(preventInvalidInput);
-        return this;
-    }
-
     public VTextField withTitle(String title) {
         setTitle(title);
         return this;

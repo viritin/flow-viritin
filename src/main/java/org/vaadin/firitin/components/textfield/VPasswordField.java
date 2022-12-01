@@ -61,11 +61,6 @@ public class VPasswordField extends PasswordField implements FluentVaadinTextFie
     }
 
 
-    public VPasswordField withPreventInvalidInput(boolean preventInvalidInput) {
-        setPreventInvalidInput(preventInvalidInput);
-        return this;
-    }
-
     public VPasswordField withPattern(String pattern) {
         setPattern(pattern);
         return this;

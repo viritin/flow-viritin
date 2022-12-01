@@ -54,11 +54,6 @@ public class VNumberField extends NumberField implements FluentVaadinTextField<V
         return this;
     }
 
-    public VNumberField withHasControls(boolean hasControls) {
-        setHasControls(hasControls);
-        return this;
-    }
-
     public VNumberField withAutofocus(boolean autofocus) {
         setAutofocus(autofocus);
         return this;
@@ -66,31 +61,6 @@ public class VNumberField extends NumberField implements FluentVaadinTextField<V
 
     public VNumberField withRequired(boolean required) {
         setRequired(required);
-        return this;
-    }
-
-    @Deprecated
-    public VNumberField withMaxLength(int maxLength) {
-        setMaxLength(maxLength);
-        return this;
-    }
-
-
-    @Deprecated
-    public VNumberField withMinLength(int minLength) {
-        setMinLength(minLength);
-        return this;
-    }
-
-    @Deprecated
-    public VNumberField withPreventInvalidInput(boolean preventInvalidInput) {
-        setPreventInvalidInput(preventInvalidInput);
-        return this;
-    }
-
-    @Deprecated
-    public VNumberField withPattern(String pattern) {
-        setPattern(pattern);
         return this;
     }
 

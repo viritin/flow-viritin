@@ -53,16 +53,10 @@ public class VEmailField extends EmailField implements FluentVaadinTextField<VEm
         return this;
     }
 
-    public VEmailField withPreventInvalidInput(boolean preventInvalidInput) {
-        setPreventInvalidInput(preventInvalidInput);
-        return this;
-    }
-
     public VEmailField withPattern(String pattern) {
         setPattern(pattern);
         return this;
     }
-
 
     public VEmailField withTitle(String title) {
         setTitle(title);
