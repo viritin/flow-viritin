@@ -32,7 +32,7 @@ import org.vaadin.firitin.fields.LocalDateTimeField;
 public class PersonForm extends AbstractForm<Person> {
 
     private TextField firstName = new VTextField();
-    private TextField lastName = new VTextField();
+    private TextField lastName = new VTextField().withTooltip("You should type last name here");
     private VDateTimePicker joinTime = new VDateTimePicker();
 
     public static class AddressEditor {

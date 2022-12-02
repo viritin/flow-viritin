@@ -7,8 +7,9 @@ import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentHasComponents;
 import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 import org.vaadin.firitin.fluency.ui.FluentHasTheme;
+import org.vaadin.firitin.fluency.ui.FluentHasTooltip;
 
-public class VTab extends Tab implements FluentComponent<VTab>, FluentHasStyle<VTab>, FluentHasComponents<VTab>, FluentHasTheme<VTab> {
+public class VTab extends Tab implements FluentComponent<VTab>, FluentHasStyle<VTab>, FluentHasComponents<VTab>, FluentHasTheme<VTab>, FluentHasTooltip<VTab> {
 
     public VTab() {
         super();

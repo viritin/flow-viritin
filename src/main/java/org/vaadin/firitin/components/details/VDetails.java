@@ -7,8 +7,9 @@ import com.vaadin.flow.component.details.DetailsVariant;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentHasEnabled;
 import org.vaadin.firitin.fluency.ui.FluentHasTheme;
+import org.vaadin.firitin.fluency.ui.FluentHasTooltip;
 
-public class VDetails extends Details implements FluentComponent<VDetails>, FluentHasEnabled<VDetails>, FluentHasTheme<VDetails> {
+public class VDetails extends Details implements FluentComponent<VDetails>, FluentHasEnabled<VDetails>, FluentHasTheme<VDetails>, FluentHasTooltip<VDetails> {
 
     public VDetails() {
     }

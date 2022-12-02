@@ -15,7 +15,7 @@ import static org.vaadin.firitin.util.VStyleUtil.applyOrElse;
 
 public class VButton extends Button implements FluentHasSize<VButton>, FluentHasEnabled<VButton>,
         FluentClickNotifier<Button, VButton>, FluentHasText<VButton>, FluentFocusable<Button, VButton>,
-        FluentComponent<VButton>, FluentHasStyle<VButton>, FluentThemableLayout<VButton> {
+        FluentComponent<VButton>, FluentHasStyle<VButton>, FluentThemableLayout<VButton>, FluentHasTooltip<VButton> {
 
     private ButtonSize size;
     private ButtonType type;

@@ -10,7 +10,7 @@ public class VCheckBox extends Checkbox implements FluentHasSize<VCheckBox>, Flu
         FluentClickNotifier<Checkbox, VCheckBox>, FluentHasEnabled<VCheckBox>, FluentComponent<VCheckBox>,
         FluentHasLabel<VCheckBox>, FluentHasAutofocus<VCheckBox>, FluentHasStyle<VCheckBox>,
         FluentHasValueAndElement<VCheckBox, ComponentValueChangeEvent<Checkbox, Boolean>, Boolean>,
-        FluentHasHelper<VCheckBox> {
+        FluentHasHelper<VCheckBox>, FluentHasTooltip<VCheckBox> {
 
     public VCheckBox() {
         super();
