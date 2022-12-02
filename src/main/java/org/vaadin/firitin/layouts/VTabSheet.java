@@ -1,20 +1,16 @@
 package org.vaadin.firitin.layouts;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import org.vaadin.firitin.util.VStyleUtil;
-import org.vaadin.firitin.util.VStyleUtil.FlexDirection;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ClientCallable;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.tabs.TabSheet;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.DomListenerRegistration;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.component.tabs.Tabs.Orientation;
-import com.vaadin.flow.component.tabs.Tabs.SelectedChangeEvent;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -26,91 +22,131 @@ import com.vaadin.flow.shared.Registration;
  * @author mmerruko
  *
  */
-public class VTabSheet extends Composite<FlexLayout> {
-    private Tabs tabs = new Tabs();
+public class VTabSheet extends TabSheet {
 
-    private Map<Tab, Component> components = new LinkedHashMap<>();
+    private DomListenerRegistration scrollreg;
 
-    private FlexLayout content = new FlexLayout();
+    public static class ScrollToEndEvent extends ComponentEvent<VTabSheet> {
+
+        /**
+         * Creates a new event using the given source and indicator whether the
+         * event originated from the client side or the server side.
+         *
+         * @param source the source component
+         */
+        ScrollToEndEvent(VTabSheet source) {
+            super(source, true);
+        }
+    }
+
+    public static class ScrollEvent extends ComponentEvent<VTabSheet> {
+
+        private final int scrollTop;
+        private final int scrollLeft;
+
+        /**
+         * Creates a new event using the given source and indicator whether the
+         * event originated from the client side or the server side.
+         *
+         * @param source the source component
+         */
+        ScrollEvent(VTabSheet source, String details) {
+            super(source, true);
+            String[] split = details.split(",");
+            this.scrollTop = Integer.parseInt(split[0]);
+            this.scrollLeft = Integer.parseInt(split[1]);
+        }
+
+        public int getScrollLeft() {
+            return scrollLeft;
+        }
+
+        public int getScrollTop() {
+            return scrollTop;
+        }
+
+    }
 
     public VTabSheet() {
-        getContent().add(tabs);
-        getContent().add(content);
-        getContent().setWidth("100%");
-
-        VStyleUtil.setFlexDirection(getContent(), FlexDirection.COLUMN);
-        VStyleUtil.setFlexShrink(0, tabs);
-        getContent().setFlexGrow(1, content);
-
-        tabs.addSelectedChangeListener(this::onTabChanged);
-    }
-
-    public Registration addSelectedChangeListener(ComponentEventListener<SelectedChangeEvent> listener) {
-        return tabs.addSelectedChangeListener(listener);
-    }
-
-    public int getSelectedIndex() {
-        return tabs.getSelectedIndex();
-    }
-
-    public void setSelectedIndex(int selectedIndex) {
-        tabs.setSelectedIndex(selectedIndex);
-    }
-
-    public Tab getSelectedTab() {
-        return tabs.getSelectedTab();
-    }
-
-    public void setSelectedTab(Tab selectedTab) {
-        tabs.setSelectedTab(selectedTab);
     }
 
     public Tab addTab(String caption, Component component) {
-        Tab tab = new Tab(caption);
-        tabs.add(tab);
-
-        if (components.isEmpty()) {
-            content.add(component);
-        }
-        components.put(tab, component);
-
-        return tab;
+        return add(caption, component);
     }
 
     public void removeTab(Tab tab) {
-        if (tabs.getSelectedTab() == tab) {
-            int index = tabs.getSelectedIndex();
-            if (index - 1 >= 0) {
-                tabs.setSelectedIndex(index - 1);
-            } else {
-                tabs.setSelectedIndex(0);
-            }
+        remove(tab);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        getElement().executeJs(
+                "var self = this;var el = this.shadowRoot.querySelector(\"vaadin-tabsheet-scroller\");\n"
+                        + "    el.addEventListener(\"scroll\", function(e) {\n"
+                        + "        if(el.scrollTop + el.clientHeight == el.scrollHeight) {\n"
+                        + "            self.$server.onScrollToEnd();\n"
+                        + "        }\n"
+                        + "    });\n"
+        );
+    }
+
+    @ClientCallable
+    private void onScrollToEnd() {
+        getEventBus().fireEvent(new ScrollToEndEvent(this));
+    }
+
+    /**
+     * Adds a listener that is called when a users scrolls the component to the
+     * end of its scrollable area.
+     *
+     * @param listener the listener
+     * @return the {@link Registration} you can use to remove this listener.
+     */
+    public Registration addScrollToEndListener(ComponentEventListener<ScrollToEndEvent> listener) {
+        return addListener(ScrollToEndEvent.class, listener);
+    }
+
+    public Registration addScrollListener(ComponentEventListener<ScrollEvent> listener) {
+        if (scrollreg == null) {
+            getElement().executeJs("" +
+                    "var el = this;" +
+                    "this.shadowRoot.querySelector(\"vaadin-tabsheet-scroller\")" +
+                    ".addEventListener('scroll', e => {" +
+                    "const event = new CustomEvent('myscroll', { detail: e.target.scrollTop + ',' + e.target.scrollLeft });\n" +
+                    "el.dispatchEvent(event);" +
+                    "})");
+            scrollreg = getElement().addEventListener("myscroll", (DomEvent de) -> {
+                getEventBus().fireEvent(new ScrollEvent(
+                        this,
+                        (String) de.getEventData().getString("event.detail")
+                ));
+            });
+            scrollreg.debounce(100); // use reasonable debouncing
+            scrollreg.addEventData("event.detail");
         }
-        tabs.remove(tab);
-        Optional.ofNullable(components.get(tab)).ifPresent(content::remove);
+        return addListener(ScrollEvent.class, listener);
     }
 
-    public Orientation getOrientation() {
-        return tabs.getOrientation();
+    public void scrollToTop() {
+        setScrollTop(0);
     }
 
-    public void setOrientation(Orientation orientation) {
-        tabs.setOrientation(orientation);
-        if (orientation == Orientation.HORIZONTAL) {
-            VStyleUtil.setFlexDirection(getContent(), FlexDirection.COLUMN);
-        } else {
-            VStyleUtil.setFlexDirection(getContent(), FlexDirection.ROW);
-        }
+    public void scrollToBottom() {
+        getElement().executeJs("this.scrollTop = this.scrollHeight");
     }
 
-    public void setFlexGrowForEnclosedTabs(double flexGrow) {
-        tabs.setFlexGrowForEnclosedTabs(flexGrow);
+    public void setScrollTop(int pixelsFromTop) {
+        getElement().executeJs("this.scrollTop = $0", pixelsFromTop);
     }
 
-    private void onTabChanged(SelectedChangeEvent e) {
-        Tab selectedTab = e.getSource().getSelectedTab();
-        content.removeAll();
-
-        Optional.ofNullable(components.get(selectedTab)).ifPresent(content::add);
+    public void setScrollLeft(int pixelsFromLeft) {
+        getElement().executeJs("this.scrollLeft = $0", pixelsFromLeft);
     }
+
+    public void scrollIntoView(Component c) {
+        c.scrollIntoView();
+    }
+
+
 }
