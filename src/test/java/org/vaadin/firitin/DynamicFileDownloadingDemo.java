@@ -173,7 +173,6 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
 
         add(actaulButtonLikeDownloadButton);
 
-
         DynamicFileDownloader interruptable = new DynamicFileDownloader("Download foobar.txt (interrupt-able)", "foobar.txt",
                 outputStream -> {
                     try {
@@ -201,6 +200,11 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
         });
         add(interruptable, b);
 
+        DynamicFileDownloader withError = new DynamicFileDownloader("Download that fails", "foobar.txt",
+                outputStream -> {
+                    throw new RuntimeException("Fail!");
+                }).asButton();
+        add(withError);
     }
 
 

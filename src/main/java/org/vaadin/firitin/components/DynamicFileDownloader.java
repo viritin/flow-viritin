@@ -100,6 +100,11 @@ public class DynamicFileDownloader extends Anchor implements FluentComponent<Dyn
                         try {
                             contentWriter.accept(response.getOutputStream());
                         } catch (Exception e) {
+                            try {
+                                response.setStatus(500);
+                            } catch (Exception e2) {
+                                // most likely header already sent
+                            }
                             e.printStackTrace();
                             return true;
                         }
