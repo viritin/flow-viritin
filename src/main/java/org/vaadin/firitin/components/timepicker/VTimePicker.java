@@ -66,7 +66,7 @@ public class VTimePicker extends TimePicker implements FluentHasSize<VTimePicker
         return this;
     }
 
-    public VTimePicker withInvalidChangeListener(ComponentEventListener<InvalidChangeEvent> listener) {
+    public VTimePicker withInvalidChangeListener(ComponentEventListener<InvalidChangeEvent<TimePicker>> listener) {
         addInvalidChangeListener(listener);
         return this;
     }

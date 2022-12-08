@@ -43,7 +43,7 @@ public class VSplitLayout extends SplitLayout implements FluentComponent<VSplitL
         return this;
     }
 
-    public VSplitLayout withSplitterDragendListener(ComponentEventListener<SplitterDragendEvent> listener) {
+    public VSplitLayout withSplitterDragendListener(ComponentEventListener<SplitterDragendEvent<SplitLayout>> listener) {
         addSplitterDragendListener(listener);
         return this;
     }

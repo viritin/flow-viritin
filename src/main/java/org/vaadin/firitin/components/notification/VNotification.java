@@ -62,7 +62,7 @@ public class VNotification extends Notification implements FluentComponent<VNoti
         return this;
     }
 
-    public VNotification withOpenedChangeListener(ComponentEventListener<OpenedChangeEvent> listener) {
+    public VNotification withOpenedChangeListener(ComponentEventListener<OpenedChangeEvent<Notification>> listener) {
         addOpenedChangeListener(listener);
         return this;
     }
