@@ -13,7 +13,7 @@ import java.util.Collection;
 
 @SuppressWarnings("unchecked")
 public class VComboBox<T> extends ComboBox<T> implements FluentHasSize<VComboBox<T>>, FluentHasValidation<VComboBox<T>>, FluentFocusable<ComboBox<T>, VComboBox<T>>,
-        FluentComponent<VComboBox<T>>, FluentHasLabel<VComboBox<T>>, FluentHasAutofocus<VComboBox<T>>,
+        FluentComponent<VComboBox<T>>, FluentHasLabel<VComboBox<T>>, FluentHasAutofocus<VComboBox<T>>, FluentHasTooltip<VComboBox<T>>,
         FluentHasStyle<VComboBox<T>>, FluentHasValueAndElement<VComboBox<T>, ComponentValueChangeEvent<ComboBox<T>, T>, T>, FluentHasHelper<VComboBox<T>> {
 
     public VComboBox() {

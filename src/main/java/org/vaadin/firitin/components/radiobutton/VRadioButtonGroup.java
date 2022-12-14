@@ -13,7 +13,7 @@ import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
 public class VRadioButtonGroup<T> extends RadioButtonGroup<T> implements
         FluentHasStyle<VRadioButtonGroup<T>>, FluentComponent<VRadioButtonGroup<T>>, FluentHasValueAndElement<VRadioButtonGroup<T>, ComponentValueChangeEvent<RadioButtonGroup<T>, T>, T>, FluentHasValidation<VRadioButtonGroup<T>>,
-        FluentHasHelper<VRadioButtonGroup<T>>, FluentHasLabel<VRadioButtonGroup<T>> {
+        FluentHasHelper<VRadioButtonGroup<T>>, FluentHasLabel<VRadioButtonGroup<T>>, FluentHasTooltip<VRadioButtonGroup<T>> {
 
     public VRadioButtonGroup() {
         super();

@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 public class VSelect<T> extends Select<T> implements
         FluentHasComponents<VSelect<T>>, FluentHasSize<VSelect<T>>, FluentHasValidation<VSelect<T>>,
         FluentHasStyle<VSelect<T>>, FluentFocusable<Select<T>, VSelect<T>>, FluentHasValueAndElement<VSelect<T>, AbstractField.ComponentValueChangeEvent<Select<T>, T>, T>, FluentHasLabel<VSelect<T>>,
-        FluentHasHelper<VSelect<T>> {
+        FluentHasHelper<VSelect<T>>, FluentHasTooltip<VSelect<T>> {
 
     public VSelect() {
         super();

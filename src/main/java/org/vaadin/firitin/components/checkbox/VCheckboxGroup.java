@@ -18,7 +18,8 @@ public class VCheckboxGroup<T> extends CheckboxGroup<T> implements
         FluentComponent<VCheckboxGroup<T>>, FluentHasStyle<VCheckboxGroup<T>>,
         FluentHasValueAndElement<VCheckboxGroup<T>, ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>, Set<T>>,
         FluentHasSize<VCheckboxGroup<T>>, FluentHasValidation<VCheckboxGroup<T>>,
-        FluentHasLabel<VCheckboxGroup<T>>, FluentHasHelper<VCheckboxGroup<T>> {
+        FluentHasLabel<VCheckboxGroup<T>>, FluentHasHelper<VCheckboxGroup<T>>,
+        FluentHasTooltip<VCheckBox> {
 
     public VCheckboxGroup<T> withDataProvider(DataProvider<T, ?> dataProvider) {
         setDataProvider(dataProvider);

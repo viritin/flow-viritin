@@ -21,7 +21,7 @@ import static java.util.stream.Collectors.toList;
 public class VDatePicker extends DatePicker implements FluentHasSize<VDatePicker>, FluentHasValidation<VDatePicker>,
         FluentHasStyle<VDatePicker>, FluentFocusable<DatePicker, VDatePicker>, FluentComponent<VDatePicker>,
         FluentThemableLayout<VDateTimePicker>, FluentHasValueAndElement<VDatePicker, AbstractField.ComponentValueChangeEvent<DatePicker, LocalDate>, LocalDate>,
-        FluentHasHelper<VDatePicker> {
+        FluentHasHelper<VDatePicker>, FluentHasTooltip<VDatePicker> {
 
     public VDatePicker() {
         super();

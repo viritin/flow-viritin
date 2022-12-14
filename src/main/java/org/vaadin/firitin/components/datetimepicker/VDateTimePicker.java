@@ -23,7 +23,7 @@ import static java.util.stream.Collectors.toList;
 public class VDateTimePicker extends DateTimePicker implements FluentHasSize<VDateTimePicker>, FluentHasValidation<VDateTimePicker>,
         FluentHasStyle<VDateTimePicker>, FluentFocusable<DateTimePicker, VDateTimePicker>, FluentComponent<VDateTimePicker>,
         FluentThemableLayout<VDateTimePicker>, FluentHasValueAndElement<VDateTimePicker, AbstractField.ComponentValueChangeEvent<DateTimePicker, LocalDateTime>, LocalDateTime>,
-        FluentHasHelper<VDateTimePicker> {
+        FluentHasHelper<VDateTimePicker>, FluentHasTooltip<VDateTimePicker> {
 
     public VDateTimePicker() {
         super();
