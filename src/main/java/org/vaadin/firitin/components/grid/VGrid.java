@@ -3,11 +3,13 @@ package org.vaadin.firitin.components.grid;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import org.vaadin.firitin.fluency.ui.*;
 
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public class VGrid<T> extends Grid<T>
@@ -66,5 +68,32 @@ public class VGrid<T> extends Grid<T>
     public VGrid<T> withItems(T... items) {
         setItems(items);
         return this;
+    }
+
+    /**
+     * Scrolls to the row presenting the given item.
+     * 
+     * @param item the item to scroll to
+     * @deprecated Note, with lazy loaded content, calling this method
+     * may cause performance issues
+     */
+    @Deprecated
+    public void scrollItem(T item) {
+        int index;
+        Stream<T> items;
+        try {
+            items = getListDataView().getItems();
+        } catch (IllegalStateException exception) {
+            // lazy loaded, this might be slow
+            // TODO, figure out if we could optimze this
+            // for the rows that happen to be already in
+            // the viewport
+            items = getGenericDataView().getItems();
+        }
+        AtomicInteger i = new AtomicInteger(); // any mutable integer wrapper
+        index = items.peek(v -> i.incrementAndGet())
+                .anyMatch(itm -> itm.equals(item)) ?
+                i.get() - 1 : -1;
+        scrollToIndex(index);
     }
 }
