@@ -11,6 +11,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.shared.Registration;
 import org.vaadin.firitin.components.button.VButton;
@@ -49,6 +50,7 @@ public class MultiDateTimeField extends Composite<VerticalLayout>
 
         next.setWidth("260px");
         next.setLabel("Add new date (+)");
+        Tooltip tooltip = next.setTooltipText("Be sure to click the + button to add the new date to selection.");
         addEntry.getElement().setAttribute("title", "Click to add new date(s) to selection");
         HorizontalLayout newRowForm = new VHorizontalLayout(
                 next, repeat,
