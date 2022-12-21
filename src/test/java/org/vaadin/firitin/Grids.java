@@ -15,21 +15,13 @@
  */
 package org.vaadin.firitin;
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.provider.CallbackDataProvider;
-import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
 import org.vaadin.firitin.components.grid.VGrid;
 import org.vaadin.firitin.testdomain.Person;
 import org.vaadin.firitin.testdomain.Service;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  *
@@ -48,7 +40,7 @@ public class Grids extends VerticalLayout {
 
         grid.setItems(list);
 
-        grid.scrollItem(somePerson);
+        grid.scrollToItem(somePerson);
         add(grid);
 
         VGrid<Person> lazyLoaded = new VGrid<>(Person.class);
@@ -58,7 +50,7 @@ public class Grids extends VerticalLayout {
                 Math.min(list.size(), query.getOffset() + query.getLimit())
         ).stream());
 
-        lazyLoaded.scrollItem(somePerson);
+        lazyLoaded.scrollToItem(somePerson);
         add(lazyLoaded);
 
     }

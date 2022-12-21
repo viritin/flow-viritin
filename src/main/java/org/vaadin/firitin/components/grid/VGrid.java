@@ -3,7 +3,6 @@ package org.vaadin.firitin.components.grid;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import org.vaadin.firitin.fluency.ui.*;
@@ -72,13 +71,13 @@ public class VGrid<T> extends Grid<T>
 
     /**
      * Scrolls to the row presenting the given item.
-     * 
+     *
      * @param item the item to scroll to
      * @deprecated Note, with lazy loaded content, calling this method
      * may cause performance issues
      */
     @Deprecated
-    public void scrollItem(T item) {
+    public void scrollToItem(T item) {
         int index;
         Stream<T> items;
         try {
