@@ -48,8 +48,8 @@ public class Grids extends VerticalLayout {
 
         grid.setItems(list);
 
-        //grid.scrollItem(somePerson);
-        //add(grid);
+        grid.scrollItem(somePerson);
+        add(grid);
 
         VGrid<Person> lazyLoaded = new VGrid<>(Person.class);
         lazyLoaded.setItems(query ->
