@@ -19,6 +19,9 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.html.Div;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * A replacement for V7/8 era custom layout component for which one can
  * provide a template dynamically and still place Vaadin components into
@@ -32,7 +35,21 @@ import com.vaadin.flow.component.html.Div;
  */
 public class CustomLayout extends Composite<Div> {
 
+    Map<String,Component> slotToComponent = new HashMap<>();
+
     public CustomLayout() {
+        this.getElement().getNode().runWhenAttached((ui) -> {
+            ui.beforeClientResponse(this, (context) -> {
+                attachComponents();
+            });
+        });
+    }
+
+    private void attachComponents() {
+        slotToComponent.forEach((slotId, c) -> {
+            getElement().executeJs("document.getElementById(\"" + slotId + "\").appendChild($0);", c.getElement());
+        });
+        slotToComponent.clear();
     }
 
     /**
@@ -56,7 +73,7 @@ public class CustomLayout extends Composite<Div> {
     public void addComponent(String slotId, Component c) {
         // Establish parent-child relationship, but leave DOM attaching to us
         getElement().appendVirtualChild(c.getElement());
-        getElement().executeJs("document.getElementById(\"" + slotId + "\").appendChild($0);", c.getElement());
+        slotToComponent.put(slotId,c);
     }
 
     public void remove(Component child) {
@@ -72,7 +89,7 @@ public class CustomLayout extends Composite<Div> {
      * @param htmlTemplate the html template.
      */
     public void setTemplate(String htmlTemplate) {
-        getElement().setProperty("innerHTML", htmlTemplate);
+        getElement().executeJs("this.innerHTML = $0", htmlTemplate);
     }
     
 }
