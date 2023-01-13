@@ -16,17 +16,19 @@
 package org.vaadin.firitin.components;
 
 import com.vaadin.flow.component.html.Div;
+
 import java.io.IOException;
 import java.io.InputStream;
+
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.markdown4j.Markdown4jProcessor;
 
 /**
- *
  * @author mstahv
  */
+
 /**
  * XSS safe rich text label with either Markdown syntax or raw html (sanitized
  * with Jsoup).
@@ -90,7 +92,7 @@ public class RichText extends Div {
     }
 
     /**
-     * 
+     *
      * @return the safelist
      * @deprecated use getSafelist instead
      */
@@ -118,12 +120,25 @@ public class RichText extends Div {
         return this;
     }
 
+    /**
+     * Return the richt text set using setRichTextAndSaveReference method.
+     * Normally reference to the content is not saved to save server memory.
+     *
+     * @return the rich text set to this content, if available
+     * @deprecated might return null if text not set with setRichTextAndSaveReference method.
+     */
     @Override
+    @Deprecated
     public String getText() {
         return richText;
     }
 
     public RichText setRichText(String text) {
+        getElement().executeJs("this.innerHTML = $0", Jsoup.clean(text, getWhitelist()));
+        return this;
+    }
+
+    public RichText setRichTextAndSaveReference(String text) {
         this.richText = text;
         getElement().setProperty("innerHTML", Jsoup.clean(richText, getWhitelist()));
         return this;
