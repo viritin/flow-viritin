@@ -26,7 +26,6 @@ import com.vaadin.flow.router.Route;
 import java.time.LocalDateTime;
 import java.util.Locale;
 
-import org.vaadin.firitin.fields.LocalDateTimeField;
 
 @Route
 public class PersonForm extends AbstractForm<Person> {

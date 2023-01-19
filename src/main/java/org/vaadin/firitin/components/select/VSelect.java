@@ -29,8 +29,9 @@ public class VSelect<T> extends Select<T> implements
     }
 
     public VSelect(String label, T... items) {
-        super(items);
+        super();
         setLabel(label);
+        setItems(items);
     }
 
     public VSelect(String label) {

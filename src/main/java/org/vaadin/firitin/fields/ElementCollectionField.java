@@ -83,6 +83,7 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
         cell.add(new VButton(VaadinIcon.TRASH.create(), event -> {
             value.remove(item);
             row.getParent().ifPresent(p -> ((Table) p).removeRows(row));
+            fireValueChange();
         }));
     }
     private void fireValueChange() {

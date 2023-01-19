@@ -111,9 +111,9 @@ public class Person {
 
     @Override
     public String toString() {
-        return "Person [id=" + id + ", name=" + firstName + " " + lastName + ", age=" + age + ", addresses=" + addresses
-                + ", groups=" + groups + "]";
+        return "Person{" + "id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", age=" + age + ", joinTime=" + joinTime + ", addresses=" + addresses + ", groups=" + groups + '}';
     }
+    
 
     @Override
     public boolean equals(Object obj) {

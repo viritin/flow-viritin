@@ -7,7 +7,7 @@ import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
 public abstract class VCustomField<T> extends CustomField<T> implements FluentHasSize<VCustomField<T>>,
         FluentHasValidation<VCustomField<T>>,
-        FluentFocusable<CustomField, VCustomField<T>>, FluentHasValueAndElement<VCustomField<T>, ComponentValueChangeEvent<CustomField<T>, T>, T>,
+        FluentFocusable<CustomField<T>, VCustomField<T>>, FluentHasValueAndElement<VCustomField<T>, ComponentValueChangeEvent<CustomField<T>, T>, T>,
         FluentComponent<VCustomField<T>>, FluentHasLabel<VCustomField<T>>, FluentHasHelper<VCustomField<T>>, FluentHasTooltip<VCustomField<T>> {
 
     public VCustomField() {

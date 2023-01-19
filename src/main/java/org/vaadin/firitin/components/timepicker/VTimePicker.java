@@ -66,7 +66,7 @@ public class VTimePicker extends TimePicker implements FluentHasSize<VTimePicker
         return this;
     }
 
-    public VTimePicker withInvalidChangeListener(ComponentEventListener<InvalidChangeEvent<TimePicker>> listener) {
+    public VTimePicker withInvalidChangeListener(ComponentEventListener<InvalidChangeEvent> listener) {
         addInvalidChangeListener(listener);
         return this;
     }
@@ -77,21 +77,8 @@ public class VTimePicker extends TimePicker implements FluentHasSize<VTimePicker
         return this;
     }
 
-    @Deprecated
-    public VTimePicker withMin(String min) {
-        setMin(min);
-        return this;
-    }
-
     public VTimePicker withMinTime(LocalTime min) {
         setMin(min);
-        return this;
-    }
-
-
-    @Deprecated
-    public VTimePicker withMax(String max) {
-        setMax(max);
         return this;
     }
 

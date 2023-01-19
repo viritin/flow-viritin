@@ -24,7 +24,7 @@ public class VDialog extends Dialog implements FluentComponent<VDialog>, FluentH
         return this;
     }
 
-    public VDialog withOpenedChangeListener(ComponentEventListener<OpenedChangeEvent<Dialog>> listener) {
+    public VDialog withOpenedChangeListener(ComponentEventListener<OpenedChangeEvent> listener) {
         addOpenedChangeListener(listener);
         return this;
     }

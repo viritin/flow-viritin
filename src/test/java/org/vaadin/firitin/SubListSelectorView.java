@@ -23,7 +23,8 @@ public class SubListSelectorView extends VFormLayout {
         List<Person> personList = listOfPersons.subList(3, 7);
 
         SubListSelector<Person> persons = new SubListSelector<>(Person.class);
-
+        persons.setItemLabelGenerator(p -> p.getFirstName() + " " + p.getLastName());
+        
         persons.setAvailableOptions(listOfPersons);
         persons.setValue(personList);
 
