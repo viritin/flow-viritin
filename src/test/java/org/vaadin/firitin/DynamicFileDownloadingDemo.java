@@ -202,8 +202,12 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
 
         DynamicFileDownloader withError = new DynamicFileDownloader("Download that fails", "foobar.txt",
                 outputStream -> {
-                    throw new RuntimeException("Fail!");
+                    throw new RuntimeException("Fail on purpose!");
                 }).asButton();
+        
+        withError.addDownloadFailedListener(e -> {
+            Notification.show(e.getException().getMessage() +" Note, file may have been generated on some browsers. Chrome should not do it.");
+        });
         add(withError);
     }
 

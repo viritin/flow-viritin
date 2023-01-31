@@ -30,9 +30,7 @@ import com.vaadin.flow.server.VaadinSession;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 import com.vaadin.flow.shared.Registration;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
@@ -73,12 +71,35 @@ public class DynamicFileDownloader extends Anchor implements FluentComponent<Dyn
         public DownloadFinishedEvent(DynamicFileDownloader source, boolean fromClient) {
             super(source, fromClient);
         }
+
     }
+    
+    public static class DownlocadFailedEvent extends ComponentEvent<DynamicFileDownloader> {
+        
+        private final Exception exception;
+
+        /**
+         * Creates a new event using the given source and indicator whether the
+         * event originated from the client side or the server side.
+         *
+         * @param source     the source component
+         * @param fromClient <code>true</code> if the event originated from the client
+         */
+        public DownlocadFailedEvent(DynamicFileDownloader source, Exception e) {
+            super(source, false);
+            this.exception = e;
+        }
+
+        public Exception getException() {
+            return exception;
+        }
+        
+    }
+
 
     private final String identifier = UUID.randomUUID().toString();
     private String fileName;
     private SerializableConsumer<OutputStream> contentWriter;
-    private List<Runnable> downloadFinishedListener;
     protected RequestHandler requestHandler;
 
     public DynamicFileDownloader(String text, String fileName, SerializableConsumer<OutputStream> contentWriter) {
@@ -105,6 +126,9 @@ public class DynamicFileDownloader extends Anchor implements FluentComponent<Dyn
                             } catch (Exception e2) {
                                 // most likely header already sent
                             }
+                            getUI().ifPresent(ui -> ui.access(() -> {
+                                DynamicFileDownloader.this.getEventBus().fireEvent(new DownlocadFailedEvent(DynamicFileDownloader.this, e));
+                            }));
                             e.printStackTrace();
                             return true;
                         }
@@ -146,6 +170,21 @@ public class DynamicFileDownloader extends Anchor implements FluentComponent<Dyn
     public Registration addDownloadFinishedListener(ComponentEventListener<DownloadFinishedEvent> listener) {
         return addListener(DownloadFinishedEvent.class, listener);
     }
+    
+    /**
+     * Adds a listener that is executed when the file content streaming has 
+     * failed due to an exception.
+     * Note that the UI changes done in the listener don't necessarily happen
+     * live if you don't have @{@link com.vaadin.flow.component.page.Push}
+     * in use or use {@link UI#setPollInterval(int)} method.
+     *
+     * @param listener the listener
+     * @return the {@link Registration}  you can use to remove this listener.
+     */
+    public Registration addDownloadFailedListener(ComponentEventListener<DownlocadFailedEvent> listener) {
+        return addListener(DownlocadFailedEvent.class, listener);
+    }
+    
 
     public void setFileHandler(SerializableConsumer<OutputStream> contentWriter) {
         this.contentWriter = contentWriter;
