@@ -2,6 +2,7 @@ package org.vaadin.firitin.components.grid;
 
 import java.util.List;
 
+import com.vaadin.flow.component.button.ButtonVariant;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
 
@@ -100,12 +101,41 @@ public class PagingGrid<T> extends VGrid<T> {
 				last.setVisible(true);
 				last.setEnabled(hasNext);
 				next.setEnabled(hasNext);
-				status.setText("Page " + (currentPage + 1) + "/" + pages + ", showing " + getPageSize()
-						+ " results per page.");
+					pageBtns.removeAll();
+					long start, end;
+					if(pages < 10) {
+						start = 0;
+						end = pages;
+					} else {
+						start = currentPage - 4;
+						if(start < 0) {
+							start = 0;
+						}
+						end = start + 9;
+						if(end > pages) {
+							end = pages;
+						}
+						if(end-start < 10) {
+							start = end - 9;
+						}
+					}
+					for(long i = start; i < end; i++) {
+						long finalI = i;
+						VButton btn = new VButton(""+(i+1), e-> {
+							currentPage = finalI;
+							fetchPage();
+						}).withEnabled(currentPage != i);
+						btn.withThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
+						pageBtns.add(btn);
+					}
+					status.setVisible(false);
+					pageBtns.setVisible(true);
+
 			} else {
 				last.setEnabled(false);
 				next.setEnabled(true);
 				status.setText("Page " + (currentPage + 1) + ", showing " + getPageSize() + " results per page.");
+				pageBtns.setVisible(false);
 			}
 		}
 
@@ -126,6 +156,10 @@ public class PagingGrid<T> extends VGrid<T> {
 			} else if (event.getSource() == previous) {
 				currentPage--;
 			}
+			fetchPage();
+		}
+
+		private void fetchPage() {
 			List<T> page = dataProvider.pageRequested(currentPage, getPageSize());
 			if (page.size() > 0) {
 				setItems(page);
@@ -151,12 +185,15 @@ public class PagingGrid<T> extends VGrid<T> {
 
 		private Button first, last, next, previous;
 		private final Span status = new Span();
+		private VHorizontalLayout pageBtns = new VHorizontalLayout();
 
 		public PaginationBar(Long size) {
 			setSize(size);
 			initButtons();
 			updateState();
-			add(first, previous, status, next, last);
+			add(first, previous);
+			space().withComponents(pageBtns, status).space();
+			add(next, last);
 			alignAll(Alignment.CENTER);
 			withFullWidth();
 		}
