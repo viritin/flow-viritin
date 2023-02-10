@@ -44,7 +44,13 @@ public class TraditionalPaging extends VerticalLayout {
 		Button b = new Button("Define size to 1000", e -> {
 			table.setTotalResults(1000);
 		});
-		add(table, b);
+		// Optional
+		// If you know, or some further long running task can detect the size of
+		// results, it can be defined later:
+		Button b2 = new Button("Define size to 90", e -> {
+			table.setTotalResults(90);
+		});
+		add(table, b, b2);
 	}
 
 }
