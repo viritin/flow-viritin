@@ -94,19 +94,13 @@ public class VSelect<T> extends Select<T> implements
         return this;
     }
 
-    public VSelect<T> withDataProvider(DataProvider<T, ?> dataProvider) {
-        setDataProvider(dataProvider);
+    public VSelect<T> withDataProvider(DataProvider<T, Void> dataProvider) {
+        setItems(dataProvider);
         return this;
     }
 
     public VSelect<T> withItems(Collection<T> items) {
         setItems(items);
-        return this;
-    }
-
-    @Deprecated
-    public VSelect<T> withItems(Stream<T> streamOfItems) {
-        setItems(streamOfItems);
         return this;
     }
 

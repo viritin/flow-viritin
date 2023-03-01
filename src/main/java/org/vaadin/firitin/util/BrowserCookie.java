@@ -30,8 +30,7 @@ public class BrowserCookie {
     public static void setCookie(String key, String value, LocalDateTime expirationTime) {
 
         String expires = toCookieGMTDate(expirationTime);
-
-        getPage().executeJavaScript(
+        getPage().executeJs(
                 String.format("document.cookie = \"%s=%s; expires=%s\";", key, value, expires));
 
     }
@@ -56,13 +55,13 @@ public class BrowserCookie {
 
         String expires = toCookieGMTDate(expirationTime);
 
-        getPage().executeJavaScript(String.format(
+        getPage().executeJs(String.format(
                 "document.cookie = \"%s=%s; path=%s\"; Expires=%s\";", key, value, path, expires
         ));
     }
 
     public static void setCookie(String key, String value, String path) {
-        getPage().executeJavaScript(String.format(
+        getPage().executeJs(String.format(
                 "document.cookie = \"%s=%s; path=%s\";", key, value, path
         ));
     }

@@ -12,7 +12,6 @@ import org.vaadin.firitin.fluency.ui.internal.FluentHasLabel;
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.stream.Stream;
 
 public class VCheckboxGroup<T> extends CheckboxGroup<T> implements
         FluentComponent<VCheckboxGroup<T>>, FluentHasStyle<VCheckboxGroup<T>>,
@@ -21,8 +20,8 @@ public class VCheckboxGroup<T> extends CheckboxGroup<T> implements
         FluentHasLabel<VCheckboxGroup<T>>, FluentHasHelper<VCheckboxGroup<T>>,
         FluentHasTooltip<VCheckBox> {
 
-    public VCheckboxGroup<T> withDataProvider(DataProvider<T, ?> dataProvider) {
-        setDataProvider(dataProvider);
+    public VCheckboxGroup<T> withDataProvider(DataProvider<T, Void> dataProvider) {
+        setItems(dataProvider);
         return this;
     }
 
@@ -73,12 +72,6 @@ public class VCheckboxGroup<T> extends CheckboxGroup<T> implements
 
     public VCheckboxGroup<T> withItems(Collection<T> items) {
         setItems(items);
-        return this;
-    }
-
-    @Deprecated
-    public VCheckboxGroup<T> withItems(Stream<T> streamOfItems) {
-        setItems(streamOfItems);
         return this;
     }
 

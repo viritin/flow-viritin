@@ -58,12 +58,6 @@ public class VGrid<T> extends Grid<T>
         return this;
     }
 
-    @Deprecated
-    public VGrid<T> withItems(Stream<T> streamOfItems) {
-        setItems(streamOfItems);
-        return this;
-    }
-
     public VGrid<T> withItems(T... items) {
         setItems(items);
         return this;
