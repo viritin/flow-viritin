@@ -83,7 +83,7 @@ public class DynamicFileDownloader extends Anchor implements FluentComponent<Dyn
          * event originated from the client side or the server side.
          *
          * @param source     the source component
-         * @param fromClient <code>true</code> if the event originated from the client
+         * @param e the exception
          */
         public DownlocadFailedEvent(DynamicFileDownloader source, Exception e) {
             super(source, false);
