@@ -183,8 +183,7 @@
                     <httpConnector>
                         <port>9998</port>
                     </httpConnector>
-                    <reload>manual</reload>
-                    <scanIntervalSeconds>2</scanIntervalSeconds>
+                    <scan>0</scan>
                     <!-- Use test scope because the UI/demo classes are in
                     the test package. -->
                     <useTestScope>true</useTestScope>

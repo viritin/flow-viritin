@@ -43,7 +43,8 @@ public class Grids extends VerticalLayout {
         grid.scrollToItem(somePerson);
         add(grid);
 
-        VGrid<Person> lazyLoaded = new VGrid<>(Person.class);
+        VGrid<Person> lazyLoaded = new VGrid<>(Person.class)
+                .withColumnSelector();
         lazyLoaded.setItems(query ->
                 list.subList(
                 query.getOffset(),
