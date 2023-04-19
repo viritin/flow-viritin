@@ -1,5 +1,6 @@
 package org.vaadin.firitin;
 
+import com.vaadin.flow.component.select.Select;
 import org.vaadin.firitin.components.grid.PagingGrid;
 import org.vaadin.firitin.testdomain.Person;
 import org.vaadin.firitin.testdomain.Service;
@@ -50,7 +51,15 @@ public class TraditionalPaging extends VerticalLayout {
 		Button b2 = new Button("Define size to 90", e -> {
 			table.setTotalResults(90);
 		});
-		add(table, b, b2);
+
+		Select<PagingGrid.PaginationBarMode> select = new Select<>();
+		select.setItems(PagingGrid.PaginationBarMode.values());
+		select.setValue(PagingGrid.PaginationBarMode.TOP);
+		select.addValueChangeListener(e -> {
+			table.setPaginationBarMode(e.getValue());
+		});
+
+		add(table, b, b2, select);
 	}
 
 }
