@@ -4,34 +4,30 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouterLink;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * A component to reprecent an main view in the navigation menu
+ * A component to represent a main view in the navigation menu
  */
-public class NavigationItem extends ListItem {
+public class NavigationItem extends SideNavItem {
     private final Class<? extends Component> navigationTarget;
     private final String text;
+    private String path;
+    private boolean disabled = false;
 
     public NavigationItem(Class<? extends Component> navigationTarget) {
-        super(new RouterLink("", navigationTarget));
+        super(null, navigationTarget);
         text = getMenuTextFromClass(navigationTarget);
-        RouterLink rl = ((RouterLink) getChildren().findFirst().get());
-        // Don't ask what these do, copied from start.vaadin.com template
-        rl.addClassNames("flex", "mx-s", "p-s", "relative", "text-secondary");
+        setLabel(text);
         MenuItem me = navigationTarget.getAnnotation(MenuItem.class);
         if (me != null) {
-            // TODO figure out how to make icon type configurable, because apparently
-            // the cool kids don't use Icon class any more.
-            rl.add(new Icon(me.icon()));
+            if(me.icon() != null) {
+                setPrefixComponent(new Icon(me.icon()));
+            }
         }
-        // TODO figure out how to let users intercept this for i18n
-        Span text = new Span(this.text);
-        text.addClassNames("font-medium", "text-s");
-        rl.add(text);
-
         this.navigationTarget = navigationTarget;
     }
 
@@ -70,9 +66,21 @@ public class NavigationItem extends ListItem {
     }
 
     @Override
+    public void setPath(String path) {
+        this.path = path;
+        if(!disabled) {
+            super.setPath(path);
+        }
+    }
+
     public void setEnabled(boolean enabled) {
-        super.setEnabled(enabled);
+        this.disabled = !enabled;
+        if(disabled) {
+            super.setPath((String) null);
+        } else if (path != null) {
+            super.setPath(path);
+        }
         String color = enabled ? "" : "gray";
-        getStyle().set("color", color);
+        getStyle().setColor(color);
     }
 }

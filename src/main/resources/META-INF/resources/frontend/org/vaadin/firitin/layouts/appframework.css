@@ -1,38 +1,16 @@
-.v-applayout [slot='drawer'] {
-  background-image: linear-gradient(0deg, var(--lumo-shade-5pct), var(--lumo-shade-5pct));
+vaadin-scroller[slot="drawer"] {
+  padding: var(--lumo-space-s);
 }
 
-.v-applayout [slot='drawer'] nav a {
-  text-decoration: none;
-  transition: color 140ms;
-}
-
-.v-applayout [slot='drawer'] nav a vaadin-icon {
-  font-size:small;
-  margin-top: calc(var(--lumo-space-xs) * 0.5);
-  margin-right: calc(var(--lumo-space-s));
-}
-
-.v-applayout [slot='drawer'] nav a::before {
-  border-radius: var(--lumo-border-radius);
-  bottom: calc(var(--lumo-space-xs) * 0.5);
-  content: '';
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: calc(var(--lumo-space-xs) * 0.5);
-  transition: background-color 140ms;
-}
-
-.v-applayout [slot='drawer'] nav a[highlight] {
-  color: var(--lumo-primary-text-color);
-}
-
-.v-applayout [slot='drawer'] nav a[highlight]::before {
-  background-color: var(--lumo-primary-color-10pct);
-}
-
-.v-applayout [slot='drawer'] footer vaadin-context-menu {
-  align-items: center;
+[slot="drawer"]:is(header, footer) {
   display: flex;
+  align-items: center;
+  gap: var(--lumo-space-s);
+  padding: var(--lumo-space-s) var(--lumo-space-m);
+  min-height: var(--lumo-size-xl);
+  box-sizing: border-box;
+}
+
+[slot="drawer"]:is(header, footer):is(:empty) {
+  display: none;
 }

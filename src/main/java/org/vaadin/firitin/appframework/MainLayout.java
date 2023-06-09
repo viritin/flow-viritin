@@ -4,22 +4,20 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.*;
-import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
-import org.vaadin.firitin.util.style.Padding;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.sidenav.SideNav;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
-import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.RouteBaseData;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouterLayout;
@@ -33,13 +31,55 @@ import com.vaadin.flow.router.RouterLayout;
  * <p>Check usage example from the text package org.vaadin.firitin.appframework</p>
  */
 @CssImport("./org/vaadin/firitin/layouts/appframework.css")
-@CssImport("lumo-css-framework/all-classes.css")
-@NpmPackage(value = "lumo-css-framework", version = "3.0.11")
-public abstract class MainLayout extends AppLayout {
+public abstract class MainLayout extends AppLayout implements AfterNavigationObserver {
 
-	private UnorderedList menu;
+	private H2 viewTitle;
 
-	private H1 viewTitle;
+	public MainLayout() {
+//		getElement().getClassList().add("v-applayout");
+		setPrimarySection(Section.DRAWER);
+		addDrawerContent();
+		addHeaderContent();
+	}
+
+	private void addHeaderContent() {
+		DrawerToggle toggle = new DrawerToggle();
+		toggle.getElement().setAttribute("aria-label", "Menu toggle");
+
+		viewTitle = new H2();
+		viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
+
+		addToNavbar(true, toggle, viewTitle);
+	}
+
+	private void addDrawerContent() {
+		H1 appName = new H1(getDrawerHeader());
+		appName.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
+		Header header = new Header(appName);
+
+		Scroller scroller = new Scroller(prepareNav());
+
+		addToDrawer(header, scroller, prepareFooter());
+	}
+
+	private SideNav prepareNav() {
+		// SideNav is a production-ready official component under a feature flag.
+		// However, it has accessibility issues and is missing some features.
+		// Both will be addressed in an upcoming minor version.
+		// These changes are likely to cause some breaking change to the custom css
+		// applied to the component.
+		SideNav nav = new SideNav();
+		this.menu = nav;
+
+		return nav;
+	}
+
+	private Footer prepareFooter() {
+		Footer layout = new Footer();
+		return layout;
+	}
+
+	private SideNav menu;
 
 	private List<NavigationItem> navigationItems = new ArrayList<>();
 
@@ -47,24 +87,15 @@ public abstract class MainLayout extends AppLayout {
 
 	private Map<Component,String> explicitViewTitles = new WeakHashMap<>();
 
-	public MainLayout() {
-		getElement().getClassList().add("v-applayout");
-	}
-
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
-		init();
+		if(navigationItems.isEmpty()) {
+			init();
+		}
 		super.onAttach(attachEvent);
 	}
 
 	protected void init() {
-		// lazy init
-		if(viewTitle != null) {
-			return;
-		}
-		setPrimarySection(Section.DRAWER);
-		addToNavbar(true, createHeaderContent());
-		addToDrawer(createDrawerContent());
 		RouteConfiguration.forSessionScope().getAvailableRoutes().stream().filter(routeData -> {
 			Class<? extends RouterLayout> parentLayout = routeData.getParentLayout();
 			if (parentLayout != null) {
@@ -147,6 +178,9 @@ public abstract class MainLayout extends AppLayout {
 	 *         the screen.
 	 */
 	public List<NavigationItem> getNavigationItems() {
+		if(navigationItems.isEmpty()) {
+			init();
+		}
 		return navigationItems;
 	}
 
@@ -159,7 +193,7 @@ public abstract class MainLayout extends AppLayout {
 	 */
 	public void buildMenu() {
 		menu.removeAll();
-		navigationItems.stream().filter(this::checkAccess).forEach(menu::add);
+		navigationItems.stream().filter(this::checkAccess).forEach(menu::addItem);
 	}
 
 	/**
@@ -173,42 +207,32 @@ public abstract class MainLayout extends AppLayout {
 		return true;
 	}
 
-	protected Component createHeaderContent() {
+	protected void createHeaderContent() {
+
 		DrawerToggle toggle = new DrawerToggle();
-		toggle.addClassName("text-secondary");
-		toggle.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
 		toggle.getElement().setAttribute("aria-label", "Menu toggle");
 
-		viewTitle = new H1();
-		viewTitle.addClassNames("m-0", "text-l");
 
-		Header header = new Header(toggle, viewTitle);
-		header.addClassNames("bg-base", "border-b", "border-contrast-10", "box-border", "flex", "h-xl", "items-center",
-				"w-full");
-		return header;
+		viewTitle = new H2();
+		viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
+
+		addToNavbar(true, toggle, viewTitle);
 	}
 
-	protected Component createDrawerContent() {
-		H2 appName = new H2(getDrawerHeader());
-		appName.addClassNames("flex", "items-center", "h-xl", "m-0", "px-m", "text-m");
-		com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(
-				appName,
-				createNavigation(),
-				createFooter());
-		section.addClassNames("flex", "flex-col", "items-stretch", "max-h-full", "min-h-full");
-		return section;
+	protected void createDrawerContent() {
+
+		H1 appName = new H1(getDrawerHeader());
+		appName.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
+		Header header = new Header(appName);
+
+		Scroller scroller = new Scroller(createNavigation());
+
+		addToDrawer(header, scroller, createFooter());
 	}
 
-	private Nav createNavigation() {
-		Nav nav = new Nav();
-		nav.addClassNames("border-b", "border-contrast-10", "flex-grow", "overflow-auto");
-		nav.getElement().setAttribute("aria-labelledby", "views");
-
-		// Wrap the links in a list; improves accessibility
-		menu = new UnorderedList();
-		menu.addClassNames("list-none", "m-0", "p-0");
-		nav.add(menu);
-
+	private SideNav createNavigation() {
+		SideNav nav = new SideNav();
+		this.menu = nav;
 		return nav;
 	}
 
@@ -216,11 +240,25 @@ public abstract class MainLayout extends AppLayout {
 
 	@Override
 	protected void afterNavigation() {
-		init();
 		super.afterNavigation();
-//		getNavigationItems().stream().filter(ni -> ni.getNavigationTarget().equals(getContent().getClass())).findFirst()
-//				.ifPresent(ni -> menu.setSelectedTab(ni));
 		updateViewTitle();
+		updateSelectedNavigationItem();
+	}
+
+	@Override
+	public void afterNavigation(AfterNavigationEvent event) {
+		updateViewTitle();
+		updateSelectedNavigationItem();
+	}
+
+	private void updateSelectedNavigationItem() {
+		getNavigationItems().forEach(i -> {
+			if(i.getNavigationTarget() == getContent().getClass()) {
+				i.getElement().setAttribute("active", true);
+			} else {
+				i.getElement().removeAttribute("active");
+			}
+		});
 	}
 
 	private void updateViewTitle() {
@@ -287,10 +325,7 @@ public abstract class MainLayout extends AppLayout {
 
 	protected Footer createFooter() {
 		Footer layout = new Footer();
-		layout.addClassNames("flex", "items-center", "my-s", "px-m", "py-xs");
-
 		return layout;
 	}
-
 
 }
