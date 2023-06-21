@@ -5,6 +5,7 @@ import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouterLink;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +21,7 @@ public class NavigationItem extends SideNavItem {
 
     public NavigationItem(Class<? extends Component> navigationTarget) {
         super(null, navigationTarget);
+        getStyle().setDisplay(Style.Display.BLOCK); // TODO WTF?
         text = getMenuTextFromClass(navigationTarget);
         setLabel(text);
         MenuItem me = navigationTarget.getAnnotation(MenuItem.class);
@@ -82,5 +84,9 @@ public class NavigationItem extends SideNavItem {
         }
         String color = enabled ? "" : "gray";
         getStyle().setColor(color);
+    }
+
+    public boolean isEnabled() {
+        return !disabled;
     }
 }

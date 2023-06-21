@@ -8,7 +8,8 @@ public class MySecondView extends MyAbstractView {
         add(new Paragraph("Second content"));
 
         add(new Button("Toggle fourth", e-> {
-            findAncestor(MyMainLayout.class).getNavigationItems().get(3);
+            NavigationItem item = findAncestor(MyMainLayout.class).getNavigationItems().get(3);
+            item.setEnabled(!item.isEnabled());
         }));
 
     }

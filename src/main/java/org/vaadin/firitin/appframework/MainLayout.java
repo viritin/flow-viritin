@@ -30,7 +30,6 @@ import com.vaadin.flow.router.RouterLayout;
  * Menu items can be configured (override caption, order, icon) using {@link MenuItem} annotation</p>
  * <p>Check usage example from the text package org.vaadin.firitin.appframework</p>
  */
-@CssImport("./org/vaadin/firitin/layouts/appframework.css")
 public abstract class MainLayout extends AppLayout implements AfterNavigationObserver {
 
 	private H2 viewTitle;
@@ -54,15 +53,16 @@ public abstract class MainLayout extends AppLayout implements AfterNavigationObs
 
 	private void addDrawerContent() {
 		H1 appName = new H1(getDrawerHeader());
-		appName.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
+		appName.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.MEDIUM);
 		Header header = new Header(appName);
 
 		Scroller scroller = new Scroller(prepareNav());
+		scroller.addClassNames(LumoUtility.Padding.SMALL);
 
 		addToDrawer(header, scroller, prepareFooter());
 	}
 
-	private SideNav prepareNav() {
+	protected SideNav prepareNav() {
 		// SideNav is a production-ready official component under a feature flag.
 		// However, it has accessibility issues and is missing some features.
 		// Both will be addressed in an upcoming minor version.
@@ -70,7 +70,6 @@ public abstract class MainLayout extends AppLayout implements AfterNavigationObs
 		// applied to the component.
 		SideNav nav = new SideNav();
 		this.menu = nav;
-
 		return nav;
 	}
 
@@ -205,35 +204,6 @@ public abstract class MainLayout extends AppLayout implements AfterNavigationObs
 	 */
 	protected boolean checkAccess(NavigationItem navigationItem) {
 		return true;
-	}
-
-	protected void createHeaderContent() {
-
-		DrawerToggle toggle = new DrawerToggle();
-		toggle.getElement().setAttribute("aria-label", "Menu toggle");
-
-
-		viewTitle = new H2();
-		viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
-
-		addToNavbar(true, toggle, viewTitle);
-	}
-
-	protected void createDrawerContent() {
-
-		H1 appName = new H1(getDrawerHeader());
-		appName.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
-		Header header = new Header(appName);
-
-		Scroller scroller = new Scroller(createNavigation());
-
-		addToDrawer(header, scroller, createFooter());
-	}
-
-	private SideNav createNavigation() {
-		SideNav nav = new SideNav();
-		this.menu = nav;
-		return nav;
 	}
 
 	protected abstract String getDrawerHeader();
