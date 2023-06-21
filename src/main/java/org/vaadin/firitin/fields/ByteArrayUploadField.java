@@ -25,6 +25,7 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -44,7 +45,7 @@ import elemental.json.Json;
  *
  * @author mstahv
  */
-@CssImport("./org/vaadin/firitin/bytearrayuploadfield.css")
+@StyleSheet("context://frontend/org/vaadin/firitin/bytearrayuploadfield.css")
 public class ByteArrayUploadField extends Composite<Div>
 		implements HasValue<ComponentValueChangeEvent<ByteArrayUploadField, byte[]>, byte[]> {
 	private static final long serialVersionUID = -188233227963143771L;

@@ -45,7 +45,7 @@ import com.vaadin.flow.function.SerializableFunction;
  * @param <T> the type of items listed as nodes of Tree. Use Object if nothing
  *            else.
  */
-@StyleSheet("./org/vaadin/firitin/components/tree.css")
+@StyleSheet("context://frontend/org/vaadin/firitin/components/tree.css")
 public class Tree<T> extends Composite<VerticalLayout> {
 
     private static final long serialVersionUID = -927074586817131378L;
