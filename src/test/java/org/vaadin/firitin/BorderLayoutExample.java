@@ -32,7 +32,7 @@ public class BorderLayoutExample extends BorderLayout {
         setChildAt(Region.NORTH, new Span("North"));
         setChildAt(Region.WEST, new Span("West"));
         setChildAt(Region.SOUTH, new Span("South"));
-        
+        setChildAt(Region.CENTER, new Span("Center"));
     }
     
 }

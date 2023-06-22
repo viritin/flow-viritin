@@ -3,7 +3,7 @@ package org.vaadin.firitin.layouts;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.dom.Style;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,16 +14,20 @@ import java.util.Map;
  * Similar to https://docs.oracle.com/javase/7/docs/api/java/awt/BorderLayout.html
  */
 @Tag("border-layout")
-@JsModule("./org/vaadin/firitin/layouts/border-layout.js")
 public class BorderLayout extends Component implements HasComponents {
 
     private final Map<Region, Component> children = new HashMap<>(Region.values().length);
 
     public BorderLayout() {
         super();
+        getElement().getStyle().setDisplay(Style.Display.GRID);
+        getElement().getStyle().set("grid-template-columns", "repeat(3, 1fr)");
     }
 
     private static void applyStyle(Component component, Region region) {
+        component.getElement().getStyle().set("grid-column", region.gridColumn);
+        component.getElement().getStyle().set("grid-row", region.gridRow);
+
         stripStyle(component);
         component.getElement().getClassList().add(region.name().toLowerCase());
     }
@@ -58,10 +62,18 @@ public class BorderLayout extends Component implements HasComponents {
 
     public enum Region {
 
-        NORTH,
-        SOUTH,
-        EAST,
-        WEST,
-        CENTER
+        NORTH("1", "2"),
+        SOUTH("3", "2"),
+        EAST("2", "3"),
+        WEST("2", "1"),
+        CENTER("2", "2");
+
+        private String gridRow;
+        private String gridColumn;
+
+        private Region(String r, String c) {
+            this.gridRow = r;
+            this.gridColumn = c;
+        }
     }
 }

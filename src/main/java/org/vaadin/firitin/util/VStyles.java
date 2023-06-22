@@ -5,8 +5,6 @@ import com.vaadin.flow.component.dialog.Dialog;
 
 public final class VStyles {
 
-    public static final String STYLE_PADDING_FIX_FOR_DIALOG = "./org/vaadin/firitin/padding-fix-for-dialog.css";
-
     private VStyles() {
 
     }
