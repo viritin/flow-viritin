@@ -10,6 +10,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouterLink;
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.annotation.Annotation;
+
 /**
  * A component to represent a main view in the navigation menu
  */
@@ -41,13 +43,17 @@ public class NavigationItem extends SideNavItem {
      */
     public static String getMenuTextFromClass(Class<? extends Component> navigationTarget) {
         final String text;
-        MenuItem me = navigationTarget.getAnnotation(MenuItem.class);
+        MenuItem me = getAnnotationFromType(navigationTarget, MenuItem.class);
         if (me != null && !me.title().isEmpty()) {
             text = me.title();
         } else {
-            PageTitle title = navigationTarget.getAnnotation(PageTitle.class);
+            PageTitle title = getAnnotationFromType(navigationTarget, PageTitle.class);
             if (title == null) {
                 String simpleName = navigationTarget.getSimpleName();
+                // weld proxy
+                if(simpleName.endsWith("_Subclass")) {
+                    simpleName = simpleName.substring(0, simpleName.length() - "_Subclass".length());
+                }
                 if (simpleName.endsWith("View")) {
                     simpleName = simpleName.substring(0, simpleName.length() - 4);
                 }
@@ -57,6 +63,17 @@ public class NavigationItem extends SideNavItem {
             }
         }
         return text;
+    }
+
+    private static <A extends Annotation> A getAnnotationFromType(Class<?> classType, final Class<A> annotationClass) {
+       while ( !classType.getName().equals(Object.class.getName()) ) {
+
+            if ( classType.isAnnotationPresent(annotationClass)) {
+                return classType.getAnnotation(annotationClass);
+            }
+            classType = classType.getSuperclass();
+        }
+        return null;
     }
 
     public String getText() {
