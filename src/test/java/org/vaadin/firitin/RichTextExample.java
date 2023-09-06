@@ -31,6 +31,19 @@ public class RichTextExample extends VVerticalLayout {
 
         add(new H1("RichText examples"));
 
+
+        add(new RichText().withMarkDown("""
+                # RichText using Markdown syntax
+                
+                *Hello* [Viritin](https://vaadin.com/) users.
+                """));
+
+        add(new RichText().withSafeHtml("""
+                <h1>RichText using HTML syntax</h1>
+                
+                <p><i>Hello</i> <a href="https://vaadin.com/">Viritin</a> users.</p>
+                """));
+
         // even though adding a large content, RichText don't consume memory
         // in the user session
         add(new RichText(RandomStringUtils.randomAlphabetic(100000)));
