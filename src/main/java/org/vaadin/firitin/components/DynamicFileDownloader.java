@@ -15,6 +15,7 @@
  */
 package org.vaadin.firitin.components;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
@@ -46,7 +47,6 @@ public class DynamicFileDownloader extends Anchor implements FluentComponent<Dyn
 
     private Button button;
     private DomListenerRegistration disableOnclick;
-
 
     public void setDisableOnClick(boolean disableOnClick) {
         if (disableOnclick != null) {
@@ -111,6 +111,11 @@ public class DynamicFileDownloader extends Anchor implements FluentComponent<Dyn
     }
 
     public DynamicFileDownloader() {
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
         runBeforeClientResponse(ui -> {
             requestHandler = new RequestHandler() {
                 @Override

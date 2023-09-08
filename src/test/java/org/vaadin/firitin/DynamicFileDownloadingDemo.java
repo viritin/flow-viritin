@@ -68,6 +68,14 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
         downloadButton.setTarget("_new");
         
         add(downloadButton);
+
+        add(new Button("Toggle attached", e->{
+            if(downloadButton.isAttached()) {
+                remove(downloadButton);
+            } else {
+                add(downloadButton);
+            }
+        }));
         
         DynamicFileDownloader downloadButton2 = new DynamicFileDownloader("Downlload file with timestamp in name", "foobar/",
         outputStream -> {
