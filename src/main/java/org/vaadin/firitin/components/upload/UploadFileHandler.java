@@ -15,6 +15,7 @@
  */
 package org.vaadin.firitin.components.upload;
 
+import com.vaadin.flow.component.upload.MultiFileReceiver;
 import com.vaadin.flow.component.upload.Receiver;
 import com.vaadin.flow.component.upload.Upload;
 import java.io.IOException;
@@ -36,7 +37,27 @@ import java.io.PipedOutputStream;
  *
  * @author mstahv
  */
-public class UploadFileHandler extends VUpload implements Receiver {
+public class UploadFileHandler extends VUpload {
+
+    MultiFileReceiver multiFileReceiver = new MultiFileReceiver() {
+        @Override
+        public OutputStream receiveUpload(String s, String s1) {
+            return UploadFileHandler.this.receiveUpload(s, s1);
+        }
+    };
+
+    Receiver receiver = new Receiver() {
+        @Override
+        public OutputStream receiveUpload(String s, String s1) {
+            return UploadFileHandler.this.receiveUpload(s, s1);
+        }
+    };
+
+    public UploadFileHandler allowMultiple() {
+        setReceiver(multiFileReceiver);
+        setMaxFiles(Integer.MAX_VALUE);
+        return this;
+    }
 
     @FunctionalInterface
     public interface FileHandler {
@@ -62,10 +83,9 @@ public class UploadFileHandler extends VUpload implements Receiver {
 
     public UploadFileHandler(FileHandler fileHandler) {
         this.fileHandler = fileHandler;
-        setReceiver(this);
+        setReceiver(receiver);
     }
 
-    @Override
     public OutputStream receiveUpload(String filename, String mimeType) {
         try {
             final PipedInputStream in = new PipedInputStream();

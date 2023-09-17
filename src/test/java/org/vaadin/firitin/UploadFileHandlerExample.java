@@ -15,6 +15,7 @@
  */
 package org.vaadin.firitin;
 
+import com.helger.commons.mutable.MutableInt;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
@@ -59,6 +60,26 @@ public class UploadFileHandlerExample extends VerticalLayout {
                     }
                 });
 
+        MutableInt lineCount = new MutableInt(0);
+
+        UploadFileHandler multiUploadFileHandler = new UploadFileHandler(
+                (InputStream content, String fileName, String mimeType) -> {
+                    try {
+                        int b = 0;
+                        int count = 0;
+                        while ((b = content.read()) != -1) {
+                            if (b == "\n".getBytes()[0]) {
+                                count++;
+                            }
+                        }
+                        lineCount.inc(count);
+                        String msg = "Counted " + lineCount + "lines so far...";
+                        getUI().get().access(() -> Notification.show(msg));
+                    } catch (IOException ex) {
+                        Logger.getLogger(UploadFileHandlerExample.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }).allowMultiple();
+
         Grid<String[]> grid = new Grid<>();
 
         UploadFileHandler csvFileHandler = new UploadFileHandler(
@@ -98,7 +119,11 @@ public class UploadFileHandlerExample extends VerticalLayout {
                     }
                 });
 
-        add(new Paragraph("Count lines"), uploadFileHandler,
+        add(
+                new Paragraph("Count lines"),
+                uploadFileHandler,
+                new Paragraph("Count lines (with multiple file support)"),
+                multiUploadFileHandler,
                 new Paragraph("Display CSV file"), csvFileHandler, grid);
 
     }
