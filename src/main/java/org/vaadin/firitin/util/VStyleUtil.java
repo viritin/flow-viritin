@@ -2,6 +2,7 @@ package org.vaadin.firitin.util;
 
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.ThemeList;
 
 import java.util.Objects;
@@ -9,6 +10,23 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public final class VStyleUtil {
+
+    public static void inject(String css) {
+        UI.getCurrent().getElement().executeJs("""
+            var style = document.createElement('style');
+            style.innerHTML = $0;
+            document.head.append(style);
+        """, css);
+    }
+
+    public static void injectAsFirst(String css) {
+        UI.getCurrent().getElement().executeJs("""
+            var style = document.createElement('style');
+            style.innerHTML = $0;
+            document.head.insertBefore(style, document.head.firstChild);
+        """, css);
+    }
+
     private VStyleUtil() {
 
     }

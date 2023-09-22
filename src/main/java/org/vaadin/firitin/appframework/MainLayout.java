@@ -21,6 +21,7 @@ import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.router.RouteBaseData;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouterLayout;
+import org.vaadin.firitin.util.VStyleUtil;
 
 /**
  * The main view is a top-level placeholder for other views. This version is based on a one
@@ -53,7 +54,8 @@ public abstract class MainLayout extends AppLayout implements AfterNavigationObs
 
 	private void addDrawerContent() {
 		H1 appName = new H1(getDrawerHeader());
-		appName.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.MEDIUM);
+		appName.getStyle().setMargin("var(--lumo-space-m)");
+		appName.getStyle().set("font-size", "var(--lumo-font-size-l)");
 		Header header = new Header(appName);
 
 		Scroller scroller = new Scroller(prepareNav());
