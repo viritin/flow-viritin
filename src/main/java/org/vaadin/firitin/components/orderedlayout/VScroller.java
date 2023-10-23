@@ -20,9 +20,11 @@ import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DebounceSettings;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.orderedlayout.Scroller;
-import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.DebouncePhase;
 import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.shared.Registration;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
@@ -40,18 +42,13 @@ public class VScroller extends Scroller implements
 
     private DomListenerRegistration scrollreg;
 
+    @DomEvent(value = "scroll-to-end", debounce = @DebounceSettings(
+            timeout = 250,
+            phases = DebouncePhase.TRAILING))
     public static class ScrollToEndEvent extends ComponentEvent<VScroller> {
 
-        /**
-         * Creates a new event using the given source and indicator whether the
-         * event originated from the client side or the server side.
-         *
-         * @param source the source component
-         * @param fromClient <code>true</code> if the event originated from the
-         * client
-         */
-        ScrollToEndEvent(VScroller source) {
-            super(source, true);
+        public ScrollToEndEvent(VScroller source, boolean fromClient) {
+            super(source, fromClient);
         }
     }
 
@@ -102,24 +99,21 @@ public class VScroller extends Scroller implements
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        getElement().executeJs(
-                "var self = this;\n"
-                + "    this.addEventListener(\"scroll\", function(e) {\n"
-                + "        if(self.scrollTop + self.clientHeight == self.scrollHeight) {\n"
-                + "            self.$server.onScrollToEnd();\n"
-                + "        }\n"
-                + "    });\n"
-        );
+        getElement().executeJs("""
+            var self = this;
+            this.addEventListener("scroll", function(e) {
+                // if rather close the the end, fire it!
+                if(self.scrollTop + self.clientHeight > (self.scrollHeight - self.clientHeight/4)) {
+                    var e = new Event("scroll-to-end");
+                    self.dispatchEvent(e);
+                }
+            });
+        """);
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
-    }
-
-    @ClientCallable
-    private void onScrollToEnd() {
-        getEventBus().fireEvent(new ScrollToEndEvent(this));
     }
 
     /**
@@ -135,7 +129,7 @@ public class VScroller extends Scroller implements
 
     public Registration addScrollListener(ComponentEventListener<ScrollEvent> listener) {
         if (scrollreg == null) {
-            scrollreg = getElement().addEventListener("scroll", (DomEvent de) -> {
+            scrollreg = getElement().addEventListener("scroll", de -> {
                 getEventBus().fireEvent(new ScrollEvent(
                         this,
                         (int) de.getEventData().getNumber("event.target.scrollTop"),
