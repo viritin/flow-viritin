@@ -31,6 +31,9 @@ public class NavigationItem extends SideNavItem {
             if(me.icon() != null) {
                 setPrefixComponent(new Icon(me.icon()));
             }
+            if(!me.enabled()) {
+                setEnabled(false);
+            }
         }
         this.navigationTarget = navigationTarget;
     }

@@ -14,7 +14,13 @@ public @interface MenuItem {
     public static final int END = Integer.MAX_VALUE;
     public static final int BEGINNING = 0;
     public static final int DEFAULT = 1000;
-	
+
+    /**
+     * @return true if the menu item should be enabled in
+     * the navigation. Note that making the view disabled with
+     * this option, does NOT prevent navigation directly to
+     * the view using deep linking url.
+     */
 	public boolean enabled() default true;
 	
 	public String title() default "";

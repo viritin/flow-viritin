@@ -21,6 +21,6 @@ public class MyMainLayout extends MainLayout {
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
 		super.onAttach(attachEvent);
-		getNavigationItems().get(3).setEnabled(false);
+		//getNavigationItems().get(3).setEnabled(false);
 	}
 }
