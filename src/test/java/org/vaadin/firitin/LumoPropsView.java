@@ -33,18 +33,15 @@ public class LumoPropsView extends VerticalLayout {
 
     private static void styleMyView(VerticalLayout layout, H1 h1) {
         // "trivial" enum implementation: easy to maintain
-        // Not everybody likes me violating Java naming conventions,
-        // camel cased variants just looks too ugly to me :-)
-        // Not a biggie to change though
-        LumoProps.fontFamily.define(layout, "roboto");
+        LumoProps.FONT_FAMILY.define(layout, "roboto");
         // Global (UI) scope
-        LumoProps.primaryColor.define("green");
-        LumoProps.primaryColor.define(layout, "red");
-        LumoProps.headerTextColor.define(layout, "blue");
+        LumoProps.PRIMARY_COLOR.define("green");
+        LumoProps.PRIMARY_COLOR.define(layout, "red");
+        LumoProps.HEADER_TEXT_COLOR.define(layout, "blue");
 
         // Using the variable in inline-css is handy with enums
-        LumoProps.primaryColor50pct.define("cyan");
-        h1.getStyle().setColor(LumoProps.primaryColor.var());
-        h1.getStyle().setBackground(LumoProps.primaryColor50pct.var());
+        LumoProps.PRIMARY_COLOR_50PCT.define("cyan");
+        h1.getStyle().setColor(LumoProps.PRIMARY_COLOR.var());
+        h1.getStyle().setBackground(LumoProps.PRIMARY_COLOR_50PCT.var());
     }
 }
