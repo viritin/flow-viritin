@@ -38,7 +38,7 @@ public class TreeTableView extends VerticalLayout {
          * bad idea, and caching to memory would be more efficient,
          * but written here as an academical example...
          */
-        boolean lazyload = false;
+        boolean lazyload = true;
         if (lazyload) {
             MyTreeModel model = new MyTreeModel();
             treeGrid.setTreeTableModel(model);
@@ -90,6 +90,10 @@ public class TreeTableView extends VerticalLayout {
         hierarchyColumn.setFlexGrow(4);
 
         add(treeGrid);
+
+        add(new Button("Scroll to item", e -> {
+            treeGrid.scrollToItem(root.resolve("org/vaadin/firitin/components/TreeTable.java"));
+        }));
     }
 
     private void previewContent(Path p) {
