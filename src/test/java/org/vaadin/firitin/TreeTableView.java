@@ -78,7 +78,7 @@ public class TreeTableView extends VerticalLayout {
             return treeGrid.getLeafModel().isLeaf(p) ? "" + "File" : "Directory";
         }).setHeader("Type");
         treeGrid.addColumn(p -> {
-            return "" + treeGrid.getDepthModel().getDepth(p);
+            return "" + treeGrid.getDepthModel().getLevel(p);
         }).setHeader("Depth");
         treeGrid.addColumn(p -> p.toFile().length()).setHeader("Size");
 
@@ -224,7 +224,7 @@ public class TreeTableView extends VerticalLayout {
         }
 
         @Override
-        public int getDepth(Path item) {
+        public int getLevel(Path item) {
             int depth = 0;
             Path parent = item.getParent();
             while (!parent.equals(root)) {

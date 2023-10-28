@@ -44,7 +44,7 @@ import java.util.function.Function;
  * Alternatively, you can provide the data in lazy loading mode with {@link #setItems(CallbackDataProvider.FetchCallback)}
  * or {@link #setItems(CallbackDataProvider.FetchCallback, CallbackDataProvider.CountCallback)}.
  * With these methods you will also need to define {@link TreeTableModel}
- * (or at least {@link LeafModel} & {@link DepthModel} separately) that
+ * (or at least {@link LeafModel} & {@link LevelModel} separately) that
  * Grid uses to visualise the hierarchy. At least {@link OpenModel} should be
  * instance specific! The fetch callbacks need to take the current expanded state
  * into account and return visible subtrees as defined by the {@link OpenModel}.
@@ -63,7 +63,7 @@ public class TreeTable<T> extends VGrid<T> {
 
     private OpenModel<T> openModel;
     private LeafModel<T> leafModel;
-    private DepthModel<T> depthModel;
+    private LevelModel<T> levelModel;
     private List<T> rootItems;
     private SerializableFunction<T, List<T>> childrenProvider;
 
@@ -85,8 +85,8 @@ public class TreeTable<T> extends VGrid<T> {
 
     /**
      * Sets the tree table model (a combination of {@link OpenModel},
-     * {@link LeafModel} and {@link DepthModel}. This (or separately
-     * {@link LeafModel} and {@link DepthModel}) must be set in case the
+     * {@link LeafModel} and {@link LevelModel}. This (or separately
+     * {@link LeafModel} and {@link LevelModel}) must be set in case the
      * rows are passed in with the lazy loading mode (using either
      * {@link #setItems(com.vaadin.flow.data.provider.CallbackDataProvider.FetchCallback)} or
      * {@link #setItems(com.vaadin.flow.data.provider.CallbackDataProvider.FetchCallback, com.vaadin.flow.data.provider.CallbackDataProvider.CountCallback)}).
@@ -96,7 +96,7 @@ public class TreeTable<T> extends VGrid<T> {
     public void setTreeTableModel(TreeTableModel model) {
         this.openModel = model;
         this.leafModel = model;
-        this.depthModel = model;
+        this.levelModel = model;
     }
 
     /**
@@ -104,7 +104,7 @@ public class TreeTable<T> extends VGrid<T> {
      * You only need to provide the root items and a method to retrieve children for each item.
      * TreeTable will then automatically load all children recursively, when needed.
      * <p>
-     * When using this method, customizing {@link LeafModel} or {@link DepthModel}
+     * When using this method, customizing {@link LeafModel} or {@link LevelModel}
      * is not needed nor supported. If you want, you can override the default
      * in-memory {@link OpenModel} that keeps all items closed by default.
      * </p>
@@ -145,17 +145,17 @@ public class TreeTable<T> extends VGrid<T> {
         this.openModel = openModel;
     }
 
-    public DepthModel<T> getDepthModel() {
-        assert depthModel != null;
-        return depthModel;
+    public LevelModel<T> getDepthModel() {
+        assert levelModel != null;
+        return levelModel;
     }
 
-    public void setDepthModel(DepthModel<T> depthModel) {
-        this.depthModel = depthModel;
+    public void setDepthModel(LevelModel<T> levelModel) {
+        this.levelModel = levelModel;
     }
 
     public LeafModel<T> getLeafModel() {
-        assert depthModel != null;
+        assert levelModel != null;
         return leafModel;
     }
 
@@ -259,11 +259,11 @@ public class TreeTable<T> extends VGrid<T> {
         boolean isLeaf(T item);
     }
 
-    public interface DepthModel<T> {
-        int getDepth(T item);
+    public interface LevelModel<T> {
+        int getLevel(T item);
     }
 
-    public interface TreeTableModel<T> extends OpenModel<T>, LeafModel<T>, DepthModel<T> {
+    public interface TreeTableModel<T> extends OpenModel<T>, LeafModel<T>, LevelModel<T> {
 
     }
 
@@ -293,7 +293,7 @@ public class TreeTable<T> extends VGrid<T> {
             if (open) {
                 getElement().setProperty("expanded", open);
             }
-            int depth = TreeTable.this.getDepthModel().getDepth(item);
+            int depth = TreeTable.this.getDepthModel().getLevel(item);
             getElement().setProperty("level", depth);
             getElement().setProperty("leaf", TreeTable.this.getLeafModel().isLeaf(item));
             // for some reason this gets called for a lot of items, so let's do it lazily
