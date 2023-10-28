@@ -118,19 +118,19 @@ public class TreeTable<T> extends VGrid<T> {
         reloadData();
     }
 
-    private void addChildrenRecursively(T rootItem, Map<T, Integer> depthMap, MutableInt depth, Function<T, List<T>> childrenProvider, List<T> visibleRows) {
+    private void addChildrenRecursively(T rootItem, Map<T, Integer> levelMap, MutableInt level, Function<T, List<T>> childrenProvider, List<T> visibleRows) {
         if (getOpenModel().isOpen(rootItem) == false) {
             return;
         }
         List<T> children = childrenProvider.apply(rootItem);
         if (children != null) {
-            depth.inc();
+            level.inc();
             for (T child : children) {
                 visibleRows.add(child);
-                depthMap.put(child, depth.intValue());
-                addChildrenRecursively(child, depthMap, depth, childrenProvider, visibleRows);
+                levelMap.put(child, level.intValue());
+                addChildrenRecursively(child, levelMap, level, childrenProvider, visibleRows);
             }
-            depth.dec();
+            level.dec();
         }
     }
 
@@ -145,12 +145,12 @@ public class TreeTable<T> extends VGrid<T> {
         this.openModel = openModel;
     }
 
-    public LevelModel<T> getDepthModel() {
+    public LevelModel<T> getLevelModel() {
         assert levelModel != null;
         return levelModel;
     }
 
-    public void setDepthModel(LevelModel<T> levelModel) {
+    public void setLevelModel(LevelModel<T> levelModel) {
         this.levelModel = levelModel;
     }
 
@@ -170,15 +170,15 @@ public class TreeTable<T> extends VGrid<T> {
         } else {
             // in-memory mode, rebuild visible rows from root items
             List<T> visibleRows = new ArrayList<>();
-            Map<T, Integer> depthMap = new HashMap<>();
-            MutableInt depth = new MutableInt(0);
+            Map<T, Integer> levelMap = new HashMap<>();
+            MutableInt level = new MutableInt(0);
             // add all root items and their children recursively
             for (T rootItem : rootItems) {
                 visibleRows.add(rootItem);
-                depthMap.put(rootItem, depth.intValue());
-                addChildrenRecursively(rootItem, depthMap, depth, childrenProvider, visibleRows);
+                levelMap.put(rootItem, level.intValue());
+                addChildrenRecursively(rootItem, levelMap, level, childrenProvider, visibleRows);
             }
-            setDepthModel(item -> depthMap.get(item));
+            setLevelModel(item -> levelMap.get(item));
             setLeafModel(item -> childrenProvider.apply(item).isEmpty());
             super.setItems(visibleRows);
         }
@@ -293,8 +293,8 @@ public class TreeTable<T> extends VGrid<T> {
             if (open) {
                 getElement().setProperty("expanded", open);
             }
-            int depth = TreeTable.this.getDepthModel().getLevel(item);
-            getElement().setProperty("level", depth);
+            int level = TreeTable.this.getLevelModel().getLevel(item);
+            getElement().setProperty("level", level);
             getElement().setProperty("leaf", TreeTable.this.getLeafModel().isLeaf(item));
             // for some reason this gets called for a lot of items, so let's do it lazily
             // Also Grid internals seems to catch this (and recycle element 🤔) and force loading items

@@ -78,7 +78,7 @@ public class TreeTableView extends VerticalLayout {
             return treeGrid.getLeafModel().isLeaf(p) ? "" + "File" : "Directory";
         }).setHeader("Type");
         treeGrid.addColumn(p -> {
-            return "" + treeGrid.getDepthModel().getLevel(p);
+            return "" + treeGrid.getLevelModel().getLevel(p);
         }).setHeader("Depth");
         treeGrid.addColumn(p -> p.toFile().length()).setHeader("Size");
 
