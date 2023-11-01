@@ -7,13 +7,25 @@ import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
-import org.vaadin.firitin.fluency.ui.*;
+import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.dom.Style;
+import org.vaadin.firitin.fluency.ui.FluentComponent;
+import org.vaadin.firitin.fluency.ui.FluentFocusable;
+import org.vaadin.firitin.fluency.ui.FluentHasSize;
+import org.vaadin.firitin.fluency.ui.FluentHasStyle;
+import org.vaadin.firitin.fluency.ui.FluentHasTheme;
+import org.vaadin.firitin.util.VStyleUtil;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 public class VGrid<T> extends Grid<T>
@@ -30,6 +42,11 @@ public class VGrid<T> extends Grid<T>
 
     public VGrid(Class<T> beanType) {
         super(beanType);
+    }
+
+    @Override
+    protected BiFunction<Renderer<T>, String, Column<T>> getDefaultColumnFactory() {
+        return (tRenderer, s) -> new VColumn<>(VGrid.this, s, tRenderer);
     }
 
     public VGrid<T> withSelectionMode(Grid.SelectionMode selectionMode) {
@@ -122,17 +139,137 @@ public class VGrid<T> extends Grid<T>
         // TODO figure out a good way to set proper margin right, now hardcoded to 16px
         // TODO figure out a good way set previous column margin, in case it is hidden
         b.getElement().executeJs("""
-        const el = this;
-        setTimeout(() => {
-            const w = el.offsetWidth;
-            el.parentElement.style.overflow = "visible";
-            el.parentElement.previousSibling.style.marginRight = (w - 16) + "px";
-            el.style.setProperty('margin-left', '-' + (w+16) + 'px');
-        }, 0);
-        """);
+                const el = this;
+                setTimeout(() => {
+                    const w = el.offsetWidth;
+                    el.parentElement.style.overflow = "visible";
+                    el.parentElement.previousSibling.style.marginRight = (w - 16) + "px";
+                    el.style.setProperty('margin-left', '-' + (w+16) + 'px');
+                }, 0);
+                """);
         columnSelector.setTarget(b);
         columnSelector.setOpenOnClick(true);
         fakeColumn.setHeader(b);
         return this;
+    }
+
+    public static class VColumn<T> extends Column<T> {
+
+        private Style customStyle;
+
+        /**
+         * Constructs a new Column for use inside a Grid.
+         *
+         * @param grid     the grid this column is attached to
+         * @param columnId unique identifier of this column
+         * @param renderer the renderer to use in this column, must not be
+         *                 {@code null}
+         */
+        public VColumn(Grid<T> grid, String columnId, Renderer<T> renderer) {
+            super(grid, columnId, renderer);
+        }
+
+        @Override
+        public Style getStyle() {
+            // super implementation is completely useless
+
+            if(customStyle != null) {
+                return customStyle;
+            }
+
+            int indexOfColumn = getGrid().getColumns().indexOf(this);
+
+            customStyle = new Style(){
+                String partName = UUID.randomUUID().toString().replaceAll("[0-9-]", "a");
+
+                private LinkedHashMap<String, String> styles = new LinkedHashMap<>();
+
+                private boolean deferred;
+
+                @Override
+                public String get(String s) {
+                    return null;
+                }
+
+                @Override
+                public Style set(String s, String s1) {
+                    styles.put(s, s1);
+                    deferredApply();
+                    return this;
+                }
+
+                private void deferredApply() {
+                    if(!deferred) {
+                        String headerText = getHeaderText();
+                        if(headerText != null) {
+                            setHeader(new Span(headerText));
+                        }
+                        if(getHeaderComponent() != null) {
+                            getHeaderComponent().addClassName(partName + "-hc");
+                        }
+                        getGrid().getElement().getNode().runWhenAttached(ui -> doApply());
+                        deferred = true;
+                    }
+                }
+
+                /** For the header we are adding the Style rules for th and the header component/text to make it easier to override default styles with strong selectors. Some rules are harmful here though, like outline/border etc */
+                private static final String[] harmfulAsDuplicate = new String[] {
+                        "border", "outline", "padding", "margin", "zoom"
+                };
+
+                private void doApply() {
+                    // This is important, TODO, optimize
+                    setPartNameGenerator(p -> partName);
+
+                    getGrid().getElement().executeJs("const g = this; setTimeout(() => {g.shadowRoot.querySelector('th:nth-child(" + (indexOfColumn + 1) + ")').part.add('" + partName + "');}, 1);");
+
+                    StringBuilder cellCssBody = new StringBuilder();
+                    StringBuilder headerContentCssBody = new StringBuilder();
+                    styles.forEach((k, v) -> {
+                        cellCssBody.append("%s: %s;".formatted(k, v));
+                        if(Arrays.stream(harmfulAsDuplicate).noneMatch(k::contains)) {
+                            headerContentCssBody.append("%s: %s;".formatted(k, v));
+                        }
+                    });
+                    VStyleUtil.inject("""
+                            vaadin-grid::part(%s) {
+                                %s
+                            }
+                            .%s-hc {
+                                %s
+                            }
+                            """.formatted(
+                                    partName,
+                                    cellCssBody.toString(),
+                                    partName,
+                                    headerContentCssBody.toString())
+                    );
+                }
+
+                @Override
+                public Style remove(String s) {
+                    styles.remove(s);
+                    return this;
+                }
+
+                @Override
+                public Style clear() {
+                    customStyle.clear();
+                    return this;
+                }
+
+                @Override
+                public boolean has(String s) {
+                    return customStyle.has(s);
+                }
+
+                @Override
+                public Stream<String> getNames() {
+                    return customStyle.getNames();
+                }
+            };
+
+            return customStyle;
+        }
     }
 }
