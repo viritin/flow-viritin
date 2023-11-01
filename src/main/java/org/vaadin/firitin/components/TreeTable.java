@@ -68,6 +68,7 @@ public class TreeTable<T> extends VGrid<T> {
     private LevelModel<T> levelModel;
     private List<T> rootItems;
     private SerializableFunction<T, List<T>> childrenProvider;
+    private boolean allowUserToToggleOpenState = true;
 
     public Column<T> addHierarchyColumn(SerializableFunction<T, String> valueProvider) {
         return addComponentColumn(item -> {
@@ -250,6 +251,10 @@ public class TreeTable<T> extends VGrid<T> {
         return super.setItems(items);
     }
 
+    public void allowUserToToggleOpenState(boolean allow) {
+        this.allowUserToToggleOpenState = allow;
+    }
+
     public interface OpenModel<T> {
         boolean isOpen(T item);
 
@@ -330,14 +335,24 @@ public class TreeTable<T> extends VGrid<T> {
             // so a hack with checking the value is really needed
             getElement().executeJs("""
                         var el = this;
+                        const allowToggling = %s;
+                        const open = %s;
                         setTimeout(function() {
                             el.addEventListener('expanded-changed', function(e) {
-                                var open = %s;
-                                if(el.expanded != open)
-                                    el.$server.onExpandedChanged();
+                                if(allowToggling) {
+                                    if(el.expanded != open)
+                                        el.$server.onExpandedChanged();
+                                } else {
+                                    el.expanded = open;
+                                }
+                                e.stopPropagation();
                             });
+                            if(!allowToggling) {
+                                // override hover color, TODO figure out a better way...
+                                el.shadowRoot.querySelector("span[part='toggle']").style.color = "var(--lumo-contrast-50pct)";
+                            }
                         }, 100);
-                    """.formatted(open));
+                    """.formatted(allowUserToToggleOpenState, open));
         }
 
         @ClientCallable

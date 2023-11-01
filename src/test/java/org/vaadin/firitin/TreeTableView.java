@@ -49,8 +49,10 @@ public class TreeTableView extends VerticalLayout {
                 return MyService.streamPaths(offset, limit, model);
             });
         } else {
-            // Alternative API without lazy loading. Uses more memory, but simpler
             // treeGrid.setOpenModel(new TreeTable.ClosedByDefault<>());
+            // treeGrid.allowUserToToggleOpenState(false);
+
+            // Alternative API without lazy loading. Uses more memory, but simpler
             List<Path> rootItems = MyService.rootItems();
             treeGrid.setRootItems(rootItems, p -> {
                 try {
