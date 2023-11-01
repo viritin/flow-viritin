@@ -16,6 +16,7 @@
 package org.vaadin.firitin;
 
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
 import org.vaadin.firitin.components.grid.VGrid;
 import org.vaadin.firitin.testdomain.Person;
@@ -37,8 +38,17 @@ public class Grids extends VerticalLayout {
         Person somePerson = list.get(700);
 
         VGrid<Person> grid = new VGrid<>(Person.class);
-
         grid.setItems(list);
+
+        var col = grid.getColumnByKey("firstName")
+                .setHeader("FIRSTI")
+                .getStyle()
+                    .setBackground("red")
+                    .setColor("white")
+                    .setFont("bold 20px Arial")
+                    .setTextAlign(Style.TextAlign.RIGHT)
+                    .setOutline("2px dotted black")
+        ;
 
         grid.scrollToItem(somePerson);
         add(grid);
@@ -50,6 +60,12 @@ public class Grids extends VerticalLayout {
                 query.getOffset(),
                 Math.min(list.size(), query.getOffset() + query.getLimit())
         ).stream());
+
+
+        VGrid.VColumn<Person> col2 = (VGrid.VColumn<Person>) lazyLoaded.getColumnByKey("firstName");
+                col2.getStyle().set("color", "red");
+        col2.setHeader("First");
+
 
         lazyLoaded.scrollToItem(somePerson);
         add(lazyLoaded);
