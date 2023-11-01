@@ -38,7 +38,7 @@ public class TreeTableView extends VerticalLayout {
          * bad idea, and caching to memory would be more efficient,
          * but written here as an academical example...
          */
-        boolean lazyload = true;
+        boolean lazyload = false;
         if (lazyload) {
             MyTreeModel model = new MyTreeModel();
             treeGrid.setTreeTableModel(model);
@@ -50,6 +50,7 @@ public class TreeTableView extends VerticalLayout {
             });
         } else {
             // Alternative API without lazy loading. Uses more memory, but simpler
+            // treeGrid.setOpenModel(new TreeTable.ClosedByDefault<>());
             List<Path> rootItems = MyService.rootItems();
             treeGrid.setRootItems(rootItems, p -> {
                 try {
@@ -94,6 +95,7 @@ public class TreeTableView extends VerticalLayout {
         add(new Button("Scroll to item", e -> {
             treeGrid.scrollToItem(root.resolve("org/vaadin/firitin/components/TreeTable.java"));
         }));
+
     }
 
     private void previewContent(Path p) {
@@ -201,7 +203,7 @@ public class TreeTableView extends VerticalLayout {
 
         /*
          * Note, for OpenModel there is a default in-memory
-         * implementation, but inverting that behavior here. In some cases
+         * implementation. In some cases
          * might be simpler to provide only LeafModel and DepthModel.
          */
         @Override

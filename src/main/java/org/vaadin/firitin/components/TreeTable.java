@@ -19,8 +19,10 @@ import org.vaadin.firitin.components.grid.VGrid;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -119,24 +121,23 @@ public class TreeTable<T> extends VGrid<T> {
     }
 
     private void addChildrenRecursively(T rootItem, Map<T, Integer> levelMap, MutableInt level, Function<T, List<T>> childrenProvider, List<T> visibleRows) {
-        if (getOpenModel().isOpen(rootItem) == false) {
-            return;
-        }
-        List<T> children = childrenProvider.apply(rootItem);
-        if (children != null) {
-            level.inc();
-            for (T child : children) {
-                visibleRows.add(child);
-                levelMap.put(child, level.intValue());
-                addChildrenRecursively(child, levelMap, level, childrenProvider, visibleRows);
+        if (getOpenModel().isOpen(rootItem)) {
+            List<T> children = childrenProvider.apply(rootItem);
+            if (children != null) {
+                level.inc();
+                for (T child : children) {
+                    visibleRows.add(child);
+                    levelMap.put(child, level.intValue());
+                    addChildrenRecursively(child, levelMap, level, childrenProvider, visibleRows);
+                }
+                level.dec();
             }
-            level.dec();
         }
     }
 
     public OpenModel<T> getOpenModel() {
         if (openModel == null) {
-            openModel = new InMemoryOpenModel();
+            openModel = new OpenByDefault();
         }
         return openModel;
     }
@@ -267,17 +268,47 @@ public class TreeTable<T> extends VGrid<T> {
 
     }
 
-    public class InMemoryOpenModel implements OpenModel<T> {
-        private final HashMap<T, Boolean> openMap = new HashMap<>();
+    public static class OpenByDefault<T> implements OpenModel<T> {
+        private final Set<T> closed = new HashSet<>();
+
+        public Set<T> getClosed() {
+            return closed;
+        }
 
         @Override
         public boolean isOpen(T item) {
-            return openMap.getOrDefault(item, false);
+            return !closed.contains(item);
         }
 
         @Override
         public void setOpen(T item, boolean open) {
-            openMap.put(item, open);
+            if (open) {
+                closed.remove(item);
+            } else {
+                closed.add(item);
+            }
+        }
+    }
+
+    public static class ClosedByDefault<T> implements OpenModel<T> {
+        private final Set<T> open = new HashSet<>();
+
+        public Set<T> getOpen() {
+            return open;
+        }
+
+        @Override
+        public boolean isOpen(T item) {
+            return open.contains(item);
+        }
+
+        @Override
+        public void setOpen(T item, boolean open) {
+            if (open) {
+                this.open.add(item);
+            } else {
+                this.open.remove(item);
+            }
         }
     }
 
@@ -290,9 +321,7 @@ public class TreeTable<T> extends VGrid<T> {
         public HierarchyColumnWrapper(T item) {
             this.item = item;
             boolean open = TreeTable.this.getOpenModel().isOpen(item);
-            if (open) {
-                getElement().setProperty("expanded", open);
-            }
+            getElement().setProperty("expanded", open);
             int level = TreeTable.this.getLevelModel().getLevel(item);
             getElement().setProperty("level", level);
             getElement().setProperty("leaf", TreeTable.this.getLeafModel().isLeaf(item));
