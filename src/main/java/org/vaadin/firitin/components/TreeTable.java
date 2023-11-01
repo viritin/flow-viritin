@@ -46,7 +46,7 @@ import java.util.function.Function;
  * Alternatively, you can provide the data in lazy loading mode with {@link #setItems(CallbackDataProvider.FetchCallback)}
  * or {@link #setItems(CallbackDataProvider.FetchCallback, CallbackDataProvider.CountCallback)}.
  * With these methods you will also need to define {@link TreeTableModel}
- * (or at least {@link LeafModel} & {@link LevelModel} separately) that
+ * (or at least {@link LeafModel} and {@link LevelModel} separately) that
  * Grid uses to visualise the hierarchy. At least {@link OpenModel} should be
  * instance specific! The fetch callbacks need to take the current expanded state
  * into account and return visible subtrees as defined by the {@link OpenModel}.
@@ -189,7 +189,7 @@ public class TreeTable<T> extends VGrid<T> {
     /**
      * Not supported in TreeTable, use setRootItems or setItems instead
      *
-     * @inheritDoc
+     *
      */
     @Deprecated
     @Override
@@ -200,7 +200,6 @@ public class TreeTable<T> extends VGrid<T> {
     /**
      * Not supported in TreeTable, use setRootItems or setItems instead
      *
-     * @inheritDoc
      */
     @Deprecated
     public GridDataView<T> setItems(InMemoryDataProvider<T> inMemoryDataProvider) {
@@ -210,7 +209,6 @@ public class TreeTable<T> extends VGrid<T> {
     /**
      * Not supported in TreeTable, use setRootItems or setItems instead
      *
-     * @inheritDoc
      */
     @Deprecated
     @Override
@@ -221,7 +219,6 @@ public class TreeTable<T> extends VGrid<T> {
     /**
      * Not supported in TreeTable, use setRootItems or setItems instead
      *
-     * @inheritDoc
      */
     @Deprecated
     @Override
@@ -232,7 +229,6 @@ public class TreeTable<T> extends VGrid<T> {
     /**
      * Not supported in TreeTable, use setRootItems or setItems instead
      *
-     * @inheritDoc
      */
     @Deprecated
     @Override
@@ -243,7 +239,6 @@ public class TreeTable<T> extends VGrid<T> {
     /**
      * Not supported in TreeTable, use setRootItems or setItems instead
      *
-     * @inheritDoc
      */
     @Deprecated
     @Override
