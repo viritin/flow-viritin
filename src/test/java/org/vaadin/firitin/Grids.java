@@ -62,10 +62,13 @@ public class Grids extends VerticalLayout {
         ).stream());
 
 
-        VGrid.VColumn<Person> col2 = (VGrid.VColumn<Person>) lazyLoaded.getColumnByKey("firstName");
-                col2.getStyle().set("color", "red");
+        var col2 = lazyLoaded.getColumnByKey("firstName");
+        col2.getStyle().set("color", "red");
         col2.setHeader("First");
 
+        // This should now re-use the style element for "color: red"
+        // and recycle that for both columns
+        lazyLoaded.getColumnByKey("lastName").getStyle().set("color", "red");
 
         lazyLoaded.scrollToItem(somePerson);
         add(lazyLoaded);

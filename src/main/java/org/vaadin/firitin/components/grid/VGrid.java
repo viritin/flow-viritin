@@ -22,8 +22,9 @@ import org.vaadin.firitin.util.VStyleUtil;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.UUID;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
@@ -31,6 +32,8 @@ import java.util.stream.Stream;
 public class VGrid<T> extends Grid<T>
         implements FluentComponent<VGrid<T>>, FluentHasStyle<VGrid<T>>, FluentHasSize<VGrid<T>>,
         FluentFocusable<Grid<T>, VGrid<T>>, FluentHasTheme<VGrid<T>> {
+
+    private Set<String> columnCssKeys;
 
     public VGrid() {
         super();
@@ -173,17 +176,19 @@ public class VGrid<T> extends Grid<T>
         public Style getStyle() {
             // super implementation is completely useless
 
-            if(customStyle != null) {
+            if (customStyle != null) {
                 return customStyle;
             }
 
             int indexOfColumn = getGrid().getColumns().indexOf(this);
 
-            customStyle = new Style(){
-                String partName = UUID.randomUUID().toString().replaceAll("[0-9-]", "a");
+            customStyle = new Style() {
 
-                private LinkedHashMap<String, String> styles = new LinkedHashMap<>();
-
+                /** For the header we are adding the Style rules for th and the header component/text to make it easier to override default styles with strong selectors. Some rules are harmful here though, like outline/border etc */
+                private static final String[] harmfulAsDuplicate = new String[]{
+                        "border", "outline", "padding", "margin", "zoom"
+                };
+                private TreeMap<String, String> styles = new TreeMap<>();
                 private boolean deferred;
 
                 @Override
@@ -199,39 +204,45 @@ public class VGrid<T> extends Grid<T>
                 }
 
                 private void deferredApply() {
-                    if(!deferred) {
-                        String headerText = getHeaderText();
-                        if(headerText != null) {
-                            setHeader(new Span(headerText));
-                        }
-                        if(getHeaderComponent() != null) {
-                            getHeaderComponent().addClassName(partName + "-hc");
-                        }
+                    if (!deferred) {
                         getGrid().getElement().getNode().runWhenAttached(ui -> doApply());
                         deferred = true;
                     }
                 }
 
-                /** For the header we are adding the Style rules for th and the header component/text to make it easier to override default styles with strong selectors. Some rules are harmful here though, like outline/border etc */
-                private static final String[] harmfulAsDuplicate = new String[] {
-                        "border", "outline", "padding", "margin", "zoom"
-                };
-
                 private void doApply() {
-                    // This is important, TODO, optimize
-                    setPartNameGenerator(p -> partName);
-
-                    getGrid().getElement().executeJs("const g = this; setTimeout(() => {g.shadowRoot.querySelector('th:nth-child(" + (indexOfColumn + 1) + ")').part.add('" + partName + "');}, 1);");
-
                     StringBuilder cellCssBody = new StringBuilder();
                     StringBuilder headerContentCssBody = new StringBuilder();
                     styles.forEach((k, v) -> {
                         cellCssBody.append("%s: %s;".formatted(k, v));
-                        if(Arrays.stream(harmfulAsDuplicate).noneMatch(k::contains)) {
+                        if (Arrays.stream(harmfulAsDuplicate).noneMatch(k::contains)) {
                             headerContentCssBody.append("%s: %s;".formatted(k, v));
                         }
                     });
-                    VStyleUtil.inject("""
+                    String cellCssBodyString = cellCssBody.toString();
+                    // part/class name unique for the similar style rules
+                    // if 5 cols are mady with same style, they will share the same style element
+                    // currently grid wide optimisation, could be per UI as well
+                    String key = "dynstyle" + cellCssBodyString.hashCode();
+
+                    String headerText = getHeaderText();
+                    if (headerText != null) {
+                        setHeader(new Span(headerText));
+                    }
+                    if (getHeaderComponent() != null) {
+                        getHeaderComponent().addClassName(key + "-hc");
+                    }
+                    setPartNameGenerator(p -> key);
+
+                    getGrid().getElement().executeJs("const g = this; setTimeout(() => {g.shadowRoot.querySelector('th:nth-child(" + (indexOfColumn + 1) + ")').part.add('" + key + "');}, 1);");
+
+                    VGrid grid = findAncestor(VGrid.class);
+                    if (grid.columnCssKeys == null) {
+                        grid.columnCssKeys = new HashSet<>();
+                    }
+                    boolean newRule = grid.columnCssKeys.add(key);
+                    if(newRule) {
+                        VStyleUtil.inject("""
                             vaadin-grid::part(%s) {
                                 %s
                             }
@@ -239,11 +250,12 @@ public class VGrid<T> extends Grid<T>
                                 %s
                             }
                             """.formatted(
-                                    partName,
-                                    cellCssBody.toString(),
-                                    partName,
-                                    headerContentCssBody.toString())
-                    );
+                                key,
+                                cellCssBodyString,
+                                key,
+                                headerContentCssBody.toString())
+                        );
+                    }
                 }
 
                 @Override
