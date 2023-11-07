@@ -1,5 +1,6 @@
 package org.vaadin.firitin;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -32,10 +33,13 @@ public class LumoPropsView extends VerticalLayout {
     }
 
     private static void styleMyView(VerticalLayout layout, H1 h1) {
-        // "trivial" enum implementation: easy to maintain
-        LumoProps.FONT_FAMILY.define(layout, "roboto");
         // Global (UI) scope
         LumoProps.PRIMARY_COLOR.define("green");
+        //... and the same in core API
+        // UI.getCurrent().getStyle().set("--lumo-primary-color", "green");
+
+        // Component scope
+        LumoProps.FONT_FAMILY.define(layout, "roboto");
         LumoProps.PRIMARY_COLOR.define(layout, "red");
         LumoProps.HEADER_TEXT_COLOR.define(layout, "blue");
 
@@ -43,5 +47,6 @@ public class LumoPropsView extends VerticalLayout {
         LumoProps.PRIMARY_COLOR_50PCT.define("cyan");
         h1.getStyle().setColor(LumoProps.PRIMARY_COLOR.var());
         h1.getStyle().setBackground(LumoProps.PRIMARY_COLOR_50PCT.var());
+
     }
 }
