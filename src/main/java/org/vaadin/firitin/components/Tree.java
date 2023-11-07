@@ -15,8 +15,20 @@
  */
 package org.vaadin.firitin.components;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.function.SerializableFunction;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -26,97 +38,17 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.ItemLabelGenerator;
-import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.dependency.StyleSheet;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.provider.hierarchy.TreeData;
-import com.vaadin.flow.function.SerializableFunction;
-
 /**
  * A Tree component to display hierarchical data sets.
  *
- * @author mstahv
  * @param <T> the type of items listed as nodes of Tree. Use Object if nothing
- *            else.
+ * else.
+ * @author mstahv
  */
 @StyleSheet("context://frontend/org/vaadin/firitin/components/tree.css")
 public class Tree<T> extends Composite<VerticalLayout> {
 
     private static final long serialVersionUID = -927074586817131378L;
-
-    /**
-     * This can be used to further configure the created TreeItem instances. For
-     * example to add additional click listeners or context menus.
-     *
-     * @author mstahv
-     *
-     * @param <T> the type of items in the Tree
-     */
-    public interface ItemDecorator<T> extends BiConsumer<T, TreeItem>, Serializable {
-
-    }
-
-    /**
-     * A listener to track when the selected node is changed.
-     *
-     * @author mstahv
-     *
-     * @param <T> the type of the selected domain object
-     */
-    @FunctionalInterface
-    public interface SelectionListener<T> extends Serializable {
-        public void selected(T selected, TreeItem item);
-    }
-
-    /**
-     * {@link ItemIconGenerator} can be used to customize the icon shown before the
-     * label of an item.
-     *
-     * @param <T> item type
-     * @author Vaadin Ltd
-     * @since 1.0
-     */
-    @FunctionalInterface
-    public interface ItemIconGenerator<T> extends SerializableFunction<T, Component> {
-
-        /**
-         * Gets a icon for the {@code item}.
-         *
-         * @param item the item to get icon for
-         * @return the icon of the item, not {@code null}
-         */
-        @Override
-        Component apply(T item);
-    }
-
-    /**
-     * {@link ItemGenerator} can be used to customize how to item is shown. This
-     * overrides everything. If for example {@link ItemLabelGenerator} or
-     * {@link ItemIconGenerator} are defined, they are ignored.
-     *
-     * @param <T> item type
-     * @author Vaadin Ltd
-     * @since 1.0
-     */
-    @FunctionalInterface
-    public interface ItemGenerator<T> extends SerializableFunction<T, Component> {
-
-        /**
-         * Gets a component for the {@code item}.
-         *
-         * @param item the item
-         * @return the component for the item, not {@code null}
-         */
-        @Override
-        Component apply(T item);
-    }
-
     private ItemLabelGenerator<T> itemLabelGenerator = o -> o.toString();
     private ItemIconGenerator<T> itemIconGenerator;
     private ItemGenerator<T> itemGenerator = item -> {
@@ -131,11 +63,9 @@ public class Tree<T> extends Composite<VerticalLayout> {
             return new Span(itemToString(item));
         }
     };
-
     private List<ItemDecorator<T>> itemDecorators = new ArrayList<>();
     private Set<SelectionListener<T>> selectionListeners = new LinkedHashSet<>();
     private HashMap<T, TreeItem> domainObjectToTreeItem = new HashMap<>();
-
     private TreeItem selectedItem;
 
     public Tree() {
@@ -148,17 +78,24 @@ public class Tree<T> extends Composite<VerticalLayout> {
         return itemLabelGenerator.apply(item);
     }
 
-    @FunctionalInterface
-    public interface ChildrenProvider<T> {
-
-        /**
-         * @param parent the item whose children are to be provided
-         * @return list of children or null if parent is is a leaf node.
-         */
-        List<T> getChildren(T parent);
-    }
-
-    public void setItems(List<T> rootNodes, ChildrenProvider<T> childrenProvider) {
+    /**
+     * Sets the root nodes for the tree with a strategy to fetch children for
+     * items (recursively). The nodes will be closed by default and tree
+     * structure will be populated lazily when nodes are opened.
+     * <p>
+     * Code example:
+     * </p>
+     *
+     * <pre>
+     *   List&lt;Dude&gt; rootNodes = getRootNodes();
+     *   dudeTree.setItems(rootNodes, Dude::getSubordinates);
+     *   dudeTree.showChildrenRecursively(rootNodes.get(0));
+     * </pre>
+     *
+     * @param rootNodes the items to be shown in the Tree at the root level
+     * @param childrenProvider the strategy to fetch children from the nodes
+     */
+    public void setItems(List<? extends T> rootNodes, ChildrenProvider<T> childrenProvider) {
         for (T item : rootNodes) {
             final TreeItem treeItem = createTreeItem(item);
             getContent().add(treeItem);
@@ -166,10 +103,113 @@ public class Tree<T> extends Composite<VerticalLayout> {
         }
     }
 
+    /**
+     * Sets the root node for the tree with a strategy to fetch children for
+     * items (recursively). The nodes will be closed by default and tree
+     * structure will be populated lazily when nodes are opened.
+     * <p>
+     * Code example:
+     * </p>
+     *
+     * <pre>
+     *   dudeTree.setItems(dude, Dude::getSubordinates);
+     *   dudeTree.showChildrenRecursively(dude);
+     * </pre>
+     *
+     * @param rootNode the item to be shown in the Tree at the root level
+     * @param childrenProvider the strategy to fetch children from the nodes
+     */
+    public void setItems(T rootNode, ChildrenProvider<T> childrenProvider) {
+        Tree.this.setItems(Arrays.asList(rootNode), childrenProvider);
+    }
+
+    /**
+     * Sets root items with multiple children providers used to fetch
+     * sub-sequent levels. This approach is handy if the hierarchy in the Tree
+     * comes from class hierarchy (different levels are different Java classes).
+     * The T type of the Tree in this case needs to be some common super type of
+     * the classes (java.lang.Object if no other exist).
+     *
+     * <p>
+     * Code example:
+     * </p>
+     *
+     * <pre>
+     *  Tree&lt;AbstractPlace&gt; tree = new Tree&lt;&gt;();
+     *  tree.setItemLabelGenerator(AbstractPlace::getName);
+     *  tree.seItems(cities,
+     *          (Tree.ChildrenProvider&lt;City&gt;) c -&gt; c.getStreets(),
+     *          (Tree.ChildrenProvider&lt;Street&gt;) s -&gt; s.getHouses()
+     *   );
+     * </pre>
+     *
+     * @param roots root items in the Tree
+     * @param providersForNextLevels the children providers for next levels of
+     * tree, that fetch the children for given item representing the tree node.
+     */
+    public void setItems(List<? extends T> roots, ChildrenProvider<? extends T>... providersForNextLevels) {
+        for (T item : roots) {
+            final TreeItem treeItem = createTreeItem(item);
+            getContent().add(treeItem);
+            fillWithProviders(0, item, treeItem, providersForNextLevels);
+        }
+    }
+
+    /**
+     * Sets root item with multiple children providers used to fetch sub-sequent
+     * levels. This approach is handy if the hierarchy in the Tree comes from
+     * class hierarchy (different levels are different Java classes). The T type
+     * of the Tree in this case needs to be some common super type of the
+     * classes (java.lang.Object if no other exist).
+     *
+     * <p>
+     * Code example:
+     * </p>
+     *
+     * <pre>
+     *  Tree&lt;AbstractPlace&gt; tree = new Tree&lt;&gt;();
+     *  tree.setItemLabelGenerator(AbstractPlace::getName);
+     *  tree.seItems(city,
+     *          (Tree.ChildrenProvider&lt;City&gt;) c -&gt; c.getStreets(),
+     *          (Tree.ChildrenProvider&lt;Street&gt;) s -&gt; s.getHouses()
+     *   );
+     * </pre>
+     *
+     * @param root root item in the Tree
+     * @param providersForNextLevels the children providers for next levels of
+     * tree, that fetch the children for given item representing the tree node.
+     */
+    public void setItems(T root, ChildrenProvider<? extends T>... providersForNextLevels) {
+        setItems(Arrays.asList(root), providersForNextLevels);
+    }
+
+    protected void fillWithProviders(int level, T item, final TreeItem treeItem, ChildrenProvider... providers) {
+        try {
+            List children = providers[level].getChildren(item);
+            if (children != null && !children.isEmpty()) {
+                for (Object t : children) {
+                    final TreeItem child = createTreeItem((T) t);
+                    treeItem.addChild(child);
+                    fillWithProviders(level + 1, (T) t, child, providers);
+                }
+            }
+        } catch (java.lang.ArrayIndexOutOfBoundsException e) {
+            // NOP -> becomes a leaf node
+        }
+    }
+
+    /**
+     *
+     * @param treeData d
+     * @param childrenProvider p
+     * @deprecated Helper to move from TreeGrid usage, in case the TreeData (from
+     * Vaadin core) happens to be used to describe the hierarchy.
+     */
+    @Deprecated
     public void setItems(TreeData<T> treeData, ChildrenProvider<T> childrenProvider) {
         getContent().removeAll();
 
-        setItems(treeData.getRootItems(), childrenProvider);
+        Tree.this.setItems(treeData.getRootItems(), childrenProvider);
     }
 
     protected TreeItem createTreeItem(T item) {
@@ -203,8 +243,8 @@ public class Tree<T> extends Composite<VerticalLayout> {
 
     /**
      * Adds an {@link ItemDecorator} to further configure {@link TreeItem}s
-     * generated automatically when {@link #setItems(List, ChildrenProvider)} method
-     * is called.
+     * generated automatically when {@link #setItems(List, ChildrenProvider)}
+     * method is called.
      *
      * @param decorator the {@link ItemDecorator}
      */
@@ -237,8 +277,8 @@ public class Tree<T> extends Composite<VerticalLayout> {
     /**
      * Sets the strategy to generate component for for the items.
      * <p>
-     * Note that this overrides possibly configured {@link ItemIconGenerator} and
-     * {@link ItemLabelGenerator}.
+     * Note that this overrides possibly configured {@link ItemIconGenerator}
+     * and {@link ItemLabelGenerator}.
      *
      * @param itemGenerator the {@link ItemGenerator}
      */
@@ -260,8 +300,8 @@ public class Tree<T> extends Composite<VerticalLayout> {
     }
 
     /**
-     * Shows children of the node in UI. Same as user would click on the caret in
-     * the UI.
+     * Shows children of the node in UI. Same as user would click on the caret
+     * in the UI.
      *
      * @param item the item whose children should be visible in the UI
      */
@@ -270,8 +310,8 @@ public class Tree<T> extends Composite<VerticalLayout> {
     }
 
     /**
-     * Shows children of the node in UI recursively. Same as user would click on the caret in
-     * the UI.
+     * Shows children of the node in UI recursively. Same as user would click on
+     * the caret in the UI.
      *
      * @param item the item whose children should be visible in the UI
      */
@@ -280,8 +320,8 @@ public class Tree<T> extends Composite<VerticalLayout> {
     }
 
     /**
-     * Hides children of the node in UI. Same as user would click on the caret in
-     * the UI when children are visible.
+     * Hides children of the node in UI. Same as user would click on the caret
+     * in the UI when children are visible.
      *
      * @param item the item whose children should be hidden in the UI
      */
@@ -292,7 +332,8 @@ public class Tree<T> extends Composite<VerticalLayout> {
     /**
      * Moves child of the node in UI.
      *
-     * @param parent the parent whose child should be moved in the UI, may be null
+     * @param parent the parent whose child should be moved in the UI, may be
+     * null
      * @param items the items within which one is to be moved
      * @param index the index of the item to be moved
      * @param up True then move up else move down
@@ -320,7 +361,8 @@ public class Tree<T> extends Composite<VerticalLayout> {
     /**
      * Adds child of the node in UI.
      *
-     * @param parent the parent whose child should be added in the UI, may be null
+     * @param parent the parent whose child should be added in the UI, may be
+     * null
      * @param item the item to be added in the UI
      */
     public void addChild(T parent, T item) {
@@ -338,7 +380,8 @@ public class Tree<T> extends Composite<VerticalLayout> {
     /**
      * Removes child of the node in UI.
      *
-     * @param parent the parent whose child should be removed in the UI, may be null
+     * @param parent the parent whose child should be removed in the UI, may be
+     * null
      * @param item the item to be removed in the UI
      */
     public void removeChild(T parent, T item) {
@@ -384,7 +427,8 @@ public class Tree<T> extends Composite<VerticalLayout> {
     /**
      * @param item the item to be styled in the UI
      * @param styleName the style property name as camelCase, not null
-     * @param styleValue the style property value (if null, the property will be removed)
+     * @param styleValue the style property value (if null, the property will be
+     * removed)
      */
     public void styleChild(T item, String styleName, String styleValue) {
         TreeItem treeItem = domainObjectToTreeItem.get(item);
@@ -438,6 +482,82 @@ public class Tree<T> extends Composite<VerticalLayout> {
     public void deselectAllItems() {
         selectedItem = null;
         domainObjectToTreeItem.values().forEach(treeItem -> treeItem.setSelected(false));
+    }
+
+    /**
+     * This can be used to further configure the created TreeItem instances. For
+     * example to add additional click listeners or context menus.
+     *
+     * @param <T> the type of items in the Tree
+     * @author mstahv
+     */
+    public interface ItemDecorator<T> extends BiConsumer<T, TreeItem>, Serializable {
+
+    }
+
+    /**
+     * A listener to track when the selected node is changed.
+     *
+     * @param <T> the type of the selected domain object
+     * @author mstahv
+     */
+    @FunctionalInterface
+    public interface SelectionListener<T> extends Serializable {
+
+        public void selected(T selected, TreeItem item);
+    }
+
+    /**
+     * {@link ItemIconGenerator} can be used to customize the icon shown before
+     * the label of an item.
+     *
+     * @param <T> item type
+     * @author Vaadin Ltd
+     * @since 1.0
+     */
+    @FunctionalInterface
+    public interface ItemIconGenerator<T> extends SerializableFunction<T, Component> {
+
+        /**
+         * Gets a icon for the {@code item}.
+         *
+         * @param item the item to get icon for
+         * @return the icon of the item, not {@code null}
+         */
+        @Override
+        Component apply(T item);
+    }
+
+    /**
+     * {@link ItemGenerator} can be used to customize how to item is shown. This
+     * overrides everything. If for example {@link ItemLabelGenerator} or
+     * {@link ItemIconGenerator} are defined, they are ignored.
+     *
+     * @param <T> item type
+     * @author Vaadin Ltd
+     * @since 1.0
+     */
+    @FunctionalInterface
+    public interface ItemGenerator<T> extends SerializableFunction<T, Component> {
+
+        /**
+         * Gets a component for the {@code item}.
+         *
+         * @param item the item
+         * @return the component for the item, not {@code null}
+         */
+        @Override
+        Component apply(T item);
+    }
+
+    @FunctionalInterface
+    public interface ChildrenProvider<T> {
+
+        /**
+         * @param parent the item whose children are to be provided
+         * @return list of children or null if parent is is a leaf node.
+         */
+        List getChildren(T parent);
     }
 
 }
