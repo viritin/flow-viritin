@@ -359,4 +359,11 @@ public class TreeTable<T> extends VGrid<T> {
 
     }
 
+    public TreeTable() {
+        super();
+    }
+
+    public TreeTable(Class<T> beanType) {
+        super(beanType);
+    }
 }
