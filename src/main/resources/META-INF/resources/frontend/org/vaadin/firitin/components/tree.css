@@ -6,26 +6,27 @@
     vertical-align: top;
 }
 
-.viritin-tree .expander {
-    width: 18px;
-    --iron-icon-height: 18px;
-    --iron-icon-width: 18px;
+.viritin-tree .expander vaadin-icon {
+    width: var(--lumo-font-size-m);
+    height: var(--lumo-font-size-m);
 }
 
-.viritin-tree .node-content>span>iron-icon {
-    margin-right: 0.5em;
+.viritin-tree .node-content>span>vaadin-icon {
+    margin-right: calc(var(--lumo-font-size-m)*0.25);
+    width: var(--lumo-font-size-m);
+    height: var(--lumo-font-size-m);
+    
 }
 
 .viritin-tree .node-content {
-    padding: 0 0.5em 0 -0.5em;
     position: relative;
     cursor: default;
-    font-size : small;
+    font-size : var(--lumo-font-size-m);
 }
 
 .viritin-tree .selected:before {
     content: "";
-    background: rgba(22, 118, 243, 0.0980392);
+    background: var(--lumo-primary-color-10pct);
     position: absolute;
     top: -0.15em;
     right: -0.15em;
@@ -34,6 +35,3 @@
     /* z-index: -1; */
 }
 
-.viritin-tree .item-text {
-    padding: 0.5em;
-}
