@@ -10,7 +10,7 @@
     <description>General purpose helpers for Vaadin Flow users.</description>
 
     <properties>
-        <vaadin.version>24.1.13</vaadin.version>
+        <vaadin.version>24.2.2</vaadin.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -96,28 +96,12 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-core</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.vaadin</groupId>
-                    <artifactId>fusion-endpoint</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax.validation</groupId>
-                    <artifactId>validation-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
             <version>5.0.0</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.github.benas</groupId>
-            <artifactId>random-beans</artifactId>
-            <version>3.9.0</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>commons-beanutils</groupId>
@@ -184,7 +168,7 @@
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>11.0.14</version>
+                <version>11.0.15</version>
                 <configuration>
                     <httpConnector>
                         <port>9998</port>

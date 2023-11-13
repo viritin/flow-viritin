@@ -13,7 +13,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
-import io.github.benas.randombeans.api.EnhancedRandom;
+import org.vaadin.firitin.testdomain.Service;
 
 @Route
 public class DemoView extends VerticalLayout {
@@ -29,11 +29,12 @@ public class DemoView extends VerticalLayout {
                 .withLabel("Checkbox Label");
 
         add(checkbox);
-
+        
         VComboBox<Person> comboBox = new VComboBox<Person>()
                 .withAllowCustomValue(false).withLabel("Person").withItemLabelGenerator(Person::getLastName)
                 .withValueChangeListener(v -> Notification.show("Selected " + v.getValue().getLastName()));
-        comboBox.setItems(EnhancedRandom.randomListOf(100, Person.class)); // TODO add back fluent setItems methods via new interfaces: .withItems(EnhancedRandom.randomListOf(100, Person.class))
+        
+        comboBox.setItems(Service.getListOfPersons(100));
         add(comboBox);
 
         VTextField textField = new VTextField().withPlaceholder("This field don't give you NPE with null value");
