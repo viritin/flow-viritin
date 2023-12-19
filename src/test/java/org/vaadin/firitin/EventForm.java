@@ -2,7 +2,8 @@ package org.vaadin.firitin;
 
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -11,6 +12,8 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.router.Route;
 import org.vaadin.firitin.fields.MultiDateTimeField;
+import org.vaadin.firitin.fields.MultiDateTimeField2;
+import org.vaadin.firitin.fields.MultiDateTimeField3;
 import org.vaadin.firitin.form.AbstractForm;
 import org.vaadin.firitin.testdomain.Event;
 import org.vaadin.firitin.testdomain.Link;
@@ -40,6 +43,10 @@ public class EventForm extends AbstractForm<Event> {
 
         setEntity(event);
 
+        DatePicker datePicker = new DatePicker();
+
+        getContent().add(datePicker);
+
     }
 
     private void handleSave(Event event) {
@@ -68,7 +75,7 @@ public class EventForm extends AbstractForm<Event> {
         VerticalLayout formContents = new VerticalLayout();
 
         name.setLabel("Name");
-        formContents.add(name, new Label("Dates:"), dates, links, attachments);
+        formContents.add(name, new Span("Dates:"), dates, links, attachments);
 
         content.add(formContents);
 
