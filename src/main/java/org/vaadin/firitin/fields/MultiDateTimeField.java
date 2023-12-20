@@ -23,6 +23,7 @@ import org.vaadin.firitin.components.button.DefaultButton;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
+import org.vaadin.firitin.components.textfield.VIntegerField;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -120,7 +121,7 @@ public class MultiDateTimeField extends Composite<VerticalLayout>
 
     CustomDateTimePicker next = new CustomDateTimePicker();
     Select<RepeatMode> repeatMode = new Select<>();
-    IntegerField repeatTimes = new IntegerField();
+    VIntegerField repeatTimes = new VIntegerField();
     Span repeatTimesText = new Span("times");
 
     VerticalLayout existingValues = new VVerticalLayout()
@@ -202,7 +203,8 @@ public class MultiDateTimeField extends Composite<VerticalLayout>
             Button cancelButton = new VButton("Cancel", () -> dialog.close());
             dialog.getFooter().add(cancelButton, doRepeat);
             dialog.open();
-
+            repeatTimes.selectAll();
+            repeatTimes.focus();
 
         }).withTooltip("Repeat this time daily/weekly/monthly...");
 
@@ -230,7 +232,7 @@ public class MultiDateTimeField extends Composite<VerticalLayout>
     public Registration addValueChangeListener(ValueChangeListener<? super ValueChangeEvent<List<LocalDateTime>>> listener) {
         @SuppressWarnings("rawtypes")
         ComponentEventListener componentListener = event -> {
-            AbstractField.ComponentValueChangeEvent<MultiDateTimeField3, List<LocalDateTime>> valueChangeEvent = (AbstractField.ComponentValueChangeEvent<MultiDateTimeField3, List<LocalDateTime>>) event;
+            AbstractField.ComponentValueChangeEvent<MultiDateTimeField, List<LocalDateTime>> valueChangeEvent = (AbstractField.ComponentValueChangeEvent<MultiDateTimeField, List<LocalDateTime>>) event;
             listener.valueChanged(valueChangeEvent);
         };
         return addListener(AbstractField.ComponentValueChangeEvent.class,
