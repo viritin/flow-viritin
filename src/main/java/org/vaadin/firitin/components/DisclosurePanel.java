@@ -8,6 +8,10 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 
+/**
+ * @deprecated Use the nowadays available Details component from Vaadin core instead.
+ */
+@Deprecated(forRemoval = true)
 public class DisclosurePanel extends VerticalLayout {
 
     private static final long serialVersionUID = 6509419456771505782L;
