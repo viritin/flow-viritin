@@ -1,27 +1,31 @@
 package org.vaadin.firitin.appframework;
 
-import java.lang.reflect.Modifier;
-import java.util.*;
-
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.dependency.StyleSheet;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.vaadin.flow.component.html.Footer;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.theme.lumo.LumoUtility;
-
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.applayout.AppLayout;
-import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.router.RouteBaseData;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouterLayout;
-import org.vaadin.firitin.util.VStyleUtil;
+import com.vaadin.flow.theme.lumo.LumoUtility;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+import java.util.WeakHashMap;
 
 /**
  * The main view is a top-level placeholder for other views. This version is based on a one
@@ -75,6 +79,10 @@ public abstract class MainLayout extends AppLayout implements AfterNavigationObs
 		return nav;
 	}
 
+	public SideNav getMenu() {
+		return menu;
+	}
+
 	private Footer prepareFooter() {
 		Footer layout = new Footer();
 		return layout;
@@ -123,24 +131,33 @@ public abstract class MainLayout extends AppLayout implements AfterNavigationObs
 				}
 			});
 			// UI access used to support reload by JRebel etc
-			MainLayout.this.getUI().ifPresent(ui -> ui.access(()->{
-				List<RouteBaseData<?>> addedRoutes = event.getAddedRoutes();
-				addedRoutes.stream().filter(routeData -> {
-					Class<? extends RouterLayout> parentLayout = routeData.getParentLayout();
-					if (parentLayout != null) {
-						boolean assignableFrom = MainLayout.class.isAssignableFrom(parentLayout);
-						return assignableFrom;
-					}
-					return false;
-				}).forEach(rd -> {
-					Class<? extends Component> routeClass = rd.getNavigationTarget();
-					if (!Modifier.isAbstract(routeClass.getModifiers()) && routeClass != null) {
-						navigationItems.add(new NavigationItem(routeClass));
-					}
+			MainLayout.this.getUI().ifPresent(ui -> {
+				if(ui.isClosing()) {
+					// Route reload caused most likely by JRebel reload
+					// and might be on a closing UI (because Vaadin dev
+					// mode reloads automatically these days). Ignore
+					return;
+				}
+				ui.access(()-> {
+					List<RouteBaseData<?>> addedRoutes = event.getAddedRoutes();
+					addedRoutes.stream().filter(routeData -> {
+						Class<? extends RouterLayout> parentLayout = routeData.getParentLayout();
+						if (parentLayout != null) {
+							boolean assignableFrom = MainLayout.class.isAssignableFrom(parentLayout);
+							return assignableFrom;
+						}
+						return false;
+					}).forEach(rd -> {
+						Class<? extends Component> routeClass = rd.getNavigationTarget();
+						if (!Modifier.isAbstract(routeClass.getModifiers()) && routeClass != null) {
+							navigationItems.add(new NavigationItem(routeClass));
+						}
+					});
+					sortMenuItems();
+					buildMenu();
+
 				});
-				sortMenuItems();
-				buildMenu();
-			}));
+			});
 		});
 
 		sortMenuItems();
