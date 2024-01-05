@@ -16,6 +16,7 @@
 package org.vaadin.firitin;
 
 import com.helger.commons.mutable.MutableInt;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
@@ -43,18 +44,32 @@ public class UploadFileHandlerExample extends VerticalLayout {
     private static final String DELIMITER = ";";
 
     public UploadFileHandlerExample() {
+
+        Paragraph liveLogger = new Paragraph("...");
+        UI ui = UI.getCurrent();
         UploadFileHandler uploadFileHandler = new UploadFileHandler(
                 (InputStream content, String fileName, String mimeType) -> {
                     try {
+                        long lastUpdate = System.currentTimeMillis();
                         int b = 0;
                         int count = 0;
                         while ((b = content.read()) != -1) {
                             if (b == "\n".getBytes()[0]) {
                                 count++;
+                                if((System.currentTimeMillis()-lastUpdate) > 200) {
+                                    // Modifying UI during handling, to show this
+                                    // is possible, see https://stackoverflow.com/questions/75165362/vaadin-flow-upload-component-streaming-upload
+                                    int curcount = count;
+                                    ui.access(() -> liveLogger.setText("counting... (%s)".formatted(curcount)));
+                                    lastUpdate = System.currentTimeMillis();
+                                }
                             }
                         }
                         String msg = "Counted " + count + "lines";
-                        getUI().get().access(() -> Notification.show(msg));
+                        ui.access(() -> {
+                            Notification.show(msg);
+                            liveLogger.setText("...");
+                        });
                     } catch (IOException ex) {
                         Logger.getLogger(UploadFileHandlerExample.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -121,6 +136,7 @@ public class UploadFileHandlerExample extends VerticalLayout {
 
         add(
                 new Paragraph("Count lines"),
+                liveLogger,
                 uploadFileHandler,
                 new Paragraph("Count lines (with multiple file support)"),
                 multiUploadFileHandler,
