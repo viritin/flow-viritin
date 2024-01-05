@@ -16,6 +16,7 @@
 package org.vaadin.firitin.components;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
@@ -107,8 +108,15 @@ public class DynamicFileDownloader extends Anchor implements FluentComponent<Dyn
         setText(text);
         this.fileName = fileName;
         this.contentWriter = contentWriter;
-
     }
+
+    public DynamicFileDownloader(Component downloadComponent, String fileName, SerializableConsumer<OutputStream> contentWriter) {
+        this();
+        add(downloadComponent);
+        this.fileName = fileName;
+        this.contentWriter = contentWriter;
+    }
+
 
     public DynamicFileDownloader() {
     }

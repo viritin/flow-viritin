@@ -76,6 +76,19 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
                 add(downloadButton);
             }
         }));
+
+        DynamicFileDownloader downloadFromIcon = new DynamicFileDownloader(
+                // in theory any component should do here, but button/plain icon etc are appropriate
+                VaadinIcon.DOWNLOAD.create(),
+                "foobar.txt",
+                outputStream -> {
+                    try {
+                        outputStream.write("HelloWorld".getBytes());
+                    } catch (IOException ex) {
+                        Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                });
+        add(downloadFromIcon);
         
         DynamicFileDownloader downloadButton2 = new DynamicFileDownloader("Downlload file with timestamp in name", "foobar/",
         outputStream -> {
