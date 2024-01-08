@@ -16,11 +16,13 @@
 package org.vaadin.firitin;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.upload.UploadFileHandler2;
 
 import java.io.IOException;
@@ -57,12 +59,13 @@ public class UploadFileHandler2Example extends VerticalLayout {
                                     // Modifying UI during handling, to show this
                                     // is possible, see https://stackoverflow.com/questions/75165362/vaadin-flow-upload-component-streaming-upload
                                     int curcount = count;
-                                    //System.out.println(LocalTime.now() + " counting... (%s, %s)".formatted(curcount, fileName));
+                                    System.out.println(LocalTime.now() + " counting... (%s, %s)".formatted(curcount, fileName));
                                     ui.access(() -> liveLogger.setText("counting... (%s)".formatted(curcount)));
                                     lastUpdate = System.currentTimeMillis();
                                 }
                             }
                         }
+                        ui.access(() -> Notification.show("No more data on the stream!"));
                     } catch (IOException ex) {
                         Logger.getLogger(UploadFileHandler2Example.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -91,11 +94,21 @@ public class UploadFileHandler2Example extends VerticalLayout {
             uploadFileHandler.withDragAndDrop(e.getValue());
         });
 
+        Button toggleAttached = new VButton("Detach/attach upload")
+                .withTooltip("Can be done even during upload 😎, but state of currently uploaded or previously uploaded files and events are lost");
+        toggleAttached.addClickListener(e -> {
+            if(uploadFileHandler.isAttached()) {
+                uploadFileHandler.removeFromParent();
+            } else {
+                addComponentAtIndex(2, uploadFileHandler);
+            }
+        });
+
         add(
                 new Paragraph("Counting lines as data streams in. Test the views with reasonably large files with network throttling (e.g. Chrome dev tools)"),
                 liveLogger,
                 uploadFileHandler,
-                allowMultiple, clearAutomatically, dd
+                allowMultiple, clearAutomatically, dd, toggleAttached
         );
 
     }
