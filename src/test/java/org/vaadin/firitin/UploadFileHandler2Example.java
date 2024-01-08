@@ -23,7 +23,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import org.vaadin.firitin.components.button.VButton;
-import org.vaadin.firitin.components.upload.UploadFileHandler2;
+import org.vaadin.firitin.components.upload.UploadFileHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,7 +46,7 @@ public class UploadFileHandler2Example extends VerticalLayout {
 
         Paragraph liveLogger = new Paragraph("...");
         UI ui = UI.getCurrent();
-        UploadFileHandler2 uploadFileHandler = new UploadFileHandler2(
+        UploadFileHandler uploadFileHandler = new UploadFileHandler(
                 (InputStream content, String fileName, String mimeType) -> {
                     //System.out.println(LocalTime.now() + " UploadFileHandler passing the inputStream for developer. Thread id:" + Thread.currentThread().getId());
                     try {

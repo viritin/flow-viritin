@@ -15,14 +15,38 @@
  */
 package org.vaadin.firitin.components.upload;
 
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.upload.MultiFileReceiver;
 import com.vaadin.flow.component.upload.Receiver;
 import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.server.RequestHandler;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinResponse;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.shared.Registration;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.fileupload2.core.FileItemInputIterator;
+import org.apache.commons.fileupload2.jakarta.JakartaServletFileUpload;
+import org.vaadin.firitin.fluency.ui.FluentComponent;
+import org.vaadin.firitin.fluency.ui.FluentHasSize;
+import org.vaadin.firitin.fluency.ui.FluentHasStyle;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * An upload implementation that just pass the input stream (and name and mime
@@ -37,26 +61,11 @@ import java.io.PipedOutputStream;
  *
  * @author mstahv
  */
-public class UploadFileHandler extends VUpload {
-
-    MultiFileReceiver multiFileReceiver = new MultiFileReceiver() {
-        @Override
-        public OutputStream receiveUpload(String s, String s1) {
-            return UploadFileHandler.this.receiveUpload(s, s1);
-        }
-    };
-
-    Receiver receiver = new Receiver() {
-        @Override
-        public OutputStream receiveUpload(String s, String s1) {
-            return UploadFileHandler.this.receiveUpload(s, s1);
-        }
-    };
+@Tag("vaadin-upload")
+public class UploadFileHandler extends Component implements FluentComponent<UploadFileHandler>, FluentHasStyle<UploadFileHandler>, FluentHasSize<UploadFileHandler> {
 
     public UploadFileHandler allowMultiple() {
-        setReceiver(multiFileReceiver);
-        setMaxFiles(Integer.MAX_VALUE);
-        return this;
+        return withAllowMultiple(true);
     }
 
     @FunctionalInterface
@@ -79,46 +88,134 @@ public class UploadFileHandler extends VUpload {
         public void handleFile(InputStream content, String fileName, String mimeType);
     }
 
+
     protected final FileHandler fileHandler;
+    private FileRequestHandler frh;
+    private boolean clearAutomatically = true;
+    private UI ui;
 
     public UploadFileHandler(FileHandler fileHandler) {
         this.fileHandler = fileHandler;
-        setReceiver(receiver);
-    }
-
-    public OutputStream receiveUpload(String filename, String mimeType) {
-        try {
-            final PipedInputStream in = new PipedInputStream();
-            final PipedOutputStream out = new PipedOutputStream(in);
-            writeResponce(in, filename, mimeType);
-            return out;
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    /**
-     * By default just spans a new raw thread to get the input. For strict Java
-     * EE fellows, this might not suite, so override and use executor service.
-     *
-     * @param in the input stream where file content can be handled
-     * @param filename the file name on the senders machine
-     * @param mimeType the mimeType interpreted from the file name
-     */
-    protected void writeResponce(final PipedInputStream in, String filename, String mimeType) {
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    fileHandler.handleFile(in, filename, mimeType);
-                    in.close();
-                } catch (Exception e) {
-                    getUI().get().access(() -> {
-                        // TODO figure out how to do proper error handling in Flow
-                    });
+        withAllowMultiple(false);
+        // dummy listener, makes component visit the server after upload,
+        // in case no push configured
+        addUploadSucceededListener(e -> {
+            if(clearAutomatically) {
+                frh.files.remove(e.getFileName());
+                if(frh.files.isEmpty()) {
+                    clearFiles();
                 }
             }
-        }.start();
+        });
+
+    }
+
+    public void clearFiles() {
+        getElement().executeJs("this.files = [];");
+    }
+
+    public UploadFileHandler withAllowMultiple(boolean allowMultiple) {
+        if (allowMultiple) {
+            withMaxFiles(Integer.MAX_VALUE);
+        } else {
+            withMaxFiles(1);
+        }
+        return this;
+    }
+
+    public UploadFileHandler withDragAndDrop(boolean enableDragAndDrop) {
+        if(enableDragAndDrop) {
+            getElement().removeAttribute("nodrop");
+        } else {
+            getElement().setAttribute("nodrop", true);
+        }
+        return this;
+    }
+
+    public UploadFileHandler withClearAutomatically(boolean clear) {
+        this.clearAutomatically = clear;
+        return this;
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        this.frh = new FileRequestHandler();
+        getElement().setAttribute("target", "./" + frh.id);
+        attachEvent.getSession().addRequestHandler(frh);
+        this.ui = attachEvent.getUI();
+        super.onAttach(attachEvent);
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        detachEvent.getSession().removeRequestHandler(frh);
+        ui = null;
+        super.onDetach(detachEvent);
+    }
+
+    public UploadFileHandler withMaxFiles(int maxFiles) {
+        this.getElement().setProperty("maxFiles", (double) maxFiles);
+        return this;
+    }
+
+    public class FileRequestHandler implements RequestHandler {
+
+        private final String id;
+
+        private List<String> files = new LinkedList<>();
+
+        public FileRequestHandler() {
+            this.id = UUID.randomUUID().toString();
+        }
+
+
+        @Override
+        public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) throws IOException {
+            if (request.getPathInfo().endsWith(id) && JakartaServletFileUpload.isMultipartContent((HttpServletRequest) request)) {
+                // Vaadin's StreamReceiver & friends has this odd
+                // inversion of streams, thus handle byself using commons-fileupload
+                // TODO handle multipart request and pass to handler
+
+                // Create a new file upload handler
+                JakartaServletFileUpload upload = new JakartaServletFileUpload();
+
+                // Parse the request
+                FileItemInputIterator itemIterator = upload.getItemIterator((HttpServletRequest) request);
+                itemIterator.forEachRemaining(item -> {
+                    String name = item.getFieldName();
+                    InputStream stream = item.getInputStream();
+                    String filename = item.getName();
+                    // TODO this should in theory be synchronized 🤔
+                    files.add(filename);
+                    // Process the input stream
+                    fileHandler.handleFile(item.getInputStream(), filename, item.getContentType());
+                });
+
+                return true;
+            }
+            return false;
+        }
+
+    }
+
+    public Registration addUploadSucceededListener(ComponentEventListener<UploadSucceededEvent> listener) {
+        return addListener(UploadSucceededEvent.class, listener);
+    }
+
+    @DomEvent("upload-success")
+    public static class UploadSucceededEvent
+            extends ComponentEvent<UploadFileHandler> {
+        private final String fileName;
+
+        public UploadSucceededEvent(UploadFileHandler source,
+                                    boolean fromClient, @EventData("event.detail.file.name") String fileName) {
+            super(source, fromClient);
+            this.fileName = fileName;
+        }
+
+        public String getFileName() {
+            return fileName;
+        }
     }
 
 }
