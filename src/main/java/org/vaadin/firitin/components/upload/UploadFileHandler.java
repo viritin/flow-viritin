@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Viritin.
+ * Copyright 2024 Viritin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * An upload implementation that just passes the input stream (and name and mime
+ * A vaadin-upload component that just passes the input stream (and name and mime
  * type) of the uploaded file for the developer to handle. This is essentially
  * Upload component as it should be implemented. More context from
  * https://vaadin.com/blog/uploads-and-downloads-inputs-and-outputs
@@ -255,12 +255,9 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                 String name = cd.split(";")[1].split("=")[1].substring(1);
                 name = name.substring(0, name.length() - 1);
                 Command cb = fileHandler.handleFile(request.getInputStream(), name, contentType);
-                
                 ui.access(cb);
-
                 response.setStatus(200);
                 response.getWriter().println("OK");  // Viritin approves
-
                 return true;
             }
             return false;
