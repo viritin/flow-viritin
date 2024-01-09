@@ -24,26 +24,17 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.upload.MultiFileReceiver;
-import com.vaadin.flow.component.upload.Receiver;
-import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.server.RequestHandler;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
-import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.fileupload2.core.FileItemInputIterator;
-import org.apache.commons.fileupload2.jakarta.JakartaServletFileUpload;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentHasSize;
 import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -107,7 +98,9 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                 }
             }
         });
-
+        
+        //getElement().setProperty("noAuto", true);
+        
     }
 
     public void clearFiles() {
@@ -142,6 +135,18 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
         this.frh = new FileRequestHandler();
         getElement().setAttribute("target", "./" + frh.id);
         attachEvent.getSession().addRequestHandler(frh);
+        
+        getElement().executeJs("""
+            this.addEventListener("upload-request", e => {
+                e.preventDefault(true); // I'll send this instead!!
+                const xhr = event.detail.xhr;
+                const file = event.detail.file;
+                xhr.setRequestHeader('Content-Type', file.type);
+                xhr.setRequestHeader('Content-Disposition', 'attachment; filename="' + file.name + '"');
+                xhr.send(file);
+            });
+        """);
+        
         this.ui = attachEvent.getUI();
         super.onAttach(attachEvent);
     }
@@ -171,25 +176,20 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
 
         @Override
         public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) throws IOException {
-            if (request.getPathInfo().endsWith(id) && JakartaServletFileUpload.isMultipartContent((HttpServletRequest) request)) {
+            String contextPath = request.getContextPath();
+            String pathInfo = request.getPathInfo();
+            if (pathInfo.endsWith(id) ) {
                 // Vaadin's StreamReceiver & friends has this odd
-                // inversion of streams, thus handle byself using commons-fileupload
-                // TODO handle multipart request and pass to handler
+                // inversion of streams, thus handle here
+                // TODO figure out if content type or name needs some sanitation
+                String contentType = request.getHeader("Content-Type");
+                String cd = request.getHeader("Content-Disposition");
+                String name = cd.split(";")[1].split("=")[1].substring(1);
+                name = name.substring(0, name.length() - 1);
+                fileHandler.handleFile(request.getInputStream(), name, contentType);
 
-                // Create a new file upload handler
-                JakartaServletFileUpload upload = new JakartaServletFileUpload();
-
-                // Parse the request
-                FileItemInputIterator itemIterator = upload.getItemIterator((HttpServletRequest) request);
-                itemIterator.forEachRemaining(item -> {
-                    String name = item.getFieldName();
-                    InputStream stream = item.getInputStream();
-                    String filename = item.getName();
-                    // TODO this should in theory be synchronized 🤔
-                    files.add(filename);
-                    // Process the input stream
-                    fileHandler.handleFile(item.getInputStream(), filename, item.getContentType());
-                });
+                response.setStatus(200);
+                response.getWriter().println("OK");  // Viritin approves
 
                 return true;
             }
