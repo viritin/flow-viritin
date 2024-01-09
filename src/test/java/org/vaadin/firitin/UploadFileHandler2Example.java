@@ -48,7 +48,8 @@ public class UploadFileHandler2Example extends VerticalLayout {
         UI ui = UI.getCurrent();
         UploadFileHandler uploadFileHandler = new UploadFileHandler(
                 (InputStream content, String fileName, String mimeType) -> {
-                    //System.out.println(LocalTime.now() + " UploadFileHandler passing the inputStream for developer. Thread id:" + Thread.currentThread().getId());
+                    System.out.println(LocalTime.now() + " UploadFileHandler passing the inputStream for developer. Thread id:" + Thread.currentThread().getId());
+                    System.out.println("Filename: %s, MimeType: %s".formatted(fileName, mimeType));
                     try {
                         long lastUpdate = System.currentTimeMillis();
                         int b = 0;
@@ -65,10 +66,12 @@ public class UploadFileHandler2Example extends VerticalLayout {
                                 }
                             }
                         }
-                        ui.access(() -> Notification.show("No more data on the stream!"));
                     } catch (IOException ex) {
                         Logger.getLogger(UploadFileHandler2Example.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                    // You can optionally return a callback that will be executed
+                    // in the UI thread
+                    return () -> Notification.show("No more data on the stream!");
                 }).withFullWidth();
 
         uploadFileHandler.addUploadSucceededListener(e -> {
@@ -103,6 +106,8 @@ public class UploadFileHandler2Example extends VerticalLayout {
                 addComponentAtIndex(2, uploadFileHandler);
             }
         });
+
+
 
         add(
                 new Paragraph("Counting lines as data streams in. Test the views with reasonably large files with network throttling (e.g. Chrome dev tools)"),

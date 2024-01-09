@@ -19,6 +19,7 @@ import com.helger.commons.mutable.MutableInt;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Push;
@@ -32,6 +33,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.upload.UploadFileHandler;
 
 /**
@@ -93,7 +96,8 @@ public class UploadFileHandlerExample extends VerticalLayout {
                     } catch (IOException ex) {
                         Logger.getLogger(UploadFileHandlerExample.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                }).allowMultiple();
+                }).allowMultiple()
+                .withUploadButton(new VButton(VaadinIcon.UPLOAD.create()));
 
         Grid<String[]> grid = new Grid<>();
 
