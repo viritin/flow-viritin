@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Viritin.
+ * Copyright 2024 Viritin.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,49 +15,54 @@
  */
 package org.vaadin.firitin.components.upload;
 
-import com.vaadin.flow.component.upload.MultiFileReceiver;
-import com.vaadin.flow.component.upload.Receiver;
-import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.upload.UploadI18N;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.RequestHandler;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinResponse;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.shared.Registration;
+import elemental.json.JsonObject;
+import elemental.json.JsonType;
+import org.vaadin.firitin.fluency.ui.FluentComponent;
+import org.vaadin.firitin.fluency.ui.FluentHasSize;
+import org.vaadin.firitin.fluency.ui.FluentHasStyle;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
- * An upload implementation that just pass the input stream (and name and mime
- * type) of the uploaded file for developer to handle.
+ * A vaadin-upload component that just passes the input stream (and name and mime
+ * type) of the uploaded file for the developer to handle (constructor parameter).
+ * This is essentially Upload component as it should be implemented. More context from
+ * https://vaadin.com/blog/uploads-and-downloads-inputs-and-outputs
  * <p>
- * Note, then FileHandler you pass in is not executed in the UI thread. If you
+ * Note, that the FileHandler you write is not executed in the UI thread. If you
  * want to modify the UI from it, by sure to use UI.access to handle locking
  * properly.
- * <p>
- * Note, all Upload features are not supported (but the lazy developer is not
- * throwing exceptions on all those methods).
  *
  * @author mstahv
  */
-public class UploadFileHandler extends VUpload {
+@Tag("vaadin-upload")
+public class UploadFileHandler extends Component implements FluentComponent<UploadFileHandler>, FluentHasStyle<UploadFileHandler>, FluentHasSize<UploadFileHandler> {
 
-    MultiFileReceiver multiFileReceiver = new MultiFileReceiver() {
-        @Override
-        public OutputStream receiveUpload(String s, String s1) {
-            return UploadFileHandler.this.receiveUpload(s, s1);
-        }
-    };
-
-    Receiver receiver = new Receiver() {
-        @Override
-        public OutputStream receiveUpload(String s, String s1) {
-            return UploadFileHandler.this.receiveUpload(s, s1);
-        }
-    };
-
-    public UploadFileHandler allowMultiple() {
-        setReceiver(multiFileReceiver);
-        setMaxFiles(Integer.MAX_VALUE);
-        return this;
-    }
+    private UploadI18N i18n;
 
     @FunctionalInterface
     public interface FileHandler {
@@ -78,47 +83,357 @@ public class UploadFileHandler extends VUpload {
          */
         public void handleFile(InputStream content, String fileName, String mimeType);
     }
+    
+    @FunctionalInterface
+    public interface CallbackFileHandler {
 
-    protected final FileHandler fileHandler;
-
-    public UploadFileHandler(FileHandler fileHandler) {
-        this.fileHandler = fileHandler;
-        setReceiver(receiver);
+        /**
+         * This method is called by the framework when a new file is being
+         * received.
+         * <p>
+         * You can read the file contents from the given InputStream.
+         * <p>
+         * Note, that this method is not executed in the UI thread. If you want
+         * to modify the UI from it, by sure to use UI.access (and possibly Push
+         * annotation) to handle locking properly.
+         *
+         * @param content the file content
+         * @param fileName the name of the file in users device
+         * @param mimeType the mime type parsed from the file name
+         * @return a task to be executed later in UI thread once the file upload
+         * is completed
+         */
+        public Command handleFile(InputStream content, String fileName, String mimeType);
     }
 
-    public OutputStream receiveUpload(String filename, String mimeType) {
-        try {
-            final PipedInputStream in = new PipedInputStream();
-            final PipedOutputStream out = new PipedOutputStream(in);
-            writeResponce(in, filename, mimeType);
-            return out;
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
+
+    protected final CallbackFileHandler fileHandler;
+    private FileRequestHandler frh;
+    private boolean clearAutomatically = true;
+    private UI ui;
+
+    public UploadFileHandler(FileHandler fileHandler) {
+        this((InputStream content, String fileName, String mimeType) -> {
+            fileHandler.handleFile(content, fileName, mimeType);
+            return () -> {};
+        });
+    }
+
+    public UploadFileHandler(CallbackFileHandler fileHandler) {
+        this.fileHandler = fileHandler;
+        withAllowMultiple(false);
+        // dummy listener, makes component visit the server after upload,
+        // in case no push configured
+        addUploadSucceededListener(e -> {
+            if (clearAutomatically) {
+                frh.files.remove(e.getFileName());
+                if (frh.files.isEmpty()) {
+                    clearFiles();
+                }
+            }
+        });
+
+    }
+
+    /**
+     * Clears the uploaded files shown in the component.
+     */
+    public void clearFiles() {
+        getElement().executeJs("this.files = [];");
+    }
+
+    public UploadFileHandler allowMultiple() {
+        return withAllowMultiple(true);
+    }
+
+    /**
+     * Configures the component to allow multiple files to be selected at once.
+     *
+     * @param allowMultiple true to allow multiple files
+     * @return The component for further configuration
+     */
+    public UploadFileHandler withAllowMultiple(boolean allowMultiple) {
+        if (allowMultiple) {
+            withMaxFiles(Integer.MAX_VALUE);
+        } else {
+            withMaxFiles(1);
+        }
+        return this;
+    }
+
+    /**
+     * Configures the component to allow drag and dropping of files on selected
+     * devices (mainly desktop browsers).
+     *
+     * @param enableDragAndDrop true to allow DnD
+     * @return The component for further configuration
+     */
+    public UploadFileHandler withDragAndDrop(boolean enableDragAndDrop) {
+        if (enableDragAndDrop) {
+            getElement().removeAttribute("nodrop");
+        } else {
+            getElement().setAttribute("nodrop", true);
+        }
+        return this;
+    }
+
+    /**
+     *
+     * @param clear true if the upload queue should be cleaned once all uploads
+     * are done.
+     * @return The component for further conf
+     */
+    public UploadFileHandler withClearAutomatically(boolean clear) {
+        this.clearAutomatically = clear;
+        return this;
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        this.frh = new FileRequestHandler();
+        getElement().setAttribute("target", "./" + frh.id);
+        attachEvent.getSession().addRequestHandler(frh);
+
+        getElement().executeJs("""
+            this.addEventListener("upload-request", e => {
+                e.preventDefault(true); // I'll send this instead!!
+                const xhr = event.detail.xhr;
+                const file = event.detail.file;
+                xhr.setRequestHeader('Content-Type', file.type);
+                xhr.setRequestHeader('Content-Disposition', 'attachment; filename="' + file.name + '"');
+                xhr.send(file);
+            });
+        """);
+
+        this.ui = attachEvent.getUI();
+        super.onAttach(attachEvent);
+
+        // Element state is not persisted across attach/detach
+        if (this.i18n != null) {
+            setI18nWithJS();
+        }
+
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        detachEvent.getSession().removeRequestHandler(frh);
+        ui = null;
+        super.onDetach(detachEvent);
+    }
+
+    /**
+     *
+     * @param maxFiles the number of files allowed to be uploaded at once
+     * @return The component for further configuration
+     */
+    public UploadFileHandler withMaxFiles(int maxFiles) {
+        this.getElement().setProperty("maxFiles", (double) maxFiles);
+        return this;
+    }
+
+    private class FileRequestHandler implements RequestHandler {
+
+        private final String id;
+
+        private List<String> files = new LinkedList<>();
+
+        FileRequestHandler() {
+            this.id = UUID.randomUUID().toString();
+        }
+
+        @Override
+        public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) throws IOException {
+            String contextPath = request.getContextPath();
+            String pathInfo = request.getPathInfo();
+            if (pathInfo.endsWith(id)) {
+                // Vaadin's StreamReceiver & friends has this odd
+                // inversion of streams, thus handle here
+                // TODO figure out if content type or name needs some sanitation
+                String contentType = request.getHeader("Content-Type");
+                String cd = request.getHeader("Content-Disposition");
+                String name = cd.split(";")[1].split("=")[1].substring(1);
+                name = name.substring(0, name.length() - 1);
+                Command cb = fileHandler.handleFile(request.getInputStream(), name, contentType);
+                ui.access(cb);
+                response.setStatus(200);
+                response.getWriter().println("OK");  // Viritin approves
+                return true;
+            }
+            return false;
+        }
+
+    }
+
+    public Registration addUploadSucceededListener(ComponentEventListener<UploadSucceededEvent> listener) {
+        return addListener(UploadSucceededEvent.class, listener);
+    }
+
+    /**
+     * Event fired after succesful uploads.
+     */
+    @DomEvent("upload-success")
+    public static class UploadSucceededEvent
+            extends ComponentEvent<UploadFileHandler> {
+
+        private final String fileName;
+
+        public UploadSucceededEvent(UploadFileHandler source,
+                boolean fromClient, @EventData("event.detail.file.name") String fileName) {
+            super(source, fromClient);
+            this.fileName = fileName;
+        }
+
+        public String getFileName() {
+            return fileName;
         }
     }
 
     /**
-     * By default just spans a new raw thread to get the input. For strict Java
-     * EE fellows, this might not suite, so override and use executor service.
+     * Set the component as the actionable button inside the upload component,
+     * that opens the dialog for choosing the files to be upload.
      *
-     * @param in the input stream where file content can be handled
-     * @param filename the file name on the senders machine
-     * @param mimeType the mimeType interpreted from the file name
+     * @param button the component to be clicked by the user to open the dialog,
+     * or <code>null</code> to reset to the default button
      */
-    protected void writeResponce(final PipedInputStream in, String filename, String mimeType) {
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    fileHandler.handleFile(in, filename, mimeType);
-                    in.close();
-                } catch (Exception e) {
-                    getUI().get().access(() -> {
-                        // TODO figure out how to do proper error handling in Flow
-                    });
-                }
-            }
-        }.start();
+    public void setUploadButton(Component button) {
+        SlotUtils.setSlot(this, "add-button", button);
     }
+    
+
+    /**
+     * Set the component as the actionable button inside the upload component,
+     * that opens the dialog for choosing the files to be upload.
+     *
+     * @param button the component to be clicked by the user to open the dialog,
+     * or <code>null</code> to reset to the default button
+     * @return this for further config
+     */
+    public UploadFileHandler withUploadButton(Component button) {
+        setUploadButton(button);
+        return this;
+    }
+
+    /**
+     * Specify the types of files that the server accepts. Syntax: a MIME type
+     * pattern (wildcards are allowed) or file extensions. Notice that MIME
+     * types are widely supported, while file extensions are only implemented in
+     * certain browsers, so it should be avoided.
+     * <p>
+     * Example: <code>"video/*","image/tiff"</code> or
+     * <code>".pdf","audio/mp3"</code>
+     *
+     * @param acceptedFileTypes
+     *            the allowed file types to be uploaded, or <code>null</code> to
+     *            clear any restrictions
+     */
+    public void setAcceptedFileTypes(String... acceptedFileTypes) {
+        String accepted = "";
+        if (acceptedFileTypes != null) {
+            accepted = String.join(",", acceptedFileTypes);
+        }
+        getElement().setProperty("accept", accepted);
+    }
+
+    public UploadFileHandler withAcceptedFileTypes(String... acceptedFileTypes) {
+        setAcceptedFileTypes(acceptedFileTypes);
+        return this;
+    }
+
+    /**
+     * Set the component to show as a message to the user to drop files in the
+     * upload component. Despite of the name, the label can be any component.
+     *
+     * @param label
+     *            the label to show for the users when it's possible drop files,
+     *            or <code>null</code> to reset to the default label
+     */
+    public void setDropLabel(Component label) {
+        SlotUtils.setSlot(this, "drop-label", label);
+    }
+
+    public UploadFileHandler withDropLabel(Component label) {
+        setDropLabel(label);
+        return this;
+    }
+
+    /**
+     * Set the component to show as the drop label icon. The icon is visible
+     * when the user can drop files to this upload component. Despite of the
+     * name, the drop label icon can be any component.
+     *
+     * @param icon
+     *            the label icon to show for the users when it's possible to
+     *            drop files, or <code>null</code> to reset to the default icon
+     */
+    public void setDropLabelIcon(Component icon) {
+        SlotUtils.setSlot(this, "drop-label-icon", icon);
+    }
+
+    public UploadFileHandler withDropLabelIcon(Component icon) {
+        setDropLabelIcon(icon);
+        return this;
+    }
+
+    /**
+     * Set the internationalization properties for this component.
+     *
+     * @param i18n
+     *            the internationalized properties, not <code>null</code>
+     */
+    public void setI18n(UploadI18N i18n) {
+        Objects.requireNonNull(i18n,
+                "The I18N properties object should not be null");
+        this.i18n = i18n;
+
+        runBeforeClientResponse(ui -> {
+            if (i18n == this.i18n) {
+                setI18nWithJS();
+            }
+        });
+    }
+
+    private void setI18nWithJS() {
+        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
+
+        // Remove null values so that we don't overwrite existing WC
+        // translations with empty ones
+        deeplyRemoveNullValuesFromJsonObject(i18nJson);
+
+        // Assign new I18N object to WC, by deeply merging the existing
+        // WC I18N, and the values from the new UploadI18N instance,
+        // into an empty object
+        getElement().executeJs(
+                "const dropFiles = Object.assign({}, this.i18n.dropFiles, $0.dropFiles);"
+                        + "const addFiles = Object.assign({}, this.i18n.addFiles, $0.addFiles);"
+                        + "const error = Object.assign({}, this.i18n.error, $0.error);"
+                        + "const uploadingStatus = Object.assign({}, this.i18n.uploading.status, $0.uploading && $0.uploading.status);"
+                        + "const uploadingRemainingTime = Object.assign({}, this.i18n.uploading.remainingTime, $0.uploading && $0.uploading.remainingTime);"
+                        + "const uploadingError = Object.assign({}, this.i18n.uploading.error, $0.uploading && $0.uploading.error);"
+                        + "const uploading = {status: uploadingStatus,"
+                        + "  remainingTime: uploadingRemainingTime,"
+                        + "  error: uploadingError};"
+                        + "const units = $0.units || this.i18n.units;"
+                        + "this.i18n = Object.assign({}, this.i18n, $0, {"
+                        + "  addFiles: addFiles,  dropFiles: dropFiles,"
+                        + "  uploading: uploading, units: units});",
+                i18nJson);
+    }
+
+    private void deeplyRemoveNullValuesFromJsonObject(JsonObject jsonObject) {
+        for (String key : jsonObject.keys()) {
+            if (jsonObject.get(key).getType() == JsonType.OBJECT) {
+                deeplyRemoveNullValuesFromJsonObject(jsonObject.get(key));
+            } else if (jsonObject.get(key).getType() == JsonType.NULL) {
+                jsonObject.remove(key);
+            }
+        }
+    }
+
+    void runBeforeClientResponse(SerializableConsumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
+    }
+
 
 }

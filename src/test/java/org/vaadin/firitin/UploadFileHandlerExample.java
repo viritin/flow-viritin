@@ -19,9 +19,11 @@ import com.helger.commons.mutable.MutableInt;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Push;
+import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.router.Route;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,6 +34,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.upload.UploadFileHandler;
 
 /**
@@ -93,7 +97,8 @@ public class UploadFileHandlerExample extends VerticalLayout {
                     } catch (IOException ex) {
                         Logger.getLogger(UploadFileHandlerExample.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                }).allowMultiple();
+                }).allowMultiple()
+                .withUploadButton(new VButton(VaadinIcon.UPLOAD.create()));
 
         Grid<String[]> grid = new Grid<>();
 
@@ -132,7 +137,13 @@ public class UploadFileHandlerExample extends VerticalLayout {
                     } catch (IOException ex) {
                         Logger.getLogger(UploadFileHandlerExample.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                });
+                })
+                .withAcceptedFileTypes("text/csv")
+                .withDropLabelIcon(VaadinIcon.DROP.create())
+                ;
+
+        csvFileHandler.setI18n(new UploadExamplesI18N());
+        csvFileHandler.getStyle().setBorder("2px dotted green");
 
         add(
                 new Paragraph("Count lines"),
@@ -142,6 +153,43 @@ public class UploadFileHandlerExample extends VerticalLayout {
                 multiUploadFileHandler,
                 new Paragraph("Display CSV file"), csvFileHandler, grid);
 
+    }
+
+
+    /**
+     * Provides a default I18N configuration for the Upload examples
+     *
+     * At the moment the Upload component requires a fully configured I18N instance,
+     * even for use-cases where you only want to change individual texts.
+     *
+     * This I18N configuration is an adaption of the web components I18N defaults
+     * and can be used as a basis for customizing individual texts.
+     */
+    public static class UploadExamplesI18N extends UploadI18N {
+        public UploadExamplesI18N() {
+            setDropFiles(new DropFiles().setOne("-> HERE <--")
+                    .setMany("-> HERE <--"));
+            setAddFiles(new AddFiles().setOne("Upload File...")
+                    .setMany("Upload Files..."));
+            setError(new Error().setTooManyFiles("Too Many Files.")
+                    .setFileIsTooBig("File is Too Big.")
+                    .setIncorrectFileType("Incorrect File Type."));
+            setUploading(new Uploading()
+                    .setStatus(new Uploading.Status().setConnecting("Connecting...")
+                            .setStalled("Stalled")
+                            .setProcessing("Processing File...").setHeld("Queued"))
+                    .setRemainingTime(new Uploading.RemainingTime()
+                            .setPrefix("remaining time: ")
+                            .setUnknown("unknown remaining time"))
+                    .setError(new Uploading.Error()
+                            .setServerUnavailable(
+                                    "Upload failed, please try again later")
+                            .setUnexpectedServerError(
+                                    "Upload failed due to server error")
+                            .setForbidden("Upload forbidden")));
+            setUnits(new Units().setSize(Arrays.asList("B", "kB", "MB", "GB", "TB",
+                    "PB", "EB", "ZB", "YB")));
+        }
     }
 
 }
