@@ -49,8 +49,8 @@ import java.util.UUID;
 
 /**
  * A vaadin-upload component that just passes the input stream (and name and mime
- * type) of the uploaded file for the developer to handle. This is essentially
- * Upload component as it should be implemented. More context from
+ * type) of the uploaded file for the developer to handle (constructor parameter).
+ * This is essentially Upload component as it should be implemented. More context from
  * https://vaadin.com/blog/uploads-and-downloads-inputs-and-outputs
  * <p>
  * Note, that the FileHandler you write is not executed in the UI thread. If you
