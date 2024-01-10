@@ -215,6 +215,85 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                 event.dataTransfer.dropEffect = !this._dragoverValid || this.nodrop ? 'none' : 'copy';
             }, true); // bubling phase as no idea how to override default handler by default
             
+            // support for dragging directories
+            // Run feature detection.
+            const supportsFileSystemAccessAPI = 'getAsFileSystemHandle' in DataTransferItem.prototype;
+            const supportsWebkitGetAsEntry = 'webkitGetAsEntry' in DataTransferItem.prototype;
+            this._addFiles = files => {
+                Array.prototype.forEach.call(files, f => {
+                    if(f.type === '') {
+                        // skip, most likely a dragged directory, don't cause exception
+                    } else {
+                        this._addFile(f);
+                    }
+                });
+            }
+            
+            this.addEventListener("drop", event => {
+                  if (!this.nodrop) {
+                        event.preventDefault();
+                        event.stopPropagation()
+                        this._dragover = this._dragoverValid = false;
+                        
+                        const el = this;
+                        
+                        // This ignores directories we handle later
+                        el._addFiles(event.dataTransfer.files);
+                        
+                        let getFilesRecursively = (entry) => {
+                          if (entry.kind === "file") {
+                            return entry.getFile().then(file => {
+                              if (file !== null) {
+                                return [file]; // Return an array containing the file
+                              }
+                              return []; // Return an empty array if no file
+                            });
+                          } else if (entry.kind === "directory") {
+                            return getAllEntries(entry.values()).then(entries => {
+                              // Recursively process each entry in the directory
+                              const promises = entries.map(handle => getFilesRecursively(handle));
+                              return Promise.all(promises).then(filesArrays => {
+                                // Flatten the array of arrays
+                                return filesArrays.reduce((allFiles, files) => allFiles.concat(files), []);
+                              });
+                            });
+                          }
+                          return Promise.resolve([]); // Return an empty array for non-file, non-directory entries
+                        }
+                        
+                        let getAllEntries = (iterator) => {
+                          // Utility function to get all entries from the directory handle
+                          const entries = [];
+                          const getNextEntry = () => {
+                            return iterator.next().then(result => {
+                              if (!result.done) {
+                                entries.push(result.value);
+                                return getNextEntry();
+                              }
+                              return entries;
+                            });
+                          };
+                          return getNextEntry();
+                        }
+                        
+                        [...event.dataTransfer.items].forEach(item => {
+                            const name = item.name;
+                            const type = item.type;
+                            const p = supportsFileSystemAccessAPI ? item.getAsFileSystemHandle(): item.webkitGetAsEntry();
+                            p.then(handle => {
+                                if (handle.kind === 'directory' || handle.isDirectory) {
+                                    getFilesRecursively(handle).then(files => {
+                                      files.forEach(fileHandle => {
+                                        el._addFile(fileHandle);
+                                      });
+                                    });
+                                }
+                            });
+                        });
+                  }
+            }, true);
+            
+            
             // avoid the default auto upload behaviour
             // that immediately opens xhr for each file
             this.noAuto = true;
