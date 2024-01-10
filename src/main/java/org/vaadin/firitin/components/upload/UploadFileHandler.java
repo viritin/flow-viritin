@@ -199,8 +199,9 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                 e.preventDefault(true); // I'll send this instead!!
                 const xhr = event.detail.xhr;
                 const file = event.detail.file;
+                const name = encodeURIComponent(file.name);
                 xhr.setRequestHeader('Content-Type', file.type);
-                xhr.setRequestHeader('Content-Disposition', 'attachment; filename="' + file.name + '"');
+                xhr.setRequestHeader('Content-Disposition', 'attachment; filename="' + name + '"');
                 xhr.send(file);
             });
         """);
@@ -254,6 +255,7 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                 String cd = request.getHeader("Content-Disposition");
                 String name = cd.split(";")[1].split("=")[1].substring(1);
                 name = name.substring(0, name.length() - 1);
+                name = URLDecoder.decode(name, "UTF-8");
                 Command cb = fileHandler.handleFile(request.getInputStream(), name, contentType);
                 ui.access(cb);
                 response.setStatus(200);
