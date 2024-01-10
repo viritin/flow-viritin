@@ -42,6 +42,7 @@ import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -112,6 +113,8 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
     private boolean clearAutomatically = true;
     private UI ui;
 
+    private int maxConcurrentUploads = 1;
+
     public UploadFileHandler(FileHandler fileHandler) {
         this((InputStream content, String fileName, String mimeType) -> {
             fileHandler.handleFile(content, fileName, mimeType);
@@ -125,14 +128,7 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
         // dummy listener, makes component visit the server after upload,
         // in case no push configured
         addUploadSucceededListener(e -> {
-            if (clearAutomatically) {
-                frh.files.remove(e.getFileName());
-                if (frh.files.isEmpty()) {
-                    clearFiles();
-                }
-            }
         });
-
     }
 
     /**
@@ -195,6 +191,43 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
         attachEvent.getSession().addRequestHandler(frh);
 
         getElement().executeJs("""
+            // avoid the default auto upload behaviour
+            // that immediately opens xhr for each file
+            this.noAuto = true;
+            const CLEAR = $0;
+            const MAX_CONNECTIONS = $1;
+            this.queueNext = () => {
+                const numConnections = this.files.filter(file => file.uploading).length;
+                if(numConnections < MAX_CONNECTIONS) {
+                // reverse to pick next in selection order
+                    const nextFileToUpload = this.files.slice().reverse().find(file => file.held)
+                    if (nextFileToUpload) {
+                        this.uploadFiles(nextFileToUpload)
+                    }
+                }
+            }
+            
+            // start uploading next file in queue when a file is successfully uploaded
+            this.addEventListener('upload-success', e => {
+                if(CLEAR) {
+                    const index = this.files.indexOf(e.detail.file);
+                    if (index > -1) {
+                        this._removeFile(e.detail.file);
+                    }
+                }
+                this.queueNext();
+            });
+    
+            // start uploading next file in queue also when there is an error when uploading the file
+            this.addEventListener('upload-error', () => {
+                this.queueNext();
+            });
+    
+            this.addEventListener('files-changed', (event) => {
+                this.queueNext();
+            });
+            
+            // This sends the request without obsolete and somewhat problematic multipart request
             this.addEventListener("upload-request", e => {
                 e.preventDefault(true); // I'll send this instead!!
                 const xhr = event.detail.xhr;
@@ -204,7 +237,7 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                 xhr.setRequestHeader('Content-Disposition', 'attachment; filename="' + name + '"');
                 xhr.send(file);
             });
-        """);
+        """, clearAutomatically, maxConcurrentUploads);
 
         this.ui = attachEvent.getUI();
         super.onAttach(attachEvent);
@@ -289,6 +322,16 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
         public String getFileName() {
             return fileName;
         }
+    }
+
+    /**
+     * Sets the maximum number of server connections this upload uses
+     * if multiple files are chosen.
+     *
+     * @param maxConcurrentUploads the number of maximum connections for upload
+     */
+    public void setMaxConcurrentUploads(int maxConcurrentUploads) {
+        this.maxConcurrentUploads = maxConcurrentUploads;
     }
 
     /**
@@ -436,6 +479,5 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
     }
-
 
 }
