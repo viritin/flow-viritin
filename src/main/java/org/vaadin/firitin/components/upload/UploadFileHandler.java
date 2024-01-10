@@ -191,6 +191,30 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
         attachEvent.getSession().addRequestHandler(frh);
 
         getElement().executeJs("""
+            // override default dragover so that it works
+            this.addEventListener("dragover", event => {
+                event.stopPropagation();
+                event.preventDefault();
+                if (!this.nodrop && !this._dragover) {
+                    let containsInvalid = false;
+                    let numberOfFiles = 0;
+                    const re = this.__acceptRegexp;
+                    for (const item of event.dataTransfer.items) {
+                        const acceptedType = (re == null) || re.test(item.type);
+                        if(acceptedType && item.kind == "file") {
+                            numberOfFiles++;
+                        } else {
+                            containsInvalid = true;
+                        }
+                    }
+                    if(!containsInvalid && (this.files.length + numberOfFiles) <= this.maxFiles) {
+                        this._dragoverValid = !this.maxFilesReached;
+                        this._dragover = true;
+                    }
+                }
+                event.dataTransfer.dropEffect = !this._dragoverValid || this.nodrop ? 'none' : 'copy';
+            }, true); // bubling phase as no idea how to override default handler by default
+            
             // avoid the default auto upload behaviour
             // that immediately opens xhr for each file
             this.noAuto = true;
