@@ -37,6 +37,7 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
 import elemental.json.JsonType;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
+import org.vaadin.firitin.fluency.ui.FluentHasEnabled;
 import org.vaadin.firitin.fluency.ui.FluentHasSize;
 import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 
@@ -61,9 +62,10 @@ import java.util.UUID;
  * @author mstahv
  */
 @Tag("vaadin-upload")
-public class UploadFileHandler extends Component implements FluentComponent<UploadFileHandler>, FluentHasStyle<UploadFileHandler>, FluentHasSize<UploadFileHandler> {
+public class UploadFileHandler extends Component implements FluentComponent<UploadFileHandler>, FluentHasStyle<UploadFileHandler>, FluentHasSize<UploadFileHandler>, FluentHasEnabled<UploadFileHandler> {
 
     private UploadI18N i18n;
+    private int maxFiles = 1;
 
     @FunctionalInterface
     public interface FileHandler {
@@ -365,6 +367,7 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
      * @return The component for further configuration
      */
     public UploadFileHandler withMaxFiles(int maxFiles) {
+        this.maxFiles = maxFiles;
         this.getElement().setProperty("maxFiles", (double) maxFiles);
         return this;
     }
@@ -583,4 +586,16 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                 .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
+    @Override
+    public void onEnabledStateChanged(boolean enabled) {
+        super.onEnabledStateChanged(enabled);
+        if(!enabled) {
+            int origMax = maxFiles;
+            withMaxFiles(0);
+            maxFiles = origMax;
+        } else {
+            withMaxFiles(maxFiles);
+        }
+
+    }
 }

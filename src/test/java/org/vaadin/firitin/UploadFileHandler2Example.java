@@ -96,6 +96,11 @@ public class UploadFileHandler2Example extends VerticalLayout {
         dd.addValueChangeListener(e -> {
             uploadFileHandler.withDragAndDrop(e.getValue());
         });
+        Checkbox enabled = new Checkbox("Enabled");
+        enabled.setValue(true);
+        enabled.addValueChangeListener(e -> {
+            uploadFileHandler.setEnabled(e.getValue());
+        });
 
         Button toggleAttached = new VButton("Detach/attach upload")
                 .withTooltip("Can be done even during upload 😎, but state of currently uploaded or previously uploaded files and events are lost");
@@ -107,13 +112,11 @@ public class UploadFileHandler2Example extends VerticalLayout {
             }
         });
 
-
-
         add(
                 new Paragraph("Counting lines as data streams in. Test the views with reasonably large files with network throttling (e.g. Chrome dev tools)"),
                 liveLogger,
                 uploadFileHandler,
-                allowMultiple, clearAutomatically, dd, toggleAttached
+                allowMultiple, clearAutomatically, dd, enabled, toggleAttached
         );
 
     }

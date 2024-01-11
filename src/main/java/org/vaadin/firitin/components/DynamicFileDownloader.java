@@ -36,6 +36,7 @@ import java.util.UUID;
 
 import com.vaadin.flow.shared.Registration;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
+import org.vaadin.firitin.fluency.ui.FluentHasEnabled;
 
 /**
  * An anchor which content is produced dynamically.
@@ -44,7 +45,7 @@ import org.vaadin.firitin.fluency.ui.FluentComponent;
  * @see #setFileName(java.lang.String)
  * @see #setFileHandler(com.vaadin.flow.function.SerializableConsumer)
  */
-public class DynamicFileDownloader extends Anchor implements FluentComponent<DynamicFileDownloader> {
+public class DynamicFileDownloader extends Anchor implements FluentComponent<DynamicFileDownloader>, FluentHasEnabled<DynamicFileDownloader> {
 
     private Button button;
     private DomListenerRegistration disableOnclick;
