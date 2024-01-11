@@ -3,7 +3,70 @@
 
 # Flow Viritin
 
-A similar helper library as Viritin was for Vaadin 8 and earlier. See [the Directory page](https://vaadin.com/directory/component/flow-viritin) for more details.
+A similar helper library as "old Viritin" was for Vaadin 8 and earlier. See [the Directory page](https://vaadin.com/directory/component/flow-viritin) for more details. Tries to add missing features, fix some issues in the core components and to work as an agile arena to test new potential features for Vaadin.
+
+*Version matrix:*
+ * 2.x series for Vaadin 24 (Maven central)
+ * 1.7.1+ for Vaadin 23.3+ (distribution via Maven central, directory repository is not necessary needed, "coordinates": in.virit:viritin)
+ * 0.9.0 for Vaadin 22+ (distribution via Maven central, directory repository is not necessary needed, "coordinates": in.virit:viritin)
+ * 0.4.0 for Vaadin 14
+ * The [old add-on](https://vaadin.com/directory/component/viritin) for Vaadin 8 and 7
+
+## Feature summary (not a complete list):
+
+###  Fluent API wrappers for most vaadin-core components
+
+"V" prefixed components provide most core APIs are available with a version that returns the component itself. These methods typically start with "with" instead of "set". This allows configuration of objects
+e.g. in field declaration or without declaring an extra variable. When used in appropriate places, this can produce more concise and readable code. 
+
+### Uploads & Download like they should be
+
+ * UploadFileHandler aka Upload component with [a proper Java API](https://vaadin.com/blog/uploads-and-downloads-inputs-and-outputs).
+   * Simply passes the input stream for you to handle, no weird Vaadin specific APIs
+   * Read/handle the contents while it is being uploaded, also works with Spring Boot
+   * Throttles amount of concurrent connections used, instead of choking the network
+   * Implements HasEnabled
+ * DynamicFileDownloader for simple generation of dynamically generated file downloads. No need to buffer content in memory, but simply write it to the OutputStream, like you would do with e.g. raw Servlet API
+ * ByteArrayUploadField to bind a file upload to a `byte[]` field with Binder.
+
+### Access to browser API & others
+
+ * Geolocation API using a pure Java API
+ * BrowserCookie helper that works well with web sockets too
+ * LumoProps, Java enumeration for easier discoverability (& redefining/using) of the handy Lumo theme css properties.
+ * ~WebStorage helper to save data in the browsers localStorage or sessionStorage~ (available for backwards compatibility, but the same implementation found in core as well these days)
+
+### Forms & Fields
+
+ * AbstractForm, configures binder properly for naming convention based binding and provides basic for features such as save and cancel buttons that enable themselves based on the user actions.
+ * CommaSeparatedStringField to edit List<String> with Binder
+ * SubListSelector to pick a List<T> from a large set of Ts with Binder (note, no re-ordering yet).
+ * DeleteButton, shows confirm dialog and is styled so that one don't accidentally click it
+ * Tree component to visualise hierarchical structures
+ * EnumSelect
+ * ElementCollectionField a field to edit e.g. List<Address> type structure
+ * ~LocalDateTimeField for editing LocalDateTime objects with Binder~ Use DateTimePicker from core, that is available these days.
+
+### Uncategorised helpers
+
+ * RichText component to easily show Html or Markdown formatted text. [Online demo](https://addons.dokku1.parttio.org/)
+ * Traditional paging with PagingGrid. [Online demo](https://addons.dokku1.parttio.org/paginggrid)
+ * CustomLayout component (renders raw html superfast, while you can still place Vaadin components inside it)
+ * BorderLayout (like in ~ Swing, implemented with CSS Grid)
+ * A generic MainLayout suitable for many small to medium sized projects, based on the AppLayout and SideNave components. Populates your views to the menu automatically and this way removes a ton of boilerplate code of your app.
+ * TreeTable. Like TreeGrid in the core, but with much easier API to populate items. Also properly supports [lazy loading](https://vaadin.com/blog/lazy-loading-hierarchical-data-from-ui-to-database) and scrolling to given item without extra hacks.
+
+## Documentation
+
+The [test directory](https://github.com/viritin/flow-viritin/tree/v24/src/test/java/org/vaadin/firitin) contains usage examples for components. Some components have decent JavaDocs. An actual manual would be great and an easy way to contribute back if you find the helpers useful 🤓
+
+## Contributing
+
+Yes please! TIP: Check [the project](https://github.com/viritin/flow-viritin) out alongside your app project and create handy helpers directly to Viritin. Send in pull requests and join the effort!  
+
+Mirjan Merruko and Stefan Freude are so far the most active contributors to this great tool.
+
+
 
 ## Development instructions
 
