@@ -47,9 +47,9 @@ public class UploadFileHandler2Example extends VerticalLayout {
         Paragraph liveLogger = new Paragraph("...");
         UI ui = UI.getCurrent();
         UploadFileHandler uploadFileHandler = new UploadFileHandler(
-                (InputStream content, String fileName, String mimeType) -> {
+                (InputStream content, UploadFileHandler.FileDetails d) -> {
                     System.out.println(LocalTime.now() + " UploadFileHandler passing the inputStream for developer. Thread id:" + Thread.currentThread().getId());
-                    System.out.println("Filename: %s, MimeType: %s".formatted(fileName, mimeType));
+                    System.out.println("Filename: %s, MimeType: %s".formatted(d.fileName(), d.mimeType()));
                     try {
                         long lastUpdate = System.currentTimeMillis();
                         int b = 0;
@@ -60,7 +60,7 @@ public class UploadFileHandler2Example extends VerticalLayout {
                                     // Modifying UI during handling, to show this
                                     // is possible, see https://stackoverflow.com/questions/75165362/vaadin-flow-upload-component-streaming-upload
                                     int curcount = count;
-                                    System.out.println(LocalTime.now() + " counting... (%s, %s)".formatted(curcount, fileName));
+                                    System.out.println(LocalTime.now() + " counting... (%s, %s)".formatted(curcount, d.fileName()));
                                     ui.access(() -> liveLogger.setText("counting... (%s)".formatted(curcount)));
                                     lastUpdate = System.currentTimeMillis();
                                 }

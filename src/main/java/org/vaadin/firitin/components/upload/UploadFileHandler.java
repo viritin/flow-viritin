@@ -24,6 +24,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -50,9 +51,10 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * A vaadin-upload component that just passes the input stream (and name and mime
- * type) of the uploaded file for the developer to handle (constructor parameter).
- * This is essentially Upload component as it should be implemented. More context from
+ * A vaadin-upload component that just passes the input stream (and name and
+ * mime type) of the uploaded file for the developer to handle (constructor
+ * parameter). This is essentially Upload component as it should be implemented.
+ * More context from
  * https://vaadin.com/blog/uploads-and-downloads-inputs-and-outputs
  * <p>
  * Note, that the FileHandler you write is not executed in the UI thread. If you
@@ -86,7 +88,18 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
          */
         public void handleFile(InputStream content, String fileName, String mimeType);
     }
-    
+
+    /**
+     * A collection of metadata about the uploaded files. Currently file name 
+     * and mime type, but might be extended in the future.
+     */
+    public record FileDetails(String fileName, String mimeType) {
+
+    }
+
+    /**
+     * An interface accepting file uploads.
+     */
     @FunctionalInterface
     public interface CallbackFileHandler {
 
@@ -101,14 +114,13 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
          * annotation) to handle locking properly.
          *
          * @param content the file content
-         * @param fileName the name of the file in users device
-         * @param mimeType the mime type parsed from the file name
+         * @param metaData details about the file being updated
          * @return a task to be executed later in UI thread once the file upload
          * is completed
+         * @throws java.io.IOException like you always do with streams
          */
-        public Command handleFile(InputStream content, String fileName, String mimeType);
+        public Command handleFile(InputStream content, FileDetails metaData) throws IOException;
     }
-
 
     protected final CallbackFileHandler fileHandler;
     private FileRequestHandler frh;
@@ -117,13 +129,26 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
 
     private int maxConcurrentUploads = 1;
 
+    /**
+     * Creates a basic FileUploadHandler with provided FileHandler
+     * 
+     * @param fileHandler the handler that does something with the uploaded file
+     */
     public UploadFileHandler(FileHandler fileHandler) {
-        this((InputStream content, String fileName, String mimeType) -> {
-            fileHandler.handleFile(content, fileName, mimeType);
-            return () -> {};
+        this((InputStream content, FileDetails fmd) -> {
+            fileHandler.handleFile(content, fmd.fileName(), fmd.mimeType());
+            return () -> {
+            };
         });
     }
 
+    /**
+     * Creates a FileUploadHandler with provided CallbackFileHandler. The
+     * Command returned by the handler is executed in UI after the file has been
+     * handled.
+     * 
+     * @param fileHandler the handler that does something with the uploaded file
+     */
     public UploadFileHandler(CallbackFileHandler fileHandler) {
         this.fileHandler = fileHandler;
         withAllowMultiple(false);
@@ -395,8 +420,10 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                 String name = cd.split(";")[1].split("=")[1].substring(1);
                 name = name.substring(0, name.length() - 1);
                 name = URLDecoder.decode(name, "UTF-8");
-                Command cb = fileHandler.handleFile(request.getInputStream(), name, contentType);
-                ui.access(cb);
+                Command cb = fileHandler.handleFile(request.getInputStream(), new FileDetails(name, contentType));
+                if (cb != null) {
+                    ui.access(cb);
+                }
                 response.setStatus(200);
                 response.getWriter().println("OK");  // Viritin approves
                 return true;
@@ -431,8 +458,8 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
     }
 
     /**
-     * Sets the maximum number of server connections this upload uses
-     * if multiple files are chosen.
+     * Sets the maximum number of server connections this upload uses if
+     * multiple files are chosen.
      *
      * @param maxConcurrentUploads the number of maximum connections for upload
      */
@@ -450,7 +477,6 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
     public void setUploadButton(Component button) {
         SlotUtils.setSlot(this, "add-button", button);
     }
-    
 
     /**
      * Set the component as the actionable button inside the upload component,
@@ -474,9 +500,8 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
      * Example: <code>"video/*","image/tiff"</code> or
      * <code>".pdf","audio/mp3"</code>
      *
-     * @param acceptedFileTypes
-     *            the allowed file types to be uploaded, or <code>null</code> to
-     *            clear any restrictions
+     * @param acceptedFileTypes the allowed file types to be uploaded, or
+     * <code>null</code> to clear any restrictions
      */
     public void setAcceptedFileTypes(String... acceptedFileTypes) {
         String accepted = "";
@@ -495,9 +520,8 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
      * Set the component to show as a message to the user to drop files in the
      * upload component. Despite of the name, the label can be any component.
      *
-     * @param label
-     *            the label to show for the users when it's possible drop files,
-     *            or <code>null</code> to reset to the default label
+     * @param label the label to show for the users when it's possible drop
+     * files, or <code>null</code> to reset to the default label
      */
     public void setDropLabel(Component label) {
         SlotUtils.setSlot(this, "drop-label", label);
@@ -513,9 +537,8 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
      * when the user can drop files to this upload component. Despite of the
      * name, the drop label icon can be any component.
      *
-     * @param icon
-     *            the label icon to show for the users when it's possible to
-     *            drop files, or <code>null</code> to reset to the default icon
+     * @param icon the label icon to show for the users when it's possible to
+     * drop files, or <code>null</code> to reset to the default icon
      */
     public void setDropLabelIcon(Component icon) {
         SlotUtils.setSlot(this, "drop-label-icon", icon);
@@ -529,8 +552,7 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
     /**
      * Set the internationalization properties for this component.
      *
-     * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     * @param i18n the internationalized properties, not <code>null</code>
      */
     public void setI18n(UploadI18N i18n) {
         Objects.requireNonNull(i18n,
@@ -556,18 +578,18 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
         // into an empty object
         getElement().executeJs(
                 "const dropFiles = Object.assign({}, this.i18n.dropFiles, $0.dropFiles);"
-                        + "const addFiles = Object.assign({}, this.i18n.addFiles, $0.addFiles);"
-                        + "const error = Object.assign({}, this.i18n.error, $0.error);"
-                        + "const uploadingStatus = Object.assign({}, this.i18n.uploading.status, $0.uploading && $0.uploading.status);"
-                        + "const uploadingRemainingTime = Object.assign({}, this.i18n.uploading.remainingTime, $0.uploading && $0.uploading.remainingTime);"
-                        + "const uploadingError = Object.assign({}, this.i18n.uploading.error, $0.uploading && $0.uploading.error);"
-                        + "const uploading = {status: uploadingStatus,"
-                        + "  remainingTime: uploadingRemainingTime,"
-                        + "  error: uploadingError};"
-                        + "const units = $0.units || this.i18n.units;"
-                        + "this.i18n = Object.assign({}, this.i18n, $0, {"
-                        + "  addFiles: addFiles,  dropFiles: dropFiles,"
-                        + "  uploading: uploading, units: units});",
+                + "const addFiles = Object.assign({}, this.i18n.addFiles, $0.addFiles);"
+                + "const error = Object.assign({}, this.i18n.error, $0.error);"
+                + "const uploadingStatus = Object.assign({}, this.i18n.uploading.status, $0.uploading && $0.uploading.status);"
+                + "const uploadingRemainingTime = Object.assign({}, this.i18n.uploading.remainingTime, $0.uploading && $0.uploading.remainingTime);"
+                + "const uploadingError = Object.assign({}, this.i18n.uploading.error, $0.uploading && $0.uploading.error);"
+                + "const uploading = {status: uploadingStatus,"
+                + "  remainingTime: uploadingRemainingTime,"
+                + "  error: uploadingError};"
+                + "const units = $0.units || this.i18n.units;"
+                + "this.i18n = Object.assign({}, this.i18n, $0, {"
+                + "  addFiles: addFiles,  dropFiles: dropFiles,"
+                + "  uploading: uploading, units: units});",
                 i18nJson);
     }
 
@@ -589,7 +611,7 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
     @Override
     public void onEnabledStateChanged(boolean enabled) {
         super.onEnabledStateChanged(enabled);
-        if(!enabled) {
+        if (!enabled) {
             int origMax = maxFiles;
             withMaxFiles(0);
             maxFiles = origMax;

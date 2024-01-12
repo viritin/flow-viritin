@@ -24,6 +24,7 @@ import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
 import org.vaadin.firitin.components.DynamicFileDownloader;
 
@@ -47,22 +48,9 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
 
     public DynamicFileDownloadingDemo() {
 
-        DynamicFileDownloader downloadButton = new DynamicFileDownloader("Download foobar.txt", "foobar.txt",
+        DynamicFileDownloader downloadButton = new DynamicFileDownloader("Download foobar.txt",
         outputStream -> {
-            try {
-                /**
-                 * Note that the filename in this example is static.
-                 * Also setting filename here wouldn't affect anymore
-                 * as the http headers have already been sent.
-                 * downloadButton.setFileName("too-late.txt");
-                 *
-                 * Check the next example to see how t define the name
-                 * when the actual download is happening.
-                 */
                 outputStream.write("HelloWorld".getBytes());
-            } catch (IOException ex) {
-                Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
-            }
         });
         
         downloadButton.setTarget("_new");
@@ -77,10 +65,15 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
             }
         }));
 
+        // This generates download with VaadinIcons.DOWNLOAD icon
+        DynamicFileDownloader veryBasic = new DynamicFileDownloader(
+                outputStream -> outputStream.write("content".getBytes()));
+        add(veryBasic);
+
         DynamicFileDownloader downloadFromIcon = new DynamicFileDownloader(
                 // in theory any component should do here, but button/plain icon etc are appropriate
-                VaadinIcon.DOWNLOAD.create(),
-                "foobar.txt",
+                VaadinIcon.DROP.create(),
+                "foobar.txt", // static default name for generated files
                 outputStream -> {
                     try {
                         outputStream.write("HelloWorld".getBytes());
@@ -90,30 +83,18 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
                 });
         add(downloadFromIcon);
         
-        DynamicFileDownloader downloadButton2 = new DynamicFileDownloader("Downlload file with timestamp in name", "foobar/",
-        outputStream -> {
-            try {
+        DynamicFileDownloader downloadButton2 = new DynamicFileDownloader("Download file with timestamp in name",
+            outputStream -> {
                 outputStream.write("HelloWorld".getBytes());
-            } catch (IOException ex) {
-                Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }) {
-            /**
-             * To define the name of file dynamically for each download,
-             * we need to override this method. It gets called just before
-             * the actual content will be written.
-             *
-             * @param session the vaadin session
-             * @param request the vaadin request
-             * @return the name of the file on the end users computer. In this
-             * example we just prefix "foobar.txt" with timestamp.
-             *
-             */
-            @Override
-            protected String getFileName(VaadinSession session, VaadinRequest request) {
-                return LocalDateTime.now() + "foobar.txt";
-            }
-        };
+        }).withFileNameGenerator(r -> {
+            // This is called from Vaadin RequestHandler, before the
+            // request body is written. Request is the only parameter, but
+            // you can also access e.g. VaadinSession with getCurrent()
+            // or add custom headers to file download like here
+            VaadinRequest.getCurrent().setAttribute("foo", "bar");
+            // and do the actual task, return the filename
+            return LocalDateTime.now() + "foobar.txt";
+        });
         
         add(downloadButton2);
 
@@ -122,11 +103,7 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
         ui.setPollInterval(500); // simulate Push, not needed if using Push
         downloadThatNotifiesWhenReady = new DynamicFileDownloader("Download that notifies the UI when finished", "foobar/",
                 outputStream -> {
-                    try {
-                        outputStream.write("HelloWorld".getBytes());
-                    } catch (IOException ex) {
-                        Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    outputStream.write("HelloWorld".getBytes());
                 }
         );
         downloadThatNotifiesWhenReady.addDownloadFinishedListener(e->{
@@ -141,11 +118,7 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
         // ought to be fixed in Vaadin 23
         DynamicFileDownloader disableOnClick = new DynamicFileDownloader("Allow just one download per 10 secs", "foobar.txt",
                 outputStream -> {
-                    try {
-                        outputStream.write("HelloWorld".getBytes());
-                    } catch (IOException ex) {
-                        Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    outputStream.write("HelloWorld".getBytes());
                 });
         disableOnClick.setDisableOnClick(true);
         disableOnClick.addDownloadFinishedListener(e-> {
@@ -168,9 +141,8 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
 
         UI.getCurrent().setPollInterval(500);
 
-        actaulButtonLikeDownloadButton = new DynamicFileDownloader("Download foobar.txt", "foobar.txt",
+        actaulButtonLikeDownloadButton = new DynamicFileDownloader("Download foobar.txt (should fail in Chrome)", "foobar.txt",
                 outputStream -> {
-                    try {
                         outputStream.write("HelloWorld".getBytes());
                         try {
                             Thread.sleep(4000);
@@ -182,9 +154,6 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
                             throw new RuntimeException("Die");
                         outputStream.write("HelloWorld".getBytes());
 
-                    } catch (IOException ex) {
-                        Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
-                    }
                 }).asButton();
         actaulButtonLikeDownloadButton.setDisableOnClick(true);
         actaulButtonLikeDownloadButton.addDownloadFinishedListener(e -> {
@@ -196,23 +165,18 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
 
         DynamicFileDownloader interruptable = new DynamicFileDownloader("Download foobar.txt (interrupt-able)", "foobar.txt",
                 outputStream -> {
-                    try {
-
-                        for (int i = 0; i < 10; i++) {
-                            if (cancelled) {
-                                throw new RuntimeException("Die");
-                            }
-                            outputStream.write("HelloWorld".getBytes());
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
-                            }
+                    for (int i = 0; i < 10; i++) {
+                        if (cancelled) {
+                            throw new RuntimeException("Die");
                         }
-
-                    } catch (IOException ex) {
-                        Logger.getLogger(DynamicFileDownloadingDemo.class.getName()).log(Level.SEVERE, null, ex);
+                        outputStream.write("HelloWorld".getBytes());
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
+
                 }).asButton();
 
         Button b = new Button("Cancel file generation");
