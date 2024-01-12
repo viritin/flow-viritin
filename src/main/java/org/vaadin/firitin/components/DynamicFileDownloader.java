@@ -24,6 +24,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.RequestHandler;
@@ -36,8 +38,10 @@ import java.io.OutputStream;
 import java.util.UUID;
 
 import com.vaadin.flow.shared.Registration;
+import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentHasEnabled;
+import org.vaadin.firitin.fluency.ui.FluentHasTooltip;
 
 /**
  * An anchor which links to a file whose content is produced dynamically.
@@ -47,7 +51,8 @@ import org.vaadin.firitin.fluency.ui.FluentHasEnabled;
  * @see #setFileHandler(com.vaadin.flow.function.SerializableConsumer)
  */
 public class DynamicFileDownloader extends Anchor implements 
-        FluentComponent<DynamicFileDownloader>, FluentHasEnabled<DynamicFileDownloader> {
+        FluentComponent<DynamicFileDownloader>, FluentHasEnabled<DynamicFileDownloader>,
+        FluentHasTooltip<DynamicFileDownloader> {
 
     /**
      * Writes the content of the downloaded file to the given output stream.
@@ -170,7 +175,7 @@ public class DynamicFileDownloader extends Anchor implements
      * @param writer the callback to generate the contents of the file
      */
     public DynamicFileDownloader(ContentWriter writer) {
-        add(VaadinIcon.DOWNLOAD.create());
+        add(new VButton(VaadinIcon.DOWNLOAD.create()));
         setWriter(writer);
     }
 
@@ -407,4 +412,24 @@ public class DynamicFileDownloader extends Anchor implements
         return this;
     }
 
+    /**
+     * @inheritDoc
+     *
+     * Note, that tooltips are only supported if the content of the link
+     * supports them. For example, tooltips are supported if the
+     * {@link #asButton()} method is called.
+     */
+    @Override
+    public Tooltip setTooltipText(String text) {
+        // Anchor does not implement HasTooltip, hack to content
+        // (often a Button) -> works
+        HasTooltip component = (HasTooltip) getChildren().findFirst().get();
+        return component.setTooltipText(text);
+    }
+
+    @Override
+    public Tooltip getTooltip() {
+        HasTooltip component = (HasTooltip) getChildren().findFirst().get();
+        return component.getTooltip();
+    }
 }
