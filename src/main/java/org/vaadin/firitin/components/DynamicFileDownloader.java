@@ -105,6 +105,12 @@ public class DynamicFileDownloader extends Anchor implements
             disableOnclick.remove();
         }
         if (disableOnClick) {
+            getElement().executeJs("""
+            const el = this;
+            this.addEventListener("click", e => {
+                setTimeout(() => el.removeAttribute("href"), 0);
+            });
+            """);
             disableOnclick = getElement().addEventListener("click", e -> {
                 setEnabled(false);
             });
