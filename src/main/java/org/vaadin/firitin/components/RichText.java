@@ -96,6 +96,7 @@ public class RichText extends Div {
      * @return the safelist
      * @deprecated use getSafelist instead
      */
+    @Deprecated
     public Safelist getWhitelist() {
         return getSafelist();
     }

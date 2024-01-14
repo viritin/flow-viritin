@@ -1,6 +1,11 @@
 package org.vaadin.firitin.fields;
 
-import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
@@ -9,18 +14,19 @@ import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.Registration;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.firitin.components.button.VButton;
-import org.vaadin.firitin.form.AbstractForm;
 import org.vaadin.firitin.fields.internalhtmltable.Table;
+import org.vaadin.firitin.fields.internalhtmltable.TableCell;
+import org.vaadin.firitin.fields.internalhtmltable.TableDataCell;
+import org.vaadin.firitin.fields.internalhtmltable.TableRow;
+import org.vaadin.firitin.form.AbstractForm;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import org.vaadin.firitin.fields.internalhtmltable.TableCell;
-import org.vaadin.firitin.fields.internalhtmltable.TableDataCell;
-import org.vaadin.firitin.fields.internalhtmltable.TableRow;
 
 /**
  * A field to pick a list of objects from a superset.
+ *
  * <p>Usage example: selecting runners to a relay team.</p>
  */
 public class ElementCollectionField<T> extends Composite<VerticalLayout>
@@ -31,12 +37,21 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
 
     private List<T> value;
 
+    /**
+     * The table that is used to display the collection.
+     */
     protected Table table;
     private T newItem;
     private Binder newItemForm;
 
     private SerializableSupplier<Object> editorInstantiator;
 
+    /**
+     * Creates a new instance of the field.
+     *
+     * @param clazz the class of the objects in the collection
+     * @param editorClass the class of the editor component
+     */
     public ElementCollectionField(Class<T> clazz, Class<?> editorClass) {
         this.clazz = clazz;
         this.editorClass = editorClass;
@@ -45,11 +60,19 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
         getContent().add(table);
     }
 
+    /**
+     * Configures the instance to use given editor instantiator.
+     * @param editorInstantiator the instantiator to use
+     * @return the instance for further configuration
+     */
     public ElementCollectionField<T> withEditorInstantiator(SerializableSupplier<Object> editorInstantiator) {
         this.editorInstantiator = editorInstantiator;
         return this;
     }
 
+    /**
+     * A hook to override the default column headers.
+     */
     protected void configureColumneHeaders() {
         Field[] declaredFields;
         if(editorClass != null) {
@@ -66,7 +89,7 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
     }
 
     /**
-     * Translatest raw field name to header name. By default decamelcases the name.
+     * Translates raw field name to header name. By default, decamelcases the name.
      * Override for e.g. localization.
      *
      * @param fieldName the raw field name of the row property
@@ -78,6 +101,11 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
                         StringUtils.splitByCharacterTypeCamelCase(fieldName), " "));
     }
 
+    /**
+     * hook to overrid delect button columne
+     * @param row the row to add the button t
+     * @param item the item to delete
+     */
     protected void addDeleteButtonColumn(TableRow row, T item) {
         TableDataCell cell = row.addDataCell();
         cell.add(new VButton(VaadinIcon.TRASH.create(), event -> {

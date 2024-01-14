@@ -24,7 +24,6 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -33,12 +32,23 @@ import com.vaadin.flow.data.binder.Binder;
 import org.vaadin.firitin.components.button.DefaultButton;
 import org.vaadin.firitin.components.button.DeleteButton;
 import org.vaadin.firitin.components.button.VButton;
-import org.vaadin.firitin.components.button.VButton.ButtonColor;
-import org.vaadin.firitin.components.button.VButton.ButtonType;
 import org.vaadin.firitin.components.dialog.VDialog;
 import org.vaadin.firitin.util.VStyles;
 
 /**
+ * A basic form class to avoid a ton of boilerplate code. Provided things like
+ * data binding, save and cancel buttons and controls their state based on the
+ * input in the form and deals with some of the quirks of Binder.
+ * <p>
+ * For binding this form uses naming conventions, so for each field of your
+ * edited entity, it searches similarly named Vaadin component from your class
+ * extending AbstractForm.
+ * <p>
+ * By default, BeanValidationBinder is used, so validators defined in your DTO
+ * or entity class are taken into account. Note that Vaadin don't currently
+ * support class level validators so that must be handled separately. Binding is
+ * always non-buffered variant, create a clone of your DTO if you mind that it
+ * might get changed even if user don't press the save button.
  *
  * @author mstahv
  */
@@ -46,16 +56,31 @@ public abstract class AbstractForm<T> extends Composite<Div> {
 
     private boolean settingBean;
 
+    /**
+     * A handler called when the built-in save button of the form is called.
+     * 
+     * @param <T> the entity being edited
+     */
     public interface SavedHandler<T> extends Serializable {
 
         void onSave(T entity);
     }
 
+    /**     
+     * A handler called when the built-in reset/cancel button of the form is called.
+     * 
+     * @param <T> the entity being edited
+     */
     public interface ResetHandler<T> extends Serializable {
 
         void onReset(T entity);
     }
 
+    /**
+     * A handler called when the built-in delete button of the form is called.
+     *
+     * @param <T> the entity being edited
+     */
     public interface DeleteHandler<T> extends Serializable {
 
         void onDelete(T entity);
@@ -73,6 +98,11 @@ public abstract class AbstractForm<T> extends Composite<Div> {
     private Binder<T> binder;
     private boolean hasChanges = false;
 
+    /**
+     * Constructor for the abstract form.
+     * 
+     * @param entityType The class type used for data binding
+     */
     public AbstractForm(Class<T> entityType) {
         addAttachListener(e -> lazyInit());
         binder = new BeanValidationBinder<>(entityType);
@@ -99,15 +129,14 @@ public abstract class AbstractForm<T> extends Composite<Div> {
     }
 
     /**
-     * Sets the object to be edited by this form. This method binds all fields from
-     * this form to given objects.
+     * Sets the object to be edited by this form. This method binds all fields
+     * from this form to given objects.
      * <p>
-     * If your form needs to manually configure something based on the state of the
-     * edited object, you can override this method to do that either before the
-     * object is bound to fields or to do something after the bean binding.
+     * If your form needs to manually configure something based on the state of
+     * the edited object, you can override this method to do that either before
+     * the object is bound to fields or to do something after the bean binding.
      *
-     * @param entity
-     *            the object to be edited by this form
+     * @param entity the object to be edited by this form
      */
     public void setEntity(T entity) {
         this.entity = entity;
@@ -128,10 +157,11 @@ public abstract class AbstractForm<T> extends Composite<Div> {
 
     /**
      * by default only save button get's enabled when form has any changes<br>
-     * you can use this method in case the prefilled entity is already valid and save should be possible to press without any changes<br>
+     * you can use this method in case the prefilled entity is already valid and
+     * save should be possible to press without any changes<br>
      * if entity is not valid saveButton will stay disabled!
-     * @param entity
-     *            the object to be edited by this form
+     *
+     * @param entity the object to be edited by this form
      */
     public void setEntityWithEnabledSave(T entity) {
         setEntity(entity);
@@ -246,11 +276,11 @@ public abstract class AbstractForm<T> extends Composite<Div> {
     }
 
     /**
-     * This method should return the actual content of the form, including possible
-     * toolbar.
+     * This method should return the actual content of the form, including
+     * possible toolbar.
      *
-     * Use setEntity(T entity) to fill in the data. Am example implementation could
-     * look like this:
+     * Use setEntity(T entity) to fill in the data. Am example implementation
+     * could look like this:
      *
      * <pre>
      * <code>
@@ -278,6 +308,11 @@ public abstract class AbstractForm<T> extends Composite<Div> {
      */
     protected abstract Component createContent();
 
+    /**
+     * Adjust save button state. Override if you for example want to have
+     * Save button always enabled, even if the Binder has not tracked any
+     * changes yet.
+     */
     protected void adjustSaveButtonState() {
         if (isBound()) {
             boolean valid = isValid();
@@ -338,7 +373,12 @@ public abstract class AbstractForm<T> extends Composite<Div> {
         return deleteButton;
     }
 
+    /**
+     * Adjusts the reset button state. Override if you for example wish to keep
+     * reset/cancel button enabled even if there is nothing to reset.
+     */
     protected void adjustResetButtonState() {
+        // due to issues, currently always enabled...
         getResetButton().setEnabled(true);
         /*
         if (getPopup() != null && getPopup().getParent().isPresent()) {
@@ -358,7 +398,8 @@ public abstract class AbstractForm<T> extends Composite<Div> {
     }
 
     /**
-     * @return the currently edited entity or null if the form is currently unbound
+     * @return the currently edited entity or null if the form is currently
+     * unbound
      */
     public T getEntity() {
         return entity;
@@ -408,7 +449,7 @@ public abstract class AbstractForm<T> extends Composite<Div> {
     }
 
     private boolean findFieldAndFocus(Component compositionRoot) {
-        for (Iterator<Component> iter = compositionRoot.getChildren().iterator();iter.hasNext();) {
+        for (Iterator<Component> iter = compositionRoot.getChildren().iterator(); iter.hasNext();) {
             Component component = iter.next();
 
             if (component instanceof Focusable<?>) {
@@ -435,8 +476,8 @@ public abstract class AbstractForm<T> extends Composite<Div> {
 
     /**
      *
-     * @return the last Popup into which the Form was opened with #openInModalPopup
-     *         method or null if the form hasn't been use in window
+     * @return the last Popup into which the Form was opened with
+     * #openInModalPopup method or null if the form hasn't been use in window
      */
     public Dialog getPopup() {
         return popup;
