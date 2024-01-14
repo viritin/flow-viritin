@@ -419,11 +419,13 @@ public class DynamicFileDownloader extends Anchor implements
     }
 
     /**
-     * @inheritDoc
+     * @see HasTooltip#setTooltipText(String)
      *
      * Note, that tooltips are only supported if the content of the link
      * supports them. For example, tooltips are supported if the
      * {@link #asButton()} method is called.
+     *
+     * @param text the tooltip text
      */
     @Override
     public Tooltip setTooltipText(String text) {
