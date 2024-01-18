@@ -46,6 +46,7 @@ e.g. in field declaration or without declaring an extra variable. When used in a
  * EnumSelect
  * ElementCollectionField a field to edit e.g. List<Address> type structure
  * ~LocalDateTimeField for editing LocalDateTime objects with Binder~ Use DateTimePicker from core, that is available these days.
+ * VLocalDateTimePicker and VLocalDatePicker who use the month names from the selected locale.
  * Text [Selection API](https://javadoc.dokku1.parttio.org/in.virit/viritin/2.5.2/org/vaadin/firitin/components/textfield/SelectionApi.html) (selectAll, getCursorPosition setSelection, getSelection et al.) for inputs that are based on keyboard input. Essentials to fine tune the UX of "pro user views".
 
 ### Uncategorised helpers
