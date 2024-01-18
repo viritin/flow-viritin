@@ -214,10 +214,18 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         this.frh = new FileRequestHandler();
-        getElement().setAttribute("target", "./" + frh.id);
+        getElement().setAttribute("target", ".");
         attachEvent.getSession().addRequestHandler(frh);
 
         getElement().executeJs("""
+            const ufhid = $2;
+            let trg = window.location.toString();
+            if(window.location.search != "") {
+                trg = trg + "&v-r=ufh";
+            } else {
+                trg = trg + "?v-r=ufh";
+            }
+            this.setAttribute("target", trg);         
             // override default dragover so that it works
             this.addEventListener("dragover", event => {
                 event.stopPropagation();
@@ -364,10 +372,10 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                 const file = event.detail.file;
                 const name = encodeURIComponent(file.name);
                 xhr.setRequestHeader('Content-Type', file.type);
-                xhr.setRequestHeader('Content-Disposition', 'attachment; filename="' + name + '"');
+                xhr.setRequestHeader('Content-Disposition', 'attachment;name="'+ufhid+'"; filename="' + name + '"');
                 xhr.send(file);
             });
-        """, clearAutomatically, maxConcurrentUploads);
+        """, clearAutomatically, maxConcurrentUploads, frh.id);
 
         this.ui = attachEvent.getUI();
         super.onAttach(attachEvent);
@@ -410,15 +418,14 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
         @Override
         public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) throws IOException {
             String contextPath = request.getContextPath();
-            String pathInfo = request.getPathInfo();
-            if (pathInfo.endsWith(id)) {
+            String cd = request.getHeader("Content-Disposition");
+            if (cd != null && cd.contains(id)) {
                 // Vaadin's StreamReceiver & friends has this odd
                 // inversion of streams, thus handle here
                 // TODO figure out if content type or name needs some sanitation
                 String contentType = request.getHeader("Content-Type");
-                String cd = request.getHeader("Content-Disposition");
                 String name = cd.split(";")[1].split("=")[1].substring(1);
-                name = name.substring(0, name.length() - 1);
+                name = name.substring(0, name.indexOf("\""));
                 name = URLDecoder.decode(name, "UTF-8");
                 Command cb = fileHandler.handleFile(request.getInputStream(), new FileDetails(name, contentType));
                 if (cb != null) {
