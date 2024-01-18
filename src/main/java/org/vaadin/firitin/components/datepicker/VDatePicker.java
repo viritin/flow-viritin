@@ -2,21 +2,19 @@ package org.vaadin.firitin.components.datepicker;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.server.VaadinSession;
 import org.vaadin.firitin.components.datetimepicker.VDateTimePicker;
-import org.vaadin.firitin.fluency.ui.*;
+import org.vaadin.firitin.fluency.ui.FluentComponent;
+import org.vaadin.firitin.fluency.ui.FluentFocusable;
+import org.vaadin.firitin.fluency.ui.FluentHasHelper;
+import org.vaadin.firitin.fluency.ui.FluentHasSize;
+import org.vaadin.firitin.fluency.ui.FluentHasStyle;
+import org.vaadin.firitin.fluency.ui.FluentHasTooltip;
+import org.vaadin.firitin.fluency.ui.FluentHasValidation;
+import org.vaadin.firitin.fluency.ui.FluentHasValueAndElement;
+import org.vaadin.firitin.fluency.ui.FluentThemableLayout;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.Month;
-import java.time.format.TextStyle;
-import java.time.temporal.WeekFields;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 public class VDatePicker extends DatePicker implements FluentHasSize<VDatePicker>, FluentHasValidation<VDatePicker>,
         FluentHasStyle<VDatePicker>, FluentFocusable<DatePicker, VDatePicker>, FluentComponent<VDatePicker>,
