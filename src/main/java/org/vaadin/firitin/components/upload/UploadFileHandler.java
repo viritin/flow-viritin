@@ -24,13 +24,15 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.RequestHandler;
+import com.vaadin.flow.server.StreamReceiver;
+import com.vaadin.flow.server.StreamVariable;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
@@ -44,11 +46,11 @@ import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * A vaadin-upload component that just passes the input stream (and name and
@@ -214,168 +216,167 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         this.frh = new FileRequestHandler();
-        getElement().setAttribute("target", ".");
+
+        StreamReceiver fakeSR = new StreamReceiver(getElement().getNode(), "s", dummySV());
+        this.frh.id = fakeSR.getId();
+        runBeforeClientResponse(ui -> getElement().setAttribute("fakesr", fakeSR));
         attachEvent.getSession().addRequestHandler(frh);
 
         getElement().executeJs("""
-            const ufhid = $2;
-            let trg = window.location.toString();
-            if(window.location.search != "") {
-                trg = trg + "&v-r=ufh";
-            } else {
-                trg = trg + "?v-r=ufh";
-            }
-            this.setAttribute("target", trg);         
-            // override default dragover so that it works
-            this.addEventListener("dragover", event => {
-                event.stopPropagation();
-                event.preventDefault();
-                if (!this.nodrop && !this._dragover) {
-                    let containsInvalid = false;
-                    let numberOfFiles = 0;
-                    const re = this.__acceptRegexp;
-                    for (const item of event.dataTransfer.items) {
-                        const acceptedType = (re == null) || re.test(item.type);
-                        if(acceptedType && item.kind == "file") {
-                            numberOfFiles++;
-                        } else {
-                            containsInvalid = true;
-                        }
-                    }
-                    if(!containsInvalid && (this.files.length + numberOfFiles) <= this.maxFiles) {
-                        this._dragoverValid = !this.maxFilesReached;
-                        this._dragover = true;
-                    }
-                }
-                event.dataTransfer.dropEffect = !this._dragoverValid || this.nodrop ? 'none' : 'copy';
-            }, true); // bubling phase as no idea how to override default handler by default
-            
-            // support for dragging directories
-            // Run feature detection.
-            const supportsFileSystemAccessAPI = 'getAsFileSystemHandle' in DataTransferItem.prototype;
-            const supportsWebkitGetAsEntry = 'webkitGetAsEntry' in DataTransferItem.prototype;
-            this._addFiles = files => {
-                Array.prototype.forEach.call(files, f => {
-                    if(f.type === '') {
-                        // skip, most likely a dragged directory, don't cause exception
-                    } else {
-                        this._addFile(f);
-                    }
-                });
-            }
-            
-            this.addEventListener("drop", event => {
-                  if (!this.nodrop) {
+                    const ufhid = $2;
+                    this.setAttribute("target", 
+                    this.getAttribute("fakesr").substring(0, this.getAttribute("fakesr").indexOf("VAADIN"))
+                    + "?v-r=ufh");
+                    // override default dragover so that it works
+                    this.addEventListener("dragover", event => {
+                        event.stopPropagation();
                         event.preventDefault();
-                        event.stopPropagation()
-                        this._dragover = this._dragoverValid = false;
-                        
-                        const el = this;
-                        
-                        // This ignores directories we handle later
-                        el._addFiles(event.dataTransfer.files);
-                        
-                        let getFilesRecursively = (entry) => {
-                          if (entry.kind === "file") {
-                            return entry.getFile().then(file => {
-                              if (file !== null) {
-                                return [file]; // Return an array containing the file
-                              }
-                              return []; // Return an empty array if no file
-                            });
-                          } else if (entry.kind === "directory") {
-                            return getAllEntries(entry.values()).then(entries => {
-                              // Recursively process each entry in the directory
-                              const promises = entries.map(handle => getFilesRecursively(handle));
-                              return Promise.all(promises).then(filesArrays => {
-                                // Flatten the array of arrays
-                                return filesArrays.reduce((allFiles, files) => allFiles.concat(files), []);
-                              });
-                            });
-                          }
-                          return Promise.resolve([]); // Return an empty array for non-file, non-directory entries
+                        if (!this.nodrop && !this._dragover) {
+                            let containsInvalid = false;
+                            let numberOfFiles = 0;
+                            const re = this.__acceptRegexp;
+                            for (const item of event.dataTransfer.items) {
+                                const acceptedType = (re == null) || re.test(item.type);
+                                if(acceptedType && item.kind == "file") {
+                                    numberOfFiles++;
+                                } else {
+                                    containsInvalid = true;
+                                }
+                            }
+                            if(!containsInvalid && (this.files.length + numberOfFiles) <= this.maxFiles) {
+                                this._dragoverValid = !this.maxFilesReached;
+                                this._dragover = true;
+                            }
                         }
-                        
-                        let getAllEntries = (iterator) => {
-                          // Utility function to get all entries from the directory handle
-                          const entries = [];
-                          const getNextEntry = () => {
-                            return iterator.next().then(result => {
-                              if (!result.done) {
-                                entries.push(result.value);
-                                return getNextEntry();
-                              }
-                              return entries;
-                            });
-                          };
-                          return getNextEntry();
-                        }
-                        
-                        [...event.dataTransfer.items].forEach(item => {
-                            const name = item.name;
-                            const type = item.type;
-                            const p = supportsFileSystemAccessAPI ? item.getAsFileSystemHandle(): item.webkitGetAsEntry();
-                            p.then(handle => {
-                                if (handle.kind === 'directory' || handle.isDirectory) {
-                                    getFilesRecursively(handle).then(files => {
-                                      files.forEach(fileHandle => {
-                                        el._addFile(fileHandle);
+                        event.dataTransfer.dropEffect = !this._dragoverValid || this.nodrop ? 'none' : 'copy';
+                    }, true); // bubling phase as no idea how to override default handler by default
+                    
+                    // support for dragging directories
+                    // Run feature detection.
+                    const supportsFileSystemAccessAPI = 'getAsFileSystemHandle' in DataTransferItem.prototype;
+                    const supportsWebkitGetAsEntry = 'webkitGetAsEntry' in DataTransferItem.prototype;
+                    this._addFiles = files => {
+                        Array.prototype.forEach.call(files, f => {
+                            if(f.type === '') {
+                                // skip, most likely a dragged directory, don't cause exception
+                            } else {
+                                this._addFile(f);
+                            }
+                        });
+                    }
+                    
+                    this.addEventListener("drop", event => {
+                          if (!this.nodrop) {
+                                event.preventDefault();
+                                event.stopPropagation()
+                                this._dragover = this._dragoverValid = false;
+                                
+                                const el = this;
+                                
+                                // This ignores directories we handle later
+                                el._addFiles(event.dataTransfer.files);
+                                
+                                let getFilesRecursively = (entry) => {
+                                  if (entry.kind === "file") {
+                                    return entry.getFile().then(file => {
+                                      if (file !== null) {
+                                        return [file]; // Return an array containing the file
+                                      }
+                                      return []; // Return an empty array if no file
+                                    });
+                                  } else if (entry.kind === "directory") {
+                                    return getAllEntries(entry.values()).then(entries => {
+                                      // Recursively process each entry in the directory
+                                      const promises = entries.map(handle => getFilesRecursively(handle));
+                                      return Promise.all(promises).then(filesArrays => {
+                                        // Flatten the array of arrays
+                                        return filesArrays.reduce((allFiles, files) => allFiles.concat(files), []);
                                       });
                                     });
+                                  }
+                                  return Promise.resolve([]); // Return an empty array for non-file, non-directory entries
                                 }
-                            });
-                        });
-                  }
-            }, true);
-            
-            
-            // avoid the default auto upload behaviour
-            // that immediately opens xhr for each file
-            this.noAuto = true;
-            const CLEAR = $0;
-            const MAX_CONNECTIONS = $1;
-            this.queueNext = () => {
-                const numConnections = this.files.filter(file => file.uploading).length;
-                if(numConnections < MAX_CONNECTIONS) {
-                // reverse to pick next in selection order
-                    const nextFileToUpload = this.files.slice().reverse().find(file => file.held)
-                    if (nextFileToUpload) {
-                        this.uploadFiles(nextFileToUpload)
+                                
+                                let getAllEntries = (iterator) => {
+                                  // Utility function to get all entries from the directory handle
+                                  const entries = [];
+                                  const getNextEntry = () => {
+                                    return iterator.next().then(result => {
+                                      if (!result.done) {
+                                        entries.push(result.value);
+                                        return getNextEntry();
+                                      }
+                                      return entries;
+                                    });
+                                  };
+                                  return getNextEntry();
+                                }
+                                
+                                [...event.dataTransfer.items].forEach(item => {
+                                    const name = item.name;
+                                    const type = item.type;
+                                    const p = supportsFileSystemAccessAPI ? item.getAsFileSystemHandle(): item.webkitGetAsEntry();
+                                    p.then(handle => {
+                                        if (handle.kind === 'directory' || handle.isDirectory) {
+                                            getFilesRecursively(handle).then(files => {
+                                              files.forEach(fileHandle => {
+                                                el._addFile(fileHandle);
+                                              });
+                                            });
+                                        }
+                                    });
+                                });
+                          }
+                    }, true);
+                    
+                    
+                    // avoid the default auto upload behaviour
+                    // that immediately opens xhr for each file
+                    this.noAuto = true;
+                    const CLEAR = $0;
+                    const MAX_CONNECTIONS = $1;
+                    this.queueNext = () => {
+                        const numConnections = this.files.filter(file => file.uploading).length;
+                        if(numConnections < MAX_CONNECTIONS) {
+                        // reverse to pick next in selection order
+                            const nextFileToUpload = this.files.slice().reverse().find(file => file.held)
+                            if (nextFileToUpload) {
+                                this.uploadFiles(nextFileToUpload)
+                            }
+                        }
                     }
-                }
-            }
-            
-            // start uploading next file in queue when a file is successfully uploaded
-            this.addEventListener('upload-success', e => {
-                if(CLEAR) {
-                    const index = this.files.indexOf(e.detail.file);
-                    if (index > -1) {
-                        this._removeFile(e.detail.file);
-                    }
-                }
-                this.queueNext();
-            });
-    
-            // start uploading next file in queue also when there is an error when uploading the file
-            this.addEventListener('upload-error', () => {
-                this.queueNext();
-            });
-    
-            this.addEventListener('files-changed', (event) => {
-                this.queueNext();
-            });
-            
-            // This sends the request without obsolete and somewhat problematic multipart request
-            this.addEventListener("upload-request", e => {
-                e.preventDefault(true); // I'll send this instead!!
-                const xhr = event.detail.xhr;
-                const file = event.detail.file;
-                const name = encodeURIComponent(file.name);
-                xhr.setRequestHeader('Content-Type', file.type);
-                xhr.setRequestHeader('Content-Disposition', 'attachment;name="'+ufhid+'"; filename="' + name + '"');
-                xhr.send(file);
-            });
-        """, clearAutomatically, maxConcurrentUploads, frh.id);
+                    
+                    // start uploading next file in queue when a file is successfully uploaded
+                    this.addEventListener('upload-success', e => {
+                        if(CLEAR) {
+                            const index = this.files.indexOf(e.detail.file);
+                            if (index > -1) {
+                                this._removeFile(e.detail.file);
+                            }
+                        }
+                        this.queueNext();
+                    });
+                    
+                    // start uploading next file in queue also when there is an error when uploading the file
+                    this.addEventListener('upload-error', () => {
+                        this.queueNext();
+                    });
+                    
+                    this.addEventListener('files-changed', (event) => {
+                        this.queueNext();
+                    });
+                    
+                    // This sends the request without obsolete and somewhat problematic multipart request
+                    this.addEventListener("upload-request", e => {
+                        e.preventDefault(true); // I'll send this instead!!
+                        const xhr = event.detail.xhr;
+                        const file = event.detail.file;
+                        const name = encodeURIComponent(file.name);
+                        xhr.setRequestHeader('Content-Type', file.type);
+                        xhr.setRequestHeader('Content-Disposition', 'attachment;name="'+ufhid+'"; filename="' + name + '"');
+                        xhr.send(file);
+                    });
+                """, clearAutomatically, maxConcurrentUploads, frh.id);
 
         this.ui = attachEvent.getUI();
         super.onAttach(attachEvent);
@@ -385,6 +386,47 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
             setI18nWithJS();
         }
 
+    }
+
+    private StreamVariable dummySV() {
+        // Dummy Stream variable. This stream receiver/variable are not
+        // really used
+        return new StreamVariable() {
+            @Override
+            public OutputStream getOutputStream() {
+                return null;
+            }
+
+            @Override
+            public boolean listenProgress() {
+                return false;
+            }
+
+            @Override
+            public void onProgress(StreamingProgressEvent event) {
+
+            }
+
+            @Override
+            public void streamingStarted(StreamingStartEvent event) {
+
+            }
+
+            @Override
+            public void streamingFinished(StreamingEndEvent event) {
+
+            }
+
+            @Override
+            public void streamingFailed(StreamingErrorEvent event) {
+
+            }
+
+            @Override
+            public boolean isInterrupted() {
+                return false;
+            }
+        };
     }
 
     @Override
@@ -407,13 +449,9 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
 
     private class FileRequestHandler implements RequestHandler {
 
-        private final String id;
+        private String id;
 
         private List<String> files = new LinkedList<>();
-
-        FileRequestHandler() {
-            this.id = UUID.randomUUID().toString();
-        }
 
         @Override
         public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) throws IOException {
