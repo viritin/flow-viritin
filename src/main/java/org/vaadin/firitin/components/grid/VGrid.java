@@ -16,6 +16,7 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.ValueProvider;
+import org.apache.commons.lang3.StringUtils;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentFocusable;
 import org.vaadin.firitin.fluency.ui.FluentHasSize;
@@ -24,6 +25,8 @@ import org.vaadin.firitin.fluency.ui.FluentHasTheme;
 import org.vaadin.firitin.util.VStyleUtil;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -50,6 +53,22 @@ public class VGrid<T> extends Grid<T>
 
     public VGrid(Class<T> beanType) {
         super(beanType);
+        // Is empty check in case Vaadin Grid gains support at some point
+        if(beanType.isRecord() && getColumns().isEmpty()) {
+            RecordComponent[] recordComponents = beanType.getRecordComponents();
+            for (RecordComponent r : recordComponents) {
+                String name = r.getName();
+                addColumn(v -> {
+                    try {
+                        return r.getAccessor().invoke(v);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    } catch (InvocationTargetException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).setKey(name).setHeader(StringUtils.capitalize(name));
+            }
+        }
     }
 
     @Override
