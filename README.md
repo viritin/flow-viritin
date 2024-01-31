@@ -36,6 +36,11 @@ e.g. in field declaration or without declaring an extra variable. When used in a
  * LumoProps, Java enumeration for easier discoverability (& redefining/using) of the handy Lumo theme css properties.
  * ~WebStorage helper to save data in the browsers localStorage or sessionStorage~ (available for backwards compatibility, but the same implementation found in core as well these days)
 
+### VGrid
+
+ * [Supports Java `record`s](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/RecordsWithGrid.java)
+ * [CellFormatter](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/Grids.java#L45-L63) to modify all "raw data cells" columns or based on column details.
+
 ### Forms & Fields
 
  * AbstractForm, configures binder properly for naming convention based binding and provides basic for features such as save and cancel buttons that enable themselves based on the user actions.
