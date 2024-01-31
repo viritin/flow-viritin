@@ -42,6 +42,7 @@ public class VGrid<T> extends Grid<T>
         FluentFocusable<Grid<T>, VGrid<T>>, FluentHasTheme<VGrid<T>> {
 
     private Set<String> columnCssKeys;
+    private CellFormatter<T> cellFormatter;
 
     public VGrid() {
         super();
@@ -54,19 +55,11 @@ public class VGrid<T> extends Grid<T>
     public VGrid(Class<T> beanType) {
         super(beanType);
         // Is empty check in case Vaadin Grid gains support at some point
-        if(beanType.isRecord() && getColumns().isEmpty()) {
+        if (beanType.isRecord() && getColumns().isEmpty()) {
             RecordComponent[] recordComponents = beanType.getRecordComponents();
             for (RecordComponent r : recordComponents) {
                 String name = r.getName();
-                addColumn(v -> {
-                    try {
-                        return r.getAccessor().invoke(v);
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    } catch (InvocationTargetException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).setKey(name).setHeader(StringUtils.capitalize(name));
+                addRecordColumn(r, name);
             }
         }
     }
@@ -89,6 +82,36 @@ public class VGrid<T> extends Grid<T>
     public VGrid<T> withProperties(String... propertyNames) {
         setColumns(propertyNames);
         return this;
+    }
+
+    @Override
+    public void setColumns(String... propertyNames) {
+        if (getBeanType().isRecord()) {
+            removeAllColumns();
+            RecordComponent[] recordComponents = getBeanType().getRecordComponents();
+            for (String p : propertyNames) {
+                for (RecordComponent r : recordComponents) {
+                    String name = r.getName();
+                    if(name.equals(p)) {
+                        addRecordColumn(r, name);
+                    }
+                }
+            }
+        } else {
+            super.setColumns(propertyNames);
+        }
+    }
+
+    private void addRecordColumn(RecordComponent r, String name) {
+        addColumn(v -> {
+            try {
+                return r.getAccessor().invoke(v);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        }).setKey(name).setHeader(StringUtils.capitalize(name));
     }
 
     public VGrid<T> withThemeVariants(GridVariant... variants) {
@@ -180,6 +203,106 @@ public class VGrid<T> extends Grid<T>
         return this;
     }
 
+    private VColumn<T> colById(String columnId) {
+        // Reflection extension 🤪: Map<String, Column<T>> idToColumnMap
+        try {
+            final Field field = Grid.class.getDeclaredField("idToColumnMap");
+            field.setAccessible(true);
+            Map<String, Column<T>> idToColumnMap = (Map<String, Column<T>>) field.get(this);
+            return (VColumn<T>) idToColumnMap.get(columnId);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    protected <C extends Column<T>> C addColumn(ValueProvider<T, ?> valueProvider, BiFunction<Renderer<T>, String, C> columnFactory) {
+        String columnId = createColumnId(false);
+
+        C column = addColumn(
+                new ColumnPathRenderer<T>(columnId,
+                        item -> formatColumnValue(colById(columnId),
+                                applyValueProvider(valueProvider, item))),
+                columnFactory);
+        // Set comparator in the same way as in super implementation using reflection
+        // setComparator has side effects
+        try {
+            final Field field = Column.class.getDeclaredField("comparator");
+            field.setAccessible(true);
+            SerializableComparator<T> c = ((a, b) -> compareMaybeComparables(
+                    applyValueProvider(valueProvider, a),
+                    applyValueProvider(valueProvider, b)));
+            field.set(column, c);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        return column;
+    }
+
+    // Copy pasted from Grid to override formatting
+    private Object applyValueProvider(ValueProvider<T, ?> valueProvider,
+                                      T item) {
+        Object value;
+        try {
+            value = valueProvider.apply(item);
+        } catch (NullPointerException npe) {
+            value = null;
+            if (NestedNullBehavior.THROW == getNestedNullBehavior()) {
+                throw npe;
+            }
+        }
+        return value;
+    }
+
+    private String formatColumnValue(VColumn<T> col, Object value) {
+        if (cellFormatter != null) {
+            return cellFormatter.formatColumnValue(col, value);
+        }
+        return CellFormatter.defaultVaadinFormatting(value);
+    }
+
+    /**
+     * Defines a formatter used for all basic data columns.
+     *
+     * @param formatter the formatter
+     * @return the VGrid for further configuration
+     */
+    public VGrid<T> withCellFormatter(CellFormatter<T> formatter) {
+        this.cellFormatter = formatter;
+        return this;
+    }
+
+    /**
+     * An interface to configure formatting of all data
+     * cells in the Grid. Not that this does not apply to
+     * columns defined with custom renderer.
+     *
+     * @param <T> the Item type
+     */
+    public interface CellFormatter<T> {
+        public static String defaultVaadinFormatting(Object value) {
+            if (value == null) {
+                return "";
+            }
+            return String.valueOf(value);
+        }
+
+        /**
+         * Formats the value in a raw data column.
+         * By default, nulls are rendered as "" and non-nulls
+         * with String.valueOf(Object).
+         *
+         * @param col   the column
+         * @param value the value to render in the cell
+         * @return String representation of the value to be sent to client
+         */
+        String formatColumnValue(VGrid.VColumn<T> col, Object value);
+    }
+
     public static class VColumn<T> extends Column<T> {
 
         private Style customStyle;
@@ -265,15 +388,15 @@ public class VGrid<T> extends Grid<T>
                         grid.columnCssKeys = new HashSet<>();
                     }
                     boolean newRule = grid.columnCssKeys.add(key);
-                    if(newRule) {
+                    if (newRule) {
                         VStyleUtil.inject("""
-                            vaadin-grid::part(%s) {
-                                %s
-                            }
-                            .%s-hc {
-                                %s
-                            }
-                            """.formatted(
+                                vaadin-grid::part(%s) {
+                                    %s
+                                }
+                                .%s-hc {
+                                    %s
+                                }
+                                """.formatted(
                                 key,
                                 cellCssBodyString,
                                 key,
@@ -306,106 +429,6 @@ public class VGrid<T> extends Grid<T>
             };
 
             return customStyle;
-        }
-    }
-
-    private VColumn<T> colById(String columnId) {
-        // Reflection extension 🤪: Map<String, Column<T>> idToColumnMap
-        try {
-            final Field field = Grid.class.getDeclaredField("idToColumnMap");
-            field.setAccessible(true);
-            Map<String, Column<T>> idToColumnMap = (Map<String, Column<T>>) field.get(this);
-            return (VColumn<T>) idToColumnMap.get(columnId);
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    protected <C extends Column<T>> C addColumn(ValueProvider<T, ?> valueProvider, BiFunction<Renderer<T>, String, C> columnFactory) {
-        String columnId = createColumnId(false);
-
-        C column = addColumn(
-                new ColumnPathRenderer<T>(columnId,
-                        item -> formatColumnValue(colById(columnId),
-                                applyValueProvider(valueProvider, item))),
-                columnFactory);
-        // Set comparator in the same way as in super implementation using reflection
-        // setComparator has side effects
-        try {
-            final Field field = Column.class.getDeclaredField("comparator");
-            field.setAccessible(true);
-            SerializableComparator<T> c = ((a, b) -> compareMaybeComparables(
-                    applyValueProvider(valueProvider, a),
-                    applyValueProvider(valueProvider, b)));
-            field.set(column, c);
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-        return column;
-    }
-
-    // Copy pasted from Grid to override formatting
-    private Object applyValueProvider(ValueProvider<T, ?> valueProvider,
-                                      T item) {
-        Object value;
-        try {
-            value = valueProvider.apply(item);
-        } catch (NullPointerException npe) {
-            value = null;
-            if (NestedNullBehavior.THROW == getNestedNullBehavior()) {
-                throw npe;
-            }
-        }
-        return value;
-    }
-
-    private String formatColumnValue(VColumn<T> col, Object value) {
-        if(cellFormatter != null) {
-            return cellFormatter.formatColumnValue(col, value);
-        }
-        return CellFormatter.defaultVaadinFormatting(value);
-    }
-
-    private CellFormatter<T> cellFormatter;
-
-    /**
-     * Defines a formatter used for all basic data columns.
-     * @param formatter the formatter
-     * @return the VGrid for further configuration
-     */
-    public VGrid<T> withCellFormatter(CellFormatter<T> formatter) {
-        this.cellFormatter = formatter;
-        return this;
-    }
-
-    /**
-     * An interface to configure formatting of all data
-     * cells in the Grid. Not that this does not apply to
-     * columns defined with custom renderer.
-     * @param <T> the Item type
-     */
-    public interface CellFormatter<T> {
-        /**
-         * Formats the value in a raw data column.
-         * By default, nulls are rendered as "" and non-nulls
-         * with String.valueOf(Object).
-         *
-         * @param col the column
-         * @param value the value to render in the cell
-         * @return String representation of the value to be sent to client
-         */
-        String formatColumnValue(VGrid.VColumn<T> col, Object value);
-
-        public static String defaultVaadinFormatting(Object value) {
-            if(value == null) {
-                return "";
-            }
-            return String.valueOf(value);
         }
     }
 

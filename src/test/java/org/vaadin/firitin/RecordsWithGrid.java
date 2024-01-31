@@ -43,8 +43,15 @@ public class RecordsWithGrid extends VerticalLayout {
                 new PersRecord("Bob", 30),
                 new PersRecord("Charlie", 22)
         );
-
         grid.setItems(people);
+
+        boolean nameFirst = grid.getColumns().get(0).getKey().equals("name");
+        assert nameFirst;
+
+        grid.setColumns("age", "name");
+        nameFirst = grid.getColumns().get(0).getKey().equals("name");
+        assert !nameFirst;
+
         add(grid);
     }
 
