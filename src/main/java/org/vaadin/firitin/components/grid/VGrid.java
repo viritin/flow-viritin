@@ -4,6 +4,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.grid.ColumnPathRenderer;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -13,6 +14,8 @@ import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.function.SerializableComparator;
+import com.vaadin.flow.function.ValueProvider;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentFocusable;
 import org.vaadin.firitin.fluency.ui.FluentHasSize;
@@ -20,9 +23,11 @@ import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 import org.vaadin.firitin.fluency.ui.FluentHasTheme;
 import org.vaadin.firitin.util.VStyleUtil;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -284,4 +289,105 @@ public class VGrid<T> extends Grid<T>
             return customStyle;
         }
     }
+
+    private VColumn<T> colById(String columnId) {
+        // Reflection extension 🤪: Map<String, Column<T>> idToColumnMap
+        try {
+            final Field field = Grid.class.getDeclaredField("idToColumnMap");
+            field.setAccessible(true);
+            Map<String, Column<T>> idToColumnMap = (Map<String, Column<T>>) field.get(this);
+            return (VColumn<T>) idToColumnMap.get(columnId);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    protected <C extends Column<T>> C addColumn(ValueProvider<T, ?> valueProvider, BiFunction<Renderer<T>, String, C> columnFactory) {
+        String columnId = createColumnId(false);
+
+        C column = addColumn(
+                new ColumnPathRenderer<T>(columnId,
+                        item -> formatColumnValue(colById(columnId),
+                                applyValueProvider(valueProvider, item))),
+                columnFactory);
+        // Set comparator in the same way as in super implementation using reflection
+        // setComparator has side effects
+        try {
+            final Field field = Column.class.getDeclaredField("comparator");
+            field.setAccessible(true);
+            SerializableComparator<T> c = ((a, b) -> compareMaybeComparables(
+                    applyValueProvider(valueProvider, a),
+                    applyValueProvider(valueProvider, b)));
+            field.set(column, c);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        return column;
+    }
+
+    // Copy pasted from Grid to override formatting
+    private Object applyValueProvider(ValueProvider<T, ?> valueProvider,
+                                      T item) {
+        Object value;
+        try {
+            value = valueProvider.apply(item);
+        } catch (NullPointerException npe) {
+            value = null;
+            if (NestedNullBehavior.THROW == getNestedNullBehavior()) {
+                throw npe;
+            }
+        }
+        return value;
+    }
+
+    private String formatColumnValue(VColumn<T> col, Object value) {
+        if(cellFormatter != null) {
+            return cellFormatter.formatColumnValue(col, value);
+        }
+        return CellFormatter.defaultVaadinFormatting(value);
+    }
+
+    private CellFormatter<T> cellFormatter;
+
+    /**
+     * Defines a formatter used for all basic data columns.
+     * @param formatter the formatter
+     * @return the VGrid for further configuration
+     */
+    public VGrid<T> withCellFormatter(CellFormatter<T> formatter) {
+        this.cellFormatter = formatter;
+        return this;
+    }
+
+    /**
+     * An interface to configure formatting of all data
+     * cells in the Grid. Not that this does not apply to
+     * columns defined with custom renderer.
+     * @param <T> the Item type
+     */
+    public interface CellFormatter<T> {
+        /**
+         * Formats the value in a raw data column.
+         * By default, nulls are rendered as "" and non-nulls
+         * with String.valueOf(Object).
+         *
+         * @param col the column
+         * @param value the value to render in the cell
+         * @return String representation of the value to be sent to client
+         */
+        String formatColumnValue(VGrid.VColumn<T> col, Object value);
+
+        public static String defaultVaadinFormatting(Object value) {
+            if(value == null) {
+                return "";
+            }
+            return String.valueOf(value);
+        }
+    }
+
 }

@@ -22,6 +22,8 @@ import org.vaadin.firitin.components.grid.VGrid;
 import org.vaadin.firitin.testdomain.Person;
 import org.vaadin.firitin.testdomain.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -35,9 +37,30 @@ public class Grids extends VerticalLayout {
 
         List<Person> list = Service.getListOfPersons(1000);
 
-        Person somePerson = list.get(700);
 
-        VGrid<Person> grid = new VGrid<>(Person.class);
+        Person somePerson = list.get(700);
+        somePerson.setJoinTime(LocalDateTime.now());
+
+        VGrid<Person> grid = new VGrid<>(Person.class)
+                // Optional grid wide formatting function
+                // instead of configuring all separately
+                .withCellFormatter((col, value) -> {
+                    // This would format all LocalDateTime cols
+                    // at once:
+                    if (value instanceof LocalDateTime dt) {
+                        return dt.format(DateTimeFormatter.ISO_LOCAL_DATE);
+                    }
+                    // you could also target some by focusing col
+                    // or e.g. based on column header/key. In my weather
+                    // station data analyser I have for example this that
+                    // hooks into all wind columns:
+                    // if(col.getHeaderText().contains("Wind")) {
+                    //    return "%.0f m/s".formatted(d);
+                    // }
+
+                    // nulls -> "", others String.valueOf
+                    return VGrid.CellFormatter.defaultVaadinFormatting(value);
+                });
         grid.setItems(list);
 
         var col = grid.getColumnByKey("firstName")
