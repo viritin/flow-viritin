@@ -40,6 +40,7 @@ e.g. in field declaration or without declaring an extra variable. When used in a
 
  * Fluent API configuring like with other Viritin components
  * [Supports Java `record`s](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/RecordsWithGrid.java)
+ * The default order of columns (via introspection) is what you would expect, instead of random, both for basic Java beans and records. Uses Jackson instead of JDK Introspector from `java.desktop` package (that infamously stores properties in HashSet 🤦‍). Excellent for rapid application development!
  * [CellFormatter](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/Grids.java#L45-L63) to modify all "raw data cells" columns or based on column details.
  * [Column.getStyle() method works](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/Grids.java#L68-L73) instead of silently eating the style rules. 
 
