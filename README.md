@@ -38,8 +38,10 @@ e.g. in field declaration or without declaring an extra variable. When used in a
 
 ### VGrid
 
+ * Fluent API configuring like with other Viritin components
  * [Supports Java `record`s](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/RecordsWithGrid.java)
  * [CellFormatter](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/Grids.java#L45-L63) to modify all "raw data cells" columns or based on column details.
+ * [Column.getStyle() method works](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/Grids.java#L68-L73) instead of silently eating the style rules. 
 
 ### Forms & Fields
 
