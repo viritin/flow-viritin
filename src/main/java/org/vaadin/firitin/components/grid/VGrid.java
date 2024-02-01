@@ -2,6 +2,7 @@ package org.vaadin.firitin.components.grid;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.vaadin.flow.component.button.Button;
@@ -46,6 +47,7 @@ public class VGrid<T> extends Grid<T>
         implements FluentComponent<VGrid<T>>, FluentHasStyle<VGrid<T>>, FluentHasSize<VGrid<T>>,
         FluentFocusable<Grid<T>, VGrid<T>>, FluentHasTheme<VGrid<T>> {
 
+    private BasicBeanDescription bbd;
     private Set<String> columnCssKeys;
     private CellFormatter<T> cellFormatter;
 
@@ -68,7 +70,7 @@ public class VGrid<T> extends Grid<T>
             dummyOm = new ObjectMapper();
         }
         JavaType javaType = dummyOm.getTypeFactory().constructType(beanType);
-        BasicBeanDescription bbd = (BasicBeanDescription) dummyOm.getSerializationConfig().introspect(javaType);
+        this.bbd = (BasicBeanDescription) dummyOm.getSerializationConfig().introspect(javaType);
         List<String> propertyNames = bbd.findProperties().stream().map(BeanPropertyDefinition::getName).toList();
         setColumns(propertyNames.toArray(new String[0]));
     }
@@ -108,6 +110,41 @@ public class VGrid<T> extends Grid<T>
             }
         } else {
             super.setColumns(propertyNames);
+        }
+    }
+
+    @Override
+    public Column<T> addColumn(String propertyName) {
+        try {
+            return super.addColumn(propertyName);
+        } catch (IllegalArgumentException exception) {
+            // Vaadin don't by default support modern Java like default methods, records
+            // try falling back to create column using Jackson introspection
+            if(bbd != null) {
+                var d = bbd.findProperties().stream().filter(p -> p.getName().equals(propertyName)).findFirst().get();
+                AnnotatedMethod getter = d.getGetter();
+                Column<T> col = addColumn(i -> {
+                    try {
+                        return getter.callOn(i);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+                try {
+                    col.setKey(propertyName);
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException(
+                            "Multiple columns for the same property: "
+                                    + propertyName);
+                }
+                if (Comparable.class.isAssignableFrom(d.getPrimaryType().getRawClass())) {
+                    col.setSortable(true);
+                }
+                col.setHeader(StringUtils.capitalize(propertyName));
+                return col;
+            } else {
+                throw exception;
+            }
         }
     }
 
