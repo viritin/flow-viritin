@@ -20,6 +20,8 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableComparator;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
@@ -47,8 +49,11 @@ public class VGrid<T> extends Grid<T>
         implements FluentComponent<VGrid<T>>, FluentHasStyle<VGrid<T>>, FluentHasSize<VGrid<T>>,
         FluentFocusable<Grid<T>, VGrid<T>>, FluentHasTheme<VGrid<T>> {
 
+    // Not really used for object mapping, but introspection
+    private static ObjectMapper dummyOm;
     private BasicBeanDescription bbd;
     private Set<String> columnCssKeys;
+    private Set<String> rowCssKeys;
     private CellFormatter<T> cellFormatter;
 
     public VGrid() {
@@ -59,14 +64,11 @@ public class VGrid<T> extends Grid<T>
         super(pageSize);
     }
 
-    // Not really used for object mapping, but introspection
-    private static ObjectMapper dummyOm;
-
     public VGrid(Class<T> beanType) {
         // Make Grid skip column detection, we can do better work here
         super(beanType, false);
         // Now lets get columns with Jackson, and pick the missing ones for records
-        if(dummyOm == null) {
+        if (dummyOm == null) {
             dummyOm = new ObjectMapper();
         }
         JavaType javaType = dummyOm.getTypeFactory().constructType(beanType);
@@ -103,7 +105,7 @@ public class VGrid<T> extends Grid<T>
             for (String p : propertyNames) {
                 for (RecordComponent r : recordComponents) {
                     String name = r.getName();
-                    if(name.equals(p)) {
+                    if (name.equals(p)) {
                         addRecordColumn(r, name);
                     }
                 }
@@ -120,7 +122,7 @@ public class VGrid<T> extends Grid<T>
         } catch (IllegalArgumentException exception) {
             // Vaadin don't by default support modern Java like default methods, records
             // try falling back to create column using Jackson introspection
-            if(bbd != null) {
+            if (bbd != null) {
                 var d = bbd.findProperties().stream().filter(p -> p.getName().equals(propertyName)).findFirst().get();
                 AnnotatedMethod getter = d.getGetter();
                 Column<T> col = addColumn(i -> {
@@ -320,6 +322,88 @@ public class VGrid<T> extends Grid<T>
     public VGrid<T> withCellFormatter(CellFormatter<T> formatter) {
         this.cellFormatter = formatter;
         return this;
+    }
+
+    public void withRowStyler(RowStyler<T> r) {
+        var oldCNG = getPartNameGenerator();
+        setPartNameGenerator((ValueProvider<T, String>) t -> {
+            TreeMap<String, String> styleRules = new TreeMap<>();
+            Style style = new Style() {
+                @Override
+                public String get(String name) {
+                    return styleRules.get(name);
+                }
+
+                @Override
+                public Style set(String name, String value) {
+                    styleRules.put(name, value);
+                    return this;
+                }
+
+                @Override
+                public Style remove(String name) {
+                    styleRules.remove(name);
+                    return this;
+                }
+
+                @Override
+                public Style clear() {
+                    styleRules.clear();
+                    return this;
+                }
+
+                @Override
+                public boolean has(String name) {
+                    return styleRules.containsKey(name);
+                }
+
+                @Override
+                public Stream<String> getNames() {
+                    return styleRules.keySet().stream();
+                }
+            };
+            r.styleRow(t, style);
+            if (styleRules.isEmpty()) {
+                return oldCNG != null ? oldCNG.apply(t) : null;
+            } else {
+                // TODO dynamic style and name as return value
+                StringBuilder cellCssBody = new StringBuilder();
+                styleRules.forEach((k, v) -> {
+                    cellCssBody.append("%s: %s;".formatted(k, v));
+                });
+                String cellCssBodyString = cellCssBody.toString();
+                // part/class name unique for the similar style rules
+                // if 5 cols are mady with same style, they will share the same style element
+                // currently grid wide optimisation, could be per UI as well
+                String key = "dynstyle" + cellCssBodyString.hashCode() + "-rc";
+
+                if (rowCssKeys == null) {
+                    rowCssKeys = new HashSet<>();
+                }
+                boolean newRule = rowCssKeys.add(key);
+                if (newRule) {
+                    VStyleUtil.inject("""
+                            vaadin-grid::part(%s) {
+                                %s
+                            }
+                            """.formatted(
+                            key,
+                            cellCssBodyString)
+                    );
+                }
+                if(oldCNG != null) {
+                    String oldNames = oldCNG.apply(t);
+                    if(oldNames != null) {
+                        return oldNames +  " " + key;
+                    }
+                }
+                return key;
+            }
+        });
+    }
+
+    public interface RowStyler<T> {
+        public void styleRow(T ite, Style style);
     }
 
     /**
