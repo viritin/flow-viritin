@@ -78,7 +78,13 @@ public class Grids extends VerticalLayout {
         add(grid);
 
         VGrid<Person> lazyLoaded = new VGrid<>(Person.class)
-                .withColumnSelector();
+                .withColumnSelector()
+                .withRowStyler( (item, style) -> {
+                    if(item.getId()%5 == 0) {
+                        style.setColor("blue");
+                        style.setBackgroundColor("lightgray");
+                    }
+                });
         lazyLoaded.setItems(query ->
                 list.subList(
                 query.getOffset(),
@@ -86,19 +92,12 @@ public class Grids extends VerticalLayout {
         ).stream());
 
 
+        // Style individual column
         var col2 = lazyLoaded.getColumnByKey("firstName");
         col2.getStyle().set("color", "red");
         col2.setHeader("First");
 
-        lazyLoaded.withRowStyler( (item, style) -> {
-            if(item.getId()%5 == 0) {
-                style.setColor("blue");
-                style.setBackgroundColor("lightgray");
-            }
-        });
-
-        // This should now re-use the style element for "color: red"
-        // and recycle that for both columns
+        // This re-uses the style element for "color: red" and recycle that for both columns, minimal overhead for the implementation
         lazyLoaded.getColumnByKey("lastName").getStyle().set("color", "red");
 
         lazyLoaded.scrollToItem(somePerson);

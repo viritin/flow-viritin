@@ -40,6 +40,7 @@ e.g. in field declaration or without declaring an extra variable. When used in a
 
  * Fluent API configuring like with other Viritin components
  * [Supports Java `record`s](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/RecordsWithGrid.java)
+ * Optional [built-in column selector](https://github.com/viritin/flow-viritin/blob/320c544e6a314115b18109d8469c2e727ac77da7/src/test/java/org/vaadin/firitin/Grids.java#L81) (menu in the header) like in Vaadin 8.
  * The default order of columns (via introspection) is what you would expect, instead of random, both for basic Java beans and records. [Uses Jackson instead of JDK Introspector](https://github.com/viritin/flow-viritin/blob/c99a31cab256ff2ed455c7413e164a87c85b507a/src/main/java/org/vaadin/firitin/components/grid/VGrid.java#L66-L75) from `java.desktop` package (that infamously stores properties in HashSet 🤦‍). Excellent for rapid application development!
  * In case the default Vaadin mechanism fails to generate column (e.g. using default method introduced in Java 8), VGrid [falls back to Jackson to generate to column](https://github.com/viritin/flow-viritin/blob/c99a31cab256ff2ed455c7413e164a87c85b507a/src/main/java/org/vaadin/firitin/components/grid/VGrid.java#L121-L147). Less manual column definition.
  * [CellFormatter](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/Grids.java#L45-L63) to modify all "raw data cells" columns or based on column details.
