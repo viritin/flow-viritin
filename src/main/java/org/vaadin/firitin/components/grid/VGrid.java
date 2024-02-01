@@ -329,7 +329,7 @@ public class VGrid<T> extends Grid<T>
      *
      * @param rowStyler the RowStyler
      */
-    public void withRowStyler(RowStyler<T> rowStyler) {
+    public VGrid<T> withRowStyler(RowStyler<T> rowStyler) {
         var oldCNG = getPartNameGenerator();
         setPartNameGenerator((ValueProvider<T, String>) t -> {
             TreeMap<String, String> styleRules = new TreeMap<>();
@@ -403,10 +403,12 @@ public class VGrid<T> extends Grid<T>
                 return key;
             }
         });
+        return this;
     }
 
     /**
      * Used to assign {@link Style} rules to row cells.
+     *
      * @param <T> the row type
      */
     public interface RowStyler<T> {
