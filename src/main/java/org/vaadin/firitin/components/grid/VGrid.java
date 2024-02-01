@@ -1,5 +1,9 @@
 package org.vaadin.firitin.components.grid;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
+import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
@@ -30,6 +34,7 @@ import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -52,16 +57,20 @@ public class VGrid<T> extends Grid<T>
         super(pageSize);
     }
 
+    // Not really used for object mapping, but introspection
+    private static ObjectMapper dummyOm;
+
     public VGrid(Class<T> beanType) {
-        super(beanType);
-        // Is empty check in case Vaadin Grid gains support at some point
-        if (beanType.isRecord() && getColumns().isEmpty()) {
-            RecordComponent[] recordComponents = beanType.getRecordComponents();
-            for (RecordComponent r : recordComponents) {
-                String name = r.getName();
-                addRecordColumn(r, name);
-            }
+        // Make Grid skip column detection, we can do better work here
+        super(beanType, false);
+        // Now lets get columns with Jackson, and pick the missing ones for records
+        if(dummyOm == null) {
+            dummyOm = new ObjectMapper();
         }
+        JavaType javaType = dummyOm.getTypeFactory().constructType(beanType);
+        BasicBeanDescription bbd = (BasicBeanDescription) dummyOm.getSerializationConfig().introspect(javaType);
+        List<String> propertyNames = bbd.findProperties().stream().map(BeanPropertyDefinition::getName).toList();
+        setColumns(propertyNames.toArray(new String[0]));
     }
 
     @Override
