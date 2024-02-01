@@ -44,6 +44,7 @@ e.g. in field declaration or without declaring an extra variable. When used in a
  * In case the default Vaadin mechanism fails to generate column (e.g. using default method introduced in Java 8), VGrid [falls back to Jackson to generate to column](https://github.com/viritin/flow-viritin/blob/c99a31cab256ff2ed455c7413e164a87c85b507a/src/main/java/org/vaadin/firitin/components/grid/VGrid.java#L121-L147). Less manual column definition.
  * [CellFormatter](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/Grids.java#L45-L63) to modify all "raw data cells" columns or based on column details.
  * [Column.getStyle() method works](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/Grids.java#L68-L73) instead of silently eating the style rules. 
+ * Ability to programmatically set style rules for rows.
 
 ### Forms & Fields
 

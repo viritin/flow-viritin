@@ -324,7 +324,12 @@ public class VGrid<T> extends Grid<T>
         return this;
     }
 
-    public void withRowStyler(RowStyler<T> r) {
+    /**
+     * Adds a strategy to style cells based on rows.
+     *
+     * @param rowStyler the RowStyler
+     */
+    public void withRowStyler(RowStyler<T> rowStyler) {
         var oldCNG = getPartNameGenerator();
         setPartNameGenerator((ValueProvider<T, String>) t -> {
             TreeMap<String, String> styleRules = new TreeMap<>();
@@ -362,21 +367,19 @@ public class VGrid<T> extends Grid<T>
                     return styleRules.keySet().stream();
                 }
             };
-            r.styleRow(t, style);
+            rowStyler.styleRow(t, style);
             if (styleRules.isEmpty()) {
                 return oldCNG != null ? oldCNG.apply(t) : null;
             } else {
-                // TODO dynamic style and name as return value
                 StringBuilder cellCssBody = new StringBuilder();
                 styleRules.forEach((k, v) -> {
                     cellCssBody.append("%s: %s;".formatted(k, v));
                 });
                 String cellCssBodyString = cellCssBody.toString();
                 // part/class name unique for the similar style rules
-                // if 5 cols are mady with same style, they will share the same style element
+                // if e.g. 5 rows are configured with same style, they will share the same style element
                 // currently grid wide optimisation, could be per UI as well
                 String key = "dynstyle" + cellCssBodyString.hashCode() + "-rc";
-
                 if (rowCssKeys == null) {
                     rowCssKeys = new HashSet<>();
                 }
@@ -402,8 +405,18 @@ public class VGrid<T> extends Grid<T>
         });
     }
 
+    /**
+     * Used to assign {@link Style} rules to row cells.
+     * @param <T> the row type
+     */
     public interface RowStyler<T> {
-        public void styleRow(T ite, Style style);
+        /**
+         * Assignes {@link Style} rules to row rendered for given item.
+         *
+         * @param item the item for which the row is rendered
+         * @param style the style rules for given item
+         */
+        public void styleRow(T item, Style style);
     }
 
     /**
