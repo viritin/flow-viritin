@@ -61,6 +61,7 @@ public class Grids extends VerticalLayout {
                     // nulls -> "", others String.valueOf
                     return VGrid.CellFormatter.defaultVaadinFormatting(value);
                 });
+
         grid.setItems(list);
 
         var col = grid.getColumnByKey("firstName")
@@ -88,6 +89,13 @@ public class Grids extends VerticalLayout {
         var col2 = lazyLoaded.getColumnByKey("firstName");
         col2.getStyle().set("color", "red");
         col2.setHeader("First");
+
+        lazyLoaded.withRowStyler( (item, style) -> {
+            if(item.getId()%5 == 0) {
+                style.setColor("blue");
+                style.setBackgroundColor("lightgray");
+            }
+        });
 
         // This should now re-use the style element for "color: red"
         // and recycle that for both columns
