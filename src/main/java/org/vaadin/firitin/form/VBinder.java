@@ -7,17 +7,17 @@ import com.fasterxml.jackson.databind.introspect.AnnotatedConstructor;
 import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.shared.HasValidationProperties;
-import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-import org.vaadin.firitin.components.textfield.VTextField;
+import jakarta.validation.constraints.NotNull;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,11 +61,17 @@ public class VBinder<T> {
                 if (HasValue.class.isAssignableFrom(type)) {
                     BeanPropertyDefinition property = bbd.findProperty(new PropertyName(f.getName()));
                     property.getAccessor().fixAccess(true);
+
                     if (property != null) {
                         try {
                             f.setAccessible(true);
-                            bpdToEditorField.put(property, (HasValue) f.get(formComponent));
-                            nameToEditorField.put(property.getName(), (HasValue) f.get(formComponent));
+                            HasValue hasValue = (HasValue) f.get(formComponent);
+                            if(property.getGetter().getAnnotation(NotNull.class) != null) {
+                                hasValue.setRequiredIndicatorVisible(true);
+                            }
+
+                            bpdToEditorField.put(property, hasValue);
+                            nameToEditorField.put(property.getName(), hasValue);
                         } catch (IllegalAccessException e) {
                             throw new RuntimeException(e);
                         }
@@ -112,16 +118,52 @@ public class VBinder<T> {
     }
 
     public void setConstraintViolations(Set<ConstraintViolation<T>> violations) {
+        clearValidationErrors();
+        HashSet<ConstraintViolation<T>> nonReported = new HashSet<>(violations);
         violations.forEach(cv -> {
             String property = cv.getPropertyPath().toString();
-            HasValue hasValue = nameToEditorField.get(property);
-            if(hasValue != null) {
+            if(!property.isEmpty()) {
+                HasValue hasValue = nameToEditorField.get(property);
                 if (hasValue instanceof HasValidationProperties hvp) {
                     hvp.setInvalid(true);
                     hvp.setErrorMessage(cv.getMessage()); // TODO proper interpolation
                 }
+                nonReported.remove(cv);
             }
         });
+        // TODO handle class level and other violations
+        handleClassLevelValidations(nonReported);
+
+
+    }
+
+    private Set<Component> errorMsgs = new HashSet<>();
+
+    protected void handleClassLevelValidations(Set<ConstraintViolation<T>> violations) {
+        if (formComponents[0] instanceof HasComponents hc) {
+            for(ConstraintViolation cv : violations) {
+                // TODO proper interpolation etc
+                Paragraph paragraph = new Paragraph();
+                paragraph.addClassNames(LumoUtility.TextColor.ERROR);
+                paragraph.setText(cv.getMessage());
+                errorMsgs.add(paragraph);
+                hc.add(paragraph);
+            }
+
+        }
+    }
+
+    private void clearValidationErrors() {
+        nameToEditorField.values().forEach(hv -> {
+            if (hv instanceof HasValidationProperties hvp) {
+                hvp.setInvalid(false);
+                hvp.setErrorMessage(null);
+            }
+        });
+        for(Component c : errorMsgs) {
+            c.removeFromParent();
+        }
+        errorMsgs.clear();
     }
 
 }
