@@ -22,13 +22,17 @@ import java.util.Set;
 public class VBinderTest {
 
 
-    record FooBar(String foo, @Future LocalDateTime bar, Integer baz){}
+    public record FooBar(String foo, @Future LocalDateTime bar, Integer baz){}
 
 
     public static class FooBarForm extends VerticalLayout {
         TextField foo = new VTextField();
         DateTimePicker bar = new DateTimePicker();
         IntegerField baz = new VIntegerField();
+
+        public FooBarForm() {
+            add(foo, bar, baz);
+        }
     }
 
     @Test
