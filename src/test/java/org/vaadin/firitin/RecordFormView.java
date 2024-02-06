@@ -16,7 +16,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
 import org.vaadin.firitin.components.textfield.VTextField;
 import org.vaadin.firitin.form.VBinder;
 
@@ -32,7 +32,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public class RecordFormView extends VerticalLayout {
 
     @BigShouldBeBigger
-    record Person(@NotNull String name, @Min(0) Integer small, @Max(100) Integer big) {
+    record Person(@NotEmpty String name, @Min(0) Integer small, @Max(100) Integer big) {
     }
 
     public RecordFormView() {
@@ -63,6 +63,10 @@ public class RecordFormView extends VerticalLayout {
     public @interface BigShouldBeBigger {
 
         String message() default "Big should be bigger!";
+
+        Class<?>[] groups() default { };
+
+        Class<? extends Payload>[] payload() default { };
     }
 
 
@@ -88,7 +92,6 @@ public class RecordFormView extends VerticalLayout {
             add(name,small,big);
         }
     }
-
 
     private static Set<ConstraintViolation<Person>> validate(Person record) {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
