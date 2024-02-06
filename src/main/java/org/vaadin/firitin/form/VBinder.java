@@ -11,8 +11,12 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.data.value.HasValueChangeMode;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.lang.reflect.Field;
@@ -33,7 +37,7 @@ import java.util.Set;
  *
  * @param <T>
  */
-// TODO make this implement HasValue -> could be used within existing form using the core Binder
+// TODO make this implement HasValue  -> could be used within existing form using the core Binder
 public class VBinder<T> {
 
     // Helper "Jack" to do introspection
@@ -44,6 +48,8 @@ public class VBinder<T> {
 
     Map<BeanPropertyDefinition, HasValue> bpdToEditorField = new HashMap<>();
     Map<String, HasValue> nameToEditorField = new HashMap<>();
+    private Set<Component> errorMsgs = new HashSet<>();
+    private T valueObject;
 
     public VBinder(Class<T> tClass, Component... componentsForNameBasedBinding) {
         this.tClass = tClass;
@@ -66,12 +72,12 @@ public class VBinder<T> {
                         try {
                             f.setAccessible(true);
                             HasValue hasValue = (HasValue) f.get(formComponent);
-                            if(property.getGetter().getAnnotation(NotNull.class) != null) {
+                            if (isRequired(property)) {
                                 hasValue.setRequiredIndicatorVisible(true);
                             }
-
                             bpdToEditorField.put(property, hasValue);
                             nameToEditorField.put(property.getName(), hasValue);
+                            configureEditor(property, hasValue);
                         } catch (IllegalAccessException e) {
                             throw new RuntimeException(e);
                         }
@@ -82,16 +88,50 @@ public class VBinder<T> {
 
     }
 
+    protected void configureEditor(BeanPropertyDefinition property, HasValue hasValue) {
+        if (hasValue instanceof HasValueChangeMode hvcm) {
+            hvcm.setValueChangeMode(ValueChangeMode.LAZY);
+        }
+        if(!isImmutable()) {
+            // Mutate
+            hasValue.addValueChangeListener(e -> {
+                try {
+                    property.getSetter().callOnWith(valueObject, e.getValue());
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+
+        }
+    }
+
+    protected static boolean isRequired(BeanPropertyDefinition property) {
+        return property.getGetter().getAnnotation(NotEmpty.class) != null ||
+                property.getGetter().getAnnotation(NotNull.class) != null ||
+                property.getGetter().getAnnotation(NotBlank.class) != null
+                ;
+    }
+
     public T getValue() {
         if (isImmutable()) {
             return constructRecord();
+        } else {
+            if(valueObject == null) {
+                return constructPojo();
+            }
         }
-        return null;
+        return valueObject;
     }
 
-    public void setValue(T value) {
+    public void setValue(T valueObject) {
+        this.valueObject = valueObject;
         for (BeanPropertyDefinition pd : bbd.findProperties()) {
-            Object pValue = pd.getAccessor().getValue(value);
+            Object pValue;
+            if(isImmutable()) {
+                pValue = pd.getAccessor().getValue(valueObject);
+            } else {
+                pValue = pd.getGetter().getValue(valueObject);
+            }
             HasValue hasValue = bpdToEditorField.get(pd);
             hasValue.setValue(pValue);
         }
@@ -117,12 +157,26 @@ public class VBinder<T> {
         }
     }
 
+
+    protected T constructPojo() {
+        T o = (T) bbd.instantiateBean(true);
+        bpdToEditorField.forEach( (bpd, hasValue) -> {
+            try {
+                bpd.getSetter().callOnWith(o, hasValue.getValue());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        return o;
+    }
+
+
     public void setConstraintViolations(Set<ConstraintViolation<T>> violations) {
         clearValidationErrors();
         HashSet<ConstraintViolation<T>> nonReported = new HashSet<>(violations);
         violations.forEach(cv -> {
             String property = cv.getPropertyPath().toString();
-            if(!property.isEmpty()) {
+            if (!property.isEmpty()) {
                 HasValue hasValue = nameToEditorField.get(property);
                 if (hasValue instanceof HasValidationProperties hvp) {
                     hvp.setInvalid(true);
@@ -137,11 +191,9 @@ public class VBinder<T> {
 
     }
 
-    private Set<Component> errorMsgs = new HashSet<>();
-
     protected void handleClassLevelValidations(Set<ConstraintViolation<T>> violations) {
         if (formComponents[0] instanceof HasComponents hc) {
-            for(ConstraintViolation cv : violations) {
+            for (ConstraintViolation cv : violations) {
                 // TODO proper interpolation etc
                 Paragraph paragraph = new Paragraph();
                 paragraph.addClassNames(LumoUtility.TextColor.ERROR);
@@ -160,7 +212,7 @@ public class VBinder<T> {
                 hvp.setErrorMessage(null);
             }
         });
-        for(Component c : errorMsgs) {
+        for (Component c : errorMsgs) {
             c.removeFromParent();
         }
         errorMsgs.clear();
