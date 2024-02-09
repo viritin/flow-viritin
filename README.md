@@ -68,6 +68,7 @@ e.g. in field declaration or without declaring an extra variable. When used in a
  * BorderLayout (like in ~ Swing, implemented with CSS Grid)
  * A generic MainLayout suitable for many small to medium sized projects, based on the AppLayout and SideNave components. Populates your views to the menu automatically and this way removes a ton of boilerplate code of your app.
  * TreeTable. Like TreeGrid in the core, but with much easier API to populate items. Also properly supports [lazy loading](https://vaadin.com/blog/lazy-loading-hierarchical-data-from-ui-to-database) and scrolling to given item without extra hacks.
+ * JsPromise, an Element.executeJs replacement for modern async JS APIs.
 
 ## Documentation
 
