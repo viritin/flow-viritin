@@ -1,7 +1,6 @@
 package org.vaadin.firitin;
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -19,7 +18,6 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import org.vaadin.firitin.components.checkbox.VCheckBox;
 import org.vaadin.firitin.components.textfield.VTextField;
 import org.vaadin.firitin.form.VBinder;
 
@@ -32,26 +30,66 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Route
-public class RecordFormView extends VerticalLayout {
+public class VBinderView extends VerticalLayout {
 
     @BigShouldBeBigger
-    record Person(@NotEmpty String name, @NotNull @Min(0) Integer small, @Max(100) int big) {
+    public static class Person {
+        @NotEmpty String name;
+        @NotNull
+        @Min(0) Integer small;
+        @Max(100) Integer big;
 
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Integer getSmall() {
+            return small;
+        }
+
+        public void setSmall(Integer small) {
+            this.small = small;
+        }
+
+        public Integer getBig() {
+            return big;
+        }
+
+        public void setBig(Integer big) {
+            this.big = big;
+        }
+
+        @Override
+        public String toString() {
+            return "Person{" +
+                    "name='" + name + '\'' +
+                    ", small=" + small +
+                    ", big=" + big +
+                    '}';
+        }
     }
 
-    public RecordFormView() {
+    public VBinderView() {
 
-        var record = new Person("Jorma", 70, 69);
+        var p = new Person();
+        p.setName("Jorma");
+        p.setSmall(70);
+        p.setBig(69);
+
 
         PersonForm form = new PersonForm();
         var binder = new VBinder<>(Person.class, form);
-        binder.setValue(record);
+        binder.setValue(p);
 
-        add(form);
-
-        binder.addValueChangeListener(event -> {
+        binder.addValueChangeListener(e -> {
             binder.setConstraintViolations(validate(binder.getValue()));
         });
+
+        add(form);
 
         add(new Button("Show value", e -> {
             Notification.show("Value now:" + binder.getValue());
@@ -86,7 +124,10 @@ public class RecordFormView extends VerticalLayout {
             if ( car == null ) {
                 return true;
             }
-            return car.big() > car.small();
+            if(car.getBig() == null) {
+                return false;
+            }
+            return car.getBig() > car.getSmall();
         }
     }
 

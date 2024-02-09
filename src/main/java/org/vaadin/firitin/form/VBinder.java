@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.PropertyName;
 import com.fasterxml.jackson.databind.introspect.AnnotatedConstructor;
 import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
+import com.github.rjeschke.txtmark.Run;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasValue;
@@ -13,6 +14,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.constraints.NotBlank;
@@ -20,6 +22,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,7 +41,7 @@ import java.util.Set;
  * @param <T>
  */
 // TODO make this implement HasValue  -> could be used within existing form using the core Binder
-public class VBinder<T> {
+public class VBinder<T> implements HasValue<VBinderValueChangeEvent<T>, T> {
 
     // Helper "Jack" to do introspection
     private static final ObjectMapper jack = new ObjectMapper();
@@ -50,6 +53,7 @@ public class VBinder<T> {
     Map<String, HasValue> nameToEditorField = new HashMap<>();
     private Set<Component> errorMsgs = new HashSet<>();
     private T valueObject;
+    private List<ValueChangeListener> valueChangeListeners;
 
     public VBinder(Class<T> tClass, Component... componentsForNameBasedBinding) {
         this.tClass = tClass;
@@ -88,11 +92,23 @@ public class VBinder<T> {
 
     }
 
+    protected static boolean isRequired(BeanPropertyDefinition property) {
+        if (property.getPrimaryType().isPrimitive()) {
+            return true;
+        }
+
+        return property.getGetter().getAnnotation(NotEmpty.class) != null ||
+                property.getGetter().getAnnotation(NotNull.class) != null ||
+                property.getGetter().getAnnotation(NotBlank.class) != null
+                ;
+    }
+
     protected void configureEditor(BeanPropertyDefinition property, HasValue hasValue) {
+
         if (hasValue instanceof HasValueChangeMode hvcm) {
             hvcm.setValueChangeMode(ValueChangeMode.LAZY);
         }
-        if(!isImmutable()) {
+        if (!isImmutable()) {
             // Mutate
             hasValue.addValueChangeListener(e -> {
                 try {
@@ -101,22 +117,23 @@ public class VBinder<T> {
                     throw new RuntimeException(ex);
                 }
             });
-
         }
+        hasValue.addValueChangeListener(e -> {
+            var event = new VBinderValueChangeEvent<T>(VBinder.this, e.isFromClient());
+            if (valueChangeListeners != null) {
+                for (ValueChangeListener vcl : valueChangeListeners.toArray(new ValueChangeListener[0])) {
+                    vcl.valueChanged(event);
+                }
+            }
+        });
     }
 
-    protected static boolean isRequired(BeanPropertyDefinition property) {
-        return property.getGetter().getAnnotation(NotEmpty.class) != null ||
-                property.getGetter().getAnnotation(NotNull.class) != null ||
-                property.getGetter().getAnnotation(NotBlank.class) != null
-                ;
-    }
-
+    @Override
     public T getValue() {
         if (isImmutable()) {
             return constructRecord();
         } else {
-            if(valueObject == null) {
+            if (valueObject == null) {
                 return constructPojo();
             }
         }
@@ -127,7 +144,7 @@ public class VBinder<T> {
         this.valueObject = valueObject;
         for (BeanPropertyDefinition pd : bbd.findProperties()) {
             Object pValue;
-            if(isImmutable()) {
+            if (isImmutable()) {
                 pValue = pd.getAccessor().getValue(valueObject);
             } else {
                 pValue = pd.getGetter().getValue(valueObject);
@@ -136,6 +153,38 @@ public class VBinder<T> {
             hasValue.setValue(pValue);
         }
 
+    }
+
+    @Override
+    public Registration addValueChangeListener(ValueChangeListener<? super VBinderValueChangeEvent<T>> listener) {
+        if (valueChangeListeners == null) {
+            valueChangeListeners = new ArrayList<>();
+        }
+        valueChangeListeners.add(listener);
+        return () -> valueChangeListeners.remove(listener);
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        // TODO
+        return false;
+    }
+
+    @Override
+    public void setReadOnly(boolean readOnly) {
+        // TODO
+    }
+
+    @Override
+    public boolean isRequiredIndicatorVisible() {
+        // TODO check up
+        return false;
+    }
+
+    @Override
+    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+        // TODO figure out if this should throw or stop using HashValue altogether
+        // Passing to fields is simply wrong and we don't have a place to show the
     }
 
     protected boolean isImmutable() {
@@ -147,7 +196,14 @@ public class VBinder<T> {
         List<BeanPropertyDefinition> properties = bbd.findProperties();
         Object[] args = new Object[properties.size()];
         for (int i = 0; i < properties.size(); i++) {
-            args[i] = bpdToEditorField.get(properties.get(i)).getValue();
+            BeanPropertyDefinition definition = properties.get(i);
+            HasValue hasValue = bpdToEditorField.get(definition);
+            args[i] = hasValue.getValue();
+            Class<?> rawType = definition.getGetter().getRawType();
+            boolean primitive = definition.getGetter().getRawType().isPrimitive();
+            if (primitive && hasValue.isRequiredIndicatorVisible() && args[i] == null) {
+                throw new NullPointerException("Can't construct " + bbd.getType().getRawClass().getName() + ", parameter value " + i + " is null!");
+            }
         }
         try {
             annotatedConstructor.fixAccess(true);
@@ -160,7 +216,7 @@ public class VBinder<T> {
 
     protected T constructPojo() {
         T o = (T) bbd.instantiateBean(true);
-        bpdToEditorField.forEach( (bpd, hasValue) -> {
+        bpdToEditorField.forEach((bpd, hasValue) -> {
             try {
                 bpd.getSetter().callOnWith(o, hasValue.getValue());
             } catch (Exception e) {
