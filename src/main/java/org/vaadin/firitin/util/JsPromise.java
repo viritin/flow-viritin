@@ -9,8 +9,11 @@ import java.io.Serializable;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Helper methods to consume asynchronous JS APIs. The given
- * script bodies are executed on the UI element.
+ * Helper methods to consume asynchronous JS APIs without extra JS
+ * trickery. The given script bodies are executed on the UI element
+ * and wrapped into a promise, either using Promise with resolve
+ * and reject exposed to your script body or using an anonymous
+ * async function.
  */
 public class JsPromise {
 
