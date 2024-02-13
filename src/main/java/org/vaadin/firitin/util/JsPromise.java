@@ -83,57 +83,38 @@ public class JsPromise {
         CompletableFuture<T> future = new CompletableFuture<>();
         UI current = UI.getCurrent();
         Element el = current.getElement();
-        if (current.hasModalComponent()) {
-            el = current.getInternals().getActiveModalComponent().getElement();
-        }
-        final String eventtype = UUID.randomUUID().toString();
-        AtomicReference<Registration> reg = new AtomicReference<>();
-
-        reg.set(el.addEventListener(eventtype, e -> {
-                if (String.class.isAssignableFrom(returnType)) {
-                    future.complete((T) e.getEventData().getString("event.payload"));
-                } else if (Integer.class.isAssignableFrom(returnType)) {
-                    int number = (int) e.getEventData().getNumber("event.payload");
-                    future.complete((T) Integer.valueOf(number));
-                } else if (Double.class.isAssignableFrom(returnType)) {
-                    double number = e.getEventData().getNumber("event.payload");
-                    future.complete((T) Double.valueOf(number));
-                } else if (Boolean.class.isAssignableFrom(returnType)) {
-                    boolean b = e.getEventData().getBoolean("event.payload");
-                    future.complete((T) Boolean.valueOf(b));
-                } else {
-                    try {
-                        future.complete(jackson.readValue(e.getEventData().getString("event.payload"), returnType));
-                    } catch (JsonProcessingException ex) {
-                        future.completeExceptionally(ex);
-                    }
-                }
-                reg.get().remove();
-
-            })
-            .addEventData("event.payload")
-            .setDisabledUpdateMode(DisabledUpdateMode.ALWAYS)
-        );
-
-
         el.executeJs("""
                 const ui = this;
                 const executeAsyncPromise = new Promise((resolve, reject) => {
                     %s
-                });
-                const event = new Event("%s");
-                executeAsyncPromise.then(val => {
-                        if(typeof val === 'object') {
-                            event.payload = JSON.stringify(val);
-                        } else {
-                            event.payload = val;
-                        }
-                        ui.dispatchEvent(event);
-                    }, () => {
-                        ui.dispatchEvent(event);
+                }).then(val => {
+                    if(typeof val === 'object') {
+                        return JSON.stringify(val);
+                    } else {
+                        return val;
                     }
-                );
-                """.formatted(promiseBody, eventtype), args);
+                });
+                return executeAsyncPromise;
+                """.formatted(promiseBody), args).then(jsonValue -> {
+            if (String.class.isAssignableFrom(returnType)) {
+                future.complete((T) jsonValue.asString());
+            } else if (Integer.class.isAssignableFrom(returnType)) {
+                int number = (int) jsonValue.asNumber();
+                future.complete((T) Integer.valueOf(number));
+            } else if (Double.class.isAssignableFrom(returnType)) {
+                double number = jsonValue.asNumber();
+                future.complete((T) Double.valueOf(number));
+            } else if (Boolean.class.isAssignableFrom(returnType)) {
+                boolean b = jsonValue.asBoolean();
+                future.complete((T) Boolean.valueOf(b));
+            } else {
+                try {
+                    future.complete(jackson.readValue(jsonValue.asString(), returnType));
+                } catch (JsonProcessingException ex) {
+                    future.completeExceptionally(ex);
+                }
+            }
+        });
         return future;
     }
 

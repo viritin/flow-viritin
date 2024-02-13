@@ -1,12 +1,16 @@
 package org.vaadin.firitin;
 
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.util.JsPromise;
+
+import java.time.LocalDateTime;
 
 @Route
 public class JsPromiseView extends VerticalLayout {
@@ -15,6 +19,7 @@ public class JsPromiseView extends VerticalLayout {
 
         add(new VButton("Get slow String from JS", e -> {
             JsPromise.resolveString("""
+                            debugger;
                             setTimeout(() => {
                                 resolve("It works!");
                             }, 2000);
@@ -80,5 +85,53 @@ public class JsPromiseView extends VerticalLayout {
 
         }));
 
+
+        add(new H3("Core API tests related to async JS"));
+
+        add(new VButton("Related, call @ClientCallable server method, handle return value from the promise", e -> {
+            testReturnValueFromClientCallable();
+        }));
+
+        add(new VButton("Return a Promise from Element.executeJs(String)", e -> {
+            getElement().executeJs("""
+                    return new Promise((resolve, reject) => {resolve("jorma");});
+                    """).then(String.class, val -> {
+                Notification.show(val);
+            });
+        }));
+
+
+        add(new VButton("Return a Promise with async keyword from Element.executeJs(String)", e -> {
+            getElement().executeJs("""
+                    return (async () => {
+                        return "jorma2";
+                    }).apply();
+                    """).then(String.class, val -> {
+                Notification.show(val);
+            });
+        }));
+
+        add(new VButton("Return a Promise from @ClientCallable", e -> {
+            getElement().executeJs("""
+                    return this.$server.getServerTimeStampWithMsg("It's complicated :-)");
+                    """).then(String.class, val -> {
+                Notification.show(val);
+            });
+        }));
+
     }
+
+    private void testReturnValueFromClientCallable() {
+        getElement().executeJs("""
+                this.$server.getServerTimeStampWithMsg("Jorma!")
+                    .then(msg => {window.alert(msg);});
+                """);
+    }
+
+    @ClientCallable
+    private String getServerTimeStampWithMsg(String msg) {
+        // The return value will be there in a JS Promise for the caller
+        return LocalDateTime.now() + " " + msg;
+    }
+
 }
