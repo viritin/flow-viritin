@@ -3,15 +3,15 @@ package org.vaadin.firitin.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.shared.Registration;
 
 import java.io.Serializable;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Helper methods to consume asynchronous JS APIs. The given
+ * script bodies are executed on the UI element.
+ */
 public class JsPromise {
 
     private static final ObjectMapper jackson = new ObjectMapper();
@@ -38,8 +38,8 @@ public class JsPromise {
      * @param args            the extra arguments interpolated into JS as in Element.executeJs
      * @return the future to get the value
      */
-    public static CompletableFuture<String> asyncString(String asyncMethodBody, Serializable... args) {
-        return async(asyncMethodBody, String.class, args);
+    public static CompletableFuture<String> computeString(String asyncMethodBody, Serializable... args) {
+        return compute(asyncMethodBody, String.class, args);
     }
 
     /**
@@ -51,8 +51,8 @@ public class JsPromise {
      * @param args            the extra arguments interpolated into JS as in Element.executeJs
      * @return the future to get the value
      */
-    public static CompletableFuture<Integer> asyncInteger(String asyncMethodBody, Serializable... args) {
-        return async(asyncMethodBody, Integer.class, args);
+    public static CompletableFuture<Integer> computeInteger(String asyncMethodBody, Serializable... args) {
+        return compute(asyncMethodBody, Integer.class, args);
     }
 
     /**
@@ -64,8 +64,8 @@ public class JsPromise {
      * @param args            the extra arguments interpolated into JS as in Element.executeJs
      * @return the future to get the value
      */
-    public static CompletableFuture<Double> asyncDouble(String asyncMethodBody, Serializable... args) {
-        return async(asyncMethodBody, Double.class, args);
+    public static CompletableFuture<Double> computeDouble(String asyncMethodBody, Serializable... args) {
+        return compute(asyncMethodBody, Double.class, args);
     }
 
     /**
@@ -77,8 +77,8 @@ public class JsPromise {
      * @param args            the extra arguments interpolated into JS as in Element.executeJs
      * @return the future to get the value
      */
-    public static CompletableFuture<Boolean> asyncBoolean(String asyncMethodBody, Serializable... args) {
-        return async(asyncMethodBody, Boolean.class, args);
+    public static CompletableFuture<Boolean> computeBoolean(String asyncMethodBody, Serializable... args) {
+        return compute(asyncMethodBody, Boolean.class, args);
     }
 
     /**
@@ -187,7 +187,7 @@ public class JsPromise {
      * @param <T>             the return type, if not a basic data type, the return parameter in browser is expected to be JSON that is then mapped to given type with Jackson
      * @return the future to get the value
      */
-    public static <T> CompletableFuture<T> async(String asyncMethodBody, Class<T> returnType, Serializable... args) {
+    public static <T> CompletableFuture<T> compute(String asyncMethodBody, Class<T> returnType, Serializable... args) {
         CompletableFuture<T> future = new CompletableFuture<>();
         UI current = UI.getCurrent();
         Element el = current.getElement();

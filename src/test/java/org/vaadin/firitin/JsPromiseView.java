@@ -8,13 +8,9 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.RequestHandler;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinResponse;
-import com.vaadin.flow.server.VaadinSession;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.util.JsPromise;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 
 @Route
@@ -72,13 +68,13 @@ public class JsPromiseView extends VerticalLayout {
         }));
 
         add(new VButton("Get String from async method body", e -> {
-            JsPromise.asyncString("""
+            JsPromise.computeString("""
                             return "It works from async";
                             """)
                     .thenAccept(s -> Notification.show(s));
         }).withTooltip("Doesn't make too much sense when used like here, but in this method body you can use await keyword when consuming API that returns a Promise. Check the fetch API example below to figure out why this makes sense with some APIs."));
         add(new VButton("Error handling from async method body", e -> {
-            JsPromise.asyncString("""
+            JsPromise.computeString("""
                             if(true) throw new Error("It failed!");
                             return "It works from async";
                             """)
@@ -89,19 +85,19 @@ public class JsPromiseView extends VerticalLayout {
                     });
         }));
         add(new VButton("Get Integer from async method body", e -> {
-            JsPromise.asyncInteger("""
+            JsPromise.computeInteger("""
                             return 0;
                             """)
                     .thenAccept(i -> Notification.show(i.toString()));
         }).withTooltip("Doesn't make too much sense when used like here, but in this method body you can use await keyword when consuming API that returns a Promise. Check the fetch API example below to figure out why this makes sense with some APIs."));
         add(new VButton("Get Double from async method body", e -> {
-            JsPromise.asyncDouble("""
+            JsPromise.computeDouble("""
                             return 12.2333;
                             """)
                     .thenAccept(d -> Notification.show(d.toString()));
         }).withTooltip("Doesn't make too much sense when used like here, but in this method body you can use await keyword when consuming API that returns a Promise. Check the fetch API example below to figure out why this makes sense with some APIs."));
         add(new VButton("Get Boolean from async method body", e -> {
-            JsPromise.asyncBoolean("""
+            JsPromise.computeBoolean("""
                             return true;
                             """)
                     .thenAccept(b-> Notification.show(b.toString()));
@@ -126,7 +122,7 @@ public class JsPromiseView extends VerticalLayout {
         });
 
         add(new VButton("Get a PersonDTO via browsers fetch call that is de-serialized from JSON and then passed back to server. MIND BLOWN, HAH?", e -> {
-            JsPromise.async("""
+            JsPromise.compute("""
             // This method body is executed in async function, 
             // we can use await magic 🥳
             const response = await fetch("/personjson");
