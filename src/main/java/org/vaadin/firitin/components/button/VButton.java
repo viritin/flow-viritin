@@ -3,6 +3,8 @@ package org.vaadin.firitin.components.button;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.shared.Registration;
@@ -199,6 +201,11 @@ public class VButton extends Button implements FluentHasSize<VButton>, FluentHas
 
     public VButton onClick(BasicClickListener clickListener) {
         super.addClickListener(e -> clickListener.onClick());
+        return this;
+    }
+
+    public VButton withClickShortcut(Key key, KeyModifier... keyModifiers) {
+        addClickShortcut(key, keyModifiers);
         return this;
     }
 }
