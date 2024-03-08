@@ -1,0 +1,26 @@
+//tag::include[]
+package org.vaadin.firitin.formbinder.hibernatecrossfieldexample;
+
+//end::include[]
+
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+
+//tag::include[]
+public class ValidPassengerCountValidator
+		implements ConstraintValidator<ValidPassengerCount, Car> {
+
+	@Override
+	public void initialize(ValidPassengerCount constraintAnnotation) {
+	}
+
+	@Override
+	public boolean isValid(Car car, ConstraintValidatorContext context) {
+		if ( car == null ) {
+			return true;
+		}
+
+		return car.getPassengers().size() <= car.getSeatCount();
+	}
+}
+//end::include[]

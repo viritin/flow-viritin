@@ -27,10 +27,13 @@ import jakarta.validation.constraints.Size;
  * @author mattitahvonenitmill
  */
 public class Person {
+
+    public interface FirstNameOnly {}
+
     private int id;
 
-    @NotNull
-    @Size(min = 3, max = 15)
+    @NotNull(groups = FirstNameOnly.class)
+    @Size(min = 3, max = 15, groups = FirstNameOnly.class)
     private String firstName;
     private String lastName;
 

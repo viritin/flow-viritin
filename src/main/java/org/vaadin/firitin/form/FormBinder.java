@@ -19,6 +19,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Path;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -41,7 +42,7 @@ import java.util.Set;
  * * Validation is "just validation", and not concern of this class. BUT, API must support binding external validation logic, like Bean Validation API
  * * Must support Records & immutable objects as well
  * * No requirements for BeanValidation or Spring DataBinding stuff, but optional support (or extensible for those)
- *
+ * <p>
  * Non-goals:
  * * Aiming for binding anything without property names (for good solution this needs to be resolved at language level and supported with thing like Bean Validation first)
  *
@@ -59,9 +60,12 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     Map<BeanPropertyDefinition, HasValue> bpdToEditorField = new HashMap<>();
     Map<String, HasValue> nameToEditorField = new HashMap<>();
     Map<String, Converter> nameToConverter = new HashMap<>();
+    HashMap<String, String> propertyToInputValueConversionError = new HashMap<>();
     private Set<Component> errorMsgs = new HashSet<>();
     private T valueObject;
     private List<ValueChangeListener> valueChangeListeners;
+    private boolean constraintViolations;
+    private HasComponents classLevelViolationDisplay;
 
     public FormBinder(Class<T> tClass, Component... componentsForNameBasedBinding) {
         this.tClass = tClass;
@@ -78,9 +82,9 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
                 Class<?> type = f.getType();
                 if (HasValue.class.isAssignableFrom(type)) {
                     BeanPropertyDefinition property = bbd.findProperty(new PropertyName(f.getName()));
-                    property.getAccessor().fixAccess(true);
 
                     if (property != null) {
+                        property.getAccessor().fixAccess(true);
                         try {
                             f.setAccessible(true);
                             HasValue hasValue = (HasValue) f.get(formComponent);
@@ -125,18 +129,20 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
             ValueContext ctx = new ValueContext((Component) hasValue);
             // Mutate
             hasValue.addValueChangeListener(e -> {
-                Object value = e.getValue();
-                value = convertInputValue(value, property, ctx);
-                try {
-                    property.getSetter().callOnWith(valueObject, value);
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
+                if(e.isFromClient()) {
+                    Object value = e.getValue();
+                    value = convertInputValue(value, property, ctx);
+                    try {
+                        property.getSetter().callOnWith(valueObject, value);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
             });
         }
         hasValue.addValueChangeListener(e -> {
-            var event = new FormBinderValueChangeEvent<T>(FormBinder.this, e.isFromClient());
             if (valueChangeListeners != null) {
+                var event = new FormBinderValueChangeEvent<T>(FormBinder.this, e.isFromClient());
                 for (ValueChangeListener vcl : valueChangeListeners.toArray(new ValueChangeListener[0])) {
                     vcl.valueChanged(event);
                 }
@@ -158,8 +164,6 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         }
         return value;
     }
-
-    HashMap<String,String> propertyToInputValueConversionError = new HashMap<>();
 
     /**
      * Handles input conversion error. By default, the error message saved
@@ -200,8 +204,8 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
 
     /**
      * Sets the value object bound to this form
-     * @param valueObject
-     *            the new value
+     *
+     * @param valueObject the new value
      */
     @Override
     public void setValue(T valueObject) {
@@ -214,19 +218,25 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
                 pValue = pd.getGetter().getValue(valueObject);
             }
             HasValue hasValue = bpdToEditorField.get(pd);
-            if (pValue == null) {
-                hasValue.clear();
+            if (hasValue != null) {
+
+                if (pValue == null) {
+                    hasValue.clear();
+                } else {
+                    Converter converter = nameToConverter.get(pd.getName());
+                    if (converter != null) {
+                        pValue = converter.convertToPresentation(pValue, new ValueContext((Component) hasValue));
+                    }
+                    try {
+                        hasValue.setValue(pValue);
+                    } catch (ClassCastException ex) {
+                        throw new UnsupportedOperationException("FormBinder don't yet support automatic value conversion.", ex);
+                    }
+                }
             } else {
-                Converter converter = nameToConverter.get(pd.getName());
-                if (converter != null) {
-                    pValue = converter.convertToPresentation(pValue, new ValueContext((Component) hasValue));
-                }
-                try {
-                    hasValue.setValue(pValue);
-                } catch (ClassCastException ex) {
-                    throw new UnsupportedOperationException("FormBinder don't yet support automatic value conversion.", ex);
-                }
+                // TODO figure out if non-bound fields needs to be handled some how, probably not
             }
+
         }
     }
 
@@ -325,18 +335,39 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
             }
         });
         handleClassLevelValidations(nonReported);
+        constraintViolations = !violations.isEmpty();
+    }
+
+    public void setClassLevelViolationDisplay(HasComponents display) {
+        classLevelViolationDisplay = display;
+    }
+
+    public HasComponents getClassLevelViolationDisplay() {
+        if(classLevelViolationDisplay != null) {
+            return classLevelViolationDisplay;
+        }
+
+        if (formComponents[0] instanceof HasComponents hc) {
+            return hc;
+        }
+        throw new RuntimeException("No place to report class level violations");
     }
 
     protected void handleClassLevelValidations(Set<ConstraintViolation<T>> violations) {
-        if (formComponents[0] instanceof HasComponents hc) {
-            for (ConstraintViolation cv : violations) {
-                // TODO proper interpolation etc
-                Paragraph paragraph = new Paragraph();
-                paragraph.addClassNames(LumoUtility.TextColor.ERROR);
+        HasComponents hc = getClassLevelViolationDisplay();
+        for (ConstraintViolation cv : violations) {
+            // TODO proper interpolation etc
+            Paragraph paragraph = new Paragraph();
+            paragraph.addClassNames(LumoUtility.TextColor.ERROR);
+            String propertyPath = cv.getPropertyPath().toString();
+            if(propertyPath.isEmpty()) {
                 paragraph.setText(cv.getMessage());
-                errorMsgs.add(paragraph);
-                hc.add(paragraph);
+            } else {
+                paragraph.setText(propertyPath + " " + cv.getMessage());
             }
+
+            errorMsgs.add(paragraph);
+            hc.add(paragraph);
         }
     }
 
@@ -363,6 +394,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
             }
         });
         handleClassLevelValidations(nonReported);
+        constraintViolations = !propertyToViolation.isEmpty();
     }
 
     private void handleClassLevelValidations(HashMap<String, String> nonReported) {
@@ -404,7 +436,12 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         return !propertyToInputValueConversionError.isEmpty();
     }
 
-    public Map<String,String> getInputConversionErrors() {
+    public Map<String, String> getInputConversionErrors() {
         return propertyToInputValueConversionError;
+    }
+
+    public boolean isValid() {
+        return getInputConversionErrors().isEmpty() &&
+                errorMsgs.isEmpty() && !constraintViolations;
     }
 }
