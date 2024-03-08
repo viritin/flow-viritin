@@ -205,10 +205,6 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
         }
     }
 
-    /**
-     * By default just does simple name based binding. Override this method to
-     * customize the binding.
-     */
     protected void bind() {
         binder = new FormBinder<>(entityType, this);
         binder.setClassLevelViolationDisplay(classLevelViolationsDisplay);
@@ -362,6 +358,7 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
     public Button getDeleteButton() {
         if (deleteButton == null) {
             setDeleteButton(createDeleteButton());
+            deleteButton.setVisible(deleteHandler != null);
         }
         return deleteButton;
     }

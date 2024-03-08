@@ -49,9 +49,6 @@ public class FormBinderCarForm extends BeanValidationForm<Car> {
             }
         });
 
-        // TODO why do I need to do this!?
-        getDeleteButton().setVisible(false);
-
         setSavedHandler(car -> {
             Notification.show("Saved");
             showCurrentStateAsJson(car);
