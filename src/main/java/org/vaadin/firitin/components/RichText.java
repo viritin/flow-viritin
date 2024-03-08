@@ -16,14 +16,16 @@
 package org.vaadin.firitin.components;
 
 import com.vaadin.flow.component.html.Div;
-
-import java.io.IOException;
-import java.io.InputStream;
-
+import com.vladsch.flexmark.html.HtmlRenderer;
+import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.util.data.MutableDataSet;
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
-import org.markdown4j.Markdown4jProcessor;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * @author mstahv
@@ -32,14 +34,15 @@ import org.markdown4j.Markdown4jProcessor;
 /**
  * XSS safe rich text label with either Markdown syntax or raw html (sanitized
  * with Jsoup).
- *
+ * <p>
  * By default jsoups Safelist.relaxed is used for sanitizing. This can be
  * overridden by returning custom safelist with getSafelist method.
  */
 public class RichText extends Div {
 
     private static final long serialVersionUID = -6926829115110918731L;
-
+    private static Parser parser;
+    private static HtmlRenderer renderer;
     transient private Safelist safelist;
     private String richText;
 
@@ -52,17 +55,39 @@ public class RichText extends Div {
         setRichText(content);
     }
 
-    public RichText withMarkDown(String markdown) {
-        try {
-            return setRichText(new Markdown4jProcessor().process(markdown));
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
+
+    protected Parser getMdParser() {
+        if (parser == null) {
+            MutableDataSet options = new MutableDataSet();
+
+            // uncomment to set optional extensions
+            //options.set(Parser.EXTENSIONS, Arrays.asList(TablesExtension.create(), StrikethroughExtension.create()));
+
+            // uncomment to convert soft-breaks to hard breaks
+            //options.set(HtmlRenderer.SOFT_BREAK, "<br />\n");
+
+            parser = Parser.builder(options).build();
+
         }
+        return parser;
     }
+
+    protected HtmlRenderer getMdRenderer() {
+        if (renderer == null) {
+            renderer = HtmlRenderer.builder().build();
+        }
+        return renderer;
+    }
+
+
+    public RichText withMarkDown(String markdown) {
+        return setRichText(getMdRenderer().render(getMdParser().parse(markdown)));
+    }
+
 
     public RichText withMarkDown(InputStream markdown) {
         try {
-            return setRichText(new Markdown4jProcessor().process(markdown));
+            return setRichText(getMdRenderer().render(getMdParser().parseReader(new InputStreamReader(markdown))));
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -92,7 +117,6 @@ public class RichText extends Div {
     }
 
     /**
-     *
      * @return the safelist
      * @deprecated use getSafelist instead
      */
@@ -109,7 +133,6 @@ public class RichText extends Div {
     }
 
     /**
-     *
      * @param whitelist the whitelist used for sanitizing the rich text content
      * @return the object itself for further configuration
      * @deprecated Whitelist is not serializable. Override getWhitelist instead

@@ -36,6 +36,9 @@ public class RichTextExample extends VVerticalLayout {
                 # RichText using Markdown syntax
                 
                 *Hello* [Viritin](https://vaadin.com/) users.
+                
+                This is another paragraph with multiple
+                lines belonging to same paragraph.
                 """));
 
         add(new RichText().withSafeHtml("""
