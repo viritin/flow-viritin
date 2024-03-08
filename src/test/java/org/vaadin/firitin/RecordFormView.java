@@ -1,7 +1,6 @@
 package org.vaadin.firitin;
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -19,9 +18,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import org.vaadin.firitin.components.checkbox.VCheckBox;
 import org.vaadin.firitin.components.textfield.VTextField;
-import org.vaadin.firitin.form.VBinder;
+import org.vaadin.firitin.form.FormBinder;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -44,7 +42,7 @@ public class RecordFormView extends VerticalLayout {
         var record = new Person("Jorma", 70, 69);
 
         PersonForm form = new PersonForm();
-        var binder = new VBinder<>(Person.class, form);
+        var binder = new FormBinder<>(Person.class, form);
         binder.setValue(record);
 
         add(form);

@@ -2,14 +2,14 @@ package org.vaadin.firitin.form;
 
 import com.vaadin.flow.component.HasValue;
 
-public class VBinderValueChangeEvent<T> implements HasValue.ValueChangeEvent<T> {
+public class FormBinderValueChangeEvent<T> implements HasValue.ValueChangeEvent<T> {
 
-    public VBinderValueChangeEvent(VBinder<T> source, boolean fromClient) {
+    public FormBinderValueChangeEvent(FormBinder<T> source, boolean fromClient) {
         this.source = source;
         this.fromClient = fromClient;
     }
 
-    private VBinder<T> source;
+    private FormBinder<T> source;
 
     private boolean fromClient;
 

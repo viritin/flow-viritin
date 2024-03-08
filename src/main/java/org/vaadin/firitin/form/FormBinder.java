@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.PropertyName;
 import com.fasterxml.jackson.databind.introspect.AnnotatedConstructor;
 import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.github.rjeschke.txtmark.Run;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasValue;
@@ -30,18 +29,20 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A new start for the Binder.
+ * A new start for the Binder. Note, that this is still a fairly new class,
+ * so there might be changes to it.
  * <p>
  * Design principles:
  * <p>
  * * Only support "non-buffered mode" so that validation logic can use the bean/record + simplicity of the implementation
  * * Validation is "just validation", and not concern of this class. BUT, API must support binding external validation logic, like Bean Validation API
  * * Must support Records & immutable objects as well
+ * * No requirements for BeanValidation or Spring DataBinding stuff, but optional support (or extensible for those)
  *
  * @param <T>
  */
-// TODO make this implement HasValue  -> could be used within existing form using the core Binder
-public class VBinder<T> implements HasValue<VBinderValueChangeEvent<T>, T> {
+
+public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T> {
 
     // Helper "Jack" to do introspection
     private static final ObjectMapper jack = new ObjectMapper();
@@ -55,7 +56,7 @@ public class VBinder<T> implements HasValue<VBinderValueChangeEvent<T>, T> {
     private T valueObject;
     private List<ValueChangeListener> valueChangeListeners;
 
-    public VBinder(Class<T> tClass, Component... componentsForNameBasedBinding) {
+    public FormBinder(Class<T> tClass, Component... componentsForNameBasedBinding) {
         this.tClass = tClass;
         formComponents = componentsForNameBasedBinding;
         JavaType javaType = jack.getTypeFactory().constructType(tClass);
@@ -119,7 +120,7 @@ public class VBinder<T> implements HasValue<VBinderValueChangeEvent<T>, T> {
             });
         }
         hasValue.addValueChangeListener(e -> {
-            var event = new VBinderValueChangeEvent<T>(VBinder.this, e.isFromClient());
+            var event = new FormBinderValueChangeEvent<T>(FormBinder.this, e.isFromClient());
             if (valueChangeListeners != null) {
                 for (ValueChangeListener vcl : valueChangeListeners.toArray(new ValueChangeListener[0])) {
                     vcl.valueChanged(event);
@@ -156,7 +157,7 @@ public class VBinder<T> implements HasValue<VBinderValueChangeEvent<T>, T> {
     }
 
     @Override
-    public Registration addValueChangeListener(ValueChangeListener<? super VBinderValueChangeEvent<T>> listener) {
+    public Registration addValueChangeListener(ValueChangeListener<? super FormBinderValueChangeEvent<T>> listener) {
         if (valueChangeListeners == null) {
             valueChangeListeners = new ArrayList<>();
         }

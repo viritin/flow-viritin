@@ -19,7 +19,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.vaadin.firitin.components.textfield.VTextField;
-import org.vaadin.firitin.form.VBinder;
+import org.vaadin.firitin.form.FormBinder;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -30,7 +30,7 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Route
-public class VBinderView extends VerticalLayout {
+public class FormBinderView extends VerticalLayout {
 
     @BigShouldBeBigger
     public static class Person {
@@ -73,7 +73,7 @@ public class VBinderView extends VerticalLayout {
         }
     }
 
-    public VBinderView() {
+    public FormBinderView() {
 
         var p = new Person();
         p.setName("Jorma");
@@ -82,7 +82,7 @@ public class VBinderView extends VerticalLayout {
 
 
         PersonForm form = new PersonForm();
-        var binder = new VBinder<>(Person.class, form);
+        var binder = new FormBinder<>(Person.class, form);
         binder.setValue(p);
 
         binder.addValueChangeListener(e -> {

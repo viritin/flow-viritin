@@ -13,13 +13,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.vaadin.firitin.components.textfield.VIntegerField;
 import org.vaadin.firitin.components.textfield.VTextField;
-import org.vaadin.firitin.form.VBinder;
+import org.vaadin.firitin.form.FormBinder;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Set;
 
-public class VBinderTest {
+public class FormBinderTest {
 
 
     public record FooBar(String foo, @Future LocalDateTime bar, Integer baz){}
@@ -81,7 +81,7 @@ public class VBinderTest {
 
         FooBarForm fooBarForm = new FooBarForm();
 
-        VBinder<FooBar> binder = new VBinder<>(FooBar.class, fooBarForm);
+        FormBinder<FooBar> binder = new FormBinder<>(FooBar.class, fooBarForm);
 
         FooBar value = binder.getValue();
 
@@ -127,7 +127,7 @@ public class VBinderTest {
 
         FooBarForm fooBarForm = new FooBarForm();
 
-        VBinder<FooCar> binder = new VBinder<>(FooCar.class, fooBarForm);
+        FormBinder<FooCar> binder = new FormBinder<>(FooCar.class, fooBarForm);
 
         FooCar value = binder.getValue();
 
