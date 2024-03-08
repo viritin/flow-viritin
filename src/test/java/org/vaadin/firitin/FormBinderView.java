@@ -5,6 +5,9 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.Converter;
 import com.vaadin.flow.router.Route;
 import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
@@ -83,10 +86,28 @@ public class FormBinderView extends VerticalLayout {
 
         PersonForm form = new PersonForm();
         var binder = new FormBinder<>(Person.class, form);
+        binder.setConverter("big", new Converter<String, Integer>() {
+            @Override
+            public Result<Integer> convertToModel(String value, ValueContext context) {
+                try {
+                    Integer integer = Integer.valueOf(value);
+                    return Result.ok(integer);
+                } catch (Exception ex) {
+                    return Result.error("Couldn't convert " + value + " to integer");
+                }
+            }
+
+            @Override
+            public String convertToPresentation(Integer value, ValueContext context) {
+                return value.toString();
+            }
+        });
         binder.setValue(p);
 
         binder.addValueChangeListener(e -> {
-            binder.setConstraintViolations(validate(binder.getValue()));
+            if(!binder.hasInputConversionErrors()) {
+                binder.setConstraintViolations(validate(binder.getValue()));
+            }
         });
 
         add(form);
@@ -135,7 +156,9 @@ public class FormBinderView extends VerticalLayout {
 
         TextField name = new VTextField("Name");
         IntegerField small = new IntegerField("Small number");
-        IntegerField big = new IntegerField("Big number");
+
+        // mismatching field to property type, needs configured converter
+        TextField big = new TextField("Big bound with TextField");
 
         public PersonForm() {
             add(name,small,big);

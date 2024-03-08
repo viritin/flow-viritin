@@ -11,6 +11,9 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.Converter;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.shared.Registration;
@@ -39,6 +42,9 @@ import java.util.Set;
  * * Must support Records & immutable objects as well
  * * No requirements for BeanValidation or Spring DataBinding stuff, but optional support (or extensible for those)
  *
+ * Non-goals:
+ * * Aiming for binding anything without property names (for good solution this needs to be resolved at language level and supported with thing like Bean Validation first)
+ *
  * @param <T>
  */
 
@@ -52,6 +58,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
 
     Map<BeanPropertyDefinition, HasValue> bpdToEditorField = new HashMap<>();
     Map<String, HasValue> nameToEditorField = new HashMap<>();
+    Map<String, Converter> nameToConverter = new HashMap<>();
     private Set<Component> errorMsgs = new HashSet<>();
     private T valueObject;
     private List<ValueChangeListener> valueChangeListeners;
@@ -110,10 +117,13 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
             hvcm.setValueChangeMode(ValueChangeMode.LAZY);
         }
         if (!isImmutable()) {
+            ValueContext ctx = new ValueContext((Component) hasValue);
             // Mutate
             hasValue.addValueChangeListener(e -> {
+                Object value = e.getValue();
+                value = convertInputValue(value, property, ctx);
                 try {
-                    property.getSetter().callOnWith(valueObject, e.getValue());
+                    property.getSetter().callOnWith(valueObject, value);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -127,6 +137,48 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
                 }
             }
         });
+    }
+
+    private Object convertInputValue(Object value, BeanPropertyDefinition property, ValueContext ctx) {
+        Converter converter = nameToConverter.get(property.getName());
+        if (converter != null) {
+            Result result = converter.convertToModel(value, ctx);
+            try {
+                value = result.getOrThrow(msg -> new RuntimeException(msg.toString()));
+                // clear possible previous errors
+                propertyToInputValueConversionError.remove(property.getName());
+            } catch (Throwable ex) {
+                value = handleInputConversionError(property, ctx, ex.getMessage());
+            }
+        }
+        return value;
+    }
+
+    HashMap<String,String> propertyToInputValueConversionError = new HashMap<>();
+
+    /**
+     * Handles input conversion error. By default, the error message saved
+     * and set to the field.
+     *
+     * @param property
+     * @param ctx
+     * @param conversionErrorMsg
+     * @return the value to be set to the edited object, null by default
+     */
+    protected Object handleInputConversionError(BeanPropertyDefinition property, ValueContext ctx, String conversionErrorMsg) {
+        propertyToInputValueConversionError.put(property.getName(), conversionErrorMsg);
+        // TODO figure out if it would be best to handle this somehow else,
+        // now at least calling setConstraintViolations clears this easily
+        Component component = ctx.getComponent().get();
+        if (component instanceof HasValidationProperties f) {
+            f.setErrorMessage(conversionErrorMsg);
+            f.setInvalid(true);
+        } else {
+            // TODO show the conversion error somewho in UI/binder API if not of type HasValidationProperties
+        }
+        // The value of field should be null in this case !? or should get
+        // the empty value via field and then convert again 🤷
+        return null;
     }
 
     @Override
@@ -151,9 +203,20 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
                 pValue = pd.getGetter().getValue(valueObject);
             }
             HasValue hasValue = bpdToEditorField.get(pd);
-            hasValue.setValue(pValue);
+            if (pValue == null) {
+                hasValue.clear();
+            } else {
+                Converter converter = nameToConverter.get(pd.getName());
+                if (converter != null) {
+                    pValue = converter.convertToPresentation(pValue, new ValueContext((Component) hasValue));
+                }
+                try {
+                    hasValue.setValue(pValue);
+                } catch (ClassCastException ex) {
+                    throw new UnsupportedOperationException("FormBinder don't yet support automatic value conversion.", ex);
+                }
+            }
         }
-
     }
 
     @Override
@@ -199,7 +262,9 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         for (int i = 0; i < properties.size(); i++) {
             BeanPropertyDefinition definition = properties.get(i);
             HasValue hasValue = bpdToEditorField.get(definition);
-            args[i] = hasValue.getValue();
+            Object value = hasValue.getValue();
+            value = convertInputValue(value, definition, new ValueContext((Component) hasValue));
+            args[i] = value;
             Class<?> rawType = definition.getGetter().getRawType();
             boolean primitive = definition.getGetter().getRawType().isPrimitive();
             if (primitive && hasValue.isRequiredIndicatorVisible() && args[i] == null) {
@@ -219,7 +284,9 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         T o = (T) bbd.instantiateBean(true);
         bpdToEditorField.forEach((bpd, hasValue) -> {
             try {
-                bpd.getSetter().callOnWith(o, hasValue.getValue());
+                Object value = hasValue.getValue();
+                value = convertInputValue(value, bpd, new ValueContext((Component) hasValue));
+                bpd.getSetter().callOnWith(o, value);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -275,4 +342,19 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         errorMsgs.clear();
     }
 
+    public void setConverter(String bar, Converter<?, ?> strToDt) {
+        nameToConverter.put(bar, strToDt);
+    }
+
+    protected Converter forProperty(String propertyName) {
+        return nameToConverter.get(propertyName);
+    }
+
+    public boolean hasInputConversionErrors() {
+        return !propertyToInputValueConversionError.isEmpty();
+    }
+
+    public Map<String,String> getInputConversionErrors() {
+        return propertyToInputValueConversionError;
+    }
 }

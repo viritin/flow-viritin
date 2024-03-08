@@ -4,6 +4,10 @@ import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.Converter;
+import com.vaadin.flow.function.SerializableFunction;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -24,17 +28,17 @@ public class FormBinderTest {
 
     public record FooBar(String foo, @Future LocalDateTime bar, Integer baz){}
 
-    public static class FooCar {
+    public static class FooCarPojo {
         String foo;
         @Future
         LocalDateTime bar;
         Integer baz;
 
-        public FooCar() {
+        public FooCarPojo() {
 
         }
 
-        public FooCar(String foo, LocalDateTime bar, int baz) {
+        public FooCarPojo(String foo, LocalDateTime bar, int baz) {
             this.foo = foo;
             this.bar = bar;
             this.baz = baz;
@@ -72,6 +76,16 @@ public class FormBinderTest {
         IntegerField baz = new VIntegerField();
 
         public FooBarForm() {
+            add(foo, bar, baz);
+        }
+    }
+
+    public static class FooBarFormWithTextForDate extends VerticalLayout {
+        TextField foo = new VTextField();
+        TextField bar = new VTextField();
+        IntegerField baz = new VIntegerField();
+
+        public FooBarFormWithTextForDate() {
             add(foo, bar, baz);
         }
     }
@@ -127,14 +141,14 @@ public class FormBinderTest {
 
         FooBarForm fooBarForm = new FooBarForm();
 
-        FormBinder<FooCar> binder = new FormBinder<>(FooCar.class, fooBarForm);
+        FormBinder<FooCarPojo> binder = new FormBinder<>(FooCarPojo.class, fooBarForm);
 
-        FooCar value = binder.getValue();
+        FooCarPojo value = binder.getValue();
 
         Assertions.assertEquals("", value.getFoo());
         // Vaadin Time Picker loses milliseconds...
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-        FooCar jorma = new FooCar("Jorma", now, 69);
+        FooCarPojo jorma = new FooCarPojo("Jorma", now, 69);
         binder.setValue(jorma);
         // Should be the same reference as pojos are mutable
         Assertions.assertSame(jorma, binder.getValue());
@@ -144,18 +158,18 @@ public class FormBinderTest {
         fooBarForm.bar.setValue(tomorrow);
         fooBarForm.baz.setValue(70);
 
-        FooCar kalle = binder.getValue();
+        FooCarPojo kalle = binder.getValue();
         Assertions.assertEquals("Kalle", kalle.getFoo());
         Assertions.assertEquals(tomorrow, kalle.getBar());
         Assertions.assertEquals(70, kalle.getBaz());
 
         fooBarForm.bar.setValue(LocalDateTime.now().minusDays(1));
 
-        FooCar invalid = binder.getValue();
+        FooCarPojo invalid = binder.getValue();
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
-        Set<ConstraintViolation<FooCar>> violations = validator.validate(invalid);
+        Set<ConstraintViolation<FooCarPojo>> violations = validator.validate(invalid);
 
         // TODO create a more trivial API for those not using BV API
         binder.setConstraintViolations(violations);
@@ -163,4 +177,112 @@ public class FormBinderTest {
         Assertions.assertTrue(fooBarForm.bar.isInvalid());
 
     }
+
+    @Test
+    public void testConverterWithPojo() {
+        var fooBarForm = new FooBarFormWithTextForDate();
+
+        FormBinder<FooCarPojo> binder = new FormBinder<>(FooCarPojo.class, fooBarForm);
+
+        // Vaadin Time Picker loses milliseconds...
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        FooCarPojo jorma = new FooCarPojo("Jorma", now, 69);
+        // this fails as no support for automatic conversion currently
+        //binder.setValue(jorma);
+
+        var strToDt = new Converter<String, LocalDateTime>(){
+            @Override
+            public Result<LocalDateTime> convertToModel(String value, ValueContext context) {
+                return Result.of(() -> LocalDateTime.parse(value), new SerializableFunction<Exception, String>() {
+                    @Override
+                    public String apply(Exception exception) {
+                        return exception.getMessage();
+                    }
+                });
+            }
+
+            @Override
+            public String convertToPresentation(LocalDateTime value, ValueContext context) {
+                return value.toString();
+            }
+        };
+
+        // Define a converter!
+        binder.setConverter("bar", strToDt);
+
+        // No it works
+
+        // Test creating a new value
+        FooCarPojo value = binder.getValue();
+        Assertions.assertNull(value.getBar());
+
+        binder.setValue(jorma);
+
+        LocalDateTime tomorrow = now.plusDays(1);
+        fooBarForm.bar.setValue(tomorrow.toString());
+        FooCarPojo kalle = binder.getValue();
+        Assertions.assertEquals(tomorrow, kalle.getBar());
+
+        fooBarForm.bar.setValue("Invalid datetime");
+
+        Assertions.assertTrue(fooBarForm.bar.isInvalid());
+
+    }
+
+
+    @Test
+    public void testConverterWithRecord() {
+        var fooBarForm = new FooBarFormWithTextForDate();
+
+        FormBinder<FooBar> binder = new FormBinder<>(FooBar.class, fooBarForm);
+
+        // Vaadin Time Picker loses milliseconds...
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        var jorma = new FooBar("Jorma", now, 69);
+        // this fails as no support for automatic conversion currently
+        //binder.setValue(jorma);
+
+        var strToDt = new Converter<String, LocalDateTime>(){
+            @Override
+            public Result<LocalDateTime> convertToModel(String value, ValueContext context) {
+                return Result.of(() -> LocalDateTime.parse(value), new SerializableFunction<Exception, String>() {
+                    @Override
+                    public String apply(Exception exception) {
+                        return exception.getMessage();
+                    }
+                });
+            }
+
+            @Override
+            public String convertToPresentation(LocalDateTime value, ValueContext context) {
+                return value.toString();
+            }
+        };
+
+        // Define a converter!
+        binder.setConverter("bar", strToDt);
+
+        // No it works
+
+        // Test creating a new value
+        FooBar value = binder.getValue();
+        Assertions.assertNull(value.bar());
+
+        binder.setValue(jorma);
+
+        LocalDateTime tomorrow = now.plusDays(1);
+        fooBarForm.bar.setValue(tomorrow.toString());
+        var kalle = binder.getValue();
+        Assertions.assertEquals(tomorrow, kalle.bar());
+
+        fooBarForm.bar.setValue("Invalid datetime");
+
+        // trigger dto generation
+        kalle = binder.getValue();
+        Assertions.assertTrue(fooBarForm.bar.isInvalid());
+        Assertions.assertNull(kalle.bar());
+
+    }
+
+
 }
