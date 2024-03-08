@@ -1,13 +1,10 @@
-package org.vaadin.firitin;
+package org.vaadin.firitin.formbinder;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Result;
-import com.vaadin.flow.data.binder.ValueContext;
-import com.vaadin.flow.data.converter.Converter;
 import com.vaadin.flow.router.Route;
 import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
@@ -33,84 +30,26 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Route
-public class FormBinderView extends VerticalLayout {
+public class RecordFormView extends VerticalLayout {
 
     @BigShouldBeBigger
-    public static class Person {
-        @NotEmpty String name;
-        @NotNull
-        @Min(0) Integer small;
-        @Max(100) Integer big;
+    record Person(@NotEmpty String name, @NotNull @Min(0) Integer small, @Max(100) int big) {
 
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public Integer getSmall() {
-            return small;
-        }
-
-        public void setSmall(Integer small) {
-            this.small = small;
-        }
-
-        public Integer getBig() {
-            return big;
-        }
-
-        public void setBig(Integer big) {
-            this.big = big;
-        }
-
-        @Override
-        public String toString() {
-            return "Person{" +
-                    "name='" + name + '\'' +
-                    ", small=" + small +
-                    ", big=" + big +
-                    '}';
-        }
     }
 
-    public FormBinderView() {
+    public RecordFormView() {
 
-        var p = new Person();
-        p.setName("Jorma");
-        p.setSmall(70);
-        p.setBig(69);
-
+        var record = new Person("Jorma", 70, 69);
 
         PersonForm form = new PersonForm();
         var binder = new FormBinder<>(Person.class, form);
-        binder.setConverter("big", new Converter<String, Integer>() {
-            @Override
-            public Result<Integer> convertToModel(String value, ValueContext context) {
-                try {
-                    Integer integer = Integer.valueOf(value);
-                    return Result.ok(integer);
-                } catch (Exception ex) {
-                    return Result.error("Couldn't convert " + value + " to integer");
-                }
-            }
-
-            @Override
-            public String convertToPresentation(Integer value, ValueContext context) {
-                return value.toString();
-            }
-        });
-        binder.setValue(p);
-
-        binder.addValueChangeListener(e -> {
-            if(!binder.hasInputConversionErrors()) {
-                binder.setConstraintViolations(validate(binder.getValue()));
-            }
-        });
+        binder.setValue(record);
 
         add(form);
+
+        binder.addValueChangeListener(event -> {
+            binder.setConstraintViolations(validate(binder.getValue()));
+        });
 
         add(new Button("Show value", e -> {
             Notification.show("Value now:" + binder.getValue());
@@ -145,20 +84,16 @@ public class FormBinderView extends VerticalLayout {
             if ( car == null ) {
                 return true;
             }
-            if(car.getBig() == null) {
-                return false;
-            }
-            return car.getBig() > car.getSmall();
+            return car.big() > car.small();
         }
+
     }
 
     public static class PersonForm extends VerticalLayout {
 
         TextField name = new VTextField("Name");
         IntegerField small = new IntegerField("Small number");
-
-        // mismatching field to property type, needs configured converter
-        TextField big = new TextField("Big bound with TextField");
+        IntegerField big = new IntegerField("Big number");
 
         public PersonForm() {
             add(name,small,big);

@@ -1,4 +1,4 @@
-package org.vaadin.firitin;
+package org.vaadin.firitin.formbinder;
 
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;

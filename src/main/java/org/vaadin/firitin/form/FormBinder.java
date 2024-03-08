@@ -105,10 +105,15 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
             return true;
         }
 
-        return property.getGetter().getAnnotation(NotEmpty.class) != null ||
-                property.getGetter().getAnnotation(NotNull.class) != null ||
-                property.getGetter().getAnnotation(NotBlank.class) != null
-                ;
+        try {
+            return property.getGetter().getAnnotation(NotEmpty.class) != null ||
+                    property.getGetter().getAnnotation(NotNull.class) != null ||
+                    property.getGetter().getAnnotation(NotBlank.class) != null
+                    ;
+        } catch (java.lang.NoClassDefFoundError ex) {
+            // No Bean Validation on classpath
+            return false;
+        }
     }
 
     protected void configureEditor(BeanPropertyDefinition property, HasValue hasValue) {
@@ -193,6 +198,12 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         return valueObject;
     }
 
+    /**
+     * Sets the value object bound to this form
+     * @param valueObject
+     *            the new value
+     */
+    @Override
     public void setValue(T valueObject) {
         this.valueObject = valueObject;
         for (BeanPropertyDefinition pd : bbd.findProperties()) {
@@ -217,6 +228,11 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
                 }
             }
         }
+    }
+
+    public FormBinder<T> withValue(T value) {
+        setValue(value);
+        return this;
     }
 
     @Override
@@ -294,7 +310,6 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         return o;
     }
 
-
     public void setConstraintViolations(Set<ConstraintViolation<T>> violations) {
         clearValidationErrors();
         HashSet<ConstraintViolation<T>> nonReported = new HashSet<>(violations);
@@ -305,14 +320,11 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
                 if (hasValue instanceof HasValidationProperties hvp) {
                     hvp.setInvalid(true);
                     hvp.setErrorMessage(cv.getMessage()); // TODO proper interpolation
+                    nonReported.remove(cv);
                 }
-                nonReported.remove(cv);
             }
         });
-        // TODO handle class level and other violations
         handleClassLevelValidations(nonReported);
-
-
     }
 
     protected void handleClassLevelValidations(Set<ConstraintViolation<T>> violations) {
@@ -325,11 +337,49 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
                 errorMsgs.add(paragraph);
                 hc.add(paragraph);
             }
-
         }
     }
 
-    private void clearValidationErrors() {
+    /**
+     * An alternative API to report constraint violations without
+     * BeanValidation on the classpath.
+     *
+     * @param propertyToViolation
+     * @deprecated try to use the standard Java Bean Validation API based method instead
+     */
+    @Deprecated
+    public void setRawConstraintViolations(Map<String, String> propertyToViolation) {
+        clearValidationErrors();
+        HashMap<String, String> nonReported = new HashMap<>();
+        nonReported.putAll(propertyToViolation);
+        propertyToViolation.forEach((property, msg) -> {
+            if (!property.isEmpty()) {
+                HasValue hasValue = nameToEditorField.get(property);
+                if (hasValue instanceof HasValidationProperties hvp) {
+                    hvp.setInvalid(true);
+                    hvp.setErrorMessage(msg); // TODO proper interpolation
+                    nonReported.remove(property);
+                }
+            }
+        });
+        handleClassLevelValidations(nonReported);
+    }
+
+    private void handleClassLevelValidations(HashMap<String, String> nonReported) {
+        if (formComponents[0] instanceof HasComponents hc) {
+            nonReported.forEach((property, cv) -> {
+                // TODO proper interpolation etc
+                Paragraph paragraph = new Paragraph();
+                paragraph.addClassNames(LumoUtility.TextColor.ERROR);
+                paragraph.setText(cv);
+                errorMsgs.add(paragraph);
+                hc.add(paragraph);
+            });
+        }
+
+    }
+
+    public void clearValidationErrors() {
         nameToEditorField.values().forEach(hv -> {
             if (hv instanceof HasValidationProperties hvp) {
                 hvp.setInvalid(false);
