@@ -19,7 +19,6 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Path;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -33,28 +32,34 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A new start for the Binder. Note, that this is still a fairly new class,
- * so there might be changes to it.
+ * A new start for the {@link com.vaadin.flow.data.binder.Binder}.
+ * Note, that this is still a fairly new class, so there might be API changes to it.
  * <p>
  * Design principles:
- * <p>
- * * Only support "non-buffered mode" so that validation logic can use the bean/record + simplicity of the implementation
- * * Validation is "just validation", and not concern of this class. BUT, API must support binding external validation logic, like Bean Validation API
- * * Must support Records & immutable objects as well
- * * No requirements for BeanValidation or Spring DataBinding stuff, but optional support (or extensible for those)
- * <p>
+ * <ul>
+ * <li> Only support "non-buffered mode" so that validation logic can use the
+ * bean/record + simplicity of the implementation</li>
+ * <li> Validation is "just validation", and not concern of this class. BUT, API
+ * must support binding external validation logic, like Bean Validation API</li>
+ * <li> Must support Records & immutable objects as well</li>
+ * <li> No requirements for BeanValidation or Spring DataBinding stuff, but
+ * optional support (or extensible for those)</li>
+ * </ul>
  * Non-goals:
- * * Aiming for binding anything without property names (for good solution this needs to be resolved at language level and supported with thing like Bean Validation first)
+ * <ul>
+ * <li> Aiming for binding anything without property names (for good solution
+ * this needs to be resolved at language level and supported with thing like
+ * Bean Validation first)</li>
+ * </ul>
  *
- * @param <T>
+ * @param <T> The class/record type bound by this binder.
  */
-
 public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T> {
 
     // Helper "Jack" to do introspection
     private static final ObjectMapper jack = new ObjectMapper();
     private final Class<T> tClass;
-    private final Component[] formComponents;
+    private final Component[] containerComponents;
     private final BasicBeanDescription bbd;
 
     Map<BeanPropertyDefinition, HasValue> bpdToEditorField = new HashMap<>();
@@ -67,13 +72,19 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     private boolean constraintViolations;
     private HasComponents classLevelViolationDisplay;
 
-    public FormBinder(Class<T> tClass, Component... componentsForNameBasedBinding) {
+    /**
+     * Constructs a new binder.
+     *
+     * @param tClass              the class of the bound entity/bean, set later with {@link #setValue(Object)}
+     * @param containerComponents the components whose class contains the fields to bound
+     */
+    public FormBinder(Class<T> tClass, Component... containerComponents) {
         this.tClass = tClass;
-        formComponents = componentsForNameBasedBinding;
+        this.containerComponents = containerComponents;
         JavaType javaType = jack.getTypeFactory().constructType(tClass);
         this.bbd = (BasicBeanDescription) jack.getSerializationConfig().introspect(javaType);
 
-        for (Component formComponent : formComponents) {
+        for (Component formComponent : this.containerComponents) {
             Class<? extends Component> aClass = formComponent.getClass();
             Field[] declaredFields = aClass.getDeclaredFields();
             for (Field f : declaredFields) {
@@ -101,7 +112,18 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
                 }
             }
         }
+    }
 
+    /**
+     * Binds given dto to the UI fields found from given component(s).
+     *
+     * @param dto                 the object to bind. The type of the FormBinder will be taken
+     *                            from this object.
+     * @param containerComponents the components whose class contains the fields to bound
+     */
+    public FormBinder(T dto, Component... containerComponents) {
+        this((Class<T>) dto.getClass(), containerComponents);
+        setValue(dto);
     }
 
     protected static boolean isRequired(BeanPropertyDefinition property) {
@@ -110,10 +132,9 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         }
 
         try {
-            return property.getGetter().getAnnotation(NotEmpty.class) != null ||
-                    property.getGetter().getAnnotation(NotNull.class) != null ||
-                    property.getGetter().getAnnotation(NotBlank.class) != null
-                    ;
+            return property.getGetter().getAnnotation(NotEmpty.class) != null
+                    || property.getGetter().getAnnotation(NotNull.class) != null
+                    || property.getGetter().getAnnotation(NotBlank.class) != null;
         } catch (java.lang.NoClassDefFoundError ex) {
             // No Bean Validation on classpath
             return false;
@@ -129,7 +150,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
             ValueContext ctx = new ValueContext((Component) hasValue);
             // Mutate
             hasValue.addValueChangeListener(e -> {
-                if(e.isFromClient()) {
+                if (e.isFromClient()) {
                     Object value = e.getValue();
                     value = convertInputValue(value, property, ctx);
                     try {
@@ -166,8 +187,8 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     }
 
     /**
-     * Handles input conversion error. By default, the error message saved
-     * and set to the field.
+     * Handles input conversion error. By default, the error message saved and
+     * set to the field.
      *
      * @param property
      * @param ctx
@@ -183,7 +204,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
             f.setErrorMessage(conversionErrorMsg);
             f.setInvalid(true);
         } else {
-            // TODO show the conversion error somewho in UI/binder API if not of type HasValidationProperties
+            // TODO show the conversion error somehow in UI/binder API if not of type HasValidationProperties
         }
         // The value of field should be null in this case !? or should get
         // the empty value via field and then convert again 🤷
@@ -256,27 +277,33 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
 
     @Override
     public boolean isReadOnly() {
-        // TODO
+        // TODO figure out what to do, coming via HasValue...
         return false;
     }
 
     @Override
     public void setReadOnly(boolean readOnly) {
-        // TODO
+        // TODO figure out what to do, coming via HasValue...
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
     public boolean isRequiredIndicatorVisible() {
-        // TODO check up
+        // TODO figure out what to do, coming via HasValue...
         return false;
     }
 
     @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        // TODO figure out if this should throw or stop using HashValue altogether
+        throw new RuntimeException("Not supported");
+        // TODO figure out if this should throw or stop using HasValue altogether
         // Passing to fields is simply wrong and we don't have a place to show the
     }
 
+    // TODO figure out if opening this to public (and having explicit field)
+    // makes sense. Would allow immutable POJOs (like those by immutable fanboys
+    // that then force to use build patter et friends) to be bound as well, but would
+    // force developer probably to provide custom constructor logic
     protected boolean isImmutable() {
         return bbd.isRecordType();
     }
@@ -305,7 +332,6 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         }
     }
 
-
     protected T constructPojo() {
         T o = (T) bbd.instantiateBean(true);
         bpdToEditorField.forEach((bpd, hasValue) -> {
@@ -320,6 +346,13 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         return o;
     }
 
+    /**
+     * Set the constraint violations found during validation. If violation is
+     * bound to a bound property, it is shown next to the field, otherwise
+     * shown at "form level", see {@link #setClassLevelViolationDisplay(HasComponents)}.
+     *
+     * @param violations the constraint violations that should be shown in the UI
+     */
     public void setConstraintViolations(Set<ConstraintViolation<T>> violations) {
         clearValidationErrors();
         HashSet<ConstraintViolation<T>> nonReported = new HashSet<>(violations);
@@ -329,7 +362,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
                 HasValue hasValue = nameToEditorField.get(property);
                 if (hasValue instanceof HasValidationProperties hvp) {
                     hvp.setInvalid(true);
-                    hvp.setErrorMessage(cv.getMessage()); // TODO proper interpolation
+                    hvp.setErrorMessage(cv.getMessage());
                     nonReported.remove(cv);
                 }
             }
@@ -338,29 +371,40 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         constraintViolations = !violations.isEmpty();
     }
 
-    public void setClassLevelViolationDisplay(HasComponents display) {
-        classLevelViolationDisplay = display;
-    }
-
+    /**
+     * Gets the class level violation display. If not set, the first container
+     * component is used if of appropriate type.
+     *
+     * @return the component where constraint violations will be displayed
+     */
     public HasComponents getClassLevelViolationDisplay() {
-        if(classLevelViolationDisplay != null) {
+        if (classLevelViolationDisplay != null) {
             return classLevelViolationDisplay;
         }
 
-        if (formComponents[0] instanceof HasComponents hc) {
+        if (containerComponents[0] instanceof HasComponents hc) {
             return hc;
         }
         throw new RuntimeException("No place to report class level violations");
     }
 
+    /**
+     * Sets the container component where "class level" constraint violations
+     * are displayed.
+     *
+     * @param display the component where the "class level" constraint violations will be displayed.
+     */
+    public void setClassLevelViolationDisplay(HasComponents display) {
+        classLevelViolationDisplay = display;
+    }
+
     protected void handleClassLevelValidations(Set<ConstraintViolation<T>> violations) {
         HasComponents hc = getClassLevelViolationDisplay();
         for (ConstraintViolation cv : violations) {
-            // TODO proper interpolation etc
             Paragraph paragraph = new Paragraph();
             paragraph.addClassNames(LumoUtility.TextColor.ERROR);
             String propertyPath = cv.getPropertyPath().toString();
-            if(propertyPath.isEmpty()) {
+            if (propertyPath.isEmpty()) {
                 paragraph.setText(cv.getMessage());
             } else {
                 paragraph.setText(propertyPath + " " + cv.getMessage());
@@ -372,11 +416,12 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     }
 
     /**
-     * An alternative API to report constraint violations without
-     * BeanValidation on the classpath.
+     * An alternative API to report constraint violations without BeanValidation
+     * on the classpath.
      *
      * @param propertyToViolation
-     * @deprecated try to use the standard Java Bean Validation API based method instead
+     * @deprecated try to use the standard Java Bean Validation API based method
+     * instead
      */
     @Deprecated
     public void setRawConstraintViolations(Map<String, String> propertyToViolation) {
@@ -388,7 +433,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
                 HasValue hasValue = nameToEditorField.get(property);
                 if (hasValue instanceof HasValidationProperties hvp) {
                     hvp.setInvalid(true);
-                    hvp.setErrorMessage(msg); // TODO proper interpolation
+                    hvp.setErrorMessage(msg);
                     nonReported.remove(property);
                 }
             }
@@ -398,9 +443,8 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     }
 
     private void handleClassLevelValidations(HashMap<String, String> nonReported) {
-        if (formComponents[0] instanceof HasComponents hc) {
+        if (containerComponents[0] instanceof HasComponents hc) {
             nonReported.forEach((property, cv) -> {
-                // TODO proper interpolation etc
                 Paragraph paragraph = new Paragraph();
                 paragraph.addClassNames(LumoUtility.TextColor.ERROR);
                 paragraph.setText(cv);
@@ -411,6 +455,9 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
 
     }
 
+    /**
+     * Removes all validation errors from bound fields and {@link #getClassLevelViolationDisplay()}.
+     */
     public void clearValidationErrors() {
         nameToEditorField.values().forEach(hv -> {
             if (hv instanceof HasValidationProperties hvp) {
@@ -424,24 +471,41 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         errorMsgs.clear();
     }
 
-    public void setConverter(String bar, Converter<?, ?> strToDt) {
-        nameToConverter.put(bar, strToDt);
+    /**
+     * Sets a converter to use between the domain model property and the
+     * corresponding UI component editing it.
+     * @param property the property
+     * @param strToDt the converter
+     */
+    public void setConverter(String property, Converter<?, ?> strToDt) {
+        nameToConverter.put(property, strToDt);
     }
 
-    protected Converter forProperty(String propertyName) {
-        return nameToConverter.get(propertyName);
-    }
-
+    /**
+     * Checks if there have recently been errors to convert value from
+     * the UI to the domain object.
+     *
+     * @return true if there are active conversion errors
+     */
     public boolean hasInputConversionErrors() {
         return !propertyToInputValueConversionError.isEmpty();
     }
 
+    /**
+     * Returns a map containing input conversion errors (propertyname-error).
+     *
+     * @return input conversion errors
+     */
     public Map<String, String> getInputConversionErrors() {
         return propertyToInputValueConversionError;
     }
 
+    /**
+     * @return true if the binging looks valid for the user: no  displayed
+     * constraint violations nor input conversion errors.
+     */
     public boolean isValid() {
-        return getInputConversionErrors().isEmpty() &&
-                errorMsgs.isEmpty() && !constraintViolations;
+        return getInputConversionErrors().isEmpty()
+                && errorMsgs.isEmpty() && !constraintViolations;
     }
 }

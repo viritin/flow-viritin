@@ -1,14 +1,13 @@
 package org.vaadin.firitin.formbinder;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
+import jakarta.validation.ConstraintViolation;
 import org.vaadin.firitin.PersonForm;
 import org.vaadin.firitin.components.datetimepicker.VDateTimePicker;
 import org.vaadin.firitin.components.textfield.VIntegerField;
@@ -18,21 +17,20 @@ import org.vaadin.firitin.fields.EnumSelect;
 import org.vaadin.firitin.form.BeanValidationForm;
 import org.vaadin.firitin.testdomain.Address;
 import org.vaadin.firitin.testdomain.Person;
-import org.vaadin.firitin.util.style.Padding;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 @Route
 public class FormBinderBasedPersonForm extends BeanValidationForm<Person> {
 
-    private TextField firstName = new VTextField();
+    private TextField firstName = new VTextField("First name, remove this to see error");
     private TextField lastName = new VTextField().withTooltip("You should type last name here");
+
     private VDateTimePicker joinTime = new VDateTimePicker();
-    private VerticalLayout formContents;
     private ElementCollectionField<Address> addresses = new ElementCollectionField<Address>(Address.class, PersonForm.AddressEditor.class)
             .withEditorInstantiator(() -> {
                 PersonForm.AddressEditor e = new PersonForm.AddressEditor();
@@ -46,7 +44,10 @@ public class FormBinderBasedPersonForm extends BeanValidationForm<Person> {
         // The default group requires "age", for which we don't have
         // a field and we are not interested in this form, define a different
         // validation group to use
+        // TODO Make validation groups affect how required indicator works
+        // Now if you add age, it is required, even though not for this group
         setValidationGroups(Person.FirstNameOnly.class);
+
         setDeleteHandler(this::handleDelete);
         setSavedHandler(this::handleSave);
         setResetHandler(this::handleReset);
@@ -55,6 +56,20 @@ public class FormBinderBasedPersonForm extends BeanValidationForm<Person> {
         person.setJoinTime(LocalDateTime.now());
         setEntity(person);
         joinTime.setLocale(new Locale("fi", "FI"));
+
+    }
+
+    @Override
+    public HorizontalLayout getToolbar() {
+        HorizontalLayout toolbar = super.getToolbar();
+        toolbar.add(new Button("Show validation errors", e-> {
+            Person person = getBinder().getValue();
+            Set<ConstraintViolation<Person>> constraintViolations = doBeanValidation(person);
+
+            Notification.show(constraintViolations.size() + " violations, person: " + person.toString());
+            getBinder().setConstraintViolations(constraintViolations);
+        }));
+        return toolbar;
     }
 
     private void handleSave(Person person) {
@@ -82,18 +97,6 @@ public class FormBinderBasedPersonForm extends BeanValidationForm<Person> {
                 joinTime,
                 addresses
         );
-    }
-
-    @Override
-    public HorizontalLayout getToolbar() {
-        return super.getToolbar();
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        getBinder().setClassLevelViolationDisplay(formContents);
-
     }
 
     public static class AddressEditor {

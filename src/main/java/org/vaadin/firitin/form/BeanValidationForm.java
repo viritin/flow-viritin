@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Matti Tahvonen.
+ * Copyright 2024 Matti Tahvonen.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,21 +44,28 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * This is "the next version" of the AbstractForm class, that finally,
- * since V7 era, works properly with e.g. cross field validation &
- * validation groups.
+ * This is "the next version" of the AbstractForm class, that finally, since V7
+ * era, works properly with e.g. cross field validation & validation groups.
  * <p>
- * This version uses FormBinder (published in Viritin 2.8)
- * instead of the basic Vaadin Binder. This might already be
- * better, but most likely there are regressions and edge case
- * that may be incompatible with the old AbstractForm, thus
- * bringing in this with a different name for testing. Once
- * tested enough and if no big regressions, AbstractForm becomes
- * this and possible a backwards compatibility version is created
- * for "core Binder version".
+ * This version uses FormBinder (published in Viritin 2.8) instead of the basic
+ * Vaadin Binder. This might already be better, but most likely there are
+ * regressions and edge case that may be incompatible with the old AbstractForm,
+ * thus bringing in this with a different name for testing. Once tested enough
+ * and if no big regressions, AbstractForm becomes this and possible a backwards
+ * compatibility version is created for "core Binder version".
+ * </p>
+ * <p>
+ * In the default configuration BeanValidationForm expects that fields are
+ * lazily pushing their value change events to the server. This way it can
+ * automatically adjust e.g. save/cancel buttons based on the state/validity.
+ * Either use Viritin fields like VTextField or configure e.g. with
+ * setValueChangeMode.
+ * </p>
  *
  * @author mstahv
- * @deprecated handle with care, very little tested and should be considered experimental at this point. API will most likely change, but feedback is more than welcome.
+ * @deprecated handle with care, very little tested and should be considered
+ * experimental at this point. API will most likely change, but feedback is more
+ * than welcome.
  */
 @Deprecated(forRemoval = false)
 public abstract class BeanValidationForm<T> extends Composite<Div> {
@@ -78,7 +85,7 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
     private Button saveButton;
     private Button resetButton;
     private Button deleteButton;
-    private Class<?>[] validationGroups = new Class[0];
+    private Class<?>[] validationGroups;
     private Validator validator;
 
     private Div classLevelViolationsDisplay = new Div();
@@ -192,7 +199,7 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
     }
 
     public FormBinder<T> getBinder() {
-        if(binder == null) {
+        if (binder == null) {
             lazyInit();
         }
         return binder;
@@ -209,7 +216,7 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
         binder = new FormBinder<>(entityType, this);
         binder.setClassLevelViolationDisplay(classLevelViolationsDisplay);
         binder.addValueChangeListener(e -> {
-            if(e.isFromClient()) {
+            if (e.isFromClient()) {
                 hasChanges = true;
                 // TODO this is old status change listener, figure out what is really needed
                 Set<ConstraintViolation<T>> constraintViolations = doBeanValidation(e.getValue());
@@ -220,22 +227,25 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
         });
     }
 
-    public void setValidationGroups(Class<?>... groups) {
-        this.validationGroups = groups;
-    }
-
     public Class<?>[] getValidationGroups() {
         return validationGroups;
     }
 
-
-    protected  <T> Set<ConstraintViolation<T>> doBeanValidation(T object) {
-        return getValidator().validate(object, getValidationGroups());
+    public void setValidationGroups(Class<?>... groups) {
+        this.validationGroups = groups;
     }
 
+    protected <T> Set<ConstraintViolation<T>> doBeanValidation(T object) {
+        Class<?>[] groups = getValidationGroups();
+        if (groups != null) {
+            return getValidator().validate(object, groups);
+        } else {
+            return getValidator().validate(object);
+        }
+    }
 
     protected Validator getValidator() {
-        if(validator == null) {
+        if (validator == null) {
             Configuration<?> configuration = Validation.byDefaultProvider().configure();
             MessageInterpolator defaultMessageInterpolator = configuration.getDefaultMessageInterpolator();
             ValidatorFactory factory = configuration
@@ -245,6 +255,7 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
                             // Override the locale to come from the form (~ UI), instead of JVM default
                             return defaultMessageInterpolator.interpolate(messageTemplate, context, getLocale());
                         }
+
                         @Override
                         public String interpolate(String messageTemplate, Context context, Locale locale) {
                             return defaultMessageInterpolator.interpolate(messageTemplate, context, locale);
@@ -295,8 +306,8 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
 
     /**
      * Return the list of field components added to the form body by default.
-     * Use a dummy implementation if your override createContent() method
-     * where you can fully customise how the content of the form is built.
+     * Use a dummy implementation if your override createContent() method where
+     * you can fully customise how the content of the form is built.
      *
      * @return the fields displayed in the form created by createContent()
      * method.
@@ -304,9 +315,9 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
     protected abstract List<Component> getFormComponents();
 
     /**
-     * Adjust save button state. Override if you for example want to have
-     * Save button always enabled, even if the Binder has not tracked any
-     * changes yet.
+     * Adjust save button state. Override if you for example want to have Save
+     * button always enabled, even if the Binder has not tracked any changes
+     * yet.
      */
     protected void adjustSaveButtonState() {
         if (isBound()) {
@@ -464,7 +475,7 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
     }
 
     private boolean findFieldAndFocus(Component compositionRoot) {
-        for (Iterator<Component> iter = compositionRoot.getChildren().iterator(); iter.hasNext(); ) {
+        for (Iterator<Component> iter = compositionRoot.getChildren().iterator(); iter.hasNext();) {
             Component component = iter.next();
 
             if (component instanceof Focusable<?>) {
@@ -514,7 +525,8 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
     }
 
     /**
-     * A handler called when the built-in reset/cancel button of the form is called.
+     * A handler called when the built-in reset/cancel button of the form is
+     * called.
      *
      * @param <T> the entity being edited
      */
