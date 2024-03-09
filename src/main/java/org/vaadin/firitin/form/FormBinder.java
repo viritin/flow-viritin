@@ -41,7 +41,7 @@ import java.util.Set;
  * bean/record + simplicity of the implementation</li>
  * <li> Validation is "just validation", and not concern of this class. BUT, API
  * must support binding external validation logic, like Bean Validation API</li>
- * <li> Must support Records & immutable objects as well</li>
+ * <li> Must support Records and immutable objects as well</li>
  * <li> No requirements for BeanValidation or Spring DataBinding stuff, but
  * optional support (or extensible for those)</li>
  * </ul>
@@ -71,6 +71,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     private List<ValueChangeListener> valueChangeListeners;
     private boolean constraintViolations;
     private HasComponents classLevelViolationDisplay;
+    private boolean ignoreServerOriginatedChanges = true;
 
     /**
      * Constructs a new binder.
@@ -150,7 +151,8 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
             ValueContext ctx = new ValueContext((Component) hasValue);
             // Mutate
             hasValue.addValueChangeListener(e -> {
-                if (e.isFromClient()) {
+                boolean dropServerOriginateEvent  = !e.isFromClient() && ignoreServerOriginatedChanges;
+                if (!dropServerOriginateEvent) {
                     Object value = e.getValue();
                     value = convertInputValue(value, property, ctx);
                     try {
@@ -507,5 +509,16 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     public boolean isValid() {
         return getInputConversionErrors().isEmpty()
                 && errorMsgs.isEmpty() && !constraintViolations;
+    }
+
+    /**
+     * A flag to control whether server originated value change events
+     * should be ignored. Currently only known to be needed for testing,
+     * might be removed in the future.
+     *
+     * @param ignore true if non-client originated events should be ignored
+     */
+    public void setIgnoreServerOriginatedChanges(boolean ignore) {
+        ignoreServerOriginatedChanges = ignore;
     }
 }

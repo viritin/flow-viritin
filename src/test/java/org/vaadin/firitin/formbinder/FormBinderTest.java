@@ -153,6 +153,10 @@ public class FormBinderTest {
         // Should be the same reference as pojos are mutable
         Assertions.assertSame(jorma, binder.getValue());
 
+        // Make value change events originating from server to be respected
+        // for testing...
+        binder.setIgnoreServerOriginatedChanges(false);
+
         fooBarForm.foo.setValue("Kalle");
         LocalDateTime tomorrow = now.plusDays(1);
         fooBarForm.bar.setValue(tomorrow);
@@ -219,6 +223,9 @@ public class FormBinderTest {
         binder.setValue(jorma);
 
         LocalDateTime tomorrow = now.plusDays(1);
+        // binder currently ignore server originated changes,
+        // not 100% sure if this is relevant, but override that for test
+        binder.setIgnoreServerOriginatedChanges(false);
         fooBarForm.bar.setValue(tomorrow.toString());
         FooCarPojo kalle = binder.getValue();
         Assertions.assertEquals(tomorrow, kalle.getBar());

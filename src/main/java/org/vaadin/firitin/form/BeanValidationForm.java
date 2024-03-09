@@ -45,7 +45,7 @@ import java.util.Set;
 
 /**
  * This is "the next version" of the AbstractForm class, that finally, since V7
- * era, works properly with e.g. cross field validation & validation groups.
+ * era, works properly with e.g. cross field validation and validation groups.
  * <p>
  * This version uses FormBinder (published in Viritin 2.8) instead of the basic
  * Vaadin Binder. This might already be better, but most likely there are
