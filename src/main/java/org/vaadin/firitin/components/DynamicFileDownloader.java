@@ -92,6 +92,25 @@ public class DynamicFileDownloader extends Anchor implements
         String getFileName(VaadinRequest request);
     }
 
+    /**
+     * Generates the content of HTTP response header 'Content-Type'.
+     * If known, should be set to the MIME type of the content.
+     * Otherwise, the 'Content-Type' defaults to 'application/octet-stream'.
+     * This indicates content as "arbitrary binary data".
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc2046#section-4.5.1">RFC2046</a>
+     */
+    @FunctionalInterface
+    public interface ContentTypeGenerator {
+
+        /**
+         * Used as 'Content-Type' HTTP response header.
+         *
+         * @return MIME type of the content.
+         */
+        String getContentType();
+    }
+
     private Button button;
     private DomListenerRegistration disableOnclick;
 
@@ -168,6 +187,7 @@ public class DynamicFileDownloader extends Anchor implements
 
     private final String identifier = UUID.randomUUID().toString();
     FileNameGenerator fileNameGenerator = (r) -> "downloadedFile";
+    private ContentTypeGenerator contentTypeGenerator = () -> "application/octet-stream";
     private SerializableConsumer<OutputStream> contentWriter;
     /**
      * The request handler that handles the download request.
@@ -276,6 +296,7 @@ public class DynamicFileDownloader extends Anchor implements
                             filename = fileNameGenerator.getFileName(request);
                         }
                         response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+                        response.setHeader("Content-Type", contentTypeGenerator.getContentType());
                         try {
                             contentWriter.accept(response.getOutputStream());
                         } catch (Exception e) {
@@ -415,6 +436,15 @@ public class DynamicFileDownloader extends Anchor implements
      */
     public DynamicFileDownloader withFileNameGenerator(FileNameGenerator fileNameGenerator) {
         setFileNameGenerator(fileNameGenerator);
+        return this;
+    }
+
+    public void setContentTypeGenerator(ContentTypeGenerator contentTypeGenerator) {
+        this.contentTypeGenerator = contentTypeGenerator;
+    }
+
+    public DynamicFileDownloader withContentTypeGenerator(ContentTypeGenerator contentTypeGenerator) {
+        setContentTypeGenerator(contentTypeGenerator);
         return this;
     }
 

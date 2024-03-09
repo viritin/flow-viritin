@@ -95,7 +95,7 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
             VaadinRequest.getCurrent().setAttribute("foo", "bar");
             // and do the actual task, return the filename
             return LocalDateTime.now() + "foobar.txt";
-        });
+        }).withContentTypeGenerator(() -> "text/plain");
         
         add(downloadButton2);
 
