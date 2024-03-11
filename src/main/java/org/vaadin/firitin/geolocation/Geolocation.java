@@ -2,8 +2,10 @@ package org.vaadin.firitin.geolocation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.DomListenerRegistration;
+import com.vaadin.flow.dom.Element;
 
 /**
  * A helper class to detect the geographical position of the end users.
@@ -117,6 +119,12 @@ public class Geolocation {
         Geolocation geolocation = new Geolocation();
         geolocation.ui = ui;
 
+        Element eventSourceElement = ui.getElement();
+        Component activeModalComponent = ui.getInternals().getActiveModalComponent();
+        if(activeModalComponent != null) {
+            eventSourceElement = activeModalComponent.getElement();
+        }
+
         String method = get ? "getCurrentPosition" : "watchPosition";
 
         /*
@@ -132,7 +140,7 @@ public class Geolocation {
          * call back support would be great.
          */
 
-        geolocation.geoupdate = ui.getElement().addEventListener("geoupdate", e -> {
+        geolocation.geoupdate = eventSourceElement.addEventListener("geoupdate", e -> {
             String detail = e.getEventData().getString("event.detail");
             try {
                 GeolocationEvent geolocationEvent = om.readValue(detail, GeolocationEvent.class);
@@ -146,7 +154,7 @@ public class Geolocation {
         });
         geolocation.geoupdate.addEventData("event.detail");
 
-        geolocation.geoerror = ui.getElement().addEventListener("geoerror", e -> {
+        geolocation.geoerror = eventSourceElement.addEventListener("geoerror", e -> {
             errorListener.geolocationError(e.getEventData().getString("event.detail"));
             if(get) {
                 geolocation.clearListeners();
@@ -155,7 +163,7 @@ public class Geolocation {
         geolocation.geoerror.addEventData("event.detail");
 
         try {
-            ui.getElement().executeJs("var el = this;\n"
+            ui.getElement().executeJs("var el = $1;\n"
                     + "return navigator.geolocation." + method + "(" +
                       "        p => {\n" +
                       "          const event = new CustomEvent('geoupdate', { \n" +
@@ -181,7 +189,7 @@ public class Geolocation {
                     "         },\n" +
                     "         JSON.parse($0)\n" +
                     "       );\n"
-                     , om.writeValueAsString(options)).then(Integer.class, s -> geolocation.setId(s));
+                     , om.writeValueAsString(options), eventSourceElement).then(Integer.class, s -> geolocation.setId(s));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

@@ -3,11 +3,14 @@ package org.vaadin.firitin;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinRequest;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 import org.vaadin.firitin.geolocation.Geolocation;
 import org.vaadin.firitin.geolocation.GeolocationOptions;
@@ -25,8 +28,19 @@ public class GeolocationView extends VVerticalLayout {
     Paragraph location = new Paragraph();
 
     public GeolocationView() {
+        VerticalLayout layout;
 
-        add(location);
+        if(false) {
+            Dialog dialog = new Dialog();
+            layout = new VerticalLayout();
+            dialog.add(layout);
+            dialog.open();
+        } else {
+            layout = this;
+        }
+
+
+        layout.add(location);
 
         Checkbox enableHighAccuracy = new Checkbox("High accuracy");
         IntegerField timeout = new IntegerField("Timeout");
@@ -71,7 +85,7 @@ public class GeolocationView extends VVerticalLayout {
                     new GeolocationOptions(enableHighAccuracy.getValue(), timeout.getValue(), maximumAge.getValue())
             );
         });
-        add(new HorizontalLayout(button, checkOnce, enableHighAccuracy, timeout, maximumAge));
+        layout.add(new HorizontalLayout(button, checkOnce, enableHighAccuracy, timeout, maximumAge));
 
     }
 
