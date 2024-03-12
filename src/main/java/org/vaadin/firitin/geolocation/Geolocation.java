@@ -204,7 +204,7 @@ public class Geolocation {
      * Stops polling the listeners with the new geolocation data.
      */
     public void cancel() {
-        ui.getElement().executeJs("navigator.geolocation.clearWatch($1);", id);
+        ui.getElement().executeJs("navigator.geolocation.clearWatch($0);", id);
         clearListeners();
     };
 
