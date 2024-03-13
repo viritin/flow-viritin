@@ -125,6 +125,7 @@ public class MarkdownMessage extends Component {
             c  = () -> {
                 appendHtml(newPart, startOfNew);
                 ScrollOptions scrollOptions = new ScrollOptions();
+                scrollOptions.setBehavior(ScrollOptions.Behavior.AUTO);
                 scrollOptions.setBlock(ScrollOptions.Alignment.END);
                 content.scrollIntoView(scrollOptions);
             };
