@@ -6,6 +6,7 @@ import com.vaadin.flow.component.ScrollOptions;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.server.Command;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
@@ -31,6 +32,7 @@ public class MarkdownMessage extends Component {
         getElement().setProperty("userName", name);
         getElement().setProperty("time", timestamp.format(DateTimeFormatter.ofPattern("YYYY-MM-DD hh:mm")));
         getElement().appendChild(content);
+        content.getStyle().setWhiteSpace(Style.WhiteSpace.NORMAL);
     }
 
     public MarkdownMessage(String name, Integer userColorIndex) {
@@ -122,7 +124,9 @@ public class MarkdownMessage extends Component {
             String newPart = html.substring(startOfNew);
             c  = () -> {
                 appendHtml(newPart, startOfNew);
-                content.scrollIntoView();
+                ScrollOptions scrollOptions = new ScrollOptions();
+                scrollOptions.setBlock(ScrollOptions.Alignment.END);
+                content.scrollIntoView(scrollOptions);
             };
         }
         previousHtml = html;
