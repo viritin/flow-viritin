@@ -21,6 +21,8 @@ public class MessageListView extends VVerticalLayout {
 
     public MessageListView() {
         MarkdownMessage message = new MarkdownMessage("Hello!\n","John", LocalDateTime.now());
+        message.setAvatarColor(MarkdownMessage.Color.AVATAR_PRESETS[1]);
+        message.setAvatarColor(new MarkdownMessage.Color("red"));
         add(message);
 
         add(

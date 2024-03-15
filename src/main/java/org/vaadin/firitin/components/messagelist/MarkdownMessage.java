@@ -2,7 +2,6 @@ package org.vaadin.firitin.components.messagelist;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ScrollOptions;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.Element;
@@ -18,6 +17,19 @@ import java.time.format.DateTimeFormatter;
 
 @Tag("vaadin-message")
 public class MarkdownMessage extends Component {
+    public record Color(String cssColorCode){
+
+        // "Stolen" form https://github.com/vaadin/web-components/blob/1875686236814dcc065a0e067c87adb80153ce60/packages/vaadin-lumo-styles/user-colors.js#L12
+        public static Color[] AVATAR_PRESETS = new Color[] {
+                new Color("#df0b92"),
+                new Color("#650acc"),
+                new Color("#097faa"),
+                new Color("#ad6200"),
+                new Color("#bf16f3"),
+                new Color("#084391"),
+                new Color("#078836")
+        };
+    };
 
     private static HtmlRenderer renderer;
     private static Parser parser;
@@ -25,31 +37,42 @@ public class MarkdownMessage extends Component {
     private String markdown;
     private String previousHtml;
 
-    private Element content = new Element("div");
+    private boolean autoScroll = true;
 
-    public MarkdownMessage(String name, LocalDateTime timestamp, Integer userColorIndex) {
-        setUserColorIndex(userColorIndex);
+    private Element content = new Element("div");
+    private Element scrollHelper = new Element("div");
+
+    public MarkdownMessage(String name, LocalDateTime timestamp, Color color) {
+        if(color != null) {
+            setAvatarColor(color);
+        }
         getElement().setProperty("userName", name);
         getElement().setProperty("time", timestamp.format(DateTimeFormatter.ofPattern("YYYY-MM-DD hh:mm")));
-        getElement().appendChild(content);
+        getElement().appendChild(content, scrollHelper);
         content.getStyle().setWhiteSpace(Style.WhiteSpace.NORMAL);
     }
 
-    public MarkdownMessage(String name, Integer userColorIndex) {
-        this(name, LocalDateTime.now(), userColorIndex);
+    public MarkdownMessage(String name, Color avatarColor) {
+        this(name, LocalDateTime.now(), avatarColor);
     }
 
-    public MarkdownMessage(String initialContent, String name, Integer userColorIndex) {
-        this(name, LocalDateTime.now(), userColorIndex);
+    public MarkdownMessage(String initialContent, String name, Color avatarColor) {
+        this(name, LocalDateTime.now(), avatarColor);
         appendMarkdown(initialContent);
     }
 
     public MarkdownMessage(String markdown, String name, LocalDateTime timestamp) {
-        this(name, timestamp, 0);
+        this(name, timestamp, null);
         String html = getMdRenderer().render(getMdParser().parse(markdown));
         appendHtml(html);
         this.markdown = markdown;
         this.previousHtml = html;
+    }
+
+    public void setAvatarColor(Color color) {
+        getElement().getStyle().set("--vaadin-avatar-user-color", color.cssColorCode);
+        // remove the once set by constructor && ensure the flag making it use
+        getElement().executeJs("$0.querySelector('vaadin-avatar').style.setProperty('--vaadin-avatar-user-color', null);$0.querySelector('vaadin-avatar').setAttribute('has-color-index', true);");
     }
 
     public void setUserColorIndex(int index) {
@@ -124,10 +147,7 @@ public class MarkdownMessage extends Component {
             String newPart = html.substring(startOfNew);
             c  = () -> {
                 appendHtml(newPart, startOfNew);
-                ScrollOptions scrollOptions = new ScrollOptions();
-                scrollOptions.setBehavior(ScrollOptions.Behavior.AUTO);
-                scrollOptions.setBlock(ScrollOptions.Alignment.END);
-                content.scrollIntoView(scrollOptions);
+                doAutoScroll();
             };
         }
         previousHtml = html;
@@ -137,6 +157,27 @@ public class MarkdownMessage extends Component {
             c.execute();
         }
 
+    }
+
+    public boolean isAutoScroll() {
+        return autoScroll;
+    }
+
+    public void setAutoScroll(boolean autoScroll) {
+        this.autoScroll = autoScroll;
+    }
+
+    protected void doAutoScroll() {
+        if(autoScroll) {
+            scrollHelper.executeJs("""
+                if(this.scrollIntoViewIfNeeded) {
+                    this.scrollIntoViewIfNeeded();
+                } else {
+                    // FF
+                    this.scrollIntoView();
+                }
+            """);
+        }
     }
 
     public void appendText(String text) {
