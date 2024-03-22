@@ -4,6 +4,7 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
 import org.vaadin.firitin.components.dialog.ConfirmationDialog;
@@ -22,6 +23,11 @@ public class ConfirmButton extends VButton {
     public ConfirmButton(String buttonCaption, Command action) {
         this.action = action;
         setText(buttonCaption);
+        super.addClickListener(e->this.prompt());
+    }
+    public ConfirmButton(Icon icon, Command action) {
+        this.action = action;
+        setIcon(icon);
         super.addClickListener(e->this.prompt());
     }
 

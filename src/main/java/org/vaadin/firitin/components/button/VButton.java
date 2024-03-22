@@ -7,6 +7,8 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.shared.Registration;
 import org.vaadin.firitin.fluency.ui.*;
 import org.vaadin.firitin.util.VStyleUtil.ThemeStyle;
@@ -93,31 +95,146 @@ public class VButton extends Button implements FluentHasSize<VButton>, FluentHas
         super(icon, clickListener);
     }
 
+    /**
+     * Creates a new Button
+     *
+     * @param icon the icon as Component
+     * @param clickListener the listeners
+     * @deprecated consider using some of the better typed version
+     */
     public VButton(Component icon, BasicClickListener clickListener) {
         super(icon, e -> clickListener.onClick());
     }
 
+    /**
+     * Creates a new Button
+     *
+     * @param icon the icon as Component
+     * @deprecated consider using some of the better typed version
+     */
+    @Deprecated
     public VButton(Component icon) {
         super(icon);
     }
 
+    public VButton(Icon icon, BasicClickListener clickListener) {
+        super(icon, e -> clickListener.onClick());
+    }
+
+    public VButton(Icon icon, ComponentEventListener<ClickEvent<Button>> clickListener) {
+        super(icon, clickListener);
+    }
+
+    public VButton(Icon icon) {
+        super(icon);
+    }
+
+    public VButton(VaadinIcon icon, BasicClickListener clickListener) {
+        super(icon.create(), e -> clickListener.onClick());
+    }
+
+    public VButton(VaadinIcon icon, ComponentEventListener<ClickEvent<Button>> clickListener) {
+        super(icon.create(), clickListener);
+    }
+
+    public VButton(VaadinIcon icon) {
+        super(icon.create());
+    }
+
+    /**
+     * Creates a new Button
+     * @param text
+     * @param icon
+     * @param clickListener
+     * @deprecated Use the versions with proper icon typing instead
+     */
+    @Deprecated
     public VButton(String text, Component icon, ComponentEventListener<ClickEvent<Button>> clickListener) {
         super(text, icon, clickListener);
     }
+    public VButton(String text, Icon icon, ComponentEventListener<ClickEvent<Button>> clickListener) {
+        super(text, icon, clickListener);
+    }
+    public VButton(String text, VaadinIcon icon, ComponentEventListener<ClickEvent<Button>> clickListener) {
+        super(text, icon.create(), clickListener);
+    }
 
+    /**
+     * Creates a new Button
+     * @param icon the icon
+     * @param text the text
+     * @param clickListener the click listener
+     * @deprecated Use the versions with proper icon typing instead
+     */
+    @Deprecated
     public VButton(Component icon, String text, ComponentEventListener<ClickEvent<Button>> clickListener) {
         super(text, icon, clickListener);
     }
 
+    /**
+     * Creates a new Button
+     * @param icon the icon
+     * @param text the text
+     * @param clickListener the click listener
+     */
+    public VButton(Icon icon, String text, ComponentEventListener<ClickEvent<Button>> clickListener) {
+        super(text, icon, clickListener);
+    }
+    public VButton(VaadinIcon icon, String text, ComponentEventListener<ClickEvent<Button>> clickListener) {
+        super(text, icon.create(), clickListener);
+    }
+
+    /**
+     * Creates a new button
+     *
+     * @param text the text
+     * @param icon the icon
+     * @param clickListener the listener
+     * @deprecated Use the versions with better typed icon instead
+     */
+    @Deprecated
     public VButton(String text, Component icon, BasicClickListener clickListener) {
         super(text, icon, e -> clickListener.onClick());
     }
 
+    public VButton(String text, Icon icon, BasicClickListener clickListener) {
+        super(text, icon, e -> clickListener.onClick());
+    }
+    public VButton(String text, VaadinIcon icon, BasicClickListener clickListener) {
+        super(text, icon.create(), e -> clickListener.onClick());
+    }
+
+    /**
+     * Creates a new icon
+     * @param text the text
+     * @param icon the icon
+     * @deprecated use the better typed versions instead
+     */
+    @Deprecated
     public VButton(String text, Component icon) {
         super(text, icon);
     }
+    public VButton(String text, VaadinIcon icon) {
+        super(text, icon.create());
+    }
+    public VButton(String text, Icon icon) {
+        super(text, icon);
+    }
 
+    /**
+     * Creates a new icon
+     * @param icon the icon
+     * @param text the text
+     * @deprecated use the better typed versions instead
+     */
+    @Deprecated
     public VButton(Component icon, String text) {
+        super(text, icon);
+    }
+    public VButton(VaadinIcon icon, String text) {
+        super(text, icon.create());
+    }
+    public VButton(Icon icon, String text) {
         super(text, icon);
     }
 
