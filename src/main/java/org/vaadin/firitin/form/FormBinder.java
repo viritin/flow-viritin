@@ -73,6 +73,8 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     private HasComponents classLevelViolationDisplay;
     private boolean ignoreServerOriginatedChanges = true;
 
+    List<Registration> registrations = new ArrayList<>();
+
     /**
      * Constructs a new binder.
      *
@@ -150,7 +152,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         if (!isImmutable()) {
             ValueContext ctx = new ValueContext((Component) hasValue);
             // Mutate
-            hasValue.addValueChangeListener(e -> {
+            registrations.add(hasValue.addValueChangeListener(e -> {
                 boolean dropServerOriginateEvent  = !e.isFromClient() && ignoreServerOriginatedChanges;
                 if (!dropServerOriginateEvent) {
                     Object value = e.getValue();
@@ -161,16 +163,16 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
                         throw new RuntimeException(ex);
                     }
                 }
-            });
+            }));
         }
-        hasValue.addValueChangeListener(e -> {
+        registrations.add(hasValue.addValueChangeListener(e -> {
             if (valueChangeListeners != null) {
                 var event = new FormBinderValueChangeEvent<T>(FormBinder.this, e.isFromClient());
                 for (ValueChangeListener vcl : valueChangeListeners.toArray(new ValueChangeListener[0])) {
                     vcl.valueChanged(event);
                 }
             }
-        });
+        }));
     }
 
     private Object convertInputValue(Object value, BeanPropertyDefinition property, ValueContext ctx) {
@@ -521,4 +523,14 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     public void setIgnoreServerOriginatedChanges(boolean ignore) {
         ignoreServerOriginatedChanges = ignore;
     }
+
+    /**
+     * Clears bindings, might be needed to clean up references if e.g. re-using fields
+     */
+    public void unBind() {
+        registrations.forEach(Registration::remove);
+        registrations.clear();
+        this.valueObject = null;
+    }
+
 }
