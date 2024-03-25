@@ -1,8 +1,10 @@
 package org.vaadin.firitin;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.router.Route;
+import org.vaadin.firitin.components.datepicker.VDatePicker;
 import org.vaadin.firitin.components.formlayout.VFormLayout;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 import org.vaadin.firitin.components.textfield.VNumberField;
@@ -11,6 +13,7 @@ import org.vaadin.firitin.components.textfield.VTextField;
 import org.vaadin.firitin.fields.CommaSeparatedStringField;
 import org.vaadin.firitin.fields.StringToDoubleMapField;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,8 +51,8 @@ public class SelectionApiView extends VVerticalLayout {
         var b4 = new Button("Get selection");
         b4.addClickListener(e -> {
             textField.getSelectionRange((start, end, content) -> {
-                Notification.show("Selection: " + start + "-" +end
-                + ": " +content);
+                Notification.show("Selection: " + start + "-" + end
+                        + ": " + content);
             });
         });
 
@@ -61,6 +64,13 @@ public class SelectionApiView extends VVerticalLayout {
         });
 
         add(textField, b, b2, b3, b4, b5);
+
+        VDatePicker datePicker = new VDatePicker();
+        datePicker.setValue(LocalDate.now());
+        add(datePicker,
+                new Button("Select all in date picker", e -> datePicker.selectAll()),
+                new Button("Select 0-2", e -> datePicker.setSelectionRange(0, 2))
+        );
 
 
     }

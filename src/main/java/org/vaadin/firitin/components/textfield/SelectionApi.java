@@ -13,7 +13,7 @@ public interface SelectionApi extends HasElement {
      * Selects all text in the field and moves the focus to the field.
      */
     default void selectAll() {
-        getElement().executeJs("this.inputElement.select();");
+        getElement().executeJs("setTimeout(()=>{this.inputElement.select()},0);");
     };
 
     /**
@@ -24,7 +24,7 @@ public interface SelectionApi extends HasElement {
      * @param selectionEnd The 0-based index for the end of the selection (exclusive). An index greater than the length of the element's value is treated as pointing to the end of the value.
      */
     default void setSelectionRange(int selectionStart, int selectionEnd) {
-        getElement().executeJs("this.inputElement.setSelectionRange($0,$1);",selectionStart,selectionEnd);
+        getElement().executeJs("setTimeout(()=>{this.inputElement.setSelectionRange($0,$1)},0);",selectionStart,selectionEnd);
     };
 
     /**
