@@ -28,14 +28,16 @@ import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.RequestHandler;
+import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.UUID;
 
 import com.vaadin.flow.shared.Registration;
 import org.vaadin.firitin.components.button.VButton;
@@ -185,7 +187,7 @@ public class DynamicFileDownloader extends Anchor implements
 
     }
 
-    private final String identifier = UUID.randomUUID().toString();
+    StreamResource resource = new StreamResource("dummy", (InputStreamFactory) () -> new ByteArrayInputStream(new byte[0]));
     FileNameGenerator fileNameGenerator = (r) -> "downloadedFile";
     private ContentTypeGenerator contentTypeGenerator = () -> "application/octet-stream";
     private SerializableConsumer<OutputStream> contentWriter;
@@ -285,11 +287,20 @@ public class DynamicFileDownloader extends Anchor implements
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+        getElement().setAttribute("fakesr", resource);
+        String identifier = resource.getId();
+        getElement().executeJs("""
+            this.setAttribute("href",
+                    this.getAttribute("fakesr").substring(0, this.getAttribute("fakesr").indexOf("VAADIN"))
+                            + "?v-r=dfd&id=%s");
+            """.formatted(identifier));
+
         runBeforeClientResponse(ui -> {
             requestHandler = new RequestHandler() {
                 @Override
                 public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) throws IOException {
-                    if (request.getPathInfo().endsWith(identifier)) {
+                    String id = request.getParameter("id");
+                    if (id != null && id.equals(identifier)) {
                         response.setStatus(200);
                         String filename = getFileName(session, request);
                         if (filename == null) {
@@ -322,15 +333,13 @@ public class DynamicFileDownloader extends Anchor implements
 
             ui.getSession().addRequestHandler(requestHandler);
 
-            setHref("./" + identifier);
-
             getElement().setAttribute("download", "");
         });
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
-        getUI().get().getSession().removeRequestHandler(requestHandler);
+        detachEvent.getSession().removeRequestHandler(requestHandler);
         super.onDetach(detachEvent);
     }
 
