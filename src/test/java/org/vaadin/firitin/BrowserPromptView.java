@@ -16,13 +16,13 @@ public class BrowserPromptView extends Div {
 
     public BrowserPromptView() {
         VButton promptBtn = new VButton().withText("Prompt").withClickListener(e -> {
-            BrowserPrompt.showPrompt("Enter something").thenAccept(s -> {
+            BrowserPrompt.promptString("Enter something").thenAccept(s -> {
                         add(new Paragraph("You entered: " + s));
                     }
             );
         });
         VButton promptBtn2 = new VButton().withText("Prompt with default").withClickListener(e -> {
-                    BrowserPrompt.showPrompt("Enter something", "Jorma").thenAccept(s -> {
+                    BrowserPrompt.promptString("Enter something", "Jorma").thenAccept(s -> {
                                 add(new Paragraph("You entered: " + s));
                             }
                     ).exceptionally(throwable -> {
