@@ -10,6 +10,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinRequest;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 import org.vaadin.firitin.geolocation.Geolocation;
 import org.vaadin.firitin.geolocation.GeolocationOptions;
@@ -20,23 +21,16 @@ import java.util.Arrays;
 import java.util.List;
 
 @Route
-public class GeolocationView extends VVerticalLayout {
+public class GeolocationModalView extends VVerticalLayout {
 
-    private Geolocation geolocation = null;
     Paragraph location = new Paragraph();
+    private Geolocation geolocation = null;
 
-    public GeolocationView() {
-        VerticalLayout layout;
-
-        if(false) {
-            Dialog dialog = new Dialog();
-            layout = new VerticalLayout();
-            dialog.add(layout);
-            dialog.open();
-        } else {
-            layout = this;
-        }
-
+    public GeolocationModalView() {
+        Dialog dialog = new Dialog();
+        var layout = new VerticalLayout();
+        dialog.add(layout);
+        dialog.open();
 
         layout.add(location);
 
@@ -48,14 +42,14 @@ public class GeolocationView extends VVerticalLayout {
 
         Button button = new Button("Start tracking");
         button.addClickListener(e -> {
-            if(geolocation == null) {
+            if (geolocation == null) {
                 geolocation = Geolocation.watchPosition(
                         event -> {
                             System.out.println(Instant.ofEpochMilli(event.getTimestamp()) + ":" + event.getCoords());
                             updateMyLocation(event.getCoords().getLatitude(), event.getCoords().getLongitude());
                         },
                         browserError -> {
-                            Notification.show("ERROR, code: %s, msg: %s".formatted(browserError.getError(), browserError));
+                            Notification.show("ERROR: " + browserError);
                         },
                         new GeolocationOptions(enableHighAccuracy.getValue(), timeout.getValue(), maximumAge.getValue())
                 );
@@ -78,7 +72,7 @@ public class GeolocationView extends VVerticalLayout {
                         updateMyLocation(event.getCoords().getLatitude(), event.getCoords().getLongitude());
                     },
                     browserError -> {
-                        Notification.show("ERROR, code: %s, msg: %s".formatted(browserError.getError(), browserError));
+                        Notification.show("ERROR: " + browserError);
                     },
                     new GeolocationOptions(enableHighAccuracy.getValue(), timeout.getValue(), maximumAge.getValue())
             );

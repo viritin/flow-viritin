@@ -6,6 +6,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.Element;
+import elemental.json.JsonObject;
 
 /**
  * A helper class to detect the geographical position of the end users.
@@ -38,7 +39,7 @@ public class Geolocation {
     }
 
     public interface ErrorListener {
-        void geolocationError(String browserError);
+        void geolocationError(GeolocationErrorEvent event);
     }
 
     /**
@@ -155,13 +156,13 @@ public class Geolocation {
         geolocation.geoupdate.addEventData("event.detail");
 
         geolocation.geoerror = eventSourceElement.addEventListener("geoerror", e -> {
-            errorListener.geolocationError(e.getEventData().getString("event.detail"));
+            final JsonObject detail = e.getEventData().getObject("event.detail");
+            errorListener.geolocationError(new GeolocationErrorEvent(((int) detail.getNumber("code")), detail.getString("message")));
             if(get) {
                 geolocation.clearListeners();
             }
         });
         geolocation.geoerror.addEventData("event.detail");
-
         try {
             ui.getElement().executeJs("var el = $1;\n"
                     + "return navigator.geolocation." + method + "(" +
@@ -184,7 +185,7 @@ public class Geolocation {
                     "           el.dispatchEvent(event);\n" +
                     "         },\n" +
                     "         e => {\n" +
-                    "           const event = new CustomEvent('geoerror', {detail: e.message});\n" +
+                    "           const event = new CustomEvent('geoerror', {detail: {code: e.code, message: e.message}});\n" +
                     "           el.dispatchEvent(event);\n" +
                     "         },\n" +
                     "         JSON.parse($0)\n" +
