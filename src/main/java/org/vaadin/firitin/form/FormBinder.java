@@ -27,6 +27,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,11 +60,10 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     // Helper "Jack" to do introspection
     private static final ObjectMapper jack = new ObjectMapper();
     private final Class<T> tClass;
-    private final Component[] containerComponents;
     private final BasicBeanDescription bbd;
 
     Map<BeanPropertyDefinition, HasValue> bpdToEditorField = new HashMap<>();
-    Map<String, HasValue> nameToEditorField = new HashMap<>();
+    Map<String, HasValue> nameToEditorField = new LinkedHashMap<>();
     Map<String, Converter> nameToConverter = new HashMap<>();
     HashMap<String, String> propertyToInputValueConversionError = new HashMap<>();
     private Set<Component> errorMsgs = new HashSet<>();
@@ -83,11 +83,13 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
      */
     public FormBinder(Class<T> tClass, Component... containerComponents) {
         this.tClass = tClass;
-        this.containerComponents = containerComponents;
+        if(containerComponents[0] instanceof HasComponents hc) {
+            classLevelViolationDisplay = hc;
+        }
         JavaType javaType = jack.getTypeFactory().constructType(tClass);
         this.bbd = (BasicBeanDescription) jack.getSerializationConfig().introspect(javaType);
 
-        for (Component formComponent : this.containerComponents) {
+        for (Component formComponent : containerComponents) {
             Class<? extends Component> aClass = formComponent.getClass();
             Field[] declaredFields = aClass.getDeclaredFields();
             for (Field f : declaredFields) {
@@ -113,6 +115,69 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
                         }
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Constructs a new binder.
+     *
+     * @param tClass              the class of the bound entity/bean, set later with {@link #setValue(Object)}
+     * @param editorObject        the editor object that contains the fields to bound, does not need to be a component
+     * @deprecated not sure yet if this is a good idea, added for backwards compatibility
+     */
+    @Deprecated
+    public FormBinder(Class<T> tClass, Object editorObject) {
+        this.tClass = tClass;
+        if (editorObject instanceof HasComponents hc) {
+            classLevelViolationDisplay = hc;
+        }
+        JavaType javaType = jack.getTypeFactory().constructType(tClass);
+        this.bbd = (BasicBeanDescription) jack.getSerializationConfig().introspect(javaType);
+        Class<?> aClass = editorObject.getClass();
+        Field[] declaredFields = aClass.getDeclaredFields();
+        for (Field f : declaredFields) {
+            Class<?> type = f.getType();
+            if (HasValue.class.isAssignableFrom(type)) {
+                BeanPropertyDefinition property = bbd.findProperty(new PropertyName(f.getName()));
+
+                if (property != null) {
+                    property.getAccessor().fixAccess(true);
+                    try {
+                        f.setAccessible(true);
+                        HasValue hasValue = (HasValue) f.get(editorObject);
+                        if (isRequired(property)) {
+                            hasValue.setRequiredIndicatorVisible(true);
+                        }
+                        bpdToEditorField.put(property, hasValue);
+                        nameToEditorField.put(property.getName(), hasValue);
+                        configureEditor(property, hasValue);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Binds type to given property editors
+     * @param tClass the type to bind
+     * @param propertyNameToEditor pre-instantiated editors to bind
+     */
+    public FormBinder(Class<T> tClass, Map<String,HasValue> propertyNameToEditor) {
+        this.tClass = tClass;
+        JavaType javaType = jack.getTypeFactory().constructType(tClass);
+        this.bbd = (BasicBeanDescription) jack.getSerializationConfig().introspect(javaType);
+        for (BeanPropertyDefinition property : bbd.findProperties()) {
+            if(propertyNameToEditor.containsKey(property.getName())) {
+                HasValue hasValue = propertyNameToEditor.get(property.getName());
+                if (isRequired(property)) {
+                    hasValue.setRequiredIndicatorVisible(true);
+                }
+                bpdToEditorField.put(property, hasValue);
+                nameToEditorField.put(property.getName(), hasValue);
+                configureEditor(property, hasValue);
             }
         }
     }
@@ -385,10 +450,6 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         if (classLevelViolationDisplay != null) {
             return classLevelViolationDisplay;
         }
-
-        if (containerComponents[0] instanceof HasComponents hc) {
-            return hc;
-        }
         throw new RuntimeException("No place to report class level violations");
     }
 
@@ -447,16 +508,14 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     }
 
     private void handleClassLevelValidations(HashMap<String, String> nonReported) {
-        if (containerComponents[0] instanceof HasComponents hc) {
-            nonReported.forEach((property, cv) -> {
-                Paragraph paragraph = new Paragraph();
-                paragraph.addClassNames(LumoUtility.TextColor.ERROR);
-                paragraph.setText(cv);
-                errorMsgs.add(paragraph);
-                hc.add(paragraph);
-            });
-        }
-
+        HasComponents hc = getClassLevelViolationDisplay();
+        nonReported.forEach((property, cv) -> {
+            Paragraph paragraph = new Paragraph();
+            paragraph.addClassNames(LumoUtility.TextColor.ERROR);
+            paragraph.setText(cv);
+            errorMsgs.add(paragraph);
+            hc.add(paragraph);
+        });
     }
 
     /**
@@ -531,6 +590,14 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         registrations.forEach(Registration::remove);
         registrations.clear();
         this.valueObject = null;
+    }
+
+    public List<String> getBoundProperties() {
+        return nameToEditorField.keySet().stream().toList();
+    }
+
+    public HasValue getEditor(String property) {
+        return nameToEditorField.get(property);
     }
 
 }

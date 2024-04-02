@@ -31,13 +31,8 @@ public class FormBinderBasedPersonForm extends BeanValidationForm<Person> {
     private TextField lastName = new VTextField().withTooltip("You should type last name here");
 
     private VDateTimePicker joinTime = new VDateTimePicker();
-    private ElementCollectionField<Address> addresses = new ElementCollectionField<Address>(Address.class, PersonForm.AddressEditor.class)
-            .withEditorInstantiator(() -> {
-                PersonForm.AddressEditor e = new PersonForm.AddressEditor();
-                // This is optional but sometimes handy in more complex cases
-                // to configure fields. Do whatever configuraiton for the fields you need.
-                return e;
-            });
+
+    private ElementCollectionField<Address> addresses = new ElementCollectionField<Address>(Address.class);
 
     public FormBinderBasedPersonForm() {
         super(Person.class);
