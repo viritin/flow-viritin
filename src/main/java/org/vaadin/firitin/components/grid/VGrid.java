@@ -20,8 +20,6 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableComparator;
-import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
@@ -34,6 +32,7 @@ import org.vaadin.firitin.util.VStyleUtil;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.RecordComponent;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -94,6 +93,22 @@ public class VGrid<T> extends Grid<T>
 
     public VGrid<T> withProperties(String... propertyNames) {
         setColumns(propertyNames);
+        return this;
+    }
+
+    /**
+     * Hides given columns.
+     *
+     * @param propertyNamesToHide the property names/column keys to hide
+     * @return the grid for further configuration
+     */
+    public VGrid<T> hideProperties(String... propertyNamesToHide) {
+        List<String> properties = new ArrayList<>(getColumns().stream().map(col -> col.getKey()).toList());
+        for(String pToHide : propertyNamesToHide) {
+            properties.remove(pToHide);
+        }
+        setColumns(properties.toArray(new String[properties.size()]));
+        getColumns().get(1).setVisible(false);
         return this;
     }
 
