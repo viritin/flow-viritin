@@ -15,11 +15,16 @@ import org.apache.commons.lang3.StringUtils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * A wrapper for vaadin-message web component, that supports Markdown
+ * formatting and appending content dynamically to the element. Typical
+ * usecase: LLM chatbots slowly giving you the answer.
+ */
 @Tag("vaadin-message")
 public class MarkdownMessage extends Component {
     public record Color(String cssColorCode){
 
-        // "Stolen" form https://github.com/vaadin/web-components/blob/1875686236814dcc065a0e067c87adb80153ce60/packages/vaadin-lumo-styles/user-colors.js#L12
+        // "Stolen" from https://github.com/vaadin/web-components/blob/1875686236814dcc065a0e067c87adb80153ce60/packages/vaadin-lumo-styles/user-colors.js#L12
         public static Color[] AVATAR_PRESETS = new Color[] {
                 new Color("#df0b92"),
                 new Color("#650acc"),
@@ -42,6 +47,14 @@ public class MarkdownMessage extends Component {
     private Element content = new Element("div");
     private Element scrollHelper = new Element("div");
 
+    /**
+     * Constructs a new MarkdownMessages with all the bells and whistles,
+     * without initial content. Add that later with {@link #appendMarkdownAsync(String)}.
+     *
+     * @param name the name of the user
+     * @param timestamp time of the message
+     * @param color the color used for user avatar
+     */
     public MarkdownMessage(String name, LocalDateTime timestamp, Color color) {
         if(color != null) {
             setAvatarColor(color);
@@ -52,15 +65,60 @@ public class MarkdownMessage extends Component {
         content.getStyle().setWhiteSpace(Style.WhiteSpace.NORMAL);
     }
 
+    /**
+     * Constructs a new MarkdownMessages, without initial content.
+     * Add that later with {@link #appendMarkdownAsync(String)}.
+     *
+     * @param name the name of the user
+     */
+    public MarkdownMessage(String name) {
+        this(name, LocalDateTime.now(), Color.AVATAR_PRESETS[0]);
+    }
+
+    /**
+     * Constructs a new MarkdownMessages, without initial content.
+     * Add that later with {@link #appendMarkdownAsync(String)}.
+     *
+     * @param name the name of the user
+     * @param timestamp the timestamp of the message
+     */
+    public MarkdownMessage(String name, LocalDateTime timestamp) {
+        this(name, timestamp,Color.AVATAR_PRESETS[0]);
+    }
+
+    /**
+     * Constructs a new MarkdownMessages, without initial content.
+     * Add that later with {@link #appendMarkdownAsync(String)}.
+     *
+     * @param name the name of the user
+     * @param avatarColor the avatar color
+     */
     public MarkdownMessage(String name, Color avatarColor) {
         this(name, LocalDateTime.now(), avatarColor);
     }
 
-    public MarkdownMessage(String initialContent, String name, Color avatarColor) {
+    /**
+     * Constructs a new MarkdownMessages, with initial content.
+     * You can add more text later with {@link #appendMarkdownAsync(String)}.
+     *
+     *
+     * @param markdown the initial content as markdown formatter text
+     * @param name the name of the user
+     * @param avatarColor the color of the avatar
+     */
+    public MarkdownMessage(String markdown, String name, Color avatarColor) {
         this(name, LocalDateTime.now(), avatarColor);
-        appendMarkdown(initialContent);
+        appendMarkdown(markdown);
     }
 
+    /**
+     * Constructs a new MarkdownMessages, with initial content.
+     * You can add more text later with {@link #appendMarkdownAsync(String)}.
+     *
+     * @param markdown the initial content as markdown formatted text
+     * @param name the name of the user
+     * @param timestamp the timestamp of the message
+     */
     public MarkdownMessage(String markdown, String name, LocalDateTime timestamp) {
         this(name, timestamp, null);
         String html = getMdRenderer().render(getMdParser().parse(markdown));
@@ -124,9 +182,26 @@ public class MarkdownMessage extends Component {
         }
         return ui;
     }
+
+    /**
+     * Directly adds markdown formatted text to message part.
+     * Note, that this method should not be called from any other but
+     * Vaadin UI thread. Consider using the {@link #appendMarkdownAsync(String)}
+     * version in case the new text is coming from a background thread.
+     *
+     * @param markdownSnippet the new markdown formatted text snippet
+     */
     public void appendMarkdown(String markdownSnippet) {
         appendMarkdown(markdownSnippet, false);
     }
+
+    /**
+     * Adds markdown formatted text to message part. This method takes care
+     * of synchronization with {@link UI#access(Command)}, so it is safe to call
+     * this directly from a background thread.
+     * 
+     * @param markdownSnippet the new markdown formatted text snippet
+     */
     public void appendMarkdownAsync(String markdownSnippet) {
         appendMarkdown(markdownSnippet, true);
     }
