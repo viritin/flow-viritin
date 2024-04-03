@@ -361,9 +361,27 @@ public class TreeTable<T> extends VGrid<T> {
 
     public TreeTable() {
         super();
+        hackAroundScrollToIndexTimingIssue();
     }
 
     public TreeTable(Class<T> beanType) {
         super(beanType);
+        hackAroundScrollToIndexTimingIssue();
     }
+
+    private void hackAroundScrollToIndexTimingIssue() {
+        // Without this hack, scrolling fails if done at the same visit as
+        // doing initial rendering
+        // TODO figure out if this is also issue in plain Grid
+        getElement().executeJs("""
+            const orig = this.scrollToIndex;
+            const el = this;
+            this.scrollToIndex = function(idx) {
+                setTimeout(() => {
+                    orig.call(el,idx);
+                }, 0);                
+            }
+            """);
+    }
+
 }
