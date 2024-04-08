@@ -7,14 +7,14 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.Route;
 import org.vaadin.firitin.components.grid.VGrid;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
-import org.vaadin.firitin.util.ComponentSizeReporter;
+import org.vaadin.firitin.util.ResizeObserver;
 
 @Route
 public class ResizeObserverView extends VVerticalLayout {
 
     public ResizeObserverView() {
-        Paragraph uiElementSize = new Paragraph();
-        Paragraph paragraph = new Paragraph();
+        Paragraph uiElementSize = new Paragraph("UI size unknown");
+        Paragraph paragraph = new Paragraph("Paragraph size unknown");
         paragraph.setWidthFull();
         add(uiElementSize, paragraph);
 
@@ -23,31 +23,25 @@ public class ResizeObserverView extends VVerticalLayout {
         // to do some interesting logic to figure out good default position...
         splitLayout.setSplitterPosition(30);
         var left = new Div("L");
-        var grid = new VGrid<>(ComponentSizeReporter.Dimensions.class)
+        var grid = new VGrid<>(ResizeObserver.Dimensions.class)
                 .withSizeFull();
         splitLayout.addToPrimary(left);
         splitLayout.addToSecondary(grid);
         splitLayout.setSizeFull(); // WTF, why is this needed?
         addAndExpand(splitLayout);
 
-        ComponentSizeReporter.get()
-                .observe(paragraph, left, grid)
-                .addResizeListener(e -> {
-                    if (e.component() == UI.getCurrent()) {
-                        uiElementSize.setText("Hello. UI element (~ browser content area) size is " + e.dimensions());
-                    } else if (e.component() == paragraph) {
-                        paragraph.setText("Full width paragraph size (~ excluding marginals) is " + e.dimensions());
-                    } else if (e.component() == left) {
-                        left.setText("Left component size is " + e.dimensions());
-                    } else if (e.component() == grid) {
-                        // Added grid sizes to the grid itself and adjust
-                        // columns if narrow
-                        grid.getListDataView().addItem(e.dimensions());
-                        if(e.dimensions().width() > 450) {
-                            grid.setColumns("x","y","width","height", "top", "right", "bottom");
-                        } else {
-                            grid.setColumns("width","height");
-                        }
+        ResizeObserver.get()
+                .observe(left, d -> left.setText(d.toString()))
+                .observe(UI.getCurrent(), d -> uiElementSize.setText("Hello. UI element (~ browser content area) size is " + d))
+                .observe(paragraph, d -> paragraph.setText("Full width paragraph size (~ excluding marginals) is " + d))
+                .observe(grid, d -> {
+                    // Added grid sizes to the grid itself and adjust
+                    // columns if narrow
+                    grid.getListDataView().addItem(d);
+                    if(d.width() > 450) {
+                        grid.setColumns("x","y","width","height", "top", "right", "bottom");
+                    } else {
+                        grid.setColumns("width","height");
                     }
                 });
     }

@@ -10,6 +10,7 @@ import elemental.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -19,22 +20,23 @@ import java.util.WeakHashMap;
  * Allows you for example to easily configure Grid columns for different
  * devices or swap component implementations based on the screen size/orientation.
  *
+ *
  * @deprecated Consider this an early draft that may change unexpectedly. Feedback
  * for the helper highly appreciated, hoping to get similar tooling to core
  * soon to replace resize listener in Page.
  */
 @Deprecated(forRemoval = false)
-public class ComponentSizeReporter {
+public class ResizeObserver {
 
     private static ObjectMapper om = new ObjectMapper();
 
     private final Element el;
-    private final List<SizeListener> listeners = new ArrayList<>();
+    private final Map<Component,List<SizeHandler>> listeners = new HashMap<>();
     private final List<Component> components = new ArrayList<>();
     private final DomListenerRegistration reg;
 
-    public interface SizeListener {
-        void onObservation(SizeObservation observation);
+    public interface SizeHandler {
+        void onSizeObservation(Dimensions observation);
     }
 
     public record Dimensions(
@@ -48,19 +50,17 @@ public class ComponentSizeReporter {
             int left
     ) {}
 
-    public record SizeObservation(Component component, Dimensions dimensions) {}
+    private static Map<Component, ResizeObserver> uiToObserver = Collections.synchronizedMap(new WeakHashMap<>());
 
-    private static Map<Component, ComponentSizeReporter> uiToObserver = Collections.synchronizedMap(new WeakHashMap<>());
-
-    public static ComponentSizeReporter of(UI ui) {
-        return uiToObserver.computeIfAbsent(ui, c -> new ComponentSizeReporter(ui));
+    public static ResizeObserver of(UI ui) {
+        return uiToObserver.computeIfAbsent(ui, c -> new ResizeObserver(ui));
     }
 
-    public static ComponentSizeReporter get() {
-        return ComponentSizeReporter.of(UI.getCurrent());
+    public static ResizeObserver get() {
+        return ResizeObserver.of(UI.getCurrent());
     }
 
-    private ComponentSizeReporter(UI ui) {
+    private ResizeObserver(UI ui) {
         components.add(ui);
         this.el = ui.getElement();
         el.executeJs("""
@@ -91,7 +91,8 @@ public class ComponentSizeReporter {
                         try {
                             Dimensions dimensions = om.readValue(json, Dimensions.class);
                             Component component = components.get(Integer.valueOf(idx));
-                            new ArrayList<>(listeners).forEach(l -> l.onObservation(new SizeObservation(component, dimensions)));
+                            new ArrayList<>(listeners.getOrDefault(component, Collections.emptyList()))
+                                    .forEach(l -> l.onSizeObservation(dimensions));
                         } catch (JsonProcessingException e) {
                             throw new RuntimeException(e);
                         }
@@ -101,28 +102,28 @@ public class ComponentSizeReporter {
                 .debounce(100); // Wait a tiny bit for a pause while resizing, otherwise it will choke the connection for no reason...
     }
 
-    public ComponentSizeReporter addResizeListener(SizeListener listener) {
-        listeners.add(listener);
+    public ResizeObserver observe(Component component, SizeHandler listener) {
+        observeComponentChanges(component);
+        listeners.computeIfAbsent(component, c -> new ArrayList<>()).add(listener);
         return this;
     }
 
-    public ComponentSizeReporter observe(Component... additionalComponentsToObserve) {
+    private ResizeObserver observeComponentChanges(Component... additionalComponentsToObserve) {
         for(Component c : additionalComponentsToObserve) {
-            if(components.contains(c)) {
-                throw new IllegalArgumentException("Component is already being observed!");
+            if(!components.contains(c)) {
+                components.add(c);
+                el.executeJs("""
+                    this._resizeObserverElements.push($0);
+                    this._resizeObserver.observe($0);
+                """, c.getElement()).then(jsonvalue -> {}, s -> {
+                    throw new RuntimeException("Error adding size observer, component not attached!?");
+                });
             }
-            components.add(c);
-            el.executeJs("""
-                this._resizeObserverElements.push($0);
-                this._resizeObserver.observe($0);
-            """, c.getElement()).then(jsonvalue -> {}, s -> {
-                throw new RuntimeException("Error adding size observer, component not attached!?");
-            });
         }
         return this;
     }
 
-    public ComponentSizeReporter withDebounceTimeout(int timeout) {
+    public ResizeObserver withDebounceTimeout(int timeout) {
         reg.debounce(timeout);
         return this;
     }
