@@ -21,6 +21,7 @@ import org.vaadin.firitin.form.FormBinder;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.Set;
 
 public class FormBinderTest {
@@ -291,5 +292,16 @@ public class FormBinderTest {
 
     }
 
+    static class JustASetter {
+        void setSomething(Integer v) { /* nothing */ }
+    }
+
+    @Test
+    public void testOnlyBoundFieldsAreTriedToRead() {
+        FormBinder<JustASetter> binder = new FormBinder<>(JustASetter.class, Collections.emptyMap());
+        Assertions.assertDoesNotThrow(() ->
+                binder.setValue(new JustASetter())
+        );
+    }
 
 }
