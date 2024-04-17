@@ -7,6 +7,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.auth.AnnotatedViewAccessChecker;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
@@ -108,6 +109,19 @@ public class MarkdownMessage extends Component {
      */
     public MarkdownMessage(String markdown, String name, Color avatarColor) {
         this(name, LocalDateTime.now(), avatarColor);
+        appendMarkdown(markdown);
+    }
+
+    /**
+     * Constructs a new MarkdownMessages, with initial content.
+     * You can add more text later with {@link #appendMarkdownAsync(String)}.
+     *
+     *
+     * @param markdown the initial content as markdown formatter text
+     * @param name the name of the user
+     */
+    public MarkdownMessage(String markdown, String name) {
+        this(name, LocalDateTime.now(), Color.AVATAR_PRESETS[name.hashCode()%Color.AVATAR_PRESETS.length]);
         appendMarkdown(markdown);
     }
 
