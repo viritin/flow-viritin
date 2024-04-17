@@ -107,7 +107,9 @@ public enum LumoProps {
     }
 
     public void define(String value) {
-        define(UI.getCurrent(), value);
+        UI.getCurrent().getElement().executeJs("""
+        window.document.documentElement.style.setProperty("%s", "%s"); """
+                .formatted(getCssName(), value));
     }
 
     public String var() {
