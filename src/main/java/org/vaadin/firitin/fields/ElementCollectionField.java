@@ -162,7 +162,9 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
     }
 
     private void addRowForNewItem() {
-        newItem = instantiateNewItem();
+        if(!clazz.isRecord()) {
+            newItem = instantiateNewItem();
+        }
         newItemForm = addNewRow(newItem);
         // hide the delete button until actually added to the collection
         getLastCell().setVisible(false);
@@ -199,19 +201,32 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
             }
             tr = new TableRow(components);
         }
-        binder.setValue(item);
+        if(item != null) {
+            binder.setValue(item);
+        }
         addDeleteButtonColumn(tr, item);
         binder.addValueChangeListener(e -> {
             if(binder == newItemForm) {
                 // TODO add as new row if valid
                 if(e.isFromClient() && newItemForm.isValid()) {
-                    value.add(newItem);
+                    if(newItem != null) {
+                        value.add(newItem);
+                    } else {
+                        // Record/immutable object
+                        value.add(binder.getValue());
+                    }
                     // display the delete button column
                     getLastCell().setVisible(true);
                     addRowForNewItem();
                     fireValueChange();
                 }
             } else {
+                if(clazz.isRecord()) {
+                    List<TableRow> rows = table.getRows();
+                    int index = rows.indexOf(tr) - 1; // 1 for the header row
+                    // replace the item in the list
+                    value.set(index, binder.getValue());
+                }
                 fireValueChange();
             }
         });
@@ -246,7 +261,7 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
             } else if(Enum.class.isAssignableFrom(type)) {
                 hv = new EnumSelect<>(type);
             } else {
-                throw new UnsupportedOperationException("No field type generated for" + type.getName());
+                throw new UnsupportedOperationException("No field generated for type " + type.getName());
             }
             editors.put(property.getName(), hv);
         }
