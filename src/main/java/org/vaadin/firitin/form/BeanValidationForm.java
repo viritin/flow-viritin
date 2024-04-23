@@ -403,6 +403,9 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
      * unbound
      */
     public T getEntity() {
+        if(binder.isImmutable()) {
+            return binder.getValue();
+        }
         return entity;
     }
 
