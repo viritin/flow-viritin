@@ -301,14 +301,14 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     public void setValue(T valueObject) {
         this.valueObject = valueObject;
         for (BeanPropertyDefinition pd : bbd.findProperties()) {
-            Object pValue;
-            if (isImmutable()) {
-                pValue = pd.getAccessor().getValue(valueObject);
-            } else {
-                pValue = pd.getGetter().getValue(valueObject);
-            }
             HasValue hasValue = bpdToEditorField.get(pd);
             if (hasValue != null) {
+                Object pValue;
+                if (isImmutable()) {
+                    pValue = pd.getAccessor().getValue(valueObject);
+                } else {
+                    pValue = pd.getGetter().getValue(valueObject);
+                }
 
                 if (pValue == null) {
                     hasValue.clear();
