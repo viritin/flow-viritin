@@ -13,15 +13,15 @@ import java.time.temporal.ChronoUnit;
  * A field for entering a duration of JDK type {@link Duration}.
  * <p>
  *     The field supports inputting the duration the following formats:
- *     <ul>
- *         <li>hh:mm:ss</li>
- *         <li>hhmmss</li>
- *         <li>hh:mm</li>
- *         <li>hhmm</li>
- *         <li>hh</li>
- *         <li>ISO-8601 format: PnDTnHnMn.nS</li>
- *     </ul>
  * </p>
+ * <ul>
+ *     <li>hh:mm:ss</li>
+ *     <li>hhmmss</li>
+ *     <li>hh:mm</li>
+ *     <li>hhmm</li>
+ *     <li>hh</li>
+ *     <li>ISO-8601 format: PnDTnHnMn.nS</li>
+ * </ul>
  */
 public class DurationField extends CustomField<Duration> implements HasPlaceholder {
     VTextField durationInput = new VTextField()
