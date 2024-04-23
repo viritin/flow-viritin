@@ -6,9 +6,9 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import org.vaadin.firitin.appframework.MenuItem;
+import org.vaadin.firitin.components.RichText;
 import org.vaadin.firitin.fields.CommaSeparatedStringField;
 import org.vaadin.firitin.fields.DurationField;
-import org.vaadin.firitin.components.RichText;
 import org.vaadin.firitin.fields.ElementCollectionField;
 import org.vaadin.firitin.fields.EnumSelect;
 import org.vaadin.firitin.form.BeanValidationForm;
@@ -16,8 +16,6 @@ import org.vaadin.firitin.form.BeanValidationForm;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -29,8 +27,7 @@ public class FormFieldsView extends BeanValidationForm<FormFieldsView.MyRecord> 
         ONE, TWO, THREE
     }
 
-    // TODO fix element collection field with records
-    public record Element(String name, Integer value, MyEnum myEnum) {
+    public record Element(String name, Integer integer, MyEnum myEnum) {
     }
 
     public record MyRecord(MyEnum myEnum, Duration duration, List<Element> children, Set<String> strings) {
@@ -39,7 +36,12 @@ public class FormFieldsView extends BeanValidationForm<FormFieldsView.MyRecord> 
     private DurationField duration = new DurationField("Input duration here");
     private EnumSelect<MyEnum> myEnum = new EnumSelect<>(MyEnum.class)
             .withLabel("Select enum value");
+    // ElementCollectionField is designed for e.g. elementcollection or one-to-many relationships
+    // in JPA entities, but essentially edits List of other objects withing a small grid.
+    // Sometimes suitable as such without any special configuration, but you can also define what
+    // kind of fields you want for elements properties.
     private ElementCollectionField<Element> children = new ElementCollectionField<>(Element.class);
+    // Maps to Set<String>. For example for "tags" or similar.
     private CommaSeparatedStringField strings = new CommaSeparatedStringField("Strings separated with commas");
 
     public FormFieldsView() {
