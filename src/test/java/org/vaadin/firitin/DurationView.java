@@ -36,14 +36,14 @@ public class DurationView extends VVerticalLayout {
         add(duration, text);
 
         add("Duration (Duration.toString()):");
-        var value = new Paragraph();
-        add(value);
+        var valueDisplay = new Paragraph();
+        add(valueDisplay);
 
         FormBinder<Dto> binder = new FormBinder<>(Dto.class, this);
 
         duration.addValueChangeListener(e -> {
             Duration d = e.getValue();
-            value.setText(""+d);
+            valueDisplay.setText(""+d);
         });
 
         add(new VButton("Binder dto.toString()", () -> Notification.show(binder.getValue().toString())));

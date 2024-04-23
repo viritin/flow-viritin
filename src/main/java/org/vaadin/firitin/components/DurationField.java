@@ -2,6 +2,7 @@ package org.vaadin.firitin.components;
 
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.customfield.CustomField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.vaadin.firitin.components.textfield.VTextField;
 
@@ -48,6 +49,13 @@ public class DurationField extends CustomField<Duration> implements HasPlacehold
             if (!durationInput.isInvalid()) {
                 Duration duration = parseInput(durationInput.getValue());
                 durationInput.setValue(formatToPresentation(duration));
+            }
+        });
+        durationInput.addValueChangeListener(e -> {
+            if(e.isFromClient()) {
+                // lazy value change events are not fired on the client side
+                // not caught by CustomField -> we need to update the value manually
+                updateValue();
             }
         });
         add(durationInput);
@@ -149,4 +157,32 @@ public class DurationField extends CustomField<Duration> implements HasPlacehold
     public String getPlaceholder() {
         return durationInput.getPlaceholder();
     }
+
+    // Proxy (value change mode related) methods to the underlying TextField
+    public DurationField withValueChangeMode(ValueChangeMode valueChangeMode) {
+        durationInput.setValueChangeMode(valueChangeMode);
+        return this;
+    }
+
+    public DurationField withValueChangeTimeout(int valueChangeTimeout) {
+        durationInput.setValueChangeTimeout(valueChangeTimeout);
+        return this;
+    }
+
+    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
+        durationInput.setValueChangeMode(valueChangeMode);
+    }
+
+    public ValueChangeMode getValueChangeMode() {
+        return durationInput.getValueChangeMode();
+    }
+
+    public void setValueChangeTimeout(int valueChangeTimeout) {
+        durationInput.setValueChangeTimeout(valueChangeTimeout);
+    }
+
+    public int getValueChangeTimeout() {
+        return durationInput.getValueChangeTimeout();
+    }
+
 }
