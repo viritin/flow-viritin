@@ -9,14 +9,36 @@ import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 
+/**
+ * A field for entering a duration of JDK type {@link Duration}.
+ * <p>
+ *     The field supports inputting the duration the following formats:
+ *     <ul>
+ *         <li>hh:mm:ss</li>
+ *         <li>hhmmss</li>
+ *         <li>hh:mm</li>
+ *         <li>hhmm</li>
+ *         <li>hh</li>
+ *         <li>ISO-8601 format: PnDTnHnMn.nS</li>
+ *     </ul>
+ * </p>
+ */
 public class DurationField extends CustomField<Duration> implements HasPlaceholder {
     VTextField durationInput = new VTextField()
             .withPlaceholder("hh:mm:ss");
 
+    /**
+     * Creates a new field with empty value (null).
+     */
     public DurationField() {
         this(null);
     }
 
+    /**
+     * Creates a new field with a given label.
+     *
+     * @param label the text to set as the label
+     */
     public DurationField(String label) {
         setLabel(label);
         durationInput.setWidth("8em");
@@ -32,7 +54,7 @@ public class DurationField extends CustomField<Duration> implements HasPlacehold
         setTooltipText("""
             Default formatting for duration: hh:mm:ss.
             For quick input, if no separator typed in, until 100, interpreted an hour.
-            Then until 10000, hhmm.
+            Then until 10000, hhmm. Also supports ISO-8601 style format for "human compilers": PnDTnHnMn.nS
         """);
     }
 

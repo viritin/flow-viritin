@@ -28,15 +28,12 @@ public class DurationView extends VVerticalLayout {
 
         duration.setLabel("Label for field");
         duration.setRequiredIndicatorVisible(true);
-        duration.setTooltipText("This showed when hovered with mouse.");
+        //duration.setTooltipText("This showed when hovered with mouse.");
         duration.setInvalid(true);
         duration.setErrorMessage("This makes the field red and error message visible.");
         duration.setHelperText("This is so called helper text. Kind of like tooltip but always visible.");
 
         add(duration, text);
-        if(true) {
-            return;
-        }
 
         add("Duration (Duration.toString()):");
         var value = new Paragraph();
