@@ -38,6 +38,7 @@ import com.vaadin.flow.server.VaadinSession;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -376,7 +377,7 @@ public class DynamicFileDownloader extends Anchor implements
      * Writes the content of the downloaded file to the given output stream.
      */
     @FunctionalInterface
-    public interface ContentWriter {
+    public interface ContentWriter extends Serializable {
 
         /**
          * Writes the content of the downloaded file to the given output
@@ -396,7 +397,7 @@ public class DynamicFileDownloader extends Anchor implements
      * body).
      */
     @FunctionalInterface
-    public interface FileNameGenerator {
+    public interface FileNameGenerator extends Serializable {
 
         /**
          * Creates the filename for the downloaded files.
@@ -419,7 +420,7 @@ public class DynamicFileDownloader extends Anchor implements
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc2046#section-4.5.1">RFC2046</a>
      */
     @FunctionalInterface
-    public interface ContentTypeGenerator {
+    public interface ContentTypeGenerator extends Serializable {
 
         /**
          * Used as 'Content-Type' HTTP response header.

@@ -28,7 +28,9 @@ import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
 import org.vaadin.firitin.components.DynamicFileDownloader;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.time.LocalDateTime;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -195,6 +197,18 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
             Notification.show(e.getException().getMessage() +" Note, file may have been generated on some browsers. Chrome should not do it.");
         });
         add(withError);
+
+
+        add(new Button("Test UI serialization", event -> {
+
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            try {
+                new ObjectOutputStream(bout).writeObject(DynamicFileDownloadingDemo.this);
+                Notification.show("UI successfully serialized");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }));
     }
 
 
