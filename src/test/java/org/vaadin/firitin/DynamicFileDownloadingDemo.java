@@ -74,7 +74,7 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
         DynamicFileDownloader downloadFromIcon = new DynamicFileDownloader(
                 // in theory any component should do here, but button/plain icon etc are appropriate
                 VaadinIcon.DROP.create(),
-                "foobar.txt", // static default name for generated files
+                "foobaröä.txt", // static default name for generated files
                 outputStream -> {
                     try {
                         outputStream.write("HelloWorld".getBytes());
@@ -94,7 +94,7 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
             // or add custom headers to file download like here
             VaadinRequest.getCurrent().setAttribute("foo", "bar");
             // and do the actual task, return the filename
-            return LocalDateTime.now() + "foobar.txt";
+            return LocalDateTime.now() + "foobaröä.txt";
         }).withContentTypeGenerator(() -> "text/plain");
         
         add(downloadButton2);

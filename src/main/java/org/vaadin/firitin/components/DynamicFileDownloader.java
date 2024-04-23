@@ -38,6 +38,8 @@ import com.vaadin.flow.server.VaadinSession;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import com.vaadin.flow.shared.Registration;
 import org.vaadin.firitin.components.button.VButton;
@@ -52,149 +54,20 @@ import org.vaadin.firitin.fluency.ui.FluentHasTooltip;
  * @see #setFileName(java.lang.String)
  * @see #setFileHandler(com.vaadin.flow.function.SerializableConsumer)
  */
-public class DynamicFileDownloader extends Anchor implements 
+public class DynamicFileDownloader extends Anchor implements
         FluentComponent<DynamicFileDownloader>, FluentHasEnabled<DynamicFileDownloader>,
         FluentHasTooltip<DynamicFileDownloader> {
 
     /**
-     * Writes the content of the downloaded file to the given output stream.
-     */
-    @FunctionalInterface
-    public interface ContentWriter {
-
-        /**
-         * Writes the content of the downloaded file to the given output
-         * stream (~ output stream of there response).
-         *
-         * @param out the output stream to write to
-         * @throws IOException if an IO error occurs
-         */
-        void writeContent(OutputStream out) throws IOException;
-
-    }
-
-    /**
-     * Generates name dynamically per request. Override for example to add
-     * timestamps to the names of the downloaded files or to configure response
-     * headers (executed during download, but before writing the actual response
-     * body).
-     */
-    @FunctionalInterface
-    public interface FileNameGenerator {
-
-        /**
-         * Creates the filename for the downloaded files.
-         *
-         * Called by the framework when download is requested by browser, just
-         * before the file body is generated.
-         *
-         * @param request the request object
-         * @return the file name to be used in the Content-Disposition header
-         */
-        String getFileName(VaadinRequest request);
-    }
-
-    /**
-     * Generates the content of HTTP response header 'Content-Type'.
-     * If known, should be set to the MIME type of the content.
-     * Otherwise, the 'Content-Type' defaults to 'application/octet-stream'.
-     * This indicates content as "arbitrary binary data".
-     *
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc2046#section-4.5.1">RFC2046</a>
-     */
-    @FunctionalInterface
-    public interface ContentTypeGenerator {
-
-        /**
-         * Used as 'Content-Type' HTTP response header.
-         *
-         * @return MIME type of the content.
-         */
-        String getContentType();
-    }
-
-    private Button button;
-    private DomListenerRegistration disableOnclick;
-
-    /**
-     * Makes the download link to be disabled after the first click.
-     *
-     * @param disableOnClick true to disable the link after the first click
-     */
-    public void setDisableOnClick(boolean disableOnClick) {
-        if (disableOnclick != null) {
-            disableOnclick.remove();
-        }
-        if (disableOnClick) {
-            getElement().executeJs("""
-            const el = this;
-            this.addEventListener("click", e => {
-                setTimeout(() => el.removeAttribute("href"), 0);
-            });
-            """);
-            disableOnclick = getElement().addEventListener("click", e -> {
-                setEnabled(false);
-            });
-        }
-    }
-
-    /**
-     * Event fired when the file download has been streamed to the client.
-     */
-    public static class DownloadFinishedEvent extends ComponentEvent<DynamicFileDownloader> {
-
-        /**
-         * Creates a new event using the given source and indicator whether the
-         * event originated from the client side or the server side.
-         *
-         * @param source the source component
-         * @param fromClient <code>true</code> if the event originated from the
-         * client
-         */
-        public DownloadFinishedEvent(DynamicFileDownloader source, boolean fromClient) {
-            super(source, fromClient);
-        }
-
-    }
-
-    /**
-     * Event fired when the file download fails.
-     */
-    public static class DownloadFailedEvent extends ComponentEvent<DynamicFileDownloader> {
-
-        private final Exception exception;
-
-        /**
-         * Creates a new event using the given source and indicator whether the
-         * event originated from the client side or the server side.
-         *
-         * @param source the source component
-         * @param e the exception
-         */
-        public DownloadFailedEvent(DynamicFileDownloader source, Exception e) {
-            super(source, false);
-            this.exception = e;
-        }
-
-        /**
-         * Gets the exception that caused the download to fail.
-         *
-         * @return the exception
-         */
-        public Exception getException() {
-            return exception;
-        }
-
-    }
-
-    StreamResource resource = new StreamResource("dummy", (InputStreamFactory) () -> new ByteArrayInputStream(new byte[0]));
-    FileNameGenerator fileNameGenerator = (r) -> "downloadedFile";
-    private ContentTypeGenerator contentTypeGenerator = () -> "application/octet-stream";
-    private SerializableConsumer<OutputStream> contentWriter;
-    /**
      * The request handler that handles the download request.
      */
     protected RequestHandler requestHandler;
+    StreamResource resource = new StreamResource("dummy", (InputStreamFactory) () -> new ByteArrayInputStream(new byte[0]));
+    FileNameGenerator fileNameGenerator = (r) -> "downloadedFile";
+    private Button button;
+    private DomListenerRegistration disableOnclick;
+    private ContentTypeGenerator contentTypeGenerator = () -> "application/octet-stream";
+    private SerializableConsumer<OutputStream> contentWriter;
 
     /**
      * Constructs a basic download link with DOWNLOAD icon from
@@ -211,24 +84,23 @@ public class DynamicFileDownloader extends Anchor implements
      * Constructs a new download link with given text, static file name and
      * writer.
      *
-     * @param linkText the text inside the link
+     * @param linkText      the text inside the link
      * @param contentWriter the content writer that generates the actual
-     * content.
+     *                      content.
      */
     public DynamicFileDownloader(String linkText, ContentWriter contentWriter) {
         this();
         setText(linkText);
         setWriter(contentWriter);
     }
-
     /**
      * Constructs a new download link with given text, static file name and
      * writer.
      *
-     * @param linkText the text inside the link
-     * @param fileName the file name of produced files
+     * @param linkText      the text inside the link
+     * @param fileName      the file name of produced files
      * @param contentWriter the content writer that generates the actual
-     * content.
+     *                      content.
      */
     public DynamicFileDownloader(String linkText, String fileName, ContentWriter contentWriter) {
         this();
@@ -236,15 +108,14 @@ public class DynamicFileDownloader extends Anchor implements
         this.fileNameGenerator = r -> fileName;
         setWriter(contentWriter);
     }
-
     /**
      * Constructs a download link with given component as the content that
      * ignites the download.
      *
      * @param downloadComponent the component to be clicked by the user to start
-     * the download
-     * @param fileName the filename of the generated files
-     * @param contentWriter the content writer of the generated file
+     *                          the download
+     * @param fileName          the filename of the generated files
+     * @param contentWriter     the content writer of the generated file
      */
     public DynamicFileDownloader(Component downloadComponent, String fileName, ContentWriter contentWriter) {
         this();
@@ -252,19 +123,46 @@ public class DynamicFileDownloader extends Anchor implements
         fileNameGenerator = r -> fileName;
         setWriter(contentWriter);
     }
-
     /**
      * Constructs a download link with given component as the content that
      * ignites the download.
      *
      * @param downloadComponent the component to be clicked by the user to start
-     * the download
-     * @param contentWriter the content writer of the generated file
+     *                          the download
+     * @param contentWriter     the content writer of the generated file
      */
     public DynamicFileDownloader(Component downloadComponent, ContentWriter contentWriter) {
         this();
         add(downloadComponent);
         setWriter(contentWriter);
+    }
+    /**
+     * Empty constructor file downloader. Be sure to call setFileHandler
+     * before the component is attached.
+     */
+    public DynamicFileDownloader() {
+    }
+
+    /**
+     * Makes the download link to be disabled after the first click.
+     *
+     * @param disableOnClick true to disable the link after the first click
+     */
+    public void setDisableOnClick(boolean disableOnClick) {
+        if (disableOnclick != null) {
+            disableOnclick.remove();
+        }
+        if (disableOnClick) {
+            getElement().executeJs("""
+                    const el = this;
+                    this.addEventListener("click", e => {
+                        setTimeout(() => el.removeAttribute("href"), 0);
+                    });
+                    """);
+            disableOnclick = getElement().addEventListener("click", e -> {
+                setEnabled(false);
+            });
+        }
     }
 
     private void setWriter(ContentWriter contentWriter) {
@@ -277,23 +175,16 @@ public class DynamicFileDownloader extends Anchor implements
         };
     }
 
-    /**
-     * Empty constructor file downloader. Be sure to call setFileHandler
-     * before the component is attached.
-     */
-    public DynamicFileDownloader() {
-    }
-
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         getElement().setAttribute("fakesr", resource);
         String identifier = resource.getId();
         getElement().executeJs("""
-            this.setAttribute("href",
-                    this.getAttribute("fakesr").substring(0, this.getAttribute("fakesr").indexOf("VAADIN"))
-                            + "?v-r=dfd&id=%s");
-            """.formatted(identifier));
+                this.setAttribute("href",
+                        this.getAttribute("fakesr").substring(0, this.getAttribute("fakesr").indexOf("VAADIN"))
+                                + "?v-r=dfd&id=%s");
+                """.formatted(identifier));
 
         runBeforeClientResponse(ui -> {
             requestHandler = new RequestHandler() {
@@ -306,8 +197,7 @@ public class DynamicFileDownloader extends Anchor implements
                         if (filename == null) {
                             filename = fileNameGenerator.getFileName(request);
                         }
-                        response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
-                        response.setHeader("Content-Type", contentTypeGenerator.getContentType());
+                        response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + URLEncoder.encode(filename, StandardCharsets.UTF_8));
                         try {
                             contentWriter.accept(response.getOutputStream());
                         } catch (Exception e) {
@@ -372,6 +262,7 @@ public class DynamicFileDownloader extends Anchor implements
 
     /**
      * Sets the file handler that generates the file content.
+     *
      * @param contentWriter the file handler
      */
     public void setFileHandler(SerializableConsumer<OutputStream> contentWriter) {
@@ -380,6 +271,7 @@ public class DynamicFileDownloader extends Anchor implements
 
     /**
      * Sets the file name of downloaded file.
+     *
      * @param fileName the file name
      */
     public void setFileName(String fileName) {
@@ -440,6 +332,7 @@ public class DynamicFileDownloader extends Anchor implements
 
     /**
      * Fluent method to set the strategy to creates the name of the downloaded.
+     *
      * @param fileNameGenerator the generator
      * @return the same instance, fluent method
      */
@@ -458,13 +351,12 @@ public class DynamicFileDownloader extends Anchor implements
     }
 
     /**
+     * @param text the tooltip text
      * @see HasTooltip#setTooltipText(String)
-     *
+     * <p>
      * Note, that tooltips are only supported if the content of the link
      * supports them. For example, tooltips are supported if the
      * {@link #asButton()} method is called.
-     *
-     * @param text the tooltip text
      */
     @Override
     public Tooltip setTooltipText(String text) {
@@ -478,5 +370,111 @@ public class DynamicFileDownloader extends Anchor implements
     public Tooltip getTooltip() {
         HasTooltip component = (HasTooltip) getChildren().findFirst().get();
         return component.getTooltip();
+    }
+
+    /**
+     * Writes the content of the downloaded file to the given output stream.
+     */
+    @FunctionalInterface
+    public interface ContentWriter {
+
+        /**
+         * Writes the content of the downloaded file to the given output
+         * stream (~ output stream of there response).
+         *
+         * @param out the output stream to write to
+         * @throws IOException if an IO error occurs
+         */
+        void writeContent(OutputStream out) throws IOException;
+
+    }
+
+    /**
+     * Generates name dynamically per request. Override for example to add
+     * timestamps to the names of the downloaded files or to configure response
+     * headers (executed during download, but before writing the actual response
+     * body).
+     */
+    @FunctionalInterface
+    public interface FileNameGenerator {
+
+        /**
+         * Creates the filename for the downloaded files.
+         * <p>
+         * Called by the framework when download is requested by browser, just
+         * before the file body is generated.
+         *
+         * @param request the request object
+         * @return the file name to be used in the Content-Disposition header
+         */
+        String getFileName(VaadinRequest request);
+    }
+
+    /**
+     * Generates the content of HTTP response header 'Content-Type'.
+     * If known, should be set to the MIME type of the content.
+     * Otherwise, the 'Content-Type' defaults to 'application/octet-stream'.
+     * This indicates content as "arbitrary binary data".
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc2046#section-4.5.1">RFC2046</a>
+     */
+    @FunctionalInterface
+    public interface ContentTypeGenerator {
+
+        /**
+         * Used as 'Content-Type' HTTP response header.
+         *
+         * @return MIME type of the content.
+         */
+        String getContentType();
+    }
+
+    /**
+     * Event fired when the file download has been streamed to the client.
+     */
+    public static class DownloadFinishedEvent extends ComponentEvent<DynamicFileDownloader> {
+
+        /**
+         * Creates a new event using the given source and indicator whether the
+         * event originated from the client side or the server side.
+         *
+         * @param source     the source component
+         * @param fromClient <code>true</code> if the event originated from the
+         *                   client
+         */
+        public DownloadFinishedEvent(DynamicFileDownloader source, boolean fromClient) {
+            super(source, fromClient);
+        }
+
+    }
+
+    /**
+     * Event fired when the file download fails.
+     */
+    public static class DownloadFailedEvent extends ComponentEvent<DynamicFileDownloader> {
+
+        private final Exception exception;
+
+        /**
+         * Creates a new event using the given source and indicator whether the
+         * event originated from the client side or the server side.
+         *
+         * @param source the source component
+         * @param e      the exception
+         */
+        public DownloadFailedEvent(DynamicFileDownloader source, Exception e) {
+            super(source, false);
+            this.exception = e;
+        }
+
+        /**
+         * Gets the exception that caused the download to fail.
+         *
+         * @return the exception
+         */
+        public Exception getException() {
+            return exception;
+        }
+
     }
 }
