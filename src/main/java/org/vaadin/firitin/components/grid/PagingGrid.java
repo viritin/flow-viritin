@@ -244,7 +244,7 @@ public class PagingGrid<T> extends VGrid<T> {
             }
         }
 
-        private void fetchPage() {
+        void fetchPage() {
             List<T> page = dataProvider.pageRequested(currentPage, getPageSize());
             if (page.size() > 0) {
                 setItems(page);
@@ -313,4 +313,11 @@ public class PagingGrid<T> extends VGrid<T> {
         }
     }
 
+    @Override
+    public void setPageSize(int pageSize) {
+        super.setPageSize(pageSize);
+        if(paginationBar != null) {
+            paginationBar.fetchPage();
+        }
+    }
 }

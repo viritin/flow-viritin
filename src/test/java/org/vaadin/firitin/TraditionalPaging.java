@@ -52,6 +52,10 @@ public class TraditionalPaging extends VerticalLayout {
 			table.setTotalResults(90);
 		});
 
+		Button b3 = new Button("Set page size to 5", e-> {
+			table.setPageSize(5);
+		});
+
 		Select<PagingGrid.PaginationBarMode> select = new Select<>();
 		select.setItems(PagingGrid.PaginationBarMode.values());
 		select.setValue(PagingGrid.PaginationBarMode.TOP);
@@ -59,7 +63,7 @@ public class TraditionalPaging extends VerticalLayout {
 			table.setPaginationBarMode(e.getValue());
 		});
 
-		add(table, b, b2, select);
+		add(table, b, b2, b3, select);
 	}
 
 }
