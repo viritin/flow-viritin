@@ -1,4 +1,4 @@
-package org.vaadin.firitin.components;
+package org.vaadin.firitin.fields;
 
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.customfield.CustomField;
