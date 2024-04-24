@@ -40,6 +40,15 @@ public class MarkdownMessage extends Component {
     private static HtmlRenderer renderer;
     private static Parser parser;
     private UI ui;
+
+    public String getMarkdown() {
+        return markdown;
+    }
+
+    public void setMarkdown(String markdown) {
+        this.appendMarkdown(markdown);
+    }
+
     private String markdown;
     private String previousHtml;
 
