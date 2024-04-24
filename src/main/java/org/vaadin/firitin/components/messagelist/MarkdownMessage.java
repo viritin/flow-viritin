@@ -2,6 +2,8 @@ package org.vaadin.firitin.components.messagelist;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.Element;
@@ -22,7 +24,7 @@ import java.time.format.DateTimeFormatter;
  * usecase: LLM chatbots slowly giving you the answer.
  */
 @Tag("vaadin-message")
-public class MarkdownMessage extends Component {
+public class MarkdownMessage extends Component implements HasStyle, HasSize {
     public record Color(String cssColorCode){
 
         // "Stolen" from https://github.com/vaadin/web-components/blob/1875686236814dcc065a0e067c87adb80153ce60/packages/vaadin-lumo-styles/user-colors.js#L12
