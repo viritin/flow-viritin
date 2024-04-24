@@ -41,6 +41,8 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.vaadin.flow.shared.Registration;
 import org.vaadin.firitin.components.button.VButton;
@@ -59,6 +61,7 @@ public class DynamicFileDownloader extends Anchor implements
         FluentComponent<DynamicFileDownloader>, FluentHasEnabled<DynamicFileDownloader>,
         FluentHasTooltip<DynamicFileDownloader> {
 
+    private static final int POLLING_INTERVAL = 999;
     /**
      * The request handler that handles the download request.
      */
@@ -69,6 +72,7 @@ public class DynamicFileDownloader extends Anchor implements
     private DomListenerRegistration disableOnclick;
     private ContentTypeGenerator contentTypeGenerator = () -> "application/octet-stream";
     private SerializableConsumer<OutputStream> contentWriter;
+    private Integer originalPollingInterval;
 
     /**
      * Constructs a basic download link with DOWNLOAD icon from
@@ -166,6 +170,14 @@ public class DynamicFileDownloader extends Anchor implements
         }
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        if(isAttached()) {
+            adjustHref();
+        }
+    }
+
     private void setWriter(ContentWriter contentWriter) {
         this.contentWriter = out -> {
             try {
@@ -179,13 +191,9 @@ public class DynamicFileDownloader extends Anchor implements
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+        ensurePollingOrPush(attachEvent);
         getElement().setAttribute("fakesr", resource);
-        String identifier = resource.getId();
-        getElement().executeJs("""
-                this.setAttribute("href",
-                        this.getAttribute("fakesr").substring(0, this.getAttribute("fakesr").indexOf("VAADIN"))
-                                + "?v-r=dfd&id=%s");
-                """.formatted(identifier));
+        String identifier = adjustHref();
 
         runBeforeClientResponse(ui -> {
             requestHandler = new RequestHandler() {
@@ -228,8 +236,47 @@ public class DynamicFileDownloader extends Anchor implements
         });
     }
 
+    private String adjustHref() {
+        String identifier = resource.getId();
+        if(isEnabled()) {
+            getElement().executeJs("""
+                this.setAttribute("href",
+                        this.getAttribute("fakesr").substring(0, this.getAttribute("fakesr").indexOf("VAADIN"))
+                                + "?v-r=dfd&id=%s");
+                """.formatted(identifier));
+        } else {
+            getElement().removeAttribute("href");
+        }
+        return identifier;
+    }
+
+    protected void ensurePollingOrPush(AttachEvent attachEvent) {
+        try {
+            UI ui = attachEvent.getUI();
+            if (ui.getPushConfiguration().getPushMode().isEnabled()) {
+                return;
+            }
+            if (ui.getPollInterval() < POLLING_INTERVAL) {
+                Logger.getLogger(DynamicFileDownloader.class.getName()).log(Level.INFO, "The UI don't have push enabled, DynamicFileDownloader setting polling interval to " + POLLING_INTERVAL + "ms to make listeners work as expected. Consider enabling push.");
+                originalPollingInterval = ui.getPollInterval();
+                ui.setPollInterval(POLLING_INTERVAL);
+            }
+        } catch (Exception e) {
+            Logger.getLogger(DynamicFileDownloader.class.getName()).log(Level.WARNING, "Failed to set polling interval", e);
+            // ignore, not supported
+        }
+    }
+
+
     @Override
     protected void onDetach(DetachEvent detachEvent) {
+        try {
+            if (originalPollingInterval != null && detachEvent.getUI().getPollInterval() == POLLING_INTERVAL && !detachEvent.getUI().isClosing()) {
+                detachEvent.getUI().setPollInterval(originalPollingInterval);
+            }
+        } catch (Exception e) {
+            Logger.getLogger(DynamicFileDownloader.class.getName()).log(Level.WARNING, "Failed to reset polling interval", e);
+        }
         detachEvent.getSession().removeRequestHandler(requestHandler);
         super.onDetach(detachEvent);
     }
