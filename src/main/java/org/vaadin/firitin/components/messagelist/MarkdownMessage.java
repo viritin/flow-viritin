@@ -278,10 +278,4 @@ public class MarkdownMessage extends Component {
         }
     }
 
-    public void appendText(String text) {
-        if(!text.endsWith("\n")) {
-            text = text + "\n";
-        }
-        appendMarkdown(text);
-    }
 }

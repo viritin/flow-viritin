@@ -29,8 +29,9 @@ public class MessageListView extends VVerticalLayout {
                 new Button("Append markdown", event -> {
                     message.appendMarkdown("### Appended \n Some more text\n");
                 }),
-                new Button("Append text", event -> {
-                    message.appendText("<h3>Appended</h3><p>Some more text</p>");
+                new Button("Append html (markdown appects html)", event -> {
+                    // line breaks not to break potential next markdown snippet...
+                    message.appendMarkdown("<h3>Appended</h3><p>Some more text</p>\n\n");
                 }),
                 new Button("Append Markdown", event -> {
                     message.appendMarkdown("""
