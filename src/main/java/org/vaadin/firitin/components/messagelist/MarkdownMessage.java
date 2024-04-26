@@ -188,7 +188,7 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
     }
     private void appendHtml(String html, int replaceFrom) {
         getElement().executeJs("""
-                this.curHtml = this.curHtml.substring(0, $2) + $0; 
+                this.curHtml = this.curHtml ? this.curHtml.substring(0, $2) + $0 : $0; 
                 $1.innerHTML = this.curHtml;
                 """, html, content, replaceFrom);
     }
@@ -246,6 +246,7 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
     }
 
     protected void appendMarkdown(String markdownSnippet, boolean uiAccess) {
+        markdownSnippet = markdownSnippet != null ? markdownSnippet : ""; // Avoid nulls
         if(markdown == null || PLACEHOLDER.equals(markdown)) {
             markdown = markdownSnippet;
         } else {
