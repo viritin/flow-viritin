@@ -69,7 +69,7 @@ public class UploadFileHandlerExample extends VerticalLayout {
                                 }
                             }
                         }
-                        String msg = "Counted " + count + "lines";
+                        String msg = "Counted " + count + "lines. Filename:" + fileName;
                         ui.access(() -> {
                             Notification.show(msg);
                             liveLogger.setText("...");
@@ -92,7 +92,7 @@ public class UploadFileHandlerExample extends VerticalLayout {
                             }
                         }
                         lineCount.inc(count);
-                        String msg = "Counted " + lineCount + "lines so far...";
+                        String msg = "Counted " + lineCount + "lines so far. Last file name " + fileName;
                         getUI().get().access(() -> Notification.show(msg));
                     } catch (IOException ex) {
                         Logger.getLogger(UploadFileHandlerExample.class.getName()).log(Level.SEVERE, null, ex);

@@ -383,7 +383,7 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                 // inversion of streams, thus handle here
                 // TODO figure out if content type or name needs some sanitation
                 String contentType = request.getHeader("Content-Type");
-                String name = cd.split(";")[1].split("=")[1].substring(1);
+                String name = cd.split(";")[2].split("=")[1].substring(1);
                 name = name.substring(0, name.indexOf("\""));
                 name = URLDecoder.decode(name, "UTF-8");
                 Command cb = fileHandler.handleFile(request.getInputStream(), new FileDetails(name, contentType));
