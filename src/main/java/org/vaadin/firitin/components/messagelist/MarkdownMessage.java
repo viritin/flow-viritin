@@ -72,7 +72,7 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
             setAvatarColor(color);
         }
         getElement().setProperty("userName", name);
-        getElement().setProperty("time", timestamp.format(DateTimeFormatter.ofPattern("YYYY-MM-DD hh:mm")));
+        getElement().setProperty("time", timestamp.format(DateTimeFormatter.ofPattern("YYYY-MM-dd hh:mm")));
         getElement().appendChild(content, scrollHelper);
         content.getStyle().setWhiteSpace(Style.WhiteSpace.NORMAL);
     }
