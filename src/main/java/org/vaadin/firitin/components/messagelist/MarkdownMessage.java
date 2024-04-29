@@ -161,7 +161,7 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
         return markdown;
     }
 
-    public void setMarkdown(String markdown, boolean uiAccess) {
+    protected void setMarkdown(String markdown, boolean uiAccess) {
         this.markdown = markdown == null ? PLACEHOLDER : markdown;
         String html = getMdRenderer().render(getMdParser().parse(this.markdown));
         previousHtml = html;
