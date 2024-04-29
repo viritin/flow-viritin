@@ -25,6 +25,9 @@ import java.time.format.DateTimeFormatter;
  */
 @Tag("vaadin-message")
 public class MarkdownMessage extends Component implements HasStyle, HasSize {
+
+    private static final String PLACEHOLDER = "...";
+
     public record Color(String cssColorCode){
 
         // "Stolen" from https://github.com/vaadin/web-components/blob/1875686236814dcc065a0e067c87adb80153ce60/packages/vaadin-lumo-styles/user-colors.js#L12
@@ -42,14 +45,6 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
     private static HtmlRenderer renderer;
     private static Parser parser;
     private UI ui;
-
-    public String getMarkdown() {
-        return markdown;
-    }
-
-    public void setMarkdown(String markdown) {
-        this.appendMarkdown(markdown);
-    }
 
     private String markdown;
     private String previousHtml;
@@ -72,7 +67,7 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
             setAvatarColor(color);
         }
         getElement().setProperty("userName", name);
-        getElement().setProperty("time", timestamp.format(DateTimeFormatter.ofPattern("YYYY-MM-DD hh:mm")));
+        getElement().setProperty("time", timestamp.format(DateTimeFormatter.ofPattern("YYYY-MM-dd hh:mm")));
         getElement().appendChild(content, scrollHelper);
         content.getStyle().setWhiteSpace(Style.WhiteSpace.NORMAL);
     }
@@ -85,6 +80,7 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
      */
     public MarkdownMessage(String name) {
         this(name, LocalDateTime.now(), Color.AVATAR_PRESETS[0]);
+        setMarkdown(null);
     }
 
     /**
@@ -96,6 +92,7 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
      */
     public MarkdownMessage(String name, LocalDateTime timestamp) {
         this(name, timestamp,Color.AVATAR_PRESETS[0]);
+        setMarkdown(null);
     }
 
     /**
@@ -107,6 +104,7 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
      */
     public MarkdownMessage(String name, Color avatarColor) {
         this(name, LocalDateTime.now(), avatarColor);
+        setMarkdown(null);
     }
 
     /**
@@ -120,7 +118,7 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
      */
     public MarkdownMessage(String markdown, String name, Color avatarColor) {
         this(name, LocalDateTime.now(), avatarColor);
-        appendMarkdown(markdown);
+        setMarkdown(markdown);
     }
 
     /**
@@ -133,7 +131,7 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
      */
     public MarkdownMessage(String markdown, String name) {
         this(name, LocalDateTime.now(), Color.AVATAR_PRESETS[name.hashCode()%Color.AVATAR_PRESETS.length]);
-        appendMarkdown(markdown);
+        setMarkdown(markdown);
     }
 
     /**
@@ -146,10 +144,7 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
      */
     public MarkdownMessage(String markdown, String name, LocalDateTime timestamp) {
         this(name, timestamp, null);
-        String html = getMdRenderer().render(getMdParser().parse(markdown));
-        appendHtml(html);
-        this.markdown = markdown;
-        this.previousHtml = html;
+        setMarkdown(markdown);
     }
 
     public void setAvatarColor(Color color) {
@@ -160,6 +155,25 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
 
     public void setUserColorIndex(int index) {
         getElement().setProperty("userColorIndex", index);
+    }
+
+    public String getMarkdown() {
+        return markdown;
+    }
+
+    public void setMarkdown(String markdown, boolean uiAccess) {
+        this.markdown = markdown == null ? PLACEHOLDER : markdown;
+        String html = getMdRenderer().render(getMdParser().parse(this.markdown));
+        previousHtml = html;
+        if (uiAccess) {
+            getUi().access(() -> appendHtml(html,0));
+        } else {
+            appendHtml(html,0);
+        }
+    }
+
+    public void setMarkdown(String markdown) {
+        setMarkdown(markdown,false);
     }
 
     private void appendHtml(String html) {
@@ -174,7 +188,7 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
     }
     private void appendHtml(String html, int replaceFrom) {
         getElement().executeJs("""
-                this.curHtml = this.curHtml.substring(0, $2) + $0; 
+                this.curHtml = this.curHtml ? this.curHtml.substring(0, $2) + $0 : $0; 
                 $1.innerHTML = this.curHtml;
                 """, html, content, replaceFrom);
     }
@@ -232,7 +246,8 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
     }
 
     protected void appendMarkdown(String markdownSnippet, boolean uiAccess) {
-        if(markdown == null) {
+        markdownSnippet = markdownSnippet != null ? markdownSnippet : ""; // Avoid nulls
+        if(markdown == null || PLACEHOLDER.equals(markdown)) {
             markdown = markdownSnippet;
         } else {
             markdown += markdownSnippet;
