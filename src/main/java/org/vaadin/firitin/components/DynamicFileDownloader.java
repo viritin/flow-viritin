@@ -207,6 +207,7 @@ public class DynamicFileDownloader extends Anchor implements
                             filename = fileNameGenerator.getFileName(request);
                         }
                         response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + URLEncoder.encode(filename, StandardCharsets.UTF_8));
+                        response.setHeader("Content-Type", contentTypeGenerator.getContentType());
                         try {
                             contentWriter.accept(response.getOutputStream());
                         } catch (Exception e) {
