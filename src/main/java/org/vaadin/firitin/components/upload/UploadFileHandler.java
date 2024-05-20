@@ -24,8 +24,10 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -66,6 +68,8 @@ import java.util.Objects;
  *
  * @author mstahv
  */
+// TODO figure out how to get rid of this safely, to be able to exclude the non-used artifact
+@Uses(Upload.class)
 @Tag("vaadin-upload")
 public class UploadFileHandler extends Component implements FluentComponent<UploadFileHandler>, FluentHasStyle<UploadFileHandler>, FluentHasSize<UploadFileHandler>, FluentHasEnabled<UploadFileHandler> {
 
