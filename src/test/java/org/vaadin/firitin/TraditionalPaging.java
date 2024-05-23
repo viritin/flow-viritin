@@ -11,6 +11,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.Route;
 
+import java.text.MessageFormat;
+
 /**
  * A prototype of a Grid with built-in paging widget and support for huge
  * collections. Reporting size is optional.
@@ -56,6 +58,10 @@ public class TraditionalPaging extends VerticalLayout {
 			table.setPageSize(5);
 		});
 
+		Button b4 = new Button("Set custom msg format", e-> {
+			table.setStatusMessage(new MessageFormat("Sivu {0}, {1} tulosta per sivu."));
+		});
+
 		Select<PagingGrid.PaginationBarMode> select = new Select<>();
 		select.setItems(PagingGrid.PaginationBarMode.values());
 		select.setValue(PagingGrid.PaginationBarMode.TOP);
@@ -63,7 +69,7 @@ public class TraditionalPaging extends VerticalLayout {
 			table.setPaginationBarMode(e.getValue());
 		});
 
-		add(table, b, b2, b3, select);
+		add(table, b, b2, b3, select, b4);
 	}
 
 }

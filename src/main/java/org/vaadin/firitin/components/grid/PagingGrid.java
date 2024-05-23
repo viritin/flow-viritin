@@ -16,6 +16,7 @@ import com.vaadin.flow.dom.Element;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 /**
@@ -30,33 +31,7 @@ public class PagingGrid<T> extends VGrid<T> {
     private PaginationBar secondaryBar;
     private FooterRow.FooterCell footerCell;
     private HeaderRow.HeaderCell headerCell;
-
-    public void setPaginationBarMode(PaginationBarMode value) {
-        if (paginationBarMode != value) {
-            paginationBarMode = value;
-            if (paginationBar != null) {
-                preparePaginationBar();
-            }
-        }
-
-    }
-
-    public enum PaginationBarMode {
-        TOP, BOTTOM, BOTH
-    }
-
-    public interface PagingDataProvider<T> {
-
-        /**
-         * Returns one page from the database.
-         *
-         * @param page     the page number
-         * @param pageSize the number of results on a page
-         * @return the result list
-         */
-        List<T> pageRequested(long page, int pageSize);
-    }
-
+    private MessageFormat statusMessage = new MessageFormat("Page {0}, showing {1} results per page.");
     private PaginationBarMode paginationBarMode = PaginationBarMode.TOP;
     private PagingGrid.PagingDataProvider<T> dataProvider;
     private PagingGrid<T>.PaginationBar paginationBar;
@@ -71,12 +46,6 @@ public class PagingGrid<T> extends VGrid<T> {
         init();
     }
 
-    private void init() {
-        addSortListener(this.sortListener);
-        setPageSize(10);
-        setAllRowsVisible(true);
-    }
-
     public PagingGrid(Class<T> beanType) {
         super(beanType);
         init();
@@ -85,6 +54,22 @@ public class PagingGrid<T> extends VGrid<T> {
     public PagingGrid(int pageSize) {
         super(pageSize);
         init();
+    }
+
+    public void setPaginationBarMode(PaginationBarMode value) {
+        if (paginationBarMode != value) {
+            paginationBarMode = value;
+            if (paginationBar != null) {
+                preparePaginationBar();
+            }
+        }
+
+    }
+
+    private void init() {
+        addSortListener(this.sortListener);
+        setPageSize(10);
+        setAllRowsVisible(true);
     }
 
     protected void preparePaginationBar() {
@@ -163,9 +148,83 @@ public class PagingGrid<T> extends VGrid<T> {
         setItems(dataProvider.pageRequested(0, getPageSize()));
     }
 
+    /**
+     * This method can optionally be used to define the size of the whole data set
+     * on all pages. If size is defined, the pagination bar shows "jump to last
+     * page" button and the status bar can report how many pages of results there
+     * are in total.
+     *
+     * @param totalResults the amount of results
+     */
+    public void setTotalResults(long totalResults) {
+        paginationBar.setSize(totalResults);
+        paginationBar.updateState();
+        if (secondaryBar != null) {
+            secondaryBar.setSize(totalResults);
+            secondaryBar.updateState();
+        }
+    }
+
+    @Override
+    public void setPageSize(int pageSize) {
+        super.setPageSize(pageSize);
+        if (paginationBar != null) {
+            paginationBar.fetchPage();
+        }
+    }
+
+    /**
+     * Sets the message format used to format status text when the amount of
+     * pages is unknown. Parameter 0 is current page, parameter 1 is page size.
+     *
+     * @param statusMessage the message
+     */
+    public void setStatusMessage(MessageFormat statusMessage) {
+        this.statusMessage = statusMessage;
+        if (paginationBar != null) {
+            paginationBar.updateState();
+            if (secondaryBar != null) {
+                secondaryBar.updateState();
+            }
+        }
+    }
+
+    public enum PaginationBarMode {
+        TOP, BOTTOM, BOTH
+    }
+
+    public interface PagingDataProvider<T> {
+
+        /**
+         * Returns one page from the database.
+         *
+         * @param page     the page number
+         * @param pageSize the number of results on a page
+         * @return the result list
+         */
+        List<T> pageRequested(long page, int pageSize);
+    }
+
     class PaginationBar extends VHorizontalLayout {
 
         private static final long serialVersionUID = 7799263034212965499L;
+        private final Span status = new Span();
+        private Long size;
+        private long currentPage;
+        private Long pages;
+        private Button first, last, next, previous;
+        private VHorizontalLayout pageBtns = new VHorizontalLayout();
+
+        public PaginationBar(Long size) {
+            setSize(size);
+            initButtons();
+            updateState();
+            add(first, previous);
+            space().withComponents(pageBtns, status).space();
+            add(next, last);
+            alignAll(Alignment.CENTER);
+            withFullWidth();
+        }
 
         private void updateState() {
 
@@ -210,7 +269,10 @@ public class PagingGrid<T> extends VGrid<T> {
             } else {
                 last.setEnabled(false);
                 next.setEnabled(true);
-                status.setText("Page " + (currentPage + 1) + ", showing " + getPageSize() + " results per page.");
+                status.setText(statusMessage.format(new Object[]{
+                        (currentPage + 1),
+                        getPageSize()
+                }));
                 pageBtns.setVisible(false);
             }
         }
@@ -260,27 +322,8 @@ public class PagingGrid<T> extends VGrid<T> {
             updateState();
         }
 
-        private Long size;
-        private long currentPage;
-        private Long pages;
-
         public long getSize() {
             return size;
-        }
-
-        private Button first, last, next, previous;
-        private final Span status = new Span();
-        private VHorizontalLayout pageBtns = new VHorizontalLayout();
-
-        public PaginationBar(Long size) {
-            setSize(size);
-            initButtons();
-            updateState();
-            add(first, previous);
-            space().withComponents(pageBtns, status).space();
-            add(next, last);
-            alignAll(Alignment.CENTER);
-            withFullWidth();
         }
 
         void setSize(Long s) {
@@ -294,30 +337,5 @@ public class PagingGrid<T> extends VGrid<T> {
             return size != null;
         }
 
-    }
-
-    /**
-     * This method can optionally be used to define the size of the whole data set
-     * on all pages. If size is defined, the pagination bar shows "jump to last
-     * page" button and the status bar can report how many pages of results there
-     * are in total.
-     *
-     * @param totalResults the amount of results
-     */
-    public void setTotalResults(long totalResults) {
-        paginationBar.setSize(totalResults);
-        paginationBar.updateState();
-        if (secondaryBar != null) {
-            secondaryBar.setSize(totalResults);
-            secondaryBar.updateState();
-        }
-    }
-
-    @Override
-    public void setPageSize(int pageSize) {
-        super.setPageSize(pageSize);
-        if(paginationBar != null) {
-            paginationBar.fetchPage();
-        }
     }
 }
