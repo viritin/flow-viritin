@@ -1,6 +1,5 @@
 package org.vaadin.firitin;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
@@ -11,7 +10,9 @@ import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
 import org.jetbrains.annotations.NotNull;
 import org.vaadin.firitin.components.button.VButton;
+import org.vaadin.firitin.components.gridlayout.Area;
 import org.vaadin.firitin.components.gridlayout.CssGridLayout;
+import org.vaadin.firitin.components.gridlayout.Row;
 import org.vaadin.firitin.util.ResizeObserver;
 
 import java.util.Random;
@@ -71,6 +72,20 @@ public class GridLayoutsView extends VerticalLayout {
     }
 
     private void cssGridLayoutAddonExampleFlexibleGrid() {
+        CssGridLayout gridLayout = new CssGridLayout();
+        gridLayout.setWidth("100%");
+        gridLayout.setHeight("600px");
+        gridLayout.setTemplateColumns("repeat(auto-fill, minmax(220px, 1fr))");
+        gridLayout.setAutoRows("220px");
+        gridLayout.add(createDiv());
+        gridLayout.add(createDiv())
+                .withRowSpan(2)
+                .withColumnSpan(2);
+        gridLayout.add(
+                createDiv(), createDiv(), createDiv(), createDiv(), createDiv(), createDiv(),
+                createDiv(), createDiv(), createDiv(), createDiv(), createDiv(), createDiv(),
+                createDiv(), createDiv());
+        showComponent(gridLayout);
         /* Original code
         FlexibleGridLayout flexibleGridLayout = new FlexibleGridLayout()
                 .withColumns(Repeat.RepeatMode.AUTO_FILL, new MinMax(new Length("220px"), new Flex()))
@@ -89,20 +104,6 @@ public class GridLayoutsView extends VerticalLayout {
         flexibleGridLayout.setWidth("100%");
         flexibleGridLayout.setHeight("600px");
         */
-        CssGridLayout gridLayout = new CssGridLayout();
-        gridLayout.setWidth("100%");
-        gridLayout.setHeight("600px");
-        gridLayout.setTemplateColumns("repeat(auto-fill, minmax(220px, 1fr))");
-        gridLayout.setAutoRows("220px");
-        gridLayout.add(createDiv());
-        gridLayout.add(createDiv())
-                .withRowSpan(2)
-                .withColumnSpan(2);
-        gridLayout.add(
-                createDiv(), createDiv(), createDiv(), createDiv(), createDiv(), createDiv(),
-                createDiv(), createDiv(), createDiv(), createDiv(), createDiv(), createDiv(),
-                createDiv(), createDiv());
-        showComponent(gridLayout);
     }
 
 
@@ -112,22 +113,27 @@ public class GridLayoutsView extends VerticalLayout {
         CssGridLayout gridLayout = new CssGridLayout();
         gridLayout.setWidth("100%");
 
-        // TODO consider providing some typed API for defining and referencing areas
+        var head = new Area("head");
+        var nav = new Area("nav");
+        var foot = new Area("foot");
+        var main = new Area("main");
         gridLayout.setTemplateAreas(
-                "head head",
-                "nav  main",
-                "nav  foot"
-        );
+                new Row( head, head ),
+                new Row( nav , main ),
+                new Row( nav , foot )
+                );
         gridLayout.setTemplateRows("50px", "1fr", "50px");
         gridLayout.setTemplateColumns("150px", "1fr");
-        gridLayout.add(createDiv()).withArea("foot");
-        gridLayout.add(createDiv()).withArea("head");
-        gridLayout.add(createDiv()).withArea("nav");
-        Div main = createDiv();
-        main.add(new Paragraph("This is..."));
-        main.add(new Paragraph("... main content..."));
-        main.add(new Paragraph("... area."));
-        gridLayout.add(main).withArea("main");
+        gridLayout.add(createDiv()).withArea(foot);
+        gridLayout.add(createDiv()).withArea(head);
+        gridLayout.add(createDiv()).withArea(nav);
+
+        Div mainContent = createDiv();
+        mainContent.add(new Paragraph("This is..."));
+        mainContent.add(new Paragraph("... main content..."));
+        mainContent.add(new Paragraph("... area."));
+        gridLayout.add(mainContent).withArea(main);
+
         showComponent(gridLayout);
 
     }
