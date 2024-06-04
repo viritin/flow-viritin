@@ -29,9 +29,9 @@ public class GridLayoutsView extends VerticalLayout {
                 new VButton("12 col with col gap", e -> this.basic12ColWithtGap()),
                 new VButton("MDC example", e -> this.mdcExample())
                 , new VButton("css grid example1", e -> this.cssGridLayoutAddonExample1())
-                , new VButton("css grid example2", e -> this.cssGridLayoutAddonExampleFlexibleGrid())
-                , new VButton("css grid example2", e -> this.cssGridExampleAreaLayout())
-                , new VButton("responsive grid", e -> this.responsiveGrid())
+                , new VButton("css grid example flexible grid", e -> this.cssGridLayoutAddonExampleFlexibleGrid())
+                , new VButton("areas", e -> this.cssGridExampleAreaLayout())
+                , new VButton("areas & responsive grid", e -> this.responsiveGrid())
         ));
         //basic12Col();
         //mdcExample();
