@@ -21,17 +21,9 @@ import org.vaadin.firitin.util.VStyleUtil;
 public class BullShitLayout extends Div {
 
     public BullShitLayout() {
-        VStyleUtil.inject("""
-            @media (min-width: 768px) {
-                .my-md-grid {
-                    display: grid;
-                }
-            }
-        """);
-
         addClassNames(
                 LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
-                "my-md-grid", // md:grid not listed in lumo utils && md:grid don't seem to work 🤷
+                "mdgrid", // note, a typo in utility classes, this will be broken soon: https://github.com/vaadin/web-components/pull/7416
                 LumoUtility.Grid.Column.COLUMNS_12
         );
         setWidthFull();
