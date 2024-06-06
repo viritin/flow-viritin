@@ -1,4 +1,4 @@
-package org.vaadin.firitin;
+package org.vaadin.firitin.layouts;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
@@ -8,7 +8,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
-import org.jetbrains.annotations.NotNull;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.gridlayout.Area;
 import org.vaadin.firitin.components.gridlayout.CssGridLayout;
@@ -258,16 +257,16 @@ public class GridLayoutsView extends VerticalLayout {
         showComponent(gridLayout);
     }
 
-    private static @NotNull Button component(int i) {
+    private static Button component(int i) {
         return component("B"+i);
     }
 
-    private static @NotNull VButton component(String i) {
+    private static VButton component(String i) {
         return new VButton(i, e -> Notification.show("It works"))
                 .withStyle("margin", "0").withStyle("border", "1px solid black");
     }
 
-    private static @NotNull VButton fullSizeComponent(String i) {
+    private static VButton fullSizeComponent(String i) {
         return component(i).withSizeFull();
     }
 
