@@ -20,12 +20,7 @@ import java.util.WeakHashMap;
  * Allows you for example to easily configure Grid columns for different
  * devices or swap component implementations based on the screen size/orientation.
  *
- *
- * @deprecated Consider this an early draft that may change unexpectedly. Feedback
- * for the helper highly appreciated, hoping to get similar tooling to core
- * soon to replace resize listener in Page.
  */
-@Deprecated(forRemoval = false)
 public class ResizeObserver {
 
     private static ObjectMapper om = new ObjectMapper();
