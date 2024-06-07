@@ -39,72 +39,39 @@ public class CSSGridView extends VerticalLayout {
         responsiveGrid();
     }
 
-    private void cssGridLayoutAddonExample1() {
-        /* Original code
-        FluentGridLayout layout = new FluentGridLayout();
-        Component alignTestComponent = getDiv();
-        layout.withTemplateRows(new Flex(), new Flex(), new Flex())
-                .withTemplateColumns(new Flex(), new Flex(), new Flex())
-                .withColumnAlign(alignTestComponent, ColumnAlign.END)
-                .withRowAlign(alignTestComponent, RowAlign.END)
-                .withRowAndColumn(alignTestComponent, 1, 1, 1, 3)
-                .withRowAndColumn(getDiv(), 2, 1)
-                .withRowAndColumn(getDiv(), 2, 2)
-                .withRowAndColumn(getDiv(), 1, 3, 3, 3);
-        layout.setWidth("100%");
-        layout.setHeight("600px");
-         */
-        CssGrid gridLayout = new CssGrid();
-        gridLayout.setWidth("100%");
-        gridLayout.setHeight("600px");
-        gridLayout.setTemplateColumns("1fr","1fr","1fr");
-        gridLayout.setTemplateRows("1fr","1fr","1fr");
-        gridLayout.add(createDiv())
-                .withRow(1)
+    private void mdcExample() {
+        CssGrid gridLayout = new CssGrid(3);
+        gridLayout.setHeight("400px");
+        gridLayout.setGap("1em");
+        gridLayout.setAutoRows("minmax(100px, auto)");
+
+        gridLayout.add(fullSizeComponent("one"))
                 .withColumns(1,3)
-                .withAlign(Style.AlignSelf.END)
-                .withJustifySelf(Style.JustifyContent.END);
-        gridLayout.add(createDiv()).withRow(2).withColumn(1);
-        gridLayout.add(createDiv()).withRow(2).withColumn(2);
-        gridLayout.add(createDiv()).withRows(1,3).withColumns(3,3);
+                .withRow(1);
+        gridLayout.add(fullSizeComponent("two"))
+                .withColumns(2,4)
+                .withRows(1,3);
+        gridLayout.add(fullSizeComponent("three"))
+                .withColumn(1)
+                .withRows(2,5);
+        gridLayout.add(fullSizeComponent("four"))
+                .withColumn(3)
+                .withRow(3);
+        gridLayout.add(fullSizeComponent("five"))
+                .withColumn(2)
+                .withRow(4);
+        gridLayout.add(fullSizeComponent("six"))
+                .withColumn(3)
+                .withRow(4);
+
+        if(false) {
+            gridLayout.add(component(1));
+            gridLayout.add(component(2));
+            gridLayout.add(component(3));
+            gridLayout.add(component(4));
+        }
         showComponent(gridLayout);
     }
-
-    private void cssGridLayoutAddonExampleFlexibleGrid() {
-        CssGrid gridLayout = new CssGrid();
-        gridLayout.setWidth("100%");
-        gridLayout.setHeight("600px");
-        gridLayout.setTemplateColumns("repeat(auto-fill, minmax(220px, 1fr))");
-        gridLayout.setAutoRows("220px");
-        gridLayout.add(createDiv());
-        gridLayout.add(createDiv())
-                .withRowSpan(2)
-                .withColumnSpan(2);
-        gridLayout.add(
-                createDiv(), createDiv(), createDiv(), createDiv(), createDiv(), createDiv(),
-                createDiv(), createDiv(), createDiv(), createDiv(), createDiv(), createDiv(),
-                createDiv(), createDiv());
-        showComponent(gridLayout);
-        /* Original code
-        FlexibleGridLayout flexibleGridLayout = new FlexibleGridLayout()
-                .withColumns(Repeat.RepeatMode.AUTO_FILL, new MinMax(new Length("220px"), new Flex()))
-                .withAutoRows(new Length("220px"))
-                .withItems(
-                        getDiv())
-                .withItemWithSize(getDiv(), 2, 2)
-                .withItems(
-                        getDiv(), getDiv(), getDiv(), getDiv(), getDiv(), getDiv(),
-                        getDiv(), getDiv(), getDiv(), getDiv(), getDiv(), getDiv(),
-                        getDiv(), getDiv())
-                .withOverflow(Overflow.AUTO)
-                .withAutoFlow(AutoFlow.ROW_DENSE)
-                .withPadding(true)
-                .withSpacing(true);
-        flexibleGridLayout.setWidth("100%");
-        flexibleGridLayout.setHeight("600px");
-        */
-    }
-
 
     private void cssGridExampleAreaLayout() {
         // MDN example, but random colors
@@ -190,41 +157,6 @@ public class CSSGridView extends VerticalLayout {
         return div;
     }
 
-
-    private void mdcExample() {
-        CssGrid gridLayout = new CssGrid(3);
-        gridLayout.setHeight("400px");
-        gridLayout.setGap("1em");
-        gridLayout.setAutoRows("minmax(100px, auto)");
-
-        gridLayout.add(fullSizeComponent("one"))
-                .withColumns(1,3)
-                .withRow(1);
-        gridLayout.add(fullSizeComponent("two"))
-                .withColumns(2,4)
-                .withRows(1,3);
-        gridLayout.add(fullSizeComponent("three"))
-                .withColumn(1)
-                .withRows(2,5);
-        gridLayout.add(fullSizeComponent("four"))
-                .withColumn(3)
-                .withRow(3);
-        gridLayout.add(fullSizeComponent("five"))
-                .withColumn(2)
-                .withRow(4);
-        gridLayout.add(fullSizeComponent("six"))
-                .withColumn(3)
-                .withRow(4);
-
-        if(false) {
-            gridLayout.add(component(1));
-            gridLayout.add(component(2));
-            gridLayout.add(component(3));
-            gridLayout.add(component(4));
-        }
-        showComponent(gridLayout);
-    }
-
     private void mdcUnequalCols() {
         CssGrid gridLayout = new CssGrid(3);
 
@@ -256,6 +188,74 @@ public class CSSGridView extends VerticalLayout {
 
         showComponent(gridLayout);
     }
+
+    private void cssGridLayoutAddonExample1() {
+        CssGrid gridLayout = new CssGrid();
+        gridLayout.setWidth("100%");
+        gridLayout.setHeight("600px");
+        gridLayout.setTemplateColumns("1fr","1fr","1fr");
+        gridLayout.setTemplateRows("1fr","1fr","1fr");
+        gridLayout.add(createDiv())
+                .withRow(1)
+                .withColumns(1,3)
+                .withAlign(Style.AlignSelf.END)
+                .withJustifySelf(Style.JustifyContent.END);
+        gridLayout.add(createDiv()).withRow(2).withColumn(1);
+        gridLayout.add(createDiv()).withRow(2).withColumn(2);
+        gridLayout.add(createDiv()).withRows(1,3).withColumns(3,3);
+        showComponent(gridLayout);
+        /* Original code from CssGrid Add-on
+        FluentGridLayout layout = new FluentGridLayout();
+        Component alignTestComponent = getDiv();
+        layout.withTemplateRows(new Flex(), new Flex(), new Flex())
+                .withTemplateColumns(new Flex(), new Flex(), new Flex())
+                .withColumnAlign(alignTestComponent, ColumnAlign.END)
+                .withRowAlign(alignTestComponent, RowAlign.END)
+                .withRowAndColumn(alignTestComponent, 1, 1, 1, 3)
+                .withRowAndColumn(getDiv(), 2, 1)
+                .withRowAndColumn(getDiv(), 2, 2)
+                .withRowAndColumn(getDiv(), 1, 3, 3, 3);
+        layout.setWidth("100%");
+        layout.setHeight("600px");
+         */
+
+    }
+
+    private void cssGridLayoutAddonExampleFlexibleGrid() {
+        CssGrid gridLayout = new CssGrid();
+        gridLayout.setWidth("100%");
+        gridLayout.setHeight("600px");
+        gridLayout.setTemplateColumns("repeat(auto-fill, minmax(220px, 1fr))");
+        gridLayout.setAutoRows("220px");
+        gridLayout.add(createDiv());
+        gridLayout.add(createDiv())
+                .withRowSpan(2)
+                .withColumnSpan(2);
+        gridLayout.add(
+                createDiv(), createDiv(), createDiv(), createDiv(), createDiv(), createDiv(),
+                createDiv(), createDiv(), createDiv(), createDiv(), createDiv(), createDiv(),
+                createDiv(), createDiv());
+        showComponent(gridLayout);
+        /* Original code
+        FlexibleGridLayout flexibleGridLayout = new FlexibleGridLayout()
+                .withColumns(Repeat.RepeatMode.AUTO_FILL, new MinMax(new Length("220px"), new Flex()))
+                .withAutoRows(new Length("220px"))
+                .withItems(
+                        getDiv())
+                .withItemWithSize(getDiv(), 2, 2)
+                .withItems(
+                        getDiv(), getDiv(), getDiv(), getDiv(), getDiv(), getDiv(),
+                        getDiv(), getDiv(), getDiv(), getDiv(), getDiv(), getDiv(),
+                        getDiv(), getDiv())
+                .withOverflow(Overflow.AUTO)
+                .withAutoFlow(AutoFlow.ROW_DENSE)
+                .withPadding(true)
+                .withSpacing(true);
+        flexibleGridLayout.setWidth("100%");
+        flexibleGridLayout.setHeight("600px");
+        */
+    }
+
 
     private static Button component(int i) {
         return component("B"+i);
