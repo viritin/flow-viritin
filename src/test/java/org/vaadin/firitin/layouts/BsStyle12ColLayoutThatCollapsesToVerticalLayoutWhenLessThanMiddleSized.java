@@ -4,7 +4,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
-import org.vaadin.firitin.components.gridlayout.CssGridLayout;
+import org.vaadin.firitin.components.cssgrid.CssGrid;
 import org.vaadin.firitin.util.ResizeObserver;
 import org.vaadin.firitin.util.VStyleUtil;
 
@@ -17,7 +17,7 @@ public class BsStyle12ColLayoutThatCollapsesToVerticalLayoutWhenLessThanMiddleSi
                     margin:0.5em;
                 }
             """);
-        CssGridLayout gridLayout = new CssGridLayout(12);
+        CssGrid gridLayout = new CssGrid(12);
         gridLayout.setId("cssgrid");
         gridLayout.setWidthFull();
         gridLayout.add(new Div("span 2")).withColumnSpan(2);

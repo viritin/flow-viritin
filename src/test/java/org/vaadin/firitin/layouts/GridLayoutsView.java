@@ -9,9 +9,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
 import org.vaadin.firitin.components.button.VButton;
-import org.vaadin.firitin.components.gridlayout.Area;
-import org.vaadin.firitin.components.gridlayout.CssGridLayout;
-import org.vaadin.firitin.components.gridlayout.Row;
+import org.vaadin.firitin.components.cssgrid.Area;
+import org.vaadin.firitin.components.cssgrid.CssGrid;
+import org.vaadin.firitin.components.cssgrid.Row;
 import org.vaadin.firitin.util.ResizeObserver;
 
 import java.util.Random;
@@ -21,7 +21,7 @@ public class GridLayoutsView extends VerticalLayout {
     private Random random = new Random(0);
 
 
-    CssGridLayout grid;
+    CssGrid grid;
 
     public GridLayoutsView() {
         add(new HorizontalLayout(
@@ -54,7 +54,7 @@ public class GridLayoutsView extends VerticalLayout {
         layout.setWidth("100%");
         layout.setHeight("600px");
          */
-        CssGridLayout gridLayout = new CssGridLayout();
+        CssGrid gridLayout = new CssGrid();
         gridLayout.setWidth("100%");
         gridLayout.setHeight("600px");
         gridLayout.setTemplateColumns("1fr","1fr","1fr");
@@ -71,7 +71,7 @@ public class GridLayoutsView extends VerticalLayout {
     }
 
     private void cssGridLayoutAddonExampleFlexibleGrid() {
-        CssGridLayout gridLayout = new CssGridLayout();
+        CssGrid gridLayout = new CssGrid();
         gridLayout.setWidth("100%");
         gridLayout.setHeight("600px");
         gridLayout.setTemplateColumns("repeat(auto-fill, minmax(220px, 1fr))");
@@ -109,7 +109,7 @@ public class GridLayoutsView extends VerticalLayout {
     private void cssGridExampleAreaLayout() {
         // MDN example, but random colors
 
-        CssGridLayout gridLayout = new CssGridLayout();
+        CssGrid gridLayout = new CssGrid();
         gridLayout.setWidth("100%");
 
         var head = new Area("head");
@@ -139,7 +139,7 @@ public class GridLayoutsView extends VerticalLayout {
 
     public void responsiveGrid() {
 
-        CssGridLayout gridLayout = new CssGridLayout();
+        CssGrid gridLayout = new CssGrid();
         gridLayout.setWidth("100%");
 
         ResizeObserver.get().observe(gridLayout, size -> {
@@ -192,7 +192,7 @@ public class GridLayoutsView extends VerticalLayout {
 
 
     private void mdcExample() {
-        CssGridLayout gridLayout = new CssGridLayout(3);
+        CssGrid gridLayout = new CssGrid(3);
         gridLayout.setHeight("400px");
         gridLayout.setGap("1em");
         gridLayout.setAutoRows("minmax(100px, auto)");
@@ -226,7 +226,7 @@ public class GridLayoutsView extends VerticalLayout {
     }
 
     private void mdcUnequalCols() {
-        CssGridLayout gridLayout = new CssGridLayout(3);
+        CssGrid gridLayout = new CssGrid(3);
 
         gridLayout.add(fullSizeComponent("one"));
         gridLayout.add(fullSizeComponent("two"));
@@ -247,7 +247,7 @@ public class GridLayoutsView extends VerticalLayout {
     }
 
     private void basic12Col() {
-        CssGridLayout gridLayout = new CssGridLayout(12);
+        CssGrid gridLayout = new CssGrid(12);
         gridLayout.getStyle().setBorder("1px solid blue");
 
         for(int i = 0; i < 24; i++) {
@@ -270,7 +270,7 @@ public class GridLayoutsView extends VerticalLayout {
         return component(i).withSizeFull();
     }
 
-    private void showComponent(CssGridLayout gridLayout) {
+    private void showComponent(CssGrid gridLayout) {
         if(grid != null) {
             grid.removeFromParent();
         }

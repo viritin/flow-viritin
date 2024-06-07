@@ -3,9 +3,10 @@ package org.vaadin.firitin.layouts;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import org.vaadin.firitin.util.VStyleUtil;
 
 /**
+ * 
+ *
  * A trivial grid layout that mimics Bootstrap grid system with following features
  *
  *  * supports colspan (1-12)

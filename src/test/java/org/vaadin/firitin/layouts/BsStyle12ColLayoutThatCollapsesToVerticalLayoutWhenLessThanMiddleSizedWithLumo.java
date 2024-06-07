@@ -2,10 +2,8 @@ package org.vaadin.firitin.layouts;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import org.vaadin.firitin.components.gridlayout.CssGridLayout;
 import org.vaadin.firitin.util.ResizeObserver;
 import org.vaadin.firitin.util.VStyleUtil;
 
