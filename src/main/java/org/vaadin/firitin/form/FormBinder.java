@@ -464,19 +464,13 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     }
 
     protected void handleClassLevelValidations(Set<ConstraintViolation<T>> violations) {
-        HasComponents hc = getClassLevelViolationDisplay();
         for (ConstraintViolation cv : violations) {
-            Paragraph paragraph = new Paragraph();
-            paragraph.addClassNames(LumoUtility.TextColor.ERROR);
             String propertyPath = cv.getPropertyPath().toString();
-            if (propertyPath.isEmpty()) {
-                paragraph.setText(cv.getMessage());
-            } else {
-                paragraph.setText(propertyPath + " " + cv.getMessage());
-            }
-
-            errorMsgs.add(paragraph);
-            hc.add(paragraph);
+            addClassLevelValidationViolation(
+                    createClassLevelValidationComponent(
+                            propertyPath.isEmpty() ? cv.getMessage() : propertyPath + " " + cv.getMessage()
+                    )
+            );
         }
     }
 
@@ -508,14 +502,22 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     }
 
     private void handleClassLevelValidations(HashMap<String, String> nonReported) {
-        HasComponents hc = getClassLevelViolationDisplay();
-        nonReported.forEach((property, cv) -> {
-            Paragraph paragraph = new Paragraph();
-            paragraph.addClassNames(LumoUtility.TextColor.ERROR);
-            paragraph.setText(cv);
-            errorMsgs.add(paragraph);
-            hc.add(paragraph);
+        nonReported.forEach((_property, cv) -> {
+            addClassLevelValidationViolation(createClassLevelValidationComponent(cv));
         });
+    }
+
+    private Component createClassLevelValidationComponent(String message) {
+        Paragraph paragraph = new Paragraph();
+        paragraph.addClassNames(LumoUtility.TextColor.ERROR);
+        paragraph.setText(message);
+        return paragraph;
+    }
+
+    private void addClassLevelValidationViolation(Component validationViolationComponent) {
+        HasComponents hc = getClassLevelViolationDisplay();
+        errorMsgs.add(validationViolationComponent);
+        hc.add(validationViolationComponent);
     }
 
     /**
