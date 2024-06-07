@@ -1,4 +1,4 @@
-package org.vaadin.firitin.layouts;
+package org.vaadin.firitin.layouts.gridsystems;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;

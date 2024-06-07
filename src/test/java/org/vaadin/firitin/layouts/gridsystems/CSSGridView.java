@@ -1,4 +1,4 @@
-package org.vaadin.firitin.layouts;
+package org.vaadin.firitin.layouts.gridsystems;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
@@ -17,13 +17,13 @@ import org.vaadin.firitin.util.ResizeObserver;
 import java.util.Random;
 
 @Route
-public class GridLayoutsView extends VerticalLayout {
+public class CSSGridView extends VerticalLayout {
     private Random random = new Random(0);
 
 
     CssGrid grid;
 
-    public GridLayoutsView() {
+    public CSSGridView() {
         add(new HorizontalLayout(
                 new VButton("Basic 12 col", e -> this.basic12Col()),
                 new VButton("12 col with col gap", e -> this.basic12ColWithtGap()),

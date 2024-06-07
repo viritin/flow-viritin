@@ -1,4 +1,4 @@
-package org.vaadin.firitin.layouts;
+package org.vaadin.firitin.layouts.gridsystems;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -8,14 +8,16 @@ import org.vaadin.firitin.util.ResizeObserver;
 import org.vaadin.firitin.util.VStyleUtil;
 
 @Route
-public class BsStyle12ColLayoutThatCollapsesToVerticalLayoutWhenLessThanMiddleSizedWithLumo extends VerticalLayout {
-    public BsStyle12ColLayoutThatCollapsesToVerticalLayoutWhenLessThanMiddleSizedWithLumo() {
+public class BsMimicingWithLumo extends VerticalLayout {
+    public BsMimicingWithLumo() {
         VStyleUtil.inject("""
                 #cssgrid div {
                     background: cyan;
                     margin:0.5em;
                 }
             """);
+
+        // Don't do this for real, bad typing, horrible to read
 
         Div gridLayout = new Div();
         gridLayout.addClassName(LumoUtility.Display.GRID);

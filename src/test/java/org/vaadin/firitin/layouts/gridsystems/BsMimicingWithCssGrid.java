@@ -1,4 +1,4 @@
-package org.vaadin.firitin.layouts;
+package org.vaadin.firitin.layouts.gridsystems;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -9,8 +9,8 @@ import org.vaadin.firitin.util.ResizeObserver;
 import org.vaadin.firitin.util.VStyleUtil;
 
 @Route
-public class BsStyle12ColLayoutThatCollapsesToVerticalLayoutWhenLessThanMiddleSized extends VerticalLayout {
-    public BsStyle12ColLayoutThatCollapsesToVerticalLayoutWhenLessThanMiddleSized() {
+public class BsMimicingWithCssGrid extends VerticalLayout {
+    public BsMimicingWithCssGrid() {
         VStyleUtil.inject("""
                 #cssgrid div {
                     background: cyan;

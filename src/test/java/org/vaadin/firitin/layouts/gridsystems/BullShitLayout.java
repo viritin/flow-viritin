@@ -1,11 +1,11 @@
-package org.vaadin.firitin.layouts;
+package org.vaadin.firitin.layouts.gridsystems;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
 /**
- * 
+ * EXPERIMENT, thus not on the src/main side.
  *
  * A trivial grid layout that mimics Bootstrap grid system with following features
  *
