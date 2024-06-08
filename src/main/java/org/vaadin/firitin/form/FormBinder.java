@@ -16,6 +16,7 @@ import com.vaadin.flow.data.binder.ValueContext;
 import com.vaadin.flow.data.converter.Converter;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.validation.ConstraintViolation;
@@ -74,6 +75,8 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     private boolean ignoreServerOriginatedChanges = true;
 
     List<Registration> registrations = new ArrayList<>();
+
+    private SerializableFunction<String,Component> classLevelValidationViolationComponentProvider = new ParagraphWithErrorStyleClassLevelValidationViolationComponentProvider();
 
     /**
      * Constructs a new binder.
@@ -474,6 +477,10 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         }
     }
 
+    public void setClassLevelValidationViolationComponentProvider(SerializableFunction<String, Component> classLevelValidationViolationComponentProvider) {
+        this.classLevelValidationViolationComponentProvider = Objects.requireNonNull(classLevelValidationViolationComponentProvider);
+    }
+
     /**
      * An alternative API to report constraint violations without BeanValidation
      * on the classpath.
@@ -508,10 +515,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     }
 
     private Component createClassLevelValidationComponent(String message) {
-        Paragraph paragraph = new Paragraph();
-        paragraph.addClassNames(LumoUtility.TextColor.ERROR);
-        paragraph.setText(message);
-        return paragraph;
+        return classLevelValidationViolationComponentProvider.apply(message);
     }
 
     private void addClassLevelValidationViolation(Component validationViolationComponent) {
@@ -600,6 +604,16 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
 
     public HasValue getEditor(String property) {
         return nameToEditorField.get(property);
+    }
+
+    public static class ParagraphWithErrorStyleClassLevelValidationViolationComponentProvider implements SerializableFunction<String,Component> {
+        @Override
+        public Component apply(String message) {
+            Paragraph paragraph = new Paragraph();
+            paragraph.addClassNames(LumoUtility.TextColor.ERROR);
+            paragraph.setText(message);
+            return paragraph;
+        }
     }
 
 }
