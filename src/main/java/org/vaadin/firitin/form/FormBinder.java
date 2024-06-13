@@ -483,14 +483,11 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     }
 
     /**
-     * An alternative API to report constraint violations without BeanValidation
+     * An alternative API to report constraint violations without BeanValidation API
      * on the classpath.
      *
      * @param propertyToViolation
-     * @deprecated try to use the standard Java Bean Validation API based method
-     * instead
      */
-    @Deprecated
     public void setRawConstraintViolations(Map<String, String> propertyToViolation) {
         clearValidationErrors();
         HashMap<String, String> nonReported = new HashMap<>();
