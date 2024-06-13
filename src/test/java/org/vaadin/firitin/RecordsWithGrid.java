@@ -53,6 +53,13 @@ public class RecordsWithGrid extends VerticalLayout {
         assert !nameFirst;
 
         add(grid);
+
+
+        record AdHocRecord(String foo, String bar) {};
+        var adhoc = new VGrid<>(AdHocRecord.class);
+        adhoc.setItems(new AdHocRecord("Foo", "Bar"));
+        add(adhoc);
+
     }
 
 }

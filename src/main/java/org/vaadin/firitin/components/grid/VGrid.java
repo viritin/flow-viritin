@@ -168,6 +168,7 @@ public class VGrid<T> extends Grid<T>
     private void addRecordColumn(RecordComponent r, String name) {
         addColumn(v -> {
             try {
+                r.getAccessor().setAccessible(true);
                 return r.getAccessor().invoke(v);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
