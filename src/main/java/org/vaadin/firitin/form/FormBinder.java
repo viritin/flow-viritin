@@ -16,6 +16,7 @@ import com.vaadin.flow.data.binder.ValueContext;
 import com.vaadin.flow.data.converter.Converter;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.validation.ConstraintViolation;
@@ -74,6 +75,8 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     private boolean ignoreServerOriginatedChanges = true;
 
     List<Registration> registrations = new ArrayList<>();
+
+    private SerializableFunction<String,Component> classLevelValidationViolationComponentProvider = new ParagraphWithErrorStyleClassLevelValidationViolationComponentProvider();
 
     /**
      * Constructs a new binder.
@@ -464,20 +467,18 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     }
 
     protected void handleClassLevelValidations(Set<ConstraintViolation<T>> violations) {
-        HasComponents hc = getClassLevelViolationDisplay();
         for (ConstraintViolation cv : violations) {
-            Paragraph paragraph = new Paragraph();
-            paragraph.addClassNames(LumoUtility.TextColor.ERROR);
             String propertyPath = cv.getPropertyPath().toString();
-            if (propertyPath.isEmpty()) {
-                paragraph.setText(cv.getMessage());
-            } else {
-                paragraph.setText(propertyPath + " " + cv.getMessage());
-            }
-
-            errorMsgs.add(paragraph);
-            hc.add(paragraph);
+            addClassLevelValidationViolation(
+                    createClassLevelValidationComponent(
+                            propertyPath.isEmpty() ? cv.getMessage() : propertyPath + " " + cv.getMessage()
+                    )
+            );
         }
+    }
+
+    public void setClassLevelValidationViolationComponentProvider(SerializableFunction<String, Component> classLevelValidationViolationComponentProvider) {
+        this.classLevelValidationViolationComponentProvider = Objects.requireNonNull(classLevelValidationViolationComponentProvider);
     }
 
     /**
@@ -508,14 +509,19 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     }
 
     private void handleClassLevelValidations(HashMap<String, String> nonReported) {
-        HasComponents hc = getClassLevelViolationDisplay();
-        nonReported.forEach((property, cv) -> {
-            Paragraph paragraph = new Paragraph();
-            paragraph.addClassNames(LumoUtility.TextColor.ERROR);
-            paragraph.setText(cv);
-            errorMsgs.add(paragraph);
-            hc.add(paragraph);
+        nonReported.forEach((_property, cv) -> {
+            addClassLevelValidationViolation(createClassLevelValidationComponent(cv));
         });
+    }
+
+    private Component createClassLevelValidationComponent(String message) {
+        return classLevelValidationViolationComponentProvider.apply(message);
+    }
+
+    private void addClassLevelValidationViolation(Component validationViolationComponent) {
+        HasComponents hc = getClassLevelViolationDisplay();
+        errorMsgs.add(validationViolationComponent);
+        hc.add(validationViolationComponent);
     }
 
     /**
@@ -598,6 +604,16 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
 
     public HasValue getEditor(String property) {
         return nameToEditorField.get(property);
+    }
+
+    public static class ParagraphWithErrorStyleClassLevelValidationViolationComponentProvider implements SerializableFunction<String,Component> {
+        @Override
+        public Component apply(String message) {
+            Paragraph paragraph = new Paragraph();
+            paragraph.addClassNames(LumoUtility.TextColor.ERROR);
+            paragraph.setText(message);
+            return paragraph;
+        }
     }
 
 }
