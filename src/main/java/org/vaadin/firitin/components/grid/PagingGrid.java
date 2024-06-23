@@ -16,6 +16,7 @@ import com.vaadin.flow.dom.Element;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
 
+import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -193,7 +194,7 @@ public class PagingGrid<T> extends VGrid<T> {
         TOP, BOTTOM, BOTH
     }
 
-    public interface PagingDataProvider<T> {
+    public interface PagingDataProvider<T> extends Serializable {
 
         /**
          * Returns one page from the database.
