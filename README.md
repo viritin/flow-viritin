@@ -96,8 +96,11 @@ Mirjan Merruko and Stefan Freude are so far the most active contributors to this
 ## Development instructions
 
 Starting the test/demo server:
+
+Run the main method of TestServer in your IDE or run the following command in the project root:
+
 ```
-mvn jetty:run
+mvn org.springframework.boot:spring-boot-maven-plugin:test-run
 ```
 
-This deploys demo at http://localhost:9998
+This deploys demo views at http://localhost:9998
