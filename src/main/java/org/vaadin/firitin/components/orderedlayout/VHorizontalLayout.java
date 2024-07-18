@@ -10,12 +10,19 @@ import org.vaadin.firitin.fluency.ui.*;
 
 public class VHorizontalLayout extends HorizontalLayout implements FluentThemableLayout<VHorizontalLayout>,
         FluentComponent<VHorizontalLayout>, FluentHasStyle<VHorizontalLayout>, FluentHasSize<VHorizontalLayout>, FluentHasComponents<VHorizontalLayout>, FluentClickNotifier<HorizontalLayout, VHorizontalLayout> {
+
+    private final void viritinDefaults() {
+        setDefaultVerticalComponentAlignment(Alignment.BASELINE);
+
+    }
     public VHorizontalLayout() {
         super();
+        viritinDefaults();
     }
 
     public VHorizontalLayout(Component... children) {
         super(children);
+        viritinDefaults();
     }
 
     public VHorizontalLayout alignAll(Alignment alignment) {
