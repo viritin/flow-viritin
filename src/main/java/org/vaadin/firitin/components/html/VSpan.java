@@ -10,6 +10,10 @@ public class VSpan extends Span implements FluentHtmlContainer<VSpan>, FluentCli
         super();
     }
 
+    public VSpan(Object text) {
+        super(text.toString());
+    }
+
     public VSpan(String text) {
         super(text);
     }
