@@ -6,12 +6,12 @@
         <groupId>in.virit.sb</groupId>
         <artifactId>viritin-addon-project-parent</artifactId>
         <version>0.0.3</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <groupId>in.virit</groupId>
     <artifactId>viritin</artifactId>
-    <version>2.8.21-SNAPSHOT</version>
+    <version>2.8.21</version>
     <name>Flow Viritin</name>
     <packaging>jar</packaging>
     <description>General purpose helpers for Vaadin Flow users.</description>
@@ -36,7 +36,7 @@
         <url>https://github.com/viritin/flow-viritin</url>
         <connection>scm:git:git://github.com/viritin/flow-viritin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:/viritin/flow-viritin.git</developerConnection>
-      <tag>HEAD</tag>
+      <tag>viritin-2.8.21</tag>
   </scm>
 
     <issueManagement>
