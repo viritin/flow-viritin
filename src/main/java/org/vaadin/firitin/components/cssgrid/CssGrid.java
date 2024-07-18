@@ -49,6 +49,21 @@ public class CssGrid extends Div {
         return new GridCell(component);
     }
 
+    public void add(Object... texts) {
+        for(Object o : texts) {
+            if (o instanceof Component c) {
+                add(c);
+            } else {
+                add(o.toString());
+            }
+        }
+    }
+
+    @Override
+    public void add(String text) {
+        super.add(new Div(text));
+    }
+
     public void setGap(String gap) {
         getStyle().set("gap", gap);
     }
