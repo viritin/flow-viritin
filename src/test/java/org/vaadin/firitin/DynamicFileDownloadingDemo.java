@@ -67,6 +67,10 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
             }
         }));
 
+        add(new Button("Toggle enabled", e->{
+            downloadButton.setEnabled(!downloadButton.isEnabled());
+        }));
+
         // This generates download with VaadinIcons.DOWNLOAD icon
         DynamicFileDownloader veryBasic = new DynamicFileDownloader(
                 outputStream -> outputStream.write("content".getBytes()));
