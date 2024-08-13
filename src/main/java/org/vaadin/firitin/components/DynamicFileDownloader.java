@@ -245,7 +245,7 @@ public class DynamicFileDownloader extends Anchor implements
         String identifier = resource.getId();
         VaadinSession session = getUI().get().getSession();
         if(isEnabled()) {
-            if(!session.getRequestHandlers().contains(requestHandler)) {
+            if(requestHandler != null && !session.getRequestHandlers().contains(requestHandler)) {
                 // re-enabling disabled component
                 session.addRequestHandler(requestHandler);
             }
