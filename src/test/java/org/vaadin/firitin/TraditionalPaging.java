@@ -25,6 +25,8 @@ public class TraditionalPaging extends VerticalLayout {
 	public TraditionalPaging() {
 		final PagingGrid<Person> table = new PagingGrid<>(Person.class);
 
+		table.sort(GridSortOrder.desc(table.getColumnByKey("age")).build());
+
 		// Define results with a simpler data provider API, that just gives you page to
 		// request
 		table.setPagingDataProvider((page, pageSize) -> {

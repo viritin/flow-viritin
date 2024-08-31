@@ -37,6 +37,10 @@ public class PagingGrid<T> extends VGrid<T> {
     private PagingGrid.PagingDataProvider<T> dataProvider;
     private PagingGrid<T>.PaginationBar paginationBar;
     private ComponentEventListener<SortEvent<Grid<T>, GridSortOrder<T>>> sortListener = event -> {
+        if(dataProvider == null) {
+            // not yet set...
+            return;
+        }
         // scroll to the beginning and fetch new rows (up to the implementation to read
         // sort order from the grid)
         setItems(dataProvider.pageRequested(paginationBar.currentPage, getPageSize()));
