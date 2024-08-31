@@ -384,8 +384,8 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     protected T constructRecord() {
         AnnotatedConstructor annotatedConstructor = bbd.getConstructors().get(0);
         List<BeanPropertyDefinition> properties = bbd.findProperties();
-        Object[] args = new Object[properties.size()];
-        for (int i = 0; i < properties.size(); i++) {
+        Object[] args = new Object[annotatedConstructor.getParameterCount()];
+        for (int i = 0; i < annotatedConstructor.getParameterCount(); i++) {
             BeanPropertyDefinition definition = properties.get(i);
             HasValue hasValue = bpdToEditorField.get(definition);
             Object value = hasValue.getValue();

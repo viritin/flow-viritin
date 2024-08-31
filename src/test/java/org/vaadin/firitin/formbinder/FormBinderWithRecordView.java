@@ -36,6 +36,11 @@ public class FormBinderWithRecordView extends VerticalLayout {
     @BigShouldBeBigger
     record Person(@NotEmpty String name, @NotNull @Min(0) Integer small, @Max(100) int big) {
 
+        // This is not used anywhere, but should not break binding
+        public boolean isValid() {
+            return big > small;
+        }
+
     }
 
     public FormBinderWithRecordView() {
