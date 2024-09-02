@@ -71,6 +71,10 @@ e.g. in field declaration or without declaring an extra variable. When used in a
 
 **AbstractForm** is the older solution, based on the Binder from Vaadin core. It also configures binder properly for naming convention based binding and provides basic for features such as save and cancel buttons that enable themselves based on the user actions. Currently this is more battle provent, but problematic in many ways (too many options due to Binder), so I expect the development of this helper to be ended.
 
+### Rapid Application Development
+
+ * DtoDisplay, a component to visualize a given DTO value in a grid layout.
+
 ### Uncategorised helpers
 
  * RichText component to easily show Html or Markdown formatted text. [Online demo](https://addons.dokku1.parttio.org/)
