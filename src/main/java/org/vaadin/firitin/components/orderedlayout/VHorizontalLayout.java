@@ -12,7 +12,6 @@ public class VHorizontalLayout extends HorizontalLayout implements FluentThemabl
         FluentComponent<VHorizontalLayout>, FluentHasStyle<VHorizontalLayout>, FluentHasSize<VHorizontalLayout>, FluentHasComponents<VHorizontalLayout>, FluentClickNotifier<HorizontalLayout, VHorizontalLayout> {
 
     private final void viritinDefaults() {
-        setDefaultVerticalComponentAlignment(Alignment.BASELINE);
 
     }
     public VHorizontalLayout() {
