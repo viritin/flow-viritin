@@ -3,12 +3,14 @@ package org.vaadin.firitin;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import org.jetbrains.annotations.NotNull;
-import org.vaadin.firitin.components.button.NonBlockingTaskButton;
+import org.vaadin.firitin.components.button.ActionButton;
+import org.vaadin.firitin.components.button.UIFuture;
 import org.vaadin.firitin.components.checkbox.VCheckBox;
 import org.vaadin.firitin.components.progressbar.VProgressBar;
 import org.vaadin.firitin.layouts.HorizontalFloatLayout;
@@ -19,6 +21,8 @@ import java.util.concurrent.CompletableFuture;
 
 @Route
 public class SlowTaskView extends VerticalLayout {
+
+    private CompletableFuture<Void> uiFuture;
 
     public SlowTaskView() {
 
@@ -48,8 +52,8 @@ public class SlowTaskView extends VerticalLayout {
         taskInProgressDialog.setModal(true);
 
         // The actual component usage
-        NonBlockingTaskButton nonBlockingTaskButton = new NonBlockingTaskButton("Compute things...");
-        nonBlockingTaskButton.setTask(() -> {
+        ActionButton nonBlockingTaskButton = new ActionButton("Compute things...");
+        nonBlockingTaskButton.setAction(() -> {
             // This is the actual task, executed later in a separate thread
             // DO NOT MODIFY UI HERE!
             return slowGetString();
@@ -58,26 +62,26 @@ public class SlowTaskView extends VerticalLayout {
         // nonBlockingTaskButton.setExecutor(Executors.newSingleThreadExecutor());
 
         // The task can also return a CompletableFuture
-        //nonBlockingTaskButton.setCompletableFutureTask(() -> computeSlowString());
+        //nonBlockingTaskButton.setCompletableFutureAction(() -> computeSlowString());
 
-        nonBlockingTaskButton.setPreTaskAction(() -> {
+        nonBlockingTaskButton.setPreUiUpdate(() -> {
             // In this task one can modify UI, this task is optional
-            if(showNotificationOnStart.getValue()) {
+            if (showNotificationOnStart.getValue()) {
                 Notification.show("Starting the task...");
             }
-            if(showDialog.getValue()) {
+            if (showDialog.getValue()) {
                 taskInProgressDialog.open();
             }
-            if(disableUI.getValue()) {
+            if (disableUI.getValue()) {
                 UI.getCurrent().setEnabled(false);
             }
             nonBlockingTaskButton.showProgressBar(builtInProgressbar.getValue());
         });
-        nonBlockingTaskButton.setPostTaskAction(s -> {
+        nonBlockingTaskButton.setPostUiUpdate(s -> {
             // In this task one can modify UI
             add(new Paragraph("Slow string: " + s));
             taskInProgressDialog.close();
-            if(disableUI.getValue()) {
+            if (disableUI.getValue()) {
                 UI.getCurrent().setEnabled(true);
             }
 
@@ -94,9 +98,9 @@ public class SlowTaskView extends VerticalLayout {
         // Check if task running button
         Button checkTaskButton = new Button("Check if task is running");
         checkTaskButton.addClickListener(event -> {
-            if(nonBlockingTaskButton.getCompletableFuture() == null) {
+            if (nonBlockingTaskButton.getCompletableFuture() == null) {
                 Notification.show("Task not started yet!");
-            } else  if (nonBlockingTaskButton.getCompletableFuture().isDone()) {
+            } else if (nonBlockingTaskButton.getCompletableFuture().isDone()) {
                 Notification.show("Task is done!");
             } else {
                 Notification.show("Task is still running...");
@@ -105,16 +109,50 @@ public class SlowTaskView extends VerticalLayout {
 
         add(checkTaskButton);
 
-    }
+        add(new H2("Lower level UIFuture usage"));
 
-    public Mono<String> monoString() {
-        return Mono.fromFuture(computeSlowString());
-    }
+        add(new HorizontalFloatLayout(
+                new Button("Test with CompletableFuture", event -> {
+                    uiFuture = new UIFuture().of(computeSlowString())
+                            .thenApply(result -> {
+                                Notification.show("Result: " + result);
+                                return result.length();
+                            })
+                            .thenAccept(length -> Notification.show("Length of the result: " + length));
+                }),
+                new Button("supplyAsync", event -> {
+                    uiFuture = new UIFuture().supplyAsync(() -> slowGetString())
+                            .thenApply(result -> {
+                                Notification.show("Result: " + result);
+                                return result.length();
+                            })
+                            .thenAccept(length -> Notification.show("Length of the result: " + length));
+                }),
+                new Button("runAsync", event -> {
+                    uiFuture = new UIFuture().runAsync(() -> {
+                                try {
+                                    Thread.sleep(2000);
+                                } catch (InterruptedException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                System.out.println("Done!");
+                            })
+                            .thenRun(() -> Notification.show("Something happened for sure, but the UI did not care!"));
+                })));
 
-    public CompletableFuture<String> computeSlowString() {
-        return CompletableFuture.supplyAsync(() -> {
-            return slowGetString();
-        });
+        add(new Button("Cancel action", event -> {
+            if(uiFuture != null) {
+                if(uiFuture.isDone()) {
+                    Notification.show("Action already finished!");
+                } else {
+                    uiFuture.cancel(true);
+                    Notification.show("Cancelled action");
+                }
+            } else {
+                Notification.show("No action to cancel!");
+            }
+        }));
+
     }
 
     private static @NotNull String slowGetString() {
@@ -125,6 +163,16 @@ public class SlowTaskView extends VerticalLayout {
             e.printStackTrace();
         }
         return "Done! " + start + " -> " + LocalTime.now();
+    }
+
+    public Mono<String> monoString() {
+        return Mono.fromFuture(computeSlowString());
+    }
+
+    public CompletableFuture<String> computeSlowString() {
+        return CompletableFuture.supplyAsync(() -> {
+            return slowGetString();
+        });
     }
 
 }
