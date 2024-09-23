@@ -60,7 +60,8 @@ public class UIFuture {
                 ui.setPollInterval(1000);
                 pollingEnabled = true;
                 // log a message that polling is enabled
-                Logger.getLogger(NonBlockingTaskButton2.class.getName()).fine("Polling enabled for SlowTaskButton. Consider enabling push instead.");
+                Logger.getLogger(UIFuture.class.getName()).fine("Polling enabled by UIFuture. Consider enabling using " +
+                        "push instead or enabling polling manually. This may cause timing issues.");
             }
         }
     }
