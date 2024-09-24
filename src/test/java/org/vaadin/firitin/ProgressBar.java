@@ -15,6 +15,7 @@
  */
 package org.vaadin.firitin;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
@@ -35,6 +36,11 @@ public class ProgressBar extends VerticalLayout {
     public ProgressBar() {
         add(new H1("This is slow view..."));
 
+        runSlowUpdate();
+
+    }
+
+    private void runSlowUpdate() {
         add(VProgressBar.indeterminateForTask(() -> {
             // slow task, but at least the UI shows it is not a bug
             try {
@@ -43,8 +49,8 @@ public class ProgressBar extends VerticalLayout {
                 throw new RuntimeException(e);
             }
             add("Done");
+            add(new Button("Run again", e -> {runSlowUpdate(); e.getSource().removeFromParent();}));
         }));
-
     }
 
 }
