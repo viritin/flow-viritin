@@ -3,6 +3,8 @@ package org.vaadin.firitin.components.button;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.server.Command;
 import org.vaadin.firitin.components.progressbar.VProgressBar;
 
@@ -18,8 +20,8 @@ import java.util.function.Supplier;
  * run on background and keep the UI funtional), is to show for example a dialog with a progress indicator and possibly
  * a cancel button.
  * <p>
- * NOTE! This class is still in early development and might change a lot stil in the future. Suggestions/contributions are
- * more than welcome.
+ * NOTE! This class is still in early development and likely to get some changes still in the future.
+ * Suggestions/contributions are more than welcome!
  * <p>
  * The button will be disabled while the task is running and re-enabled when the task is done.
  * <p>
@@ -37,11 +39,13 @@ import java.util.function.Supplier;
  */
 public class ActionButton<T> extends Composite<VButton> {
 
+    private Integer estimatedDuration;
     private Supplier<T> action;
     private Consumer<? super T> postUiUpdate;
     private Runnable preUiUpdate;
     private UI ui;
     private CompletableFuture<T> completableFuture;
+    private Boolean showProgressBar;
     private VProgressBar progressBar;
     private Supplier<CompletableFuture<T>> completableFutureSupplier;
     private Executor executor;
@@ -53,25 +57,52 @@ public class ActionButton<T> extends Composite<VButton> {
         getContent().addClickListener(this::handleClick);
     }
 
+    public ActionButton(String buttonText, Supplier<CompletableFuture<T>> action) {
+        this();
+        setText(buttonText);
+        setCompletableFutureAction(action);
+    }
+
+    public ActionButton(String buttonText, Runnable action) {
+        this();
+        setText(buttonText);
+        setAction(() -> {
+            action.run();
+            return null;
+        });
+    }
+
     public ActionButton(String buttonText) {
         this();
         setText(buttonText);
     }
 
-    public void setAction(Supplier<T> action) {
+    public ActionButton<T> setAction(Supplier<T> action) {
         this.action = action;
+        return this;
     }
 
-    public void setCompletableFutureAction(Supplier<CompletableFuture<T>> task) {
+    public ActionButton<Void> setAction(Runnable action) {
+        this.action = () -> {
+            action.run();
+            return null;
+        };
+        return (ActionButton<Void>) this;
+    }
+
+    public ActionButton<T> setCompletableFutureAction(Supplier<CompletableFuture<T>> task) {
         this.completableFutureSupplier = task;
+        return this;
     }
 
-    public void setPostUiUpdate(Consumer<? super T> postUiUpdate) {
+    public ActionButton<T> setPostUiUpdate(Consumer<? super T> postUiUpdate) {
         this.postUiUpdate = postUiUpdate;
+        return this;
     }
 
-    public void setPreUiUpdate(Runnable preUiUpdate) {
+    public ActionButton<T> setPreUiUpdate(Runnable preUiUpdate) {
         this.preUiUpdate = preUiUpdate;
+        return this;
     }
 
     @Override
@@ -79,7 +110,7 @@ public class ActionButton<T> extends Composite<VButton> {
         super.onAttach(attachEvent);
         this.ui = attachEvent.getUI();
         this.uiFuture = new UIFuture(ui);
-        if(executor != null) {
+        if (executor != null) {
             uiFuture.setExecutor(executor);
         }
     }
@@ -89,7 +120,18 @@ public class ActionButton<T> extends Composite<VButton> {
         if (preUiUpdate != null) {
             preUiUpdate.run();
         }
-        if (progressBar != null) {
+        if (isShowProgressBar()) {
+            if (progressBar == null) {
+                progressBar = prepareProgressBar();
+            }
+            if (estimatedDuration != null) {
+                progressBar.setIndeterminate(false);
+                progressBar.setValue(0);
+                progressBar.setMax(estimatedDuration);
+                progressBar.animateToEstimate();
+            } else {
+                progressBar.setIndeterminate(true);
+            }
             progressBar.setVisible(true);
         }
 
@@ -104,12 +146,12 @@ public class ActionButton<T> extends Composite<VButton> {
         }
 
         uiFuture.of(completableFuture).whenComplete((result, e) -> {
-                reEnableAfterTask();
-                if (postUiUpdate != null && e == null) {
-                    postUiUpdate.accept(result);
-                }
-                // TODO needs a separate error handling task!?
-            });
+            reEnableAfterTask();
+            if (postUiUpdate != null && e == null) {
+                postUiUpdate.accept(result);
+            }
+            // TODO needs a separate error handling task!?
+        });
 
     }
 
@@ -128,21 +170,98 @@ public class ActionButton<T> extends Composite<VButton> {
         }
     }
 
-    public void showProgressBar(boolean show) {
-        if (show == (progressBar != null)) {
-            return;
-        }
-        if (show) {
-            progressBar = new VProgressBar();
-            progressBar.setIndeterminate(true);
-            progressBar.setVisible(true);
-            // TODO This is a hack and visually broken, figure out a better way to do this
-            getContent().getElement().appendChild(progressBar.getElement());
+    public boolean isShowProgressBar() {
+        return showProgressBar == null ? true : showProgressBar;
+    }
+
+    /**
+     * @param showProgressBar true if the built-in progress bar should be shown while the task is running
+     */
+    public void setShowProgressBar(boolean showProgressBar) {
+        this.showProgressBar = showProgressBar;
+    }
+
+    protected VProgressBar prepareProgressBar() {
+        var progressBar = new VProgressBar();
+        if (true) {
+            // Absolute positioning right below the button
+            progressBar.getStyle().setPosition(Style.Position.ABSOLUTE);
+            progressBar.getStyle().setRight("0");
+            progressBar.getStyle().setLeft("0");
+            progressBar.getStyle().setDisplay(Style.Display.BLOCK);
         } else {
-            if (progressBar != null) {
-                progressBar.removeFromParent();
-                progressBar = null;
-            }
+            // Inline block positioning right after the button text
+            // TODO consider exposing this setup with API
+            progressBar.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+            progressBar.getStyle().setAlignItems(Style.AlignItems.BASELINE);
+            progressBar.getStyle().setTextAlign(Style.TextAlign.CENTER);
+            progressBar.getStyle().setMarginBottom("0");
+            progressBar.getStyle().setMarginTop("0");
+            progressBar.getStyle().setMarginLeft("1em");
+            progressBar.getStyle().setHeight("0.5em");
+            progressBar.setWidth("2em");
+        }
+        progressBar.setVisible(false);
+        getContent().getElement().appendChild(progressBar.getElement());
+        return progressBar;
+    }
+
+    /**
+     * API for updating the progress bar from the task. This method is safe to call from the task thread.
+     *
+     * @param progress the progress value to set
+     * @param min      the minimum value of the progress bar
+     * @param max      the maximum value of the progress bar
+     */
+    public void updateProgressAsync(double progress, double min, double max) {
+        if (progressBar != null) {
+            Command command = () -> {
+                progressBar.setIndeterminate(false);
+                progressBar.setMin(min);
+                progressBar.setMax(max);
+                if(progress > min) {
+                    if (progress > max) {
+                        progressBar.setIndeterminate(true);
+                    } else {
+                        System.out.println("Setting progress: " + progress);
+                        progressBar.setValue(progress);
+                    }
+                }
+            };
+            CompletableFuture.runAsync(() -> {
+                if(ui != null) {
+                    ui.access(command);
+                } else {
+                    // If not attached, safe o update directly
+                    command.execute();
+                }
+            });
+        }
+    }
+
+    /**
+     * API for updating the progress bar from the task. This method is safe to call from the task thread.
+     *
+     * @param progress the progress value to set
+     */
+    public void updateProgressAsync(double progress) {
+        if (progressBar != null) {
+            Command command = () -> {
+                progressBar.setIndeterminate(false);
+                if(progress > progressBar.getMax()) {
+                    progressBar.setIndeterminate(true);
+                } else {
+                    progressBar.setValue(progress);
+                }
+            };
+            CompletableFuture.runAsync(() -> {
+                if(ui != null) {
+                    ui.access(command);
+                } else {
+                    // If not attached, safe o update directly
+                    command.execute();
+                }
+            });
         }
     }
 
@@ -157,8 +276,44 @@ public class ActionButton<T> extends Composite<VButton> {
      */
     public void setExecutor(Executor executor) {
         this.executor = executor;
-        if(uiFuture != null) {
+        if (uiFuture != null) {
             uiFuture.setExecutor(executor);
         }
+    }
+
+    public Integer getEstimatedDuration() {
+        return estimatedDuration;
+    }
+
+    /**
+     * Set the estimated duration of the task in milliseconds. This can be used to show a progress bar that is not
+     * indeterminate.
+     *
+     * @param estimatedDuration
+     */
+    public void setEstimatedDuration(Integer estimatedDuration) {
+        this.estimatedDuration = estimatedDuration;
+        if(estimatedDuration != null) {
+            setShowProgressBar(true);
+        }
+    }
+
+    /**
+     * Returns the underlying button component, for further configaration.
+     *
+     * @return the underlying button component
+     */
+    public Button getButton() {
+        return getContent();
+    }
+
+    /**
+     * @return the underlying content component
+     * @deprecated use {@link #getButton()} instead, the composition root is likely to change for improved A11y support
+     */
+    @Deprecated
+    @Override
+    public VButton getContent() {
+        return super.getContent();
     }
 }

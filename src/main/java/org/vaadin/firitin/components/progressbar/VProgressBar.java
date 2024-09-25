@@ -68,4 +68,37 @@ public class VProgressBar extends ProgressBar implements FluentComponent<VProgre
         return this;
     }
 
+    /**
+     * Runs a client side animation to the {@link #getMax()} value as "milliseconds". If you for example expect your
+     * progress to take around 5000ms, use 5000 as max value. The progress animation will slow down in the end of the
+     * progressbar, so it doesn't matter if your estimate is slightly optimistic. If the estimate is passed a lot, the
+     * progressbar will switch to indeterminate mode.
+     */
+    public void animateToEstimate() {
+        getElement().executeJs("""
+                  const progressBar = this;
+                  const estimatedDuration = $0;
+                  const start = new Date().getTime();
+                  const step = () => {
+                    var elapsed = new Date().getTime() - start;
+                    // slow down the animation when it's almost done to play some time if estimate is passed
+                    if(elapsed > estimatedDuration * 0.8) {
+                      // TODO make this somehow smoother
+                      elapsed = estimatedDuration * 0.8 + (elapsed - estimatedDuration * 0.8) * 0.2;
+                    }
+                    if(elapsed >= estimatedDuration) {
+                        // if still over estimate, stop animation and switch to indeterminate mode
+                        clearInterval(id);
+                        progressBar.indeterminate = true;
+                    } else {
+                        progressBar.value = elapsed;
+                    }
+                    if(document.body.contains(progressBar) && !progressBar.hidden) {
+                        requestAnimationFrame(step);
+                    }
+                  }
+                  requestAnimationFrame(step);
+                """, getMax());
+
+    }
 }

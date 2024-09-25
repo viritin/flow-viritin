@@ -42,6 +42,10 @@ public class VNotification extends Notification implements FluentComponent<VNoti
         return show(text, DEFAULT_DURATION, Notification.Position.BOTTOM_START);
     }
 
+    public static VNotification prominent(String text) {
+        return show(text, DEFAULT_DURATION, Position.MIDDLE);
+    }
+
     public VNotification withText(String text) {
         setText(text);
         return this;

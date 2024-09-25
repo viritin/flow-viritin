@@ -14,16 +14,20 @@ import java.util.logging.Logger;
  * This helper class is used to execute long-running actions and provide an easy way to run updates once the action is
  * finished.
  * <p>
- *     The helper takes care of enabling polling if push is not enabled and synchronizes the UI updates with the UI thread.
- *     If the manual push mode is used, the server push is triggered automatically after UI updates are done.
+ * The helper takes care of enabling polling if push is not enabled and synchronizes the UI updates with the UI thread.
+ * If the manual push mode is used, the server push is triggered automatically after UI updates are done.
+ * <p>
+ * NOTE! This class is still in early development and likely to get some changes still in the future.
+ * Suggestions/contributions are more than welcome!
  */
 public class UIFuture {
 
-    private int actions = 0;
-
     private final UI ui;
+    private int actions = 0;
     private PushMode pushMode;
     private boolean pollingEnabled;
+    private boolean asyncUiUpdate = false;
+    private Executor executor;
 
     public UIFuture(UI ui) {
         this.ui = ui;
@@ -33,10 +37,6 @@ public class UIFuture {
         // If UI is not provided, expect that the current UI is used
         this(UI.getCurrent());
     }
-
-    private boolean asyncUiUpdate = false;
-
-    private Executor executor;
 
     public boolean isAsyncUiUpdate() {
         return asyncUiUpdate;
@@ -50,9 +50,18 @@ public class UIFuture {
         return executor;
     }
 
+    /**
+     * Sets the executor that will be used to run the task. A default by JDK is used if not set.
+     *
+     * @param executor
+     */
+    public void setExecutor(Executor executor) {
+        this.executor = executor;
+    }
+
     private void ensurePushOrPolling() {
         actions++;
-        if(actions == 1) {
+        if (actions == 1) {
             PushConfiguration pushConfiguration = ui.getPushConfiguration();
             pushMode = pushConfiguration.getPushMode();
             if (pushMode == PushMode.DISABLED && ui.getPollInterval() == -1) {
@@ -75,15 +84,6 @@ public class UIFuture {
     }
 
     /**
-     * Sets the executor that will be used to run the task. A default by JDK is used if not set.
-     *
-     * @param executor
-     */
-    public void setExecutor(Executor executor) {
-        this.executor = executor;
-    }
-
-    /**
      * Returns a completable future whose additional actions are executed and properly synchronized in the UI thread.
      * Note, that if you use the async methods of the completable future, you need to synchronize with the UI thread
      * yourself.
@@ -103,20 +103,20 @@ public class UIFuture {
                     future.complete(result);
                 }
                 shutDownPolling();
-                if(pushMode == PushMode.MANUAL) {
+                if (pushMode == PushMode.MANUAL) {
                     // Don't really know when or who should use this mode, but it's there...
                     ui.push();
                 }
             });
         };
 
-        if(asyncUiUpdate) {
-            if(executor != null) {
+        if (asyncUiUpdate) {
+            if (executor != null) {
                 task.whenCompleteAsync(handler, executor);
             } else {
                 task.whenCompleteAsync(handler);
             }
-        } else  {
+        } else {
             task.whenComplete(handler);
         }
         return future;
@@ -124,7 +124,7 @@ public class UIFuture {
 
     public <T> CompletableFuture<T> supplyAsync(Supplier<T> supplier) {
         CompletableFuture<T> future;
-        if(executor != null) {
+        if (executor != null) {
             future = CompletableFuture.supplyAsync(supplier, executor);
         } else {
             future = CompletableFuture.supplyAsync(supplier);
@@ -134,7 +134,7 @@ public class UIFuture {
 
     public CompletableFuture<Void> runAsync(Runnable runnable) {
         CompletableFuture<Void> future;
-        if(executor != null) {
+        if (executor != null) {
             future = CompletableFuture.runAsync(runnable, executor);
         } else {
             future = CompletableFuture.runAsync(runnable);
