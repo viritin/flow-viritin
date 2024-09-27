@@ -95,16 +95,48 @@ public class ActionButton<T> extends Composite<VButton> {
         return this;
     }
 
+    /**
+     * Sets an action to update the UI after the actual slow actions is completed. This is "run in the UI thread",
+     * meaning you don't need to synchronize with the UI using UI.access().
+     *
+     * @param postUiAction the action to run after the slow task
+     * @return this for chaining
+     */
+    public ActionButton<T> setPostUiAction(Consumer<? super T> postUiAction) {
+        this.postUiUpdate = postUiUpdate;
+        return this;
+    }
+
+    /**
+     * @deprecated use {@link #setPostUiAction(Consumer)} instead
+     * @param postUiUpdate the action to run after the slow task
+     * @return this for chaining
+     */
+    @Deprecated
     public ActionButton<T> setPostUiUpdate(Consumer<? super T> postUiUpdate) {
         this.postUiUpdate = postUiUpdate;
         return this;
     }
 
-    public ActionButton<T> setPreUiUpdate(Runnable preUiUpdate) {
+    /**
+     * Sets an action to update the UI before the actual slow actions is started. This is "run in the UI thread",
+     * meaning you don't need to synchronize with the UI using UI.access().
+     *
+     * @param preUiAction the action to run before the slow task
+     * @return this for chaining
+     */
+    public ActionButton<T> setPreUiAction(Runnable preUiAction) {
         this.preUiUpdate = preUiUpdate;
         return this;
     }
 
+    /**
+     * @deprecated use {@link #setPreUiAction(Runnable)} instead
+     */
+    @Deprecated(forRemoval = true)
+    public ActionButton<T> setPreUiUpdate(Runnable preUiUpdate) {
+        return setPreUiAction(preUiUpdate);
+    }
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
@@ -223,7 +255,6 @@ public class ActionButton<T> extends Composite<VButton> {
                     if (progress > max) {
                         progressBar.setIndeterminate(true);
                     } else {
-                        System.out.println("Setting progress: " + progress);
                         progressBar.setValue(progress);
                     }
                 }
