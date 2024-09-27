@@ -203,6 +203,15 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
         add(withError);
 
 
+        DynamicFileDownloader inNewWindow = new DynamicFileDownloader("\"Download\" a txt file in a new window", "generated.txt",
+                outputStream -> {
+                    outputStream.write("HelloWorld".getBytes());
+                })
+                .withContentTypeGenerator(() -> "text/plain")
+                .asButton()
+                .inNewWindow();
+        add(inNewWindow);
+
         add(new Button("Test UI serialization", event -> {
 
             ByteArrayOutputStream bout = new ByteArrayOutputStream();

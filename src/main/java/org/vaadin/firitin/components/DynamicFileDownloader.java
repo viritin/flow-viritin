@@ -23,6 +23,7 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.AnchorTargetValue;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.Tooltip;
@@ -73,6 +74,7 @@ public class DynamicFileDownloader extends Anchor implements
     private ContentTypeGenerator contentTypeGenerator = () -> "application/octet-stream";
     private SerializableConsumer<OutputStream> contentWriter;
     private Integer originalPollingInterval;
+    private boolean newWindow;
 
     /**
      * Constructs a basic download link with DOWNLOAD icon from
@@ -210,7 +212,7 @@ public class DynamicFileDownloader extends Anchor implements
                         if (filename == null) {
                             filename = fileNameGenerator.getFileName(request);
                         }
-                        response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + URLEncoder.encode(filename, StandardCharsets.UTF_8));
+                        response.setHeader("Content-Disposition", (newWindow ? "" : "attachment;") + "filename*=UTF-8''" + URLEncoder.encode(filename, StandardCharsets.UTF_8));
                         response.setHeader("Content-Type", contentTypeGenerator.getContentType());
                         try {
                             contentWriter.accept(response.getOutputStream());
@@ -237,7 +239,12 @@ public class DynamicFileDownloader extends Anchor implements
 
             ui.getSession().addRequestHandler(requestHandler);
 
-            getElement().setAttribute("download", "");
+            if(!newWindow) {
+                getElement().setAttribute("download", "");
+            } else {
+                setRouterIgnore(true);
+                setTarget("_blank");
+            }
         });
     }
 
@@ -436,6 +443,19 @@ public class DynamicFileDownloader extends Anchor implements
     public Tooltip getTooltip() {
         HasTooltip component = (HasTooltip) getChildren().findFirst().get();
         return component.getTooltip();
+    }
+
+    /**
+     * Configures the download to open in a new window and removes the download attribute and
+     * content disposition headers instructing to download the target as a file. So essentially
+     * we are giving the browser a chance to make a choise what should be done. This allows the component
+     * to be used to generated e.g. PDF files on the fly and show them in browser by default.
+     *
+     * @return the same instance, fluent method
+     */
+    public DynamicFileDownloader inNewWindow() {
+        this.newWindow = true;
+        return this;
     }
 
     /**
