@@ -96,6 +96,7 @@ public class UIFuture {
         ensurePushOrPolling();
         CompletableFuture<T> future = new CompletableFuture<>();
         BiConsumer<T, Throwable> handler = (result, throwable) -> {
+            // TODO should this skip completing if the UI is already detached?
             ui.access(() -> {
                 if (throwable != null) {
                     future.completeExceptionally(throwable);

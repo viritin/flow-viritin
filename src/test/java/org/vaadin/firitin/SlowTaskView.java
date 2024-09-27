@@ -26,7 +26,7 @@ import java.util.function.Supplier;
 @Route
 public class SlowTaskView extends VerticalLayout {
 
-    private CompletableFuture<Void> uiFuture;
+    private CompletableFuture<Void> future;
 
     public SlowTaskView() {
 
@@ -97,7 +97,7 @@ public class SlowTaskView extends VerticalLayout {
         });
 
         actionButton.setPreUiAction(() -> {
-            if(busyText.getValue()) {
+            if (busyText.getValue()) {
                 actionButton.setBusyText("Please wait for heavy things...");
             }
             // In this task one can modify UI, this task is optional
@@ -111,14 +111,14 @@ public class SlowTaskView extends VerticalLayout {
                 UI.getCurrent().setEnabled(false);
             }
             if (estimate.getValue()) {
-                if(builtInProgressbar.getValue()) {
+                if (builtInProgressbar.getValue()) {
                     actionButton.setEstimatedDuration(4000);
                 }
                 progressBarInDialog.setMax(4000);
                 progressBarInDialog.animateToEstimate();
                 progressBarInDialog.setIndeterminate(false);
             }
-            if(builtInProgressbar.getValue()) {
+            if (builtInProgressbar.getValue()) {
                 actionButton.setShowProgressBar(builtInProgressbar.getValue());
             }
         });
@@ -156,10 +156,11 @@ public class SlowTaskView extends VerticalLayout {
 
         add(new H2("Lower level UIFuture usage"));
 
+        UIFuture uiFuture = new UIFuture();
         add(new HorizontalFloatLayout(
                 new Button("Test with CompletableFuture", event -> {
                     Notification.show("Starting a task that will take 5 seconds");
-                    uiFuture = new UIFuture().of(computeSlowString())
+                    future = uiFuture.of(computeSlowString())
                             .thenApply(result -> {
                                 Notification.show("Result: " + result);
                                 return result.length();
@@ -168,7 +169,7 @@ public class SlowTaskView extends VerticalLayout {
                 }),
                 new Button("supplyAsync", event -> {
                     Notification.show("Starting a task that will take 5 seconds");
-                    uiFuture = new UIFuture().supplyAsync(() -> slowGetString())
+                    future = uiFuture.supplyAsync(() -> slowGetString())
                             .thenApply(result -> {
                                 Notification.show("Result: " + result);
                                 return result.length();
@@ -177,7 +178,7 @@ public class SlowTaskView extends VerticalLayout {
                 }),
                 new Button("runAsync", event -> {
                     Notification.show("Starting a task that will take 2 seconds");
-                    uiFuture = new UIFuture().runAsync(() -> {
+                    future = uiFuture.runAsync(() -> {
                                 try {
                                     Thread.sleep(2000);
                                 } catch (InterruptedException e) {
@@ -189,11 +190,11 @@ public class SlowTaskView extends VerticalLayout {
                 })));
 
         add(new Button("Cancel action", event -> {
-            if(uiFuture != null) {
-                if(uiFuture.isDone()) {
+            if (future != null) {
+                if (future.isDone()) {
                     Notification.show("Action already finished!");
                 } else {
-                    uiFuture.cancel(true);
+                    future.cancel(true);
                     Notification.show("Cancelled action");
                 }
             } else {
@@ -216,7 +217,7 @@ public class SlowTaskView extends VerticalLayout {
     private static @NotNull String slowGetStringWithNotifier(Consumer<Double> progressListener) {
         progressListener.accept(0.0);
         LocalTime start = LocalTime.now();
-        for(int i = 0; i < 20; i++) {
+        for (int i = 0; i < 20; i++) {
             try {
                 Thread.sleep(250);
             } catch (InterruptedException e) {
