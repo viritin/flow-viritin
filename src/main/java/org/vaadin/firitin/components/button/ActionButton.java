@@ -50,6 +50,7 @@ public class ActionButton<T> extends Composite<VButton> {
     private Supplier<CompletableFuture<T>> completableFutureSupplier;
     private Executor executor;
     private UIFuture uiFuture;
+    private boolean enableAfterAction = true;
 
     public ActionButton() {
         super();
@@ -178,7 +179,7 @@ public class ActionButton<T> extends Composite<VButton> {
         }
 
         uiFuture.of(completableFuture).whenComplete((result, e) -> {
-            reEnableAfterTask();
+            reEnableAfterAction();
             if (postUiUpdate != null && e == null) {
                 postUiUpdate.accept(result);
             }
@@ -195,8 +196,10 @@ public class ActionButton<T> extends Composite<VButton> {
         getContent().setText(s);
     }
 
-    protected void reEnableAfterTask() {
-        getContent().setEnabled(true);
+    protected void reEnableAfterAction() {
+        if(isEnableAfterAction()) {
+            getContent().setEnabled(true);
+        }
         if (progressBar != null) {
             progressBar.setVisible(false);
         }
@@ -346,5 +349,22 @@ public class ActionButton<T> extends Composite<VButton> {
     @Override
     public VButton getContent() {
         return super.getContent();
+    }
+
+    /**
+     * @return true if the button should be automatically enabled after the action is completed
+     */
+    public boolean isEnableAfterAction() {
+        return enableAfterAction;
+    }
+
+    /**
+     * @param enableAfterAction true (default) if the button should be automatically enabled after the action is
+     *                          completed
+     * @return this for chaining
+     */
+    public ActionButton setEnableAfterAction(boolean enableAfterAction) {
+        this.enableAfterAction = enableAfterAction;
+        return this;
     }
 }
