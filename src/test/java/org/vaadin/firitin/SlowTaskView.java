@@ -45,7 +45,8 @@ public class SlowTaskView extends VerticalLayout {
         var builtInProgressbar = new VCheckBox("Built in progress bar").withValue(true)
                 .withTooltip("On by default, implicitly off if preUiAction defined (like dialog in this example). Toggle this to enable explicitly.");
         var estimate = new VCheckBox("Define estimated time to 4 secs (really 5)");
-        add(new HorizontalFloatLayout(showDialog, showNotificationOnStart, disableUI, builtInProgressbar, estimate));
+        var busyText = new VCheckBox("Custom busy text");
+        add(new HorizontalFloatLayout(showDialog, showNotificationOnStart, disableUI, builtInProgressbar, estimate, busyText));
 
         Dialog taskInProgressDialog = new Dialog();
         taskInProgressDialog.setHeaderTitle("Computing things, please wait...");
@@ -95,7 +96,10 @@ public class SlowTaskView extends VerticalLayout {
             actionButton.setShowProgressBar(event.getValue());
         });
 
-        actionButton.setPreUiUpdate(() -> {
+        actionButton.setPreUiAction(() -> {
+            if(busyText.getValue()) {
+                actionButton.setBusyText("Please wait for heavy things...");
+            }
             // In this task one can modify UI, this task is optional
             if (showNotificationOnStart.getValue()) {
                 Notification.show("Starting the task...");

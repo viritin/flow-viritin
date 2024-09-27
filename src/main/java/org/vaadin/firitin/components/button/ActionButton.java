@@ -3,7 +3,7 @@ package org.vaadin.firitin.components.button;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.server.Command;
 import org.vaadin.firitin.components.progressbar.VProgressBar;
@@ -37,7 +37,7 @@ import java.util.function.Supplier;
  *
  * @param <T> the type of the result of the slow task
  */
-public class ActionButton<T> extends Composite<VButton> {
+public class ActionButton<T> extends Composite<Div> {
 
     private Integer estimatedDuration;
     private Supplier<T> action;
@@ -51,11 +51,17 @@ public class ActionButton<T> extends Composite<VButton> {
     private Executor executor;
     private UIFuture uiFuture;
     private boolean enableAfterAction = true;
+    private VButton button = new VButton();
+    private String busyText;
+    private String buttonText;
 
     public ActionButton() {
         super();
-        getContent().setDisableOnClick(true);
-        getContent().addClickListener(this::handleClick);
+        getContent().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+        getContent().getStyle().setPosition(Style.Position.RELATIVE);
+        getContent().add(button);
+        getButton().setDisableOnClick(true);
+        getButton().addClickListener(this::handleClick);
     }
 
     public ActionButton(String buttonText, Supplier<CompletableFuture<T>> action) {
@@ -127,7 +133,7 @@ public class ActionButton<T> extends Composite<VButton> {
      * @return this for chaining
      */
     public ActionButton<T> setPreUiAction(Runnable preUiAction) {
-        this.preUiUpdate = preUiUpdate;
+        this.preUiUpdate = preUiAction;
         return this;
     }
 
@@ -168,6 +174,11 @@ public class ActionButton<T> extends Composite<VButton> {
             progressBar.setVisible(true);
         }
 
+        if(busyText != null) {
+            buttonText = getButton().getText();
+            getButton().setText(busyText);
+        }
+
         if (completableFutureSupplier != null) {
             completableFuture = completableFutureSupplier.get();
         } else {
@@ -193,12 +204,25 @@ public class ActionButton<T> extends Composite<VButton> {
     }
 
     public void setText(String s) {
-        getContent().setText(s);
+        getButton().setText(s);
+    }
+
+    /**
+     * Set the text of the button to show while the task is running (and button disabled).
+     * @param text the text to show
+     * @return
+     */
+    public ActionButton setBusyText(String text) {
+        this.busyText = text;
+        return this;
     }
 
     protected void reEnableAfterAction() {
         if(isEnableAfterAction()) {
-            getContent().setEnabled(true);
+            getButton().setEnabled(true);
+            if(busyText != null) {
+                getButton().setText(buttonText);
+            }
         }
         if (progressBar != null) {
             progressBar.setVisible(false);
@@ -223,6 +247,8 @@ public class ActionButton<T> extends Composite<VButton> {
             progressBar.getStyle().setPosition(Style.Position.ABSOLUTE);
             progressBar.getStyle().setRight("0");
             progressBar.getStyle().setLeft("0");
+            progressBar.getStyle().setBottom("0");
+            progressBar.getStyle().setMargin("0");
             progressBar.getStyle().setDisplay(Style.Display.BLOCK);
         } else {
             // Inline block positioning right after the button text
@@ -237,7 +263,8 @@ public class ActionButton<T> extends Composite<VButton> {
             progressBar.setWidth("2em");
         }
         progressBar.setVisible(false);
-        getContent().getElement().appendChild(progressBar.getElement());
+
+        getContent().add(progressBar);
         return progressBar;
     }
 
@@ -337,18 +364,8 @@ public class ActionButton<T> extends Composite<VButton> {
      *
      * @return the underlying button component
      */
-    public Button getButton() {
-        return getContent();
-    }
-
-    /**
-     * @return the underlying content component
-     * @deprecated use {@link #getButton()} instead, the composition root is likely to change for improved A11y support
-     */
-    @Deprecated
-    @Override
-    public VButton getContent() {
-        return super.getContent();
+    public VButton getButton() {
+        return button;
     }
 
     /**
