@@ -19,6 +19,12 @@ public final class VStyleUtil {
         """, css);
     }
 
+    /**
+     * Injects given CSS to the beginning of the head element, so it can be overridden by other styles
+     * without strong selectors.
+     *
+     * @param css the CSS to inject
+     */
     public static void injectAsFirst(String css) {
         UI.getCurrent().getElement().executeJs("""
             var style = document.createElement('style');

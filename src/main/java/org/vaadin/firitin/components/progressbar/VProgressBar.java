@@ -1,8 +1,11 @@
 package org.vaadin.firitin.components.progressbar;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.progressbar.ProgressBarVariant;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableSupplier;
 import org.vaadin.firitin.components.button.UIFuture;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentHasSize;
@@ -10,6 +13,7 @@ import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 public class VProgressBar extends ProgressBar implements FluentComponent<VProgressBar>, FluentHasSize<VProgressBar>, FluentHasStyle<VProgressBar> {
 
@@ -52,6 +56,40 @@ public class VProgressBar extends ProgressBar implements FluentComponent<VProgre
         });
         return progressBar;
     }
+
+    /**
+     * Creates a progressbar that is visible in the UI until the given the long(ish) running task has been executed.
+     * The progressbar will be added (and rendered) to the UI and then the task will be executed in the UI thread. Once
+     * the task is done, the progress indicator will automatically be removed and replaced with the component returned
+     * by the task. The progress indicator provided by the
+     * framework is hidden during the taask. Note that the UI will be blocked during the execution, so for really long
+     * tasks where you expect users to be able to continue working with other features in the UI, this helper is not the
+     * way to go. See {@link org.vaadin.firitin.components.button.UIFuture}.
+     *
+     * @param task the task to be finished before the returned progressbar will be vanished
+     * @return the progressbar to be added to UI
+     */
+    public static VProgressBar indeterminateForTask(SerializableSupplier<Component> task) {
+        VProgressBar progressBar = new VProgressBar();
+        progressBar.setIndeterminate(true);
+        progressBar.addAttachListener(attachEvent -> {
+            Page page = attachEvent.getUI().getPage();
+            page.executeJs("document.querySelector('vaadin-connection-indicator').style.display = 'none';")
+                    .then(v -> {
+                        Component component = task.get();
+                        Optional<Component> parent = progressBar.getParent();
+                        // NOTE this is probably not the correct way to replace the progressbar with the new component,
+                        // but it seems to work at least with simple cases. TODO figure out how to do this properly!!
+                        Element parentElement = progressBar.getElement().getParent();
+                        int index = parentElement.indexOfChild(progressBar.getElement());
+                        parentElement.insertChild(index, component.getElement());
+                        progressBar.removeFromParent();
+                        page.executeJs("document.querySelector('vaadin-connection-indicator').style.display = '';");
+                    });
+        });
+        return progressBar;
+    }
+
 
     public VProgressBar withValue(double value) {
         setValue(value);

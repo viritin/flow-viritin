@@ -2,74 +2,43 @@ package org.vaadin.firitin.rad;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Pre;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+import org.junit.jupiter.api.Test;
 import org.vaadin.firitin.components.RichText;
 import org.vaadin.firitin.rad.datastructures.PersonWithThings;
 import org.vaadin.firitin.testdomain.Address;
 import org.vaadin.firitin.testdomain.Group;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Route
-public class DtoDisplayView extends VerticalLayout {
+public class DtoDisplayComplexView extends VerticalLayout {
 
-    public record PersonRecord(String firstName, String lastName, int age, List<PhoneNumber> phoneNumbers) {
-    }
-
-    public record PhoneNumber(String name, String number) {
-    }
-
-
-    public DtoDisplayView() {
-        PersonRecord person = new PersonRecord(
-                "John", "Doe", 42,
-                List.of(new PhoneNumber("Home", "1234567890"),
-                        new PhoneNumber("Work", "12345666")
-                )
-        );
-
-        add(new RichText().withMarkDown("""
-                ## The old hack,
-                
-                ... pre-formatted pretty printed json serialization, that I want to get rid of:
-                
-                    new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(dto);
-                """));
-
-        add(new Pre(toPrettyJson(person)));
-
-
-        add(new H1("DTO Display, basic usage"));
-
-
-        DtoDisplay dtoDisplay = new DtoDisplay(person);
-
-        add(dtoDisplay);
-
-
+    public DtoDisplayComplexView() {
         add(new RichText().withMarkDown("""
                 ## DTO Display, with custom formatting
                 
                 You can also provide custom formatting for the fields:
                 
-                        DtoDisplay dtoDisplay = new DtoDisplay(person)
-                                .withFormatter("age", age -> age + " years old")
-                                .withFormatter("phoneNumbers", phoneNumbers -> {
-                                    StringBuilder sb = new StringBuilder();
-                                    phoneNumbers.forEach(pn -> sb.append(pn.name()).append(": ").append(pn.number()).append("\n"));
-                                    return sb.toString();
-                                });
+                    new DtoDisplay(personWithThings)
+                       .withDefaultHeader()
+                       .withPropertyPrinter(ctx -> {
+                           if(ctx.getProperty().getName().equals("age")) {
+                               return new RichText().withMarkDown("**" + ctx.getPropertyValue() + "**, which is a good age to be.");
+                           }
+                           return null;
+                       });
                 """));
 
         PersonWithThings personWithThings = new PersonWithThings();
+        personWithThings.setSupervisor(personWithThings); // circular reference to show infinite recursion handling
         personWithThings.setFirstName("John");
         personWithThings.setLastName("Doe");
         personWithThings.setAge(42);
         personWithThings.setJoinTime(LocalDateTime.now());
+        personWithThings.setIntegerToo(123);
 
         Address address = new Address();
         address.setStreet("Some street 123");
@@ -95,7 +64,31 @@ public class DtoDisplayView extends VerticalLayout {
                 new PersonWithThings.Gadget("Smartglasses", "Glasses that are smart", true)
         });
 
-        add(new DtoDisplay(personWithThings));
+        personWithThings.setThings(new String[]{"Car", "House", "Boat"});
+
+        add(new DtoDisplay(personWithThings)
+                .withDefaultHeader()
+                .withPropertyPrinter(ctx -> {
+                    if(ctx.getProperty().getName().equals("age")) {
+                        return new RichText().withMarkDown("**" + ctx.getPropertyValue() + "**, which is a good age to be.");
+                    }
+                    return null;
+                })
+                .withPropertyPrinter(new PropertyPrinter() {
+                    @Override
+                    public Component printValue(ValueContext ctx) {
+                        if (ctx.getProperty().getName().equals("lastName")) {
+                            return new RichText().withMarkDown("**%s**".formatted(ctx.getPropertyValue()));
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public String getPropertyHeader(ValueContext ctx) {
+                        return "Surname aka last name:";
+                    }
+                })
+        );
 
     }
 
@@ -108,5 +101,12 @@ public class DtoDisplayView extends VerticalLayout {
     }
 
 
+    @Test
+    public void test() throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        PersonWithThings personWithThings = new PersonWithThings();
+        personWithThings.setAge(1);
+        objectMapper.writeValueAsString(personWithThings);
+    }
 
 }
