@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
+import com.vaadin.flow.component.UI;
+
+import java.util.Locale;
 
 /**
  * ValueContext is a helper class to pass around the context of the value being displayed/printed.
@@ -20,6 +23,7 @@ public class ValueContext {
     private ValueContext parent;
     private BasicBeanDescription bbd;
     private BeanPropertyDefinition property;
+    private Locale locale;
 
     public ValueContext(Object dto) {
         setValue(dto);
@@ -77,5 +81,21 @@ public class ValueContext {
 
     public Object getPropertyValue() {
         return property.getGetter().getValue(value);
+    }
+
+    public Locale getLocale() {
+        if(locale == null) {
+            UI ui = UI.getCurrent();
+            if(ui != null) {
+                locale = ui.getLocale();
+            } else {
+                locale = Locale.getDefault();
+            }
+        }
+        return locale;
+    }
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
     }
 }
