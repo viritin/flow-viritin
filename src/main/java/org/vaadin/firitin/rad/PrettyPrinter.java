@@ -7,7 +7,8 @@ import com.vaadin.flow.component.Component;
  */
 public class PrettyPrinter {
 
-    static Component toVaadin(Object value) {
+    public static Component toVaadin(Object value) {
         return new DtoDisplay(value);
     }
+
 }
