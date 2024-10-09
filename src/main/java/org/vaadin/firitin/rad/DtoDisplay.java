@@ -35,6 +35,7 @@ public class DtoDisplay extends Composite<Div> {
     private final ValueContext context;
 
     private List<PropertyPrinter> propertyPrinters;
+    private List<PropertyHeaderPrinter> headerPrinters = new ArrayList<>();
 
     /**
      * Creates a new instance of DtoDisplay.
@@ -88,19 +89,33 @@ public class DtoDisplay extends Composite<Div> {
 
             context.setProperty(p);
 
-            Component value = null;
+            Object value = null;
             for (PropertyPrinter propertyPrinter : propertyPrinters) {
                 value = propertyPrinter.printValue(context);
                 if (value != null) {
-                    String propertyHeader = propertyPrinter.getPropertyHeader(context);
+                    // PropertyPrinter can override header if it wants, otherwise use the first one that returns or
+                    // default header
+                    Object propertyHeader = propertyPrinter.getPropertyHeader(context);
+                    if(propertyHeader == null) {
+                        propertyHeader = headerPrinters.stream().map(headerPrinter -> headerPrinter.printHeader(context))
+                                .filter(h -> h != null).findFirst().orElse(PropertyHeaderPrinter.defaultHeader(context));
+                    }
                     TableHeaderCell tableHeaderCell = tableRow.addHeaderCell();
-                    tableHeaderCell.setText(propertyHeader);
+                    if (propertyHeader instanceof Component c) {
+                        tableHeaderCell.add(c);
+                    } else {
+                        tableHeaderCell.setText(propertyHeader.toString());
+                    }
                     break;
                 }
             }
 
             if (value != null) {
-                tableRow.addCells(value);
+                if (value instanceof Component c) {
+                    tableRow.addCells(c);
+                } else {
+                    tableRow.addCells(value.toString());
+                }
             } else {
                 TableHeaderCell tableHeaderCell = tableRow.addHeaderCell();
                 tableHeaderCell.setText(p.getName());
@@ -167,4 +182,8 @@ public class DtoDisplay extends Composite<Div> {
         return this;
     }
 
+    public DtoDisplay withPropertyHeaderPrinter(PropertyHeaderPrinter printer) {
+        headerPrinters.add(0, printer);
+        return this;
+    }
 }

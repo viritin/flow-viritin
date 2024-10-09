@@ -3,6 +3,8 @@ package org.vaadin.firitin.rad;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Emphasis;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import org.junit.jupiter.api.Test;
@@ -35,7 +37,25 @@ public class DtoDisplayComplexView extends VerticalLayout {
         PersonWithThings personWithThings = getPersonWithThings();
 
         // Probably an app wide configured with DI in real apps
-        var printer = new PrettyPrinter().withPropertyPrinter(ctx -> {
+        var printer = new PrettyPrinter()
+                .withPropertyHeaderPrinter(ctx -> {
+                    // This customises the default header generation
+                    String propertyName = ctx.getProperty().getName();
+                    String deCamelCased = DtoDisplay.deCamelCased(propertyName);
+                    Class<?> rawClass = ctx.getProperty().getPrimaryType().getRawClass();
+                    return new RichText("%s:<br><i>(%s)</i>".formatted(deCamelCased, shortenPackageName(rawClass.getName())));
+                })
+                .withPropertyPrinter(ctx -> {
+                    if (ctx.getProperty().getPrimaryType().getRawClass().equals(Boolean.class)) {
+                        Boolean value = (Boolean) ctx.getPropertyValue();
+                        if(value == null) {
+                            return new Emphasis("undefined Boolean value");
+                        }
+                        return value ? "Yes" : "No";
+                    }
+                    return null;
+                })
+                .withPropertyPrinter(ctx -> {
                     if (ctx.getProperty().getName().equals("age")) {
                         return new RichText().withMarkDown("**" + ctx.getPropertyValue() + "**, which is a good age to be.");
                     }
@@ -51,8 +71,12 @@ public class DtoDisplayComplexView extends VerticalLayout {
                     }
 
                     @Override
-                    public String getPropertyHeader(ValueContext ctx) {
-                        return "Surname aka last name:";
+                    public Object getPropertyHeader(ValueContext ctx) {
+                        // PropertyPrinters, have optional veto for the header they handle
+                        return new RichText().withMarkDown("""
+                                Surname aka last name:<br/>
+                                *%s*
+                                """.formatted(ctx.getProperty().getPrimaryType().getRawClass().getName()));
                     }
                 });
 
@@ -101,6 +125,14 @@ public class DtoDisplayComplexView extends VerticalLayout {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static String shortenPackageName(String fullName) {
+        String[] parts = fullName.split("\\.");
+        for(int i = 0; i < parts.length - 1; i++) {
+            parts[i] = parts[i].substring(0, 1);
+        }
+        return String.join(".", parts);
     }
 
 

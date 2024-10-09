@@ -45,6 +45,7 @@ public class PrettyPrinter {
     }
 
     private final List<PropertyPrinter> propertyPrinters;
+    private final List<PropertyHeaderPrinter> propertyHeaderPrinters;
 
     public static List<PropertyPrinter> getDefaultPropertyPrinters() {
         return Collections.unmodifiableList(_defaultPropertyPrinters);
@@ -62,6 +63,7 @@ public class PrettyPrinter {
 
     public PrettyPrinter(List<PropertyPrinter> propertyPrinters) {
         this.propertyPrinters = propertyPrinters;
+        this.propertyHeaderPrinters = new ArrayList<>();
     }
 
     public List<PropertyPrinter> getPropertyPrinters() {
@@ -69,11 +71,18 @@ public class PrettyPrinter {
     }
 
     public Component printToVaadin(Object value) {
-        return new DtoDisplay(propertyPrinters, new ValueContext(value));
+        DtoDisplay dtoDisplay = new DtoDisplay(propertyPrinters, new ValueContext(value));
+        propertyHeaderPrinters.forEach(dtoDisplay::withPropertyHeaderPrinter);
+        return dtoDisplay;
     }
 
     public PrettyPrinter withPropertyPrinter(PropertyPrinter printer) {
         propertyPrinters.add(0, printer);
+        return this;
+    }
+
+    public PrettyPrinter withPropertyHeaderPrinter(PropertyHeaderPrinter printer) {
+        propertyHeaderPrinters.add(0, printer);
         return this;
     }
 
