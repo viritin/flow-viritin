@@ -3,6 +3,7 @@ package org.vaadin.firitin.rad;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
+import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.type.ArrayType;
 import com.fasterxml.jackson.databind.type.CollectionLikeType;
 import com.vaadin.flow.component.AttachEvent;
@@ -11,6 +12,7 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,9 +25,12 @@ import org.vaadin.firitin.util.VStyleUtil;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import static org.vaadin.firitin.rad.ValueContext.jack;
 
@@ -155,8 +160,9 @@ public class DtoDisplay extends Composite<Div> {
                     .dto-display tr:first-child td, .dto-display tr:first-child th {
                         padding-top: 0;
                     }
-                    .dto-display td>div>p:first-child {
-                        margin-top: 0;
+                    .dto-display td>div>p:first-child,
+                    .dto-display td>p:first-child {
+                        margin: 0;
                     }
                     .dto-display th {
                         text-align: left;
@@ -223,37 +229,62 @@ public class DtoDisplay extends Composite<Div> {
         public Component printValue(ValueContext ctx) {
             JavaType primaryType = ctx.getProperty().getPrimaryType();
             if (primaryType instanceof CollectionLikeType || primaryType instanceof ArrayType) {
-                // if the value is an array we add a new table for it
-                Table subTable = new Table();
-                TableRow header = subTable.addRow();
 
                 JavaType contentType = primaryType.getContentType();
                 BasicBeanDescription contentTypeBbd = (BasicBeanDescription) jack.getSerializationConfig().introspect(contentType);
-                contentTypeBbd.findProperties().forEach(subP -> {
-                    header.addHeaderCell().setText(deCamelCased(subP.getName()));
-                });
-
+                List<BeanPropertyDefinition> properties = contentTypeBbd.findProperties();
                 Object collection = ctx.getPropertyValue();
                 Class<?> collectionClass = collection.getClass();
-                if (collectionClass.isArray()) {
-                    Object[] array = (Object[]) collection;
-                    for (Object e : array) {
-                        TableRow subTableRow = subTable.addRow();
-                        contentTypeBbd.findProperties().forEach(subP -> {
-                            Object value = subP.getGetter().getValue(e);
-                            subTableRow.addCells(value.toString());
+
+                if(properties.isEmpty()) {
+                    String str;
+                    if (collectionClass.isArray()) {
+                        Object[] array = (Object[]) collection;
+                        str = Arrays.stream(array).map(Object::toString).collect(Collectors.joining(", "));
+                    } else if (collection instanceof Iterable<?> iterable) {
+                        StringBuilder sb = new StringBuilder();
+                        Iterator<?> iterator = iterable.iterator();
+                        while(iterator.hasNext()) {
+                            sb.append(iterator.next().toString());
+                            if(iterator.hasNext()) {
+                                sb.append(", ");
+                            }
+                        }
+                        str = sb.toString();
+                    } else {
+                        str = collection.toString();
+                    }
+                    return new Paragraph(str);
+                } else {
+                    // if the value is an array we add a new table for it
+                    Table subTable = new Table();
+                    TableRow header = subTable.addRow();
+
+                    contentTypeBbd.findProperties().forEach(subP -> {
+                        header.addHeaderCell().setText(deCamelCased(subP.getName()));
+                    });
+
+                    if (collectionClass.isArray()) {
+                        Object[] array = (Object[]) collection;
+                        for (Object e : array) {
+                            TableRow subTableRow = subTable.addRow();
+                            properties.forEach(subP -> {
+                                Object value = subP.getGetter().getValue(e);
+                                subTableRow.addCells(value.toString());
+                            });
+                        }
+                    } else if (collection instanceof Iterable<?> iterable) {
+                        iterable.forEach(e -> {
+                            TableRow subTableRow = subTable.addRow();
+                            contentTypeBbd.findProperties().forEach(subP -> {
+                                Object value = subP.getGetter().getValue(e);
+                                subTableRow.addCells(value.toString());
+                            });
                         });
                     }
-                } else if (collection instanceof Iterable<?> iterable) {
-                    iterable.forEach(e -> {
-                        TableRow subTableRow = subTable.addRow();
-                        contentTypeBbd.findProperties().forEach(subP -> {
-                            Object value = subP.getGetter().getValue(e);
-                            subTableRow.addCells(value.toString());
-                        });
-                    });
+                    return subTable;
                 }
-                return subTable;
+
             }
             return null;
         }
@@ -270,7 +301,6 @@ public class DtoDisplay extends Composite<Div> {
                 Object propertyValue = ctx.getPropertyValue();
                 if (propertyValue instanceof Number number) {
                     Locale locale = ctx.getLocale();
-                    System.out.println("Number formatted with " + locale);
                     propertyValue = NumberFormat.getInstance(locale).format(propertyValue);
                 }
                 return new Span("" + propertyValue);

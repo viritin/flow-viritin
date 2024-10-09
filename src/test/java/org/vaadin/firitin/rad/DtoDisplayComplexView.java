@@ -56,8 +56,6 @@ public class DtoDisplayComplexView extends VerticalLayout {
         group.setIidee(2);
         personWithThings.getGroups().add(group);
 
-        personWithThings.setThings(new String[]{"Car", "House", "Boat"});
-
         personWithThings.setMainGadget(new PersonWithThings.Gadget("Smartphone", "A phone that is smart", false));
         personWithThings.setGadgets(new PersonWithThings.Gadget[]{
                 new PersonWithThings.Gadget("Smartwatch", "A watch that is smart", false),
