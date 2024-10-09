@@ -19,9 +19,9 @@ public class DtoDisplayComplexView extends VerticalLayout {
     public DtoDisplayComplexView() {
         add(new RichText().withMarkDown("""
                 ## DTO Display, with custom formatting
-                
+                                
                 You can also provide custom formatting for the fields:
-                
+                                
                     new DtoDisplay(personWithThings)
                        .withDefaultHeader()
                        .withPropertyPrinter(ctx -> {
@@ -32,6 +32,35 @@ public class DtoDisplayComplexView extends VerticalLayout {
                        });
                 """));
 
+        PersonWithThings personWithThings = getPersonWithThings();
+
+        // Probably an app wide configured with DI in real apps
+        var printer = new PrettyPrinter().withPropertyPrinter(ctx -> {
+                    if (ctx.getProperty().getName().equals("age")) {
+                        return new RichText().withMarkDown("**" + ctx.getPropertyValue() + "**, which is a good age to be.");
+                    }
+                    return null;
+                })
+                .withPropertyPrinter(new PropertyPrinter() {
+                    @Override
+                    public Component printValue(ValueContext ctx) {
+                        if (ctx.getProperty().getName().equals("lastName")) {
+                            return new RichText().withMarkDown("**%s**".formatted(ctx.getPropertyValue()));
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public String getPropertyHeader(ValueContext ctx) {
+                        return "Surname aka last name:";
+                    }
+                });
+
+        add(printer.printToVaadin(personWithThings));
+
+    }
+
+    private static PersonWithThings getPersonWithThings() {
         PersonWithThings personWithThings = new PersonWithThings();
         personWithThings.setSupervisor(personWithThings); // circular reference to show infinite recursion handling
         personWithThings.setFirstName("John");
@@ -63,31 +92,7 @@ public class DtoDisplayComplexView extends VerticalLayout {
         });
 
         personWithThings.setThings(new String[]{"Car", "House", "Boat"});
-
-        add(new DtoDisplay(personWithThings)
-                .withDefaultHeader()
-                .withPropertyPrinter(ctx -> {
-                    if(ctx.getProperty().getName().equals("age")) {
-                        return new RichText().withMarkDown("**" + ctx.getPropertyValue() + "**, which is a good age to be.");
-                    }
-                    return null;
-                })
-                .withPropertyPrinter(new PropertyPrinter() {
-                    @Override
-                    public Component printValue(ValueContext ctx) {
-                        if (ctx.getProperty().getName().equals("lastName")) {
-                            return new RichText().withMarkDown("**%s**".formatted(ctx.getPropertyValue()));
-                        }
-                        return null;
-                    }
-
-                    @Override
-                    public String getPropertyHeader(ValueContext ctx) {
-                        return "Surname aka last name:";
-                    }
-                })
-        );
-
+        return personWithThings;
     }
 
     public static String toPrettyJson(Object dto) {

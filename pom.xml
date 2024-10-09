@@ -5,7 +5,7 @@
     <parent>
         <groupId>in.virit.sb</groupId>
         <artifactId>viritin-addon-project-parent</artifactId>
-        <version>0.0.3</version>
+        <version>0.0.5</version>
         <relativePath />
     </parent>
 
