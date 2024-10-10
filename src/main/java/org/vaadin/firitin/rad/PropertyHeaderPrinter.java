@@ -18,10 +18,10 @@ public interface PropertyHeaderPrinter {
      * @param ctx the value context
      * @return the component representing the property header or null if this printer does not know how to print the value
      */
-    Object printHeader(ValueContext ctx);
+    Object printHeader(PropertyContext ctx);
 
-    static String defaultHeader(ValueContext ctx) {
-        String propertyName = ctx.getProperty().getName();
+    static String defaultHeader(PropertyContext ctx) {
+        String propertyName = ctx.getName();
         String deCamelCased = deCamelCased(propertyName);
         return deCamelCased + ":";
     }

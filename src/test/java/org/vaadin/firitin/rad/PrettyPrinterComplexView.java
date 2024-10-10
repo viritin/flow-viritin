@@ -4,11 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Emphasis;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import org.junit.jupiter.api.Test;
 import org.vaadin.firitin.components.RichText;
+import org.vaadin.firitin.components.details.VDetails;
 import org.vaadin.firitin.rad.datastructures.PersonWithThings;
 import org.vaadin.firitin.testdomain.Address;
 import org.vaadin.firitin.testdomain.Group;
@@ -16,9 +16,9 @@ import org.vaadin.firitin.testdomain.Group;
 import java.time.LocalDateTime;
 
 @Route
-public class DtoDisplayComplexView extends VerticalLayout {
+public class PrettyPrinterComplexView extends VerticalLayout {
 
-    public DtoDisplayComplexView() {
+    public PrettyPrinterComplexView() {
         add(new RichText().withMarkDown("""
                 ## DTO Display, with custom formatting
                                 
@@ -40,13 +40,20 @@ public class DtoDisplayComplexView extends VerticalLayout {
         var printer = new PrettyPrinter()
                 .withPropertyHeaderPrinter(ctx -> {
                     // This customises the default header generation
-                    String propertyName = ctx.getProperty().getName();
+                    // for testing, print differently on root level, with some type info
+                    String propertyName = ctx.getName();
                     String deCamelCased = DtoDisplay.deCamelCased(propertyName);
-                    Class<?> rawClass = ctx.getProperty().getPrimaryType().getRawClass();
-                    return new RichText("%s:<br><i>(%s)</i>".formatted(deCamelCased, shortenPackageName(rawClass.getName())));
+                    Class<?> rawClass = ctx.beanPropertyDefinition().getPrimaryType().getRawClass();
+                    int level = ctx.getLevel();
+                    boolean isRootLevel = level == 1;
+                    if(isRootLevel) {
+                        return new RichText("%s:<br><i>(%s)</i>".formatted(deCamelCased, shortenPackageName(rawClass.getName())));
+                    } else {
+                        return propertyName;
+                    }
                 })
                 .withPropertyPrinter(ctx -> {
-                    if (ctx.getProperty().getPrimaryType().getRawClass().equals(Boolean.class)) {
+                    if (ctx.beanPropertyDefinition().getPrimaryType().getRawClass().equals(Boolean.class)) {
                         Boolean value = (Boolean) ctx.getPropertyValue();
                         if(value == null) {
                             return new Emphasis("undefined Boolean value");
@@ -56,28 +63,46 @@ public class DtoDisplayComplexView extends VerticalLayout {
                     return null;
                 })
                 .withPropertyPrinter(ctx -> {
-                    if (ctx.getProperty().getName().equals("age")) {
+                    if (ctx.getName().equals("age")) {
                         return new RichText().withMarkDown("**" + ctx.getPropertyValue() + "**, which is a good age to be.");
                     }
                     return null;
                 })
                 .withPropertyPrinter(new PropertyPrinter() {
                     @Override
-                    public Component printValue(ValueContext ctx) {
-                        if (ctx.getProperty().getName().equals("lastName")) {
+                    public Component printValue(PropertyContext ctx) {
+                        if (ctx.getName().equals("lastName")) {
                             return new RichText().withMarkDown("**%s**".formatted(ctx.getPropertyValue()));
                         }
                         return null;
                     }
 
                     @Override
-                    public Object getPropertyHeader(ValueContext ctx) {
+                    public Object getPropertyHeader(PropertyContext ctx) {
                         // PropertyPrinters, have optional veto for the header they handle
                         return new RichText().withMarkDown("""
                                 Surname aka last name:<br/>
                                 *%s*
-                                """.formatted(ctx.getProperty().getPrimaryType().getRawClass().getName()));
+                                """.formatted(ctx.beanPropertyDefinition().getPrimaryType().getRawClass().getName()));
                     }
+                })
+                .withPropertyPrinter(ctx -> {
+                    // an example that cuts the recursion in a circular reference after first level
+                    if(ctx.getName().equals("supervisor")) {
+                        if (ctx.getLevel() > 1 && ctx.getPropertyValue() == ctx.owner().value()) {
+                            PersonWithThings propertyValue = (PersonWithThings) ctx.getPropertyValue();
+                            String summary = "%s %s (YES, this fellow is his own boss, terminated here with simple Strign representation)".formatted(propertyValue.getFirstName(), propertyValue.getLastName());
+                            return summary;
+                        } else {
+                            // A second example for this printer, add better formatted string summary for the details
+                            PersonWithThings propertyValue = (PersonWithThings) ctx.getPropertyValue();
+                            String summary = "%s %s".formatted(propertyValue.getFirstName(), propertyValue.getLastName());
+                            // this is the same thing that PropertyPrinter does by example for "properties with properties"
+                            // but now we have more meaningful summary
+                            return new VDetails(summary, () -> ctx.getPrettyPrinter().printToVaadin(ctx.asValueContext()));
+                        }
+                    }
+                    return null;
                 });
 
         add(printer.printToVaadin(personWithThings));

@@ -1,101 +1,40 @@
 package org.vaadin.firitin.rad;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.vaadin.flow.component.UI;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
-/**
- * ValueContext is a helper class to pass around the context of the value being displayed/printed.
- *
- * <p>Experimental, not yet stable API.</p>
- */
-public class ValueContext {
-    // Helper "Jack" to do introspection
-    static final ObjectMapper jack = new ObjectMapper();
+public interface ValueContext {
+    Object value();
 
-    private Class type;
-    private Object value;
-    private String propertyName;
-    private ValueContext parent;
-    private BasicBeanDescription bbd;
-    private BeanPropertyDefinition property;
-    private Locale locale;
+    ValueContext parent();
 
-    public ValueContext(Object dto) {
-        setValue(dto);
-    }
+    BasicBeanDescription beanDescription();
 
-    public void setValue(Object dto) {
-        this.value = dto;
-        if(type == null) {
-            type = dto.getClass();
+    Locale getLocale();
+
+    PrettyPrinter getPrettyPrinter();
+
+    PropertyContext getPropertyContext(BeanPropertyDefinition property);
+
+    int getLevel();
+
+    default String toShortString() {
+        if (value() == null) {
+            return "null";
         }
-        JavaType javaType = jack.getTypeFactory().constructType(type);
-        this.bbd = (BasicBeanDescription) jack.getSerializationConfig().introspect(javaType);
-        setBeanDescription(bbd);
-    }
-
-    public Object getValue() {
-        return value;
-    }
-
-    public ValueContext getParent() {
-        return parent;
-    }
-
-    public void setParent(ValueContext parent) {
-        this.parent = parent;
-    }
-
-    public String getPropertyName() {
-        return propertyName;
-    }
-
-    public void setPropertyName(String propertyName) {
-        this.propertyName = propertyName;
-    }
-
-    public Class getType() {
-        return type;
-    }
-
-    public void setBeanDescription(BasicBeanDescription bbd) {
-        this.bbd = bbd;
-    }
-
-    public BasicBeanDescription getBeanDescription() {
-        return bbd;
-    }
-
-    public void setProperty(BeanPropertyDefinition p) {
-        this.property = p;
-    }
-
-    public BeanPropertyDefinition getProperty() {
-        return property;
-    }
-
-    public Object getPropertyValue() {
-        return property.getGetter().getValue(value);
-    }
-
-    public Locale getLocale() {
-        if(locale == null) {
-            UI ui = UI.getCurrent();
-            if(ui != null) {
-                locale = ui.getLocale();
-            } else {
-                locale = Locale.getDefault();
+        List<BeanPropertyDefinition> properties = beanDescription().findProperties();
+        if (properties.isEmpty()) {
+            return DtoDisplay.toShortString(value());
+        } else {
+            Optional<BeanPropertyDefinition> name = properties.stream().filter(p -> p.getName().equals("name")).findFirst();
+            if (name.isPresent()) {
+                return DtoDisplay.toShortString(getPropertyContext(name.get()).getPropertyValue());
             }
         }
-        return locale;
-    }
-
-    public void setLocale(Locale locale) {
-        this.locale = locale;
+        return DtoDisplay.toShortString(value());
     }
 }

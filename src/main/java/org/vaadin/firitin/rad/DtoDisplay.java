@@ -43,7 +43,7 @@ public class DtoDisplay extends Composite<Div> {
      * @param dto the DTO to display
      */
     public DtoDisplay(Object dto) {
-        this(new ArrayList<>(getDefaultPropertyPrinters()), new ValueContext(dto));
+        this(new ArrayList<>(getDefaultPropertyPrinters()), new ValueContextImpl(PrettyPrinter.getDefault(), dto));
     }
 
     public DtoDisplay(List<PropertyPrinter> propertyPrinters, ValueContext context) {
@@ -84,21 +84,20 @@ public class DtoDisplay extends Composite<Div> {
     private void buildTable() {
         injectStyles();
         Table table = new Table();
-        context.getBeanDescription().findProperties().forEach(p -> {
+        context.beanDescription().findProperties().forEach(p -> {
             TableRow tableRow = table.addRow();
-
-            context.setProperty(p);
+            PropertyContext propertyContext = context.getPropertyContext(p);
 
             Object value = null;
             for (PropertyPrinter propertyPrinter : propertyPrinters) {
-                value = propertyPrinter.printValue(context);
+                value = propertyPrinter.printValue(propertyContext);
                 if (value != null) {
                     // PropertyPrinter can override header if it wants, otherwise use the first one that returns or
                     // default header
-                    Object propertyHeader = propertyPrinter.getPropertyHeader(context);
+                    Object propertyHeader = propertyPrinter.getPropertyHeader(propertyContext);
                     if(propertyHeader == null) {
-                        propertyHeader = headerPrinters.stream().map(headerPrinter -> headerPrinter.printHeader(context))
-                                .filter(h -> h != null).findFirst().orElse(PropertyHeaderPrinter.defaultHeader(context));
+                        propertyHeader = headerPrinters.stream().map(headerPrinter -> headerPrinter.printHeader(propertyContext))
+                                .filter(h -> h != null).findFirst().orElse(PropertyHeaderPrinter.defaultHeader(propertyContext));
                     }
                     TableHeaderCell tableHeaderCell = tableRow.addHeaderCell();
                     if (propertyHeader instanceof Component c) {
@@ -119,7 +118,7 @@ public class DtoDisplay extends Composite<Div> {
             } else {
                 TableHeaderCell tableHeaderCell = tableRow.addHeaderCell();
                 tableHeaderCell.setText(p.getName());
-                Object value1 = p.getGetter().getValue(context.getValue());
+                Object value1 = p.getGetter().getValue(context.value());
                 tableRow.addCells((value1 == null ? "null" : value1.toString()) + " (no printer found)");
             }
 
@@ -157,12 +156,14 @@ public class DtoDisplay extends Composite<Div> {
                         color: var(--lumo-secondary-text-color);
                         font-weight: 500;
                     }
-                    
+                    .dto-display th,
+                    .dto-display td {
+                        vertical-align: top;
+                    }
                     .dto-display>table>tr>th {
                         text-align: right;
                         white-space: nowrap;
                         align-items: start;
-                        vertical-align: top;
                         padding-right: var(--lumo-space-s);
                     }
                     .dto-display td>vaadin-details>vaadin-details-summary {
@@ -173,7 +174,7 @@ public class DtoDisplay extends Composite<Div> {
     }
 
     public DtoDisplay withDefaultHeader() {
-        getContent().addComponentAsFirst(new H1(deCamelCased(context.getValue().getClass().getSimpleName()) + ":"));
+        getContent().addComponentAsFirst(new H1(deCamelCased(context.value().getClass().getSimpleName()) + ":"));
         return this;
     }
 
@@ -186,4 +187,5 @@ public class DtoDisplay extends Composite<Div> {
         headerPrinters.add(0, printer);
         return this;
     }
+
 }

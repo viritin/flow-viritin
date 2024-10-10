@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Route
-public class DtoDisplayView extends VerticalLayout {
+public class PrettyPrinterView extends VerticalLayout {
 
     public record PersonRecord(String firstName, String lastName, int age, List<PhoneNumber> phoneNumbers) {
     }
@@ -24,7 +24,7 @@ public class DtoDisplayView extends VerticalLayout {
     }
 
 
-    public DtoDisplayView() {
+    public PrettyPrinterView() {
         PersonRecord person = new PersonRecord(
                 "John", "Doe", 42,
                 List.of(new PhoneNumber("Home", "1234567890"),
@@ -46,9 +46,7 @@ public class DtoDisplayView extends VerticalLayout {
         add(new H1("DTO Display, basic usage"));
 
 
-        DtoDisplay dtoDisplay = new DtoDisplay(person);
-
-        add(dtoDisplay);
+        add(PrettyPrinter.toVaadin(person));
 
 
         add(new RichText().withMarkDown("""
@@ -95,7 +93,7 @@ public class DtoDisplayView extends VerticalLayout {
                 new PersonWithThings.Gadget("Smartglasses", "Glasses that are smart", true)
         });
 
-        add(new DtoDisplay(personWithThings));
+        add(PrettyPrinter.toVaadin(personWithThings));
 
     }
 

@@ -2,6 +2,8 @@ package org.vaadin.firitin.rad;
 
 import com.vaadin.flow.component.Component;
 
+import static org.vaadin.firitin.rad.DtoDisplay.toShortString;
+
 /**
  * Experimental, not yet stable API.
  * <p>
@@ -15,10 +17,9 @@ public interface PropertyPrinter {
      * @param ctx the value context
      * @return the component representing the property value or null if this printer does not know how to print the value
      */
-    Object printValue(ValueContext ctx);
+    Object printValue(PropertyContext ctx);
 
-    default Object getPropertyHeader(ValueContext ctx) {
+    default Object getPropertyHeader(PropertyContext ctx) {
         return null;
     }
-
 }

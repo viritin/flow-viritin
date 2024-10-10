@@ -1,12 +1,13 @@
 package org.vaadin.firitin.rad;
 
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.type.ArrayType;
 import com.fasterxml.jackson.databind.type.CollectionLikeType;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import org.apache.commons.lang3.ClassUtils;
@@ -25,15 +26,16 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static org.vaadin.firitin.rad.DtoDisplay.deCamelCased;
-import static org.vaadin.firitin.rad.DtoDisplay.toShortString;
-import static org.vaadin.firitin.rad.ValueContext.jack;
 
 /**
  * Experimental feature, API/naming might change.
  */
 public class PrettyPrinter {
 
+    // Helper "Jack" to do introspection
+    static final ObjectMapper jack = new ObjectMapper();
     static List<PropertyPrinter> _defaultPropertyPrinters = new ArrayList<>();
+    private static final PrettyPrinter INSTANCE = new PrettyPrinter(getDefaultPropertyPrinters());
 
     static {
         _defaultPropertyPrinters.add(new PrimitivePrinter());
@@ -46,16 +48,7 @@ public class PrettyPrinter {
 
     private final List<PropertyPrinter> propertyPrinters;
     private final List<PropertyHeaderPrinter> propertyHeaderPrinters;
-
-    public static List<PropertyPrinter> getDefaultPropertyPrinters() {
-        return Collections.unmodifiableList(_defaultPropertyPrinters);
-    }
-
-    private static final PrettyPrinter INSTANCE = new PrettyPrinter(getDefaultPropertyPrinters());
-
-    static PrettyPrinter getDefault() {
-        return INSTANCE;
-    }
+    private Locale locale;
 
     public PrettyPrinter() {
         this(new ArrayList<>(getDefaultPropertyPrinters()));
@@ -66,12 +59,37 @@ public class PrettyPrinter {
         this.propertyHeaderPrinters = new ArrayList<>();
     }
 
+    public static List<PropertyPrinter> getDefaultPropertyPrinters() {
+        return Collections.unmodifiableList(_defaultPropertyPrinters);
+    }
+
+    static PrettyPrinter getDefault() {
+        return INSTANCE;
+    }
+
+    public static Component toVaadin(Object value) {
+        return INSTANCE.printToVaadin(value);
+    }
+
+    static BasicBeanDescription inrospect(Object dto) {
+        if(dto == null) {
+            return null;
+        }
+        JavaType javaType = jack.getTypeFactory().constructType(dto.getClass());
+        return (BasicBeanDescription) jack.getSerializationConfig().introspect(javaType);
+    }
+
     public List<PropertyPrinter> getPropertyPrinters() {
         return propertyPrinters;
     }
 
     public Component printToVaadin(Object value) {
-        DtoDisplay dtoDisplay = new DtoDisplay(propertyPrinters, new ValueContext(value));
+        ValueContextImpl valueContext = new ValueContextImpl(this, value);
+        return printToVaadin(valueContext);
+    }
+
+    Component printToVaadin(ValueContext ctx) {
+        DtoDisplay dtoDisplay = new DtoDisplay(propertyPrinters, ctx);
         propertyHeaderPrinters.forEach(dtoDisplay::withPropertyHeaderPrinter);
         return dtoDisplay;
     }
@@ -86,19 +104,31 @@ public class PrettyPrinter {
         return this;
     }
 
-    public static Component toVaadin(Object value) {
-        return INSTANCE.printToVaadin(value);
+    public Locale getLocale() {
+        if (locale == null) {
+            UI ui = UI.getCurrent();
+            if (ui != null) {
+                locale = ui.getLocale();
+            } else {
+                locale = Locale.getDefault();
+            }
+        }
+        return locale;
+    }
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
     }
 
     // TODO, figure out if needed, this is essentially the same as object printer
     private static class RecordTypePrinter implements PropertyPrinter {
 
         @Override
-        public Component printValue(ValueContext ctx) {
-            if (ctx.getProperty().getPrimaryType().isRecordType()) {
-                Object value = ctx.getProperty().getGetter().getValue(ctx.getValue());
-                String header = toShortString(value);
-                return new VDetails(header, () -> new DtoDisplay(value));
+        public Component printValue(PropertyContext ctx) {
+            if (ctx.beanPropertyDefinition().getPrimaryType().isRecordType()) {
+                ValueContext propertyContext = ctx.asValueContext();
+                String header = propertyContext.toShortString();
+                return new VDetails(header, () -> propertyContext.getPrettyPrinter().printToVaadin(propertyContext));
             }
             return null;
         }
@@ -106,24 +136,18 @@ public class PrettyPrinter {
 
     private static class ObjectPrinter implements PropertyPrinter {
         @Override
-        public Component printValue(ValueContext ctx) {
+        public Component printValue(PropertyContext ctx) {
             // TODO, figure out if circular references should be handled/visualized somehow in special way
-            Object value;
-            if (ctx.getProperty().hasGetter()) {
-                AnnotatedMethod getter = ctx.getProperty().getGetter();
-                value = getter.getValue(ctx.getValue());
-            } else {
-                value = ctx.getProperty().getAccessor().getValue(ctx.getValue());
-            }
-            String header = toShortString(value);
-            return new VDetails(header, () -> new DtoDisplay(value));
+            ValueContext propCtx = ctx.asValueContext();
+            String header = propCtx.toShortString();
+            return new VDetails(header, () -> propCtx.getPrettyPrinter().printToVaadin(propCtx));
         }
     }
 
     private static class CollectionPropertyPrinter implements PropertyPrinter {
         @Override
-        public Component printValue(ValueContext ctx) {
-            JavaType primaryType = ctx.getProperty().getPrimaryType();
+        public Component printValue(PropertyContext ctx) {
+            JavaType primaryType = ctx.beanPropertyDefinition().getPrimaryType();
             if (primaryType instanceof CollectionLikeType || primaryType instanceof ArrayType) {
 
                 JavaType contentType = primaryType.getContentType();
@@ -188,10 +212,10 @@ public class PrettyPrinter {
 
     private static class PrimitivePrinter implements PropertyPrinter {
         @Override
-        public Component printValue(ValueContext ctx) {
-            if (ctx.getProperty().getPrimaryType().isPrimitive() ||
-                    String.class == ctx.getProperty().getPrimaryType().getRawClass() ||
-                    ClassUtils.isPrimitiveOrWrapper(ctx.getProperty().getRawPrimaryType())) {
+        public Component printValue(PropertyContext ctx) {
+            if (ctx.beanPropertyDefinition().getPrimaryType().isPrimitive() ||
+                    String.class == ctx.beanPropertyDefinition().getPrimaryType().getRawClass() ||
+                    ClassUtils.isPrimitiveOrWrapper(ctx.beanPropertyDefinition().getRawPrimaryType())) {
                 // TODO improve basic formatting. E.g. for numbers we could use NumberFormat and booleans with more
                 // visual checkboxes or similar.
                 Object propertyValue = ctx.getPropertyValue();
@@ -207,15 +231,14 @@ public class PrettyPrinter {
 
     private static class EnumPrinter implements PropertyPrinter {
         @Override
-        public Component printValue(ValueContext ctx) {
+        public Component printValue(PropertyContext ctx) {
             // TODO figure out if this should be merged with primitive printer 🤔
             // Now only formatting with "code" tag to separate from basic string
-            if (ctx.getProperty().getPrimaryType().isEnumType() ||
-                    ctx.getProperty().getPrimaryType().isEnumImplType()) {
+            if (ctx.beanPropertyDefinition().getPrimaryType().isEnumType() ||
+                    ctx.beanPropertyDefinition().getPrimaryType().isEnumImplType()) {
                 return new VCode("" + ctx.getPropertyValue());
             }
             return null;
         }
     }
-
 }
