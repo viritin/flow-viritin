@@ -273,18 +273,25 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
                 value = handleInputConversionError(property, ctx, ex.getMessage());
             }
         } else {
-            Class<?> presentationValueClass = value.getClass();
-            if (!property.getPrimaryType().isTypeOrSuperTypeOf(presentationValueClass)) {
-                // Go and check Vaadin's default converters
-                converter = DefaultConverterFactory.INSTANCE.newInstance(
-                        presentationValueClass, property.getPrimaryType().getRawClass()
-                ).orElseThrow(() -> new RuntimeException("No converter found for for " + presentationValueClass + " -> " + property.getPrimaryType()));
-                try {
-                    value = converter.convertToModel(value, ctx).getOrThrow(em -> new IllegalArgumentException("Conversion failed" + em));
-                } catch (Throwable e) {
-                    throw new RuntimeException("Conversion failed for " + property.getPrimaryType().getRawClass().getName());
+            if(value != null) {
+                Class<?> presentationValueClass = value.getClass();
+                if(property.getPrimaryType().isPrimitive() && value != null) {
+                    // unboxing probably works here
+                    return value;
+                }
+                if (!property.getPrimaryType().isTypeOrSuperTypeOf(presentationValueClass)) {
+                    // Go and check Vaadin's default converters
+                    converter = DefaultConverterFactory.INSTANCE.newInstance(
+                            presentationValueClass, property.getPrimaryType().getRawClass()
+                    ).orElseThrow(() -> new RuntimeException("No converter found for for " + presentationValueClass + " -> " + property.getPrimaryType()));
+                    try {
+                        value = converter.convertToModel(value, ctx).getOrThrow(em -> new IllegalArgumentException("Conversion failed" + em));
+                    } catch (Throwable e) {
+                        throw new RuntimeException("Conversion failed for " + property.getPrimaryType().getRawClass().getName());
+                    }
                 }
             }
+
         }
         return value;
     }
