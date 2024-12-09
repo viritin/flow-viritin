@@ -35,6 +35,7 @@ e.g. in field declaration or without declaring an extra variable. When used in a
  * BrowserCookie helper that works well with web sockets too
  * LumoProps, Java enumeration for easier discoverability (& redefining/using) of the handy Lumo theme css properties.
  * ~WebStorage helper to save data in the browsers localStorage or sessionStorage~ (available for backwards compatibility, but the same implementation found in core as well these days)
+ * Like with [JS developer can with the ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver), with Viritin one can observe the component sizes and hook Java logic to changes. If you are using Viritin components or implementing `FluentHasSize` on your component, you can [hook listener directly to the component](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/resizeobserver/ResizeObserverCoreApiDrafting.java#L32-L38). Otherwise, you can use the [ResizeObserver utility](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/resizeobserver/ResizeObserverView.java).
 
 ### VGrid
 

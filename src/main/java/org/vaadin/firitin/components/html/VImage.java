@@ -1,5 +1,8 @@
 package org.vaadin.firitin.components.html;
 
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.AbstractStreamResource;
 import org.vaadin.firitin.fluency.ui.FluentClickNotifier;
@@ -32,6 +35,17 @@ public class VImage extends Image implements FluentHtmlContainer<VImage>, Fluent
     public VImage withAlt(String alt) {
         setAlt(alt);
         return this;
+    }
+
+    public void addErrorListener(ComponentEventListener<LoadingErrorEvent> listener) {
+        addListener(LoadingErrorEvent.class, listener);
+    }
+
+    @DomEvent("error")
+    public static class LoadingErrorEvent extends ComponentEvent<Image> {
+        public LoadingErrorEvent(Image source, boolean fromClient) {
+            super(source, fromClient);
+        }
     }
 
 }

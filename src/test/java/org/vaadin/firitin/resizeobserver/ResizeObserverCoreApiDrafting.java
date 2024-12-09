@@ -6,11 +6,14 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import org.vaadin.firitin.components.RichText;
+import org.vaadin.firitin.components.html.VDiv;
+import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 import org.vaadin.firitin.rad.PrettyPrinter;
+import org.vaadin.firitin.util.ResizeObserver;
 import org.vaadin.firitin.util.style.LumoProps;
 
 @Route
-public class ResizeObserverCoreApiDrafting extends VerticalLayout implements ResizeObservable {
+public class ResizeObserverCoreApiDrafting extends VVerticalLayout {
 
     private Registration registration;
 
@@ -21,18 +24,17 @@ public class ResizeObserverCoreApiDrafting extends VerticalLayout implements Res
             The ResizeObserver itself could be an internal helper to Flow.
             """));
 
-        var div = new Div();
-        div.getStyle().setBackground(LumoProps.CONTRAST_5PCT.var());
+        var sizeDisplay = new SizeDisplay();
 
         Button toggle = new Button("Start observing");
         toggle.addClickListener(e -> {
             if (registration == null) {
                 registration = addResizeListener(event -> {
-                    // This is what users would most often fetch, should probably be brought to event level
-                    int width = event.getDimensions().width();
+                    // This is what users would most often fetch
+                    int width = event.getWidht();
 
-                    div.removeAll();
-                    div.add(PrettyPrinter.toVaadin(event.getDimensions()));
+                    // print the full dimentions to the screen as a demo of the API
+                    sizeDisplay.updateDimentions(event.getDimensions());
                 });
                 toggle.setText("Stop observing");
             } else {
@@ -42,7 +44,20 @@ public class ResizeObserverCoreApiDrafting extends VerticalLayout implements Res
             }
         });
 
-        add(toggle, div);
+        add(toggle, sizeDisplay);
+
+    }
+
+    class SizeDisplay extends Div {
+        {
+            getStyle().setBackground(LumoProps.CONTRAST_5PCT.var());
+            setWidthFull();
+        }
+
+        public void updateDimentions(ResizeObserver.Dimensions dim) {
+            removeAll();
+            add(PrettyPrinter.toVaadin(dim));
+        }
 
     }
 }

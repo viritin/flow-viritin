@@ -69,6 +69,20 @@ public class ResizeObserver {
         }
 
         /**
+         * @return the new width of the component in pixels
+         */
+        public int getWidht() {
+            return dimensions.width();
+        }
+
+        /**
+         * @return the new height of the component in pixels
+         */
+        public int getHeight() {
+            return dimensions.height();
+        }
+
+        /**
          * @return the new dimensions of the component
          */
         public Dimensions getDimensions() {

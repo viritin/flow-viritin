@@ -1,6 +1,10 @@
 package org.vaadin.firitin.fluency.ui;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.shared.Registration;
+import org.vaadin.firitin.util.ResizeObserver;
 
 @SuppressWarnings("unchecked")
 public interface FluentHasSize<S extends FluentHasSize<S>> extends HasSize {
@@ -24,6 +28,20 @@ public interface FluentHasSize<S extends FluentHasSize<S>> extends HasSize {
         setWidth(width);
         return (S) this;
     }
+
+    /**
+     * Adds a listener that is notified when the size of the component changes on the client side. The listener is also
+     * notified when the dimensions of the component become available for the first time.
+     *
+     * @param listener the listener to add
+     * @return a registration object for removing the listener
+     * @deprecated Hoping to get this feature to the core soon, there might be API conflicts at that point.
+     * Use the lower level {@link ResizeObserver} directly if you are concerned about potential future API conflicts.
+     */
+    @Deprecated
+    default Registration addResizeListener(ComponentEventListener<ResizeObserver.SizeChangeEvent> listener) {
+        return ResizeObserver.get().addResizeListener((Component) this, listener);
+    };
 
     // Javadoc copied form Vaadin Framework
 
