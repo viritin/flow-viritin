@@ -16,6 +16,7 @@ import org.vaadin.firitin.components.html.VCode;
 import org.vaadin.firitin.fields.internalhtmltable.Table;
 import org.vaadin.firitin.fields.internalhtmltable.TableRow;
 
+import java.lang.reflect.Array;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -154,13 +155,37 @@ public class PrettyPrinter {
                 BasicBeanDescription contentTypeBbd = (BasicBeanDescription) jack.getSerializationConfig().introspect(contentType);
                 List<BeanPropertyDefinition> properties = contentTypeBbd.findProperties();
                 Object collection = ctx.getPropertyValue();
+                if(collection == null) {
+                    return new Paragraph("null");
+                }
                 Class<?> collectionClass = collection.getClass();
-
                 if (properties.isEmpty()) {
                     String str;
                     if (collectionClass.isArray()) {
-                        Object[] array = (Object[]) collection;
-                        str = Arrays.stream(array).map(Object::toString).collect(Collectors.joining(", "));
+                        Class<?> aClass = collectionClass.componentType();
+                        if(aClass.isPrimitive()) {
+                            int length = Array.getLength(collection);
+                            String simpleName = collectionClass.getSimpleName();
+                            str = simpleName;
+                            if(length > 5) {
+                                str += ", legth:" + length;
+                            }
+                            str += ": [";
+                            int max = Math.min(length, 5);
+                            for (int i = 0; i < max; i++) {
+                                str += Array.get(collection, i);
+                                if(i != max - 1) {
+                                    str += ", ";
+                                }
+                            }
+                            if(length > 5) {
+                                str += "...";
+                            }
+                            str += "]";
+                        } else {
+                            Object[] array = (Object[]) collection;
+                            str = Arrays.stream(array).map(Object::toString).collect(Collectors.joining(", "));
+                        }
                     } else if (collection instanceof Iterable<?> iterable) {
                         StringBuilder sb = new StringBuilder();
                         Iterator<?> iterator = iterable.iterator();
