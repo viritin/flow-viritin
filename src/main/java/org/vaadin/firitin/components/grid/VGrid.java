@@ -13,6 +13,7 @@ import com.vaadin.flow.component.grid.ColumnPathRenderer;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -83,9 +84,17 @@ public class VGrid<T> extends Grid<T>
         JavaType javaType = dummyOm.getTypeFactory().constructType(beanType);
         this.bbd = (BasicBeanDescription) dummyOm.getSerializationConfig().introspect(javaType);
         if(autoCreateColumns) {
-            List<String> propertyNames = bbd.findProperties().stream().map(BeanPropertyDefinition::getName).toList();
+            List<String> propertyNames = getBeanPropertyNames();
             setColumns(propertyNames.toArray(new String[0]));
         }
+    }
+
+    protected List<BeanPropertyDefinition> getBeanPropertyDefinitions() {
+        return this.bbd.findProperties();
+    }
+
+    protected List<String> getBeanPropertyNames() {
+        return getBeanPropertyDefinitions().stream().map(BeanPropertyDefinition::getName).toList();
     }
 
     @Override
@@ -338,7 +347,16 @@ public class VGrid<T> extends Grid<T>
         if (cellFormatter != null) {
             return cellFormatter.formatColumnValue(col, value);
         }
-        return CellFormatter.defaultVaadinFormatting(value);
+        try {
+            return CellFormatter.defaultVaadinFormatting(value);
+        } catch (Exception e) {
+            // Yes, toString can fail, e.g. sometimes with HbnProxy classes...
+            if(value == null) {
+                return "null";
+            } else {
+                return value.getClass().getSimpleName();
+            }
+        }
     }
 
     /**
