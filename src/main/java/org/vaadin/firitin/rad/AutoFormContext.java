@@ -10,17 +10,19 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.TextField;
 import org.vaadin.firitin.components.checkbox.VCheckBox;
 import org.vaadin.firitin.components.datepicker.VDatePicker;
 import org.vaadin.firitin.components.datetimepicker.VDateTimePicker;
 import org.vaadin.firitin.components.textfield.VBigDecimalField;
 import org.vaadin.firitin.components.textfield.VIntegerField;
 import org.vaadin.firitin.components.textfield.VNumberField;
+import org.vaadin.firitin.components.textfield.VPasswordField;
+import org.vaadin.firitin.components.textfield.VTextArea;
 import org.vaadin.firitin.components.textfield.VTextField;
 import org.vaadin.firitin.components.timepicker.VTimePicker;
 import org.vaadin.firitin.fields.ElementCollectionField;
 import org.vaadin.firitin.fields.EnumSelect;
+import org.vaadin.firitin.fields.ShortField;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -46,6 +48,8 @@ public class AutoFormContext {
     // conxtex (not just by names as now)
     private Set<String> hiddenProperties = new HashSet<>(){{add("id");}};
 
+    private boolean annotateTypes = false;
+
     public AutoFormContext() {
         this(new ArrayList<>(getDefaultPropertyPrinters()));
     }
@@ -60,10 +64,11 @@ public class AutoFormContext {
         if(_defaultPropertyPrinters.isEmpty()) {
             _defaultPropertyPrinters.add(new StringEditor());
             _defaultPropertyPrinters.add(new TypeBasePrinter(VIntegerField.class, int.class, Integer.class));
+            _defaultPropertyPrinters.add(new TypeBasePrinter(ShortField.class, Short.class, short.class));
             _defaultPropertyPrinters.add(new TypeBasePrinter(VNumberField.class, double.class, Double.class));
             _defaultPropertyPrinters.add(new TypeBasePrinter(VBigDecimalField.class, BigDecimal.class));
             _defaultPropertyPrinters.add(new TypeBasePrinter(VDatePicker.class, java.util.Date.class, java.time.LocalDate.class));
-            _defaultPropertyPrinters.add(new TypeBasePrinter(VDateTimePicker.class, java.util.Date.class, java.time.LocalDateTime.class));
+            _defaultPropertyPrinters.add(new TypeBasePrinter(VDateTimePicker.class, java.util.Date.class, java.time.LocalDateTime.class, java.time.Instant.class));
             _defaultPropertyPrinters.add(new TypeBasePrinter(VTimePicker.class, java.time.LocalTime.class));
             _defaultPropertyPrinters.add(new TypeBasePrinter(VCheckBox.class, Boolean.class, boolean.class));
             _defaultPropertyPrinters.add(new TypeBasePrinter(EnumSelect.class, java.lang.Enum.class));
@@ -86,6 +91,14 @@ public class AutoFormContext {
     static BasicBeanDescription introspectClass(Class<?> type) {
         JavaType javaType = jack.getTypeFactory().constructType(type);
         return (BasicBeanDescription) jack.getSerializationConfig().introspect(javaType);
+    }
+
+    public boolean isAnnotateTypes() {
+        return annotateTypes;
+    }
+
+    public void setAnnotateTypes(boolean annotateTypes) {
+        this.annotateTypes = annotateTypes;
     }
 
     public List<PropertyPrinter> getPropertyPrinters() {
@@ -216,11 +229,18 @@ public class AutoFormContext {
     }
 
 
-    private static class StringEditor extends TypeBasePrinter {
-        public StringEditor() {
-            super(VTextField.class, String.class);
+    private static class StringEditor implements PropertyPrinter {
+        @Override
+        public Object printValue(PropertyContext ctx) {
+            if(String.class == ctx.beanPropertyDefinition().getPrimaryType().getRawClass()) {
+                if(ctx.getName().toString().equals("description")) {
+                    return new VTextArea();
+                }
+                // PasswordField probably makes no sense with autoform
+                return new VTextField();
+            }
+            return null;
         }
-
     }
 
     private static class IntegerEditor implements PropertyPrinter {

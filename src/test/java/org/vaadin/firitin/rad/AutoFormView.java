@@ -18,6 +18,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,6 +54,8 @@ public class AutoFormView extends VerticalLayout {
         add(new H1("AutoFormView"));
 
         AutoFormContext context = new AutoFormContext();
+
+        context.setAnnotateTypes(true);
 
         // Relations as hard for automatic form generation. No good heuristic to decide
         // what to offer as options for ComboBoxes (or whatever used to select one)
@@ -166,12 +169,16 @@ public class AutoFormView extends VerticalLayout {
         private Category category;
         private PersonPojo friend;
         private BigDecimal salary;
+        private Instant lastModified;
+        private Short shortNumber;
+        private short shortNumberPrimitive;
 
         public PersonPojo(String firstName, String lastName, int age, List<PhoneNumber> phoneNumbers) {
             this.firstName = firstName;
             this.lastName = lastName;
             this.age = age;
             this.phoneNumbers = new ArrayList<>(phoneNumbers);
+            lastModified = Instant.now();
         }
 
         public String getFirstName() {
@@ -268,6 +275,30 @@ public class AutoFormView extends VerticalLayout {
 
         public void setSalary(BigDecimal salary) {
             this.salary = salary;
+        }
+
+        public Instant getLastModified() {
+            return lastModified;
+        }
+
+        public void setLastModified(Instant lastModified) {
+            this.lastModified = lastModified;
+        }
+
+        public Short getShortNumber() {
+            return shortNumber;
+        }
+
+        public void setShortNumber(Short shortNumber) {
+            this.shortNumber = shortNumber;
+        }
+
+        public short getShortNumberPrimitive() {
+            return shortNumberPrimitive;
+        }
+
+        public void setShortNumberPrimitive(short shortNumberPrimitive) {
+            this.shortNumberPrimitive = shortNumberPrimitive;
         }
 
     }

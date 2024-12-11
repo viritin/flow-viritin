@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
@@ -103,6 +105,17 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
                         // Data binding with the form binder
                         formBinder.bindProperty(p, (HasValue) value);
                     }
+
+                    if(autoFormContext.isAnnotateTypes()) {
+                        if(HasHelper.class.isAssignableFrom(value.getClass())) {
+                            ((HasHelper) value).setHelperText(p.getPrimaryType().getRawClass().toString());
+                        } else {
+                            HasElement element = (HasElement) value;
+                            // As a fallback, set to the title attribute
+                            element.getElement().setAttribute("title", p.getPrimaryType().getRawClass().toString());
+                        }
+                    }
+
                     // PropertyPrinter can override header if it wants, otherwise use the first one that returns or
                     // default header
                     Object propertyHeader = propertyPrinter.getPropertyHeader(propertyContext);
