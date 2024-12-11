@@ -1,5 +1,6 @@
 package org.vaadin.firitin.rad;
 
+import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
@@ -84,10 +85,18 @@ public class DtoDisplay extends Composite<Div> {
     private void buildTable() {
         injectStyles();
         Table table = new Table();
-        context.beanDescription().findProperties().forEach(p -> {
+        BasicBeanDescription bdd = context.beanDescription();
+        if(bdd == null) {
+            return;
+        }
+        bdd.findProperties().forEach(p -> {
+            // TODO this is a hack to skip obsolete hibernate proxy properties,
+            // replace with a proper exclusion list with decent default values
+            if(p.getName().equals("hibernateLazyInitializer")) {
+                return;
+            }
             TableRow tableRow = table.addRow();
             PropertyContext propertyContext = context.getPropertyContext(p);
-
             Object value = null;
             for (PropertyPrinter propertyPrinter : propertyPrinters) {
                 value = propertyPrinter.printValue(propertyContext);
