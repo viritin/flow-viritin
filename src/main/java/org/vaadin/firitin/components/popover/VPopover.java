@@ -16,7 +16,10 @@ public class VPopover extends Popover implements FluentHasStyle<VPopover>, Fluen
         this();
         addOpenedChangeListener(event -> {
             if(event.isOpened()) {
-                add(contentProvider.get());
+                // regression!? called twice now...
+                if(!getChildren().findFirst().isPresent()) {
+                    add(contentProvider.get());
+                }
             } else {
                 removeAll();
             }
