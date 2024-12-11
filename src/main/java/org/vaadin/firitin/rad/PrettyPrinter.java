@@ -1,5 +1,6 @@
 package org.vaadin.firitin.rad;
 
+import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
@@ -16,6 +17,7 @@ import org.vaadin.firitin.components.html.VCode;
 import org.vaadin.firitin.fields.internalhtmltable.Table;
 import org.vaadin.firitin.fields.internalhtmltable.TableRow;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -73,11 +75,75 @@ public class PrettyPrinter {
     }
 
     static BasicBeanDescription inrospect(Object dto) {
-        if(dto == null) {
+        if (dto == null) {
             return null;
         }
         JavaType javaType = jack.getTypeFactory().constructType(dto.getClass());
         return (BasicBeanDescription) jack.getSerializationConfig().introspect(javaType);
+    }
+
+    public static String printOneLiner(final Object entity, final int maxLength) {
+        return printOneLiner(entity, maxLength, "|", "|");
+    }
+
+    public static String printOneLiner(final Object entity, final int maxLength, final String delim, final String prefix) {
+        // TODO figure out how to allow customizing the one-liner format
+        if(entity == null) {
+            return "null";
+        }
+
+        JavaType javaType = jack.getTypeFactory().constructType(entity.getClass());
+        BasicBeanDescription bdd = (BasicBeanDescription) jack.getSerializationConfig().introspect(javaType);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(prefix);
+        List<BeanPropertyDefinition> properties = bdd.findProperties();
+        for (BeanPropertyDefinition p : properties) {
+            if (p.getAccessor() == null) {
+                continue;
+            }
+            String name = p.getName();
+            if(name.equals("hibernateLazyInitializer")) {
+                continue;
+            }
+            Object value = p.getAccessor().getValue(entity);
+            if (value == null) {
+                sb.append("null");
+                continue;
+            }
+            if (isEntityType(p)) {
+                // try to get id from value and use that instead of probably useless/overwhelming tosString
+                BeanDescription introspect = jack.getSerializationConfig().introspect(jack.getTypeFactory().constructType(p.getRawPrimaryType()));
+                introspect.findProperties().stream().filter(pp -> pp.getName().equals("id")).findFirst().ifPresent(pp -> {
+                    Object id = pp.getAccessor().getValue(value);
+                    sb.append("⇢");
+                    sb.append(p.getPrimaryType().getRawClass().getSimpleName());
+                    sb.append("-");
+                    sb.append(id);
+                });
+            } else {
+                sb.append(value);
+            }
+            sb.append(delim);
+        }
+        if (sb.length() > maxLength) {
+            return sb.substring(0, maxLength) + "...";
+        }
+        return sb.toString();
+
+    }
+
+    private static boolean isEntityType(BeanPropertyDefinition p) {
+        try {
+            Class eaClazz = Class.forName("jakarta.persistence.Entity");
+            Annotation annotation = p.getRawPrimaryType().getAnnotation(eaClazz);
+            if (annotation != null) {
+                return true;
+            }
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+        return false;
     }
 
     public List<PropertyPrinter> getPropertyPrinters() {
@@ -155,7 +221,7 @@ public class PrettyPrinter {
                 BasicBeanDescription contentTypeBbd = (BasicBeanDescription) jack.getSerializationConfig().introspect(contentType);
                 List<BeanPropertyDefinition> properties = contentTypeBbd.findProperties();
                 Object collection = ctx.getPropertyValue();
-                if(collection == null) {
+                if (collection == null) {
                     return new Paragraph("null");
                 }
                 Class<?> collectionClass = collection.getClass();
@@ -163,22 +229,22 @@ public class PrettyPrinter {
                     String str;
                     if (collectionClass.isArray()) {
                         Class<?> aClass = collectionClass.componentType();
-                        if(aClass.isPrimitive()) {
+                        if (aClass.isPrimitive()) {
                             int length = Array.getLength(collection);
                             String simpleName = collectionClass.getSimpleName();
                             str = simpleName;
-                            if(length > 5) {
+                            if (length > 5) {
                                 str += ", legth:" + length;
                             }
                             str += ": [";
                             int max = Math.min(length, 5);
                             for (int i = 0; i < max; i++) {
                                 str += Array.get(collection, i);
-                                if(i != max - 1) {
+                                if (i != max - 1) {
                                     str += ", ";
                                 }
                             }
-                            if(length > 5) {
+                            if (length > 5) {
                                 str += "...";
                             }
                             str += "]";
