@@ -387,4 +387,13 @@ public abstract class MainLayout extends AppLayout implements AfterNavigationObs
         return layout;
     }
 
+    /**
+     * Manually override the current view title.
+     *
+     * @param title the title to set
+     */
+    public void setViewTitle(String title) {
+        viewTitle.setText(title);
+    }
+
 }
