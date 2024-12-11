@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyName;
 import com.fasterxml.jackson.databind.introspect.AnnotatedConstructor;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.googlecode.gentyref.GenericTypeReflector;
@@ -215,6 +216,13 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         }
     }
 
+    protected boolean isReadOnly(BeanPropertyDefinition property) {
+        if(!property.hasSetter()) {
+            return !this.bbd.isRecordType();
+        }
+        return false;
+    }
+
     /**
      * Binds given property to the given editor field.
      *
@@ -225,6 +233,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         if (isRequired(property)) {
             hasValue.setRequiredIndicatorVisible(true);
         }
+        hasValue.setReadOnly(isReadOnly(property));
         bpdToEditorField.put(property, hasValue);
         nameToEditorField.put(property.getName(), hasValue);
         configureEditor(property, hasValue);
