@@ -23,7 +23,9 @@ public @interface MenuItem {
      * the view using deep linking url.
      */
 	public boolean enabled() default true;
-	
+
+    public boolean hidden() default false;
+
 	public String title() default "";
     
     public int order() default DEFAULT;

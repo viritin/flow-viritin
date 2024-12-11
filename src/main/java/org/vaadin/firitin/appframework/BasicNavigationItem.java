@@ -26,6 +26,9 @@ public class BasicNavigationItem extends SideNavItem implements NavigationItem {
             if(me.icon() != null) {
                 setPrefixComponent(new Icon(me.icon()));
             }
+            if(me.hidden()) {
+                setVisible(false);
+            }
             if(!me.enabled()) {
                 setEnabled(false);
             }
