@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class TestServer {
     public static void main(String[] args) {
+        System.setProperty("vaadin.vaadin.frontend.frontend.folder", "./target/frontend");
         SpringApplication.run(TestServer.class, args);
     }
 }
