@@ -386,9 +386,8 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
                     }
                 }
             } else {
-                // TODO figure out if non-bound fields needs to be handled some how, probably not
-                // Or maybe should for records?
-                Logger.getLogger(FormBinder.class.getName()).log(Level.WARNING, "No editor field for property " + pd.getName());
+                // TODO should probably remove this for non-records and throw exception for records??
+                Logger.getLogger(FormBinder.class.getName()).log(Level.INFO, "No editor field for property " + pd.getName());
             }
 
         }
