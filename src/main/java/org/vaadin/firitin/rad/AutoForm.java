@@ -18,6 +18,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 import jakarta.validation.Configuration;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.MessageInterpolator;
+import jakarta.validation.Path;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
@@ -31,9 +32,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
+ * A form that automatically creates fields for all properties of a bean. Not meant to created directly, but through
+ * {@link AutoFormContext}.
  */
 public class AutoForm<T> extends Composite<Div> implements ValueContext {
 
@@ -52,6 +56,30 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
     private SerializableConsumer<T> deleteHandler;
     private SerializableConsumer<T> resetHandler;
     private Dialog dialog;
+    private Button saveButton = new DefaultButton("Save", e -> {
+        saveHandler.accept(getValue());
+        if (dialog != null) {
+            dialog.close();
+        }
+        hasChanges = false;
+        if(isAttached()) {
+            adjustSaveButtonState();
+        }
+    }) {{
+        setEnabled(false);
+    }};
+    private Button deleteButton = new DeleteButton(() -> {
+        deleteHandler.accept(getValue());
+        if (dialog != null) {
+            dialog.close();
+        }
+    });
+    private Button resetButton = new VButton("Reset", e -> {
+        resetHandler.accept(getValue());
+        if (dialog != null) {
+            dialog.close();
+        }
+    });
 
     AutoForm(AutoFormContext autoFormContext, BasicBeanDescription beanDescription, T value) {
         this.autoFormContext = autoFormContext;
@@ -59,8 +87,18 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
         this.beanDescription = beanDescription;
         this.formBinder = new FormBinder<T>(beanDescription);
         this.value = value;
-    }
 
+        formBinder.addValueChangeListener(e -> {
+            if (e.isFromClient()) {
+                hasChanges = true;
+                doBeanValidation();
+                resetButton.setEnabled(true);
+                adjustSaveButtonState();
+            }
+        });
+
+
+    }
 
     private static boolean isLongString(Object object) {
         return object != null && object.toString().length() > SHORT_STRING_THRESHOLD;
@@ -106,8 +144,8 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
                         formBinder.bindProperty(p, (HasValue) value);
                     }
 
-                    if(autoFormContext.isAnnotateTypes()) {
-                        if(HasHelper.class.isAssignableFrom(value.getClass())) {
+                    if (autoFormContext.isAnnotateTypes()) {
+                        if (HasHelper.class.isAssignableFrom(value.getClass())) {
                             ((HasHelper) value).setHelperText(p.getPrimaryType().getRawClass().toString());
                         } else {
                             HasElement element = (HasElement) value;
@@ -158,7 +196,7 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
         });
 
         getContent().add(formLayout);
-        if(value != null) {
+        if (value != null) {
             formBinder.setValue(value);
         }
     }
@@ -168,6 +206,10 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
         super.onAttach(attachEvent);
         getContent().removeAll();
         buildTable();
+        Div display = new Div();
+        display.setClassName("bean-validation-display");
+        getContent().add(display);
+        formBinder.setClassLevelViolationDisplay(display);
     }
 
     public AutoForm withPropertyHeaderPrinter(PropertyHeaderPrinter printer) {
@@ -234,62 +276,22 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
         this.resetHandler = resetHandler;
     }
 
-    private Button saveButton = new DefaultButton("Save", e -> {
-        saveHandler.accept(getValue());
-        if(dialog != null) {
-            dialog.close();
-        }
-    }) {{
-        setEnabled(false);
-    }};
-    private Button deleteButton = new DeleteButton(() -> {
-        deleteHandler.accept(getValue());
-        if(dialog != null) {
-            dialog.close();
-        }
-    });
-    private Button resetButton = new VButton("Reset", e -> {
-        resetHandler.accept(getValue());
-        if(dialog != null) {
-            dialog.close();
-        }
-    });
-
     public Component getActions() {
-        if(resetHandler == null) {
+        if (resetHandler == null) {
             resetButton.setVisible(false);
         }
-        if(deleteHandler == null) {
+        if (deleteHandler == null) {
             deleteButton.setVisible(false);
         }
-        if(saveHandler == null) {
+        if (saveHandler == null) {
             saveButton.setVisible(false);
         }
 
         return new HorizontalLayout(saveButton, deleteButton, resetButton);
     }
 
+    @Deprecated(forRemoval = true)
     public AutoForm<T> withBeanValidation() {
-        // TODO should this come from the context?
-
-        addAttachListener(al -> {
-            Div display = new Div();
-            display.setClassName("bean-validation-display");
-            getContent().add(display);
-            formBinder.setClassLevelViolationDisplay(display);
-
-            formBinder.addValueChangeListener(e -> {
-                if (e.isFromClient()) {
-                    hasChanges = true;
-                    // TODO this is old status change listener, figure out what is really needed
-                    Set<ConstraintViolation<T>> constraintViolations = doBeanValidation(e.getValue());
-                    formBinder.setConstraintViolations(constraintViolations);
-                    resetButton.setEnabled(true);
-                    adjustSaveButtonState();
-                }
-            });
-        });
-
         return this;
     }
 
@@ -306,12 +308,40 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
     }
 
 
-    protected <T> Set<ConstraintViolation<T>> doBeanValidation(T object) {
-        Class<?>[] groups = getValidationGroups();
-        if (groups != null) {
-            return getValidator().validate(object, groups);
-        } else {
-            return getValidator().validate(object);
+    protected void doBeanValidation() {
+        if (autoFormContext.isDefaultBeanValidation()) {
+            try {
+                T object = (T) getBinder().getValue();
+                Class<?>[] groups = getValidationGroups();
+                Set<ConstraintViolation<T>> constraintViolations;
+                if (groups != null) {
+                    constraintViolations = getValidator().validate(object, groups);
+                } else {
+                    constraintViolations = getValidator().validate(object);
+                }
+                // TODO figure out if this is a good default, strict developer would use groups!!
+                // clear violations for which there is a field but not a UI field (e.g. id for new JPA entity)
+                constraintViolations.removeIf(v -> {
+                    try {
+                        Path propertyPath = v.getPropertyPath();
+                        String propertyName = propertyPath.toString();
+                        List<String> boundProperties = getBinder().getBoundProperties();
+                        if (!boundProperties.contains(propertyName)) {
+                            return true;
+                        }
+                    } catch (Exception e) {
+                        // ignore
+                        Logger.getLogger(AutoForm.class.getName()).log(Level.FINE, "Ignoring constraint violation", e);
+                    }
+
+                    return false;
+                });
+
+                formBinder.setConstraintViolations(constraintViolations);
+            } catch (Throwable e) {
+                // TODO catch error if BeanValidation is not on the classpath and log + ignore
+                new RuntimeException(e);
+            }
         }
     }
 
@@ -343,6 +373,7 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
     }
 
     public void setValidationGroups(Class<?>... groups) {
+        // TODO figure out if this is the right place
         this.validationGroups = groups;
     }
 

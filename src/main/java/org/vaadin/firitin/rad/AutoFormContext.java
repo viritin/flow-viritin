@@ -49,6 +49,7 @@ public class AutoFormContext {
     private Set<String> hiddenProperties = new HashSet<>(){{add("id");}};
 
     private boolean annotateTypes = false;
+    private boolean defaultBeanValidation = true;
 
     public AutoFormContext() {
         this(new ArrayList<>(getDefaultPropertyPrinters()));
@@ -133,6 +134,20 @@ public class AutoFormContext {
     public AutoFormContext withPropertyHeaderPrinter(PropertyHeaderPrinter printer) {
         propertyHeaderPrinters.add(0, printer);
         return this;
+    }
+
+    /**
+     * Disables the default bean validation. By default, the bean validation is enabled if found from the classpath.
+     *
+     * @return this for chaining
+     */
+    public AutoFormContext disableBeanValidation() {
+        defaultBeanValidation = false;
+        return this;
+    }
+
+    public boolean isDefaultBeanValidation() {
+        return defaultBeanValidation;
     }
 
     public Locale getLocale() {

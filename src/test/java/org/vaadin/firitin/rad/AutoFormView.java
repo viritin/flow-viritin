@@ -32,24 +32,25 @@ public class AutoFormView extends VerticalLayout {
 
     private boolean autovalidate = false;
 
+    PersonPojo personPojo = new PersonPojo(
+            "John", "Doe", 42,
+            List.of(new PhoneNumber("Home", "1234567890"),
+                    new PhoneNumber("Work", "12345666")
+            )
+    );
+
+    List<PersonPojo> friends = new ArrayList<>();
+    {
+        personPojo.setDescription("This is a person with soem description");
+        //personPojo.setOldSchoolDate(new Date());
+
+        friends.add(new PersonPojo("Jane", "Doe", 42, List.of(new PhoneNumber("Home", "1234567890"))));
+        friends.add(new PersonPojo("Jack", "Doe", 43, List.of(new PhoneNumber("Home", "1234567890"))));
+        friends.add(new PersonPojo("Jill", "Doe", 44, List.of(new PhoneNumber("Home", "1234567890"))));
+        friends.add(new PersonPojo("Jim", "Doe", 45, List.of(new PhoneNumber("Home", "1234567890"))));
+    }
+
     public AutoFormView() {
-        PersonPojo personPojo = new PersonPojo(
-                "John", "Doe", 42,
-                List.of(new PhoneNumber("Home", "1234567890"),
-                        new PhoneNumber("Work", "12345666")
-                )
-        );
-
-        List<PersonPojo> friends = new ArrayList<>();
-        {
-            personPojo.setDescription("This is a person with soem description");
-            //personPojo.setOldSchoolDate(new Date());
-
-            friends.add(new PersonPojo("Jane", "Doe", 42, List.of(new PhoneNumber("Home", "1234567890"))));
-            friends.add(new PersonPojo("Jack", "Doe", 43, List.of(new PhoneNumber("Home", "1234567890"))));
-            friends.add(new PersonPojo("Jill", "Doe", 44, List.of(new PhoneNumber("Home", "1234567890"))));
-            friends.add(new PersonPojo("Jim", "Doe", 45, List.of(new PhoneNumber("Home", "1234567890"))));
-        }
 
         add(new H1("AutoFormView"));
 
@@ -93,8 +94,7 @@ public class AutoFormView extends VerticalLayout {
         HorizontalLayout horizontalLayout = new HorizontalLayout() {
             {
 
-                AutoForm<PersonPojo> form = context.createForm(personPojo)
-                        .withBeanValidation();
+                AutoForm<PersonPojo> form = context.createForm(personPojo);
 
                 form.setSaveHandler(person -> {
                     Notification.show("Save action!");
