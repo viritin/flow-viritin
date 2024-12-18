@@ -13,7 +13,6 @@ import com.vaadin.flow.component.grid.ColumnPathRenderer;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -71,7 +70,7 @@ public class VGrid<T> extends Grid<T>
     /**
      * Creates a new Grid with given bean type.
      *
-     * @param beanType the bean/record type
+     * @param beanType          the bean/record type
      * @param autoCreateColumns if true, columns are created automatically for all introspected properties
      */
     public VGrid(Class<T> beanType, boolean autoCreateColumns) {
@@ -83,7 +82,7 @@ public class VGrid<T> extends Grid<T>
         }
         JavaType javaType = dummyOm.getTypeFactory().constructType(beanType);
         this.bbd = (BasicBeanDescription) dummyOm.getSerializationConfig().introspect(javaType);
-        if(autoCreateColumns) {
+        if (autoCreateColumns) {
             List<String> propertyNames = getBeanPropertyNames();
             setColumns(propertyNames.toArray(new String[0]));
         }
@@ -125,7 +124,7 @@ public class VGrid<T> extends Grid<T>
      */
     public VGrid<T> hideProperties(String... propertyNamesToHide) {
         List<String> properties = new ArrayList<>(getColumns().stream().map(col -> col.getKey()).toList());
-        for(String pToHide : propertyNamesToHide) {
+        for (String pToHide : propertyNamesToHide) {
             properties.remove(pToHide);
         }
         setColumns(properties.toArray(new String[properties.size()]));
@@ -254,37 +253,45 @@ public class VGrid<T> extends Grid<T>
      */
     public VGrid<T> withColumnSelector() {
         ContextMenu columnSelector = new ContextMenu();
-        getColumns().forEach(col -> {
-            MenuItem item = columnSelector.addItem(col.getHeaderText());
+        List<Column<T>> columns = getColumns();
+        for (int i = 0; i < columns.size(); i++) {
+            Column<T> col = columns.get(i);
+            String headerText = col.getHeaderText();
+            if (headerText == null) {
+                headerText = col.getKey();
+            }
+            if (headerText == null) {
+                headerText = "Column " + i;
+            }
+            MenuItem item = columnSelector.addItem(headerText);
             item.setCheckable(true);
             item.setChecked(col.isVisible());
             item.addClickListener(e -> {
                 col.setVisible(!col.isVisible());
                 item.setChecked(col.isVisible());
             });
-        });
+        }
 
-        Grid.Column fakeColumn = addColumn(s -> "");
-        fakeColumn.setKey("column-selector-fake-column");
-        fakeColumn.setWidth("0px");
-        fakeColumn.setFlexGrow(0);
-
-        Button b = new Button(VaadinIcon.CHEVRON_CIRCLE_DOWN_O.create());
-        b.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        // TODO figure out a good way to set proper margin right, now hardcoded to 16px
-        // TODO figure out a good way set previous column margin, in case it is hidden
-        b.getElement().executeJs("""
-                const el = this;
-                setTimeout(() => {
-                    const w = el.offsetWidth;
-                    el.parentElement.style.overflow = "visible";
-                    el.parentElement.previousSibling.style.marginRight = (w - 16) + "px";
-                    el.style.setProperty('margin-left', '-' + (w+16) + 'px');
-                }, 0);
-                """);
+        Button b = new Button(VaadinIcon.CHEVRON_CIRCLE_DOWN_O.create()) {{
+            addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+            getStyle()
+                    .setPosition(Style.Position.ABSOLUTE)
+                    .setRight("0")
+                    .setMinWidth("1em")
+                    .setMarginRight("0")
+                    .setMarginTop("0.5em")
+                    .setPadding("0")
+                    .setBackgroundColor("rgba(255,255,255,0.8)");
+            getElement().executeJs("""
+                    const el = this;
+                    const gridel = $0;
+                    gridel.shadowRoot.getElementById("scroller").appendChild(el);
+                    """, VGrid.this.getElement());
+        }};
+        VGrid.this.getElement().appendVirtualChild(b.getElement());
         columnSelector.setTarget(b);
         columnSelector.setOpenOnClick(true);
-        fakeColumn.setHeader(b);
+
         return this;
     }
 
@@ -351,7 +358,7 @@ public class VGrid<T> extends Grid<T>
             return CellFormatter.defaultVaadinFormatting(value);
         } catch (Exception e) {
             // Yes, toString can fail, e.g. sometimes with HbnProxy classes...
-            if(value == null) {
+            if (value == null) {
                 return "null";
             } else {
                 return value.getClass().getSimpleName();
@@ -440,10 +447,10 @@ public class VGrid<T> extends Grid<T>
                             cellCssBodyString)
                     );
                 }
-                if(oldCNG != null) {
+                if (oldCNG != null) {
                     String oldNames = oldCNG.apply(t);
-                    if(oldNames != null) {
-                        return oldNames +  " " + key;
+                    if (oldNames != null) {
+                        return oldNames + " " + key;
                     }
                 }
                 return key;
@@ -461,7 +468,7 @@ public class VGrid<T> extends Grid<T>
         /**
          * Assignes {@link Style} rules to row rendered for given item.
          *
-         * @param item the item for which the row is rendered
+         * @param item  the item for which the row is rendered
          * @param style the style rules for given item
          */
         public void styleRow(T item, Style style);
