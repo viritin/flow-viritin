@@ -59,6 +59,18 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- Enable if needed, faster starts/restarts without
         <dependency>
             <groupId>com.vaadin</groupId>

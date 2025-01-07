@@ -13,15 +13,21 @@ import com.vaadin.flow.component.grid.ColumnPathRenderer;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableComparator;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentFocusable;
 import org.vaadin.firitin.fluency.ui.FluentHasSize;
@@ -29,6 +35,7 @@ import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 import org.vaadin.firitin.fluency.ui.FluentHasTheme;
 import org.vaadin.firitin.util.VStyleUtil;
 
+import java.awt.print.Pageable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.RecordComponent;
@@ -42,6 +49,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class VGrid<T> extends Grid<T>
@@ -628,6 +636,10 @@ public class VGrid<T> extends Grid<T>
 
             return customStyle;
         }
+    }
+
+    public void mySpringBindingMethod(SerializableFunction<PageRequest, Page> fetcher) {
+        setItems(query -> fetcher.apply(VaadinSpringDataHelpers.toSpringPageRequest(query)).stream());
     }
 
 }
