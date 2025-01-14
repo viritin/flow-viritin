@@ -172,6 +172,9 @@ public class AutoFormView extends VerticalLayout {
         private Instant lastModified;
         private Short shortNumber;
         private short shortNumberPrimitive;
+        private long longNumber;
+        private Long longNumberToo;
+
 
         public PersonPojo(String firstName, String lastName, int age, List<PhoneNumber> phoneNumbers) {
             this.firstName = firstName;
@@ -301,6 +304,21 @@ public class AutoFormView extends VerticalLayout {
             this.shortNumberPrimitive = shortNumberPrimitive;
         }
 
+        public long getLongNumber() {
+            return longNumber;
+        }
+
+        public void setLongNumber(long longNumber) {
+            this.longNumber = longNumber;
+        }
+
+        public Long getLongNumberToo() {
+            return longNumberToo;
+        }
+
+        public void setLongNumberToo(Long longNumberToo) {
+            this.longNumberToo = longNumberToo;
+        }
     }
 
 }

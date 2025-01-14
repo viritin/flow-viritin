@@ -22,6 +22,7 @@ import org.vaadin.firitin.components.textfield.VTextField;
 import org.vaadin.firitin.components.timepicker.VTimePicker;
 import org.vaadin.firitin.fields.ElementCollectionField;
 import org.vaadin.firitin.fields.EnumSelect;
+import org.vaadin.firitin.fields.LongField;
 import org.vaadin.firitin.fields.ShortField;
 
 import java.math.BigDecimal;
@@ -65,6 +66,7 @@ public class AutoFormContext {
         if(_defaultPropertyPrinters.isEmpty()) {
             _defaultPropertyPrinters.add(new StringEditor());
             _defaultPropertyPrinters.add(new TypeBasePrinter(VIntegerField.class, int.class, Integer.class));
+            _defaultPropertyPrinters.add(new TypeBasePrinter(LongField.class, Long.class, long.class));
             _defaultPropertyPrinters.add(new TypeBasePrinter(ShortField.class, Short.class, short.class));
             _defaultPropertyPrinters.add(new TypeBasePrinter(VNumberField.class, double.class, Double.class));
             _defaultPropertyPrinters.add(new TypeBasePrinter(VBigDecimalField.class, BigDecimal.class));
