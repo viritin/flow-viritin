@@ -110,7 +110,7 @@ public class ActionButton<T> extends Composite<Div> {
      * @return this for chaining
      */
     public ActionButton<T> setPostUiAction(Consumer<? super T> postUiAction) {
-        this.postUiUpdate = postUiUpdate;
+        this.postUiUpdate = postUiAction;
         return this;
     }
 
