@@ -252,7 +252,7 @@ public class PrettyPrinter {
                             Object[] array = (Object[]) collection;
                             str = Arrays.stream(array).map(Object::toString).collect(Collectors.joining(", "));
                         }
-                    } else if (collection instanceof Iterable<?> iterable) {
+                    } else if (collection != null && collection instanceof Iterable<?> iterable) {
                         StringBuilder sb = new StringBuilder();
                         Iterator<?> iterator = iterable.iterator();
                         while (iterator.hasNext()) {
@@ -263,7 +263,7 @@ public class PrettyPrinter {
                         }
                         str = sb.toString();
                     } else {
-                        str = collection.toString();
+                        str = "" + collection;
                     }
                     return new Paragraph(str);
                 } else {
@@ -281,7 +281,7 @@ public class PrettyPrinter {
                             TableRow subTableRow = subTable.addRow();
                             properties.forEach(subP -> {
                                 Object value = subP.getGetter().getValue(e);
-                                subTableRow.addCells(value.toString());
+                                subTableRow.addCells("" + value);
                             });
                         }
                     } else if (collection instanceof Iterable<?> iterable) {
@@ -289,7 +289,7 @@ public class PrettyPrinter {
                             TableRow subTableRow = subTable.addRow();
                             contentTypeBbd.findProperties().forEach(subP -> {
                                 Object value = subP.getGetter().getValue(e);
-                                subTableRow.addCells(value.toString());
+                                subTableRow.addCells(""+value);
                             });
                         });
                     }
