@@ -2,6 +2,8 @@ package org.vaadin.firitin.rad.datastructures;
 
 import org.vaadin.firitin.testdomain.Person;
 
+import java.util.Set;
+
 public class PersonWithThings extends Person {
 
     public record Gadget(String name, String description, boolean broken) {
@@ -11,6 +13,8 @@ public class PersonWithThings extends Person {
     private Gadget mainGadget;
 
     private Gadget[] gadgets;
+
+    private Set<Gadget> gadgetSet;
 
     private String[] things;
 
@@ -45,6 +49,14 @@ public class PersonWithThings extends Person {
 
     public void setGadgets(Gadget[] gadgets) {
         this.gadgets = gadgets;
+    }
+
+    public Set<Gadget> getGadgetSet() {
+        return gadgetSet;
+    }
+
+    public void setGadgetSet(Set<Gadget> gadgetSet) {
+        this.gadgetSet = gadgetSet;
     }
 
     public Person getSupervisor() {

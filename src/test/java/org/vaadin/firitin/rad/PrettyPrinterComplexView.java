@@ -14,6 +14,7 @@ import org.vaadin.firitin.testdomain.Address;
 import org.vaadin.firitin.testdomain.Group;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 
 @Route
 public class PrettyPrinterComplexView extends VerticalLayout {
@@ -117,6 +118,12 @@ public class PrettyPrinterComplexView extends VerticalLayout {
         personWithThings.setAge(42);
         personWithThings.setJoinTime(LocalDateTime.now());
         personWithThings.setIntegerToo(123);
+
+
+
+        var gadgets = new HashSet<PersonWithThings.Gadget>();
+        gadgets.add(new PersonWithThings.Gadget("Smartwatch", "A watch that is smart", false));
+        personWithThings.setGadgetSet(gadgets);
 
         Address address = new Address();
         address.setStreet("Some street 123");
