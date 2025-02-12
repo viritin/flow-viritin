@@ -23,6 +23,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import jakarta.validation.Configuration;
@@ -299,7 +300,9 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
      */
     protected Component createContent() {
         VVerticalLayout layout = new VVerticalLayout();
-        getFormComponents().forEach(f -> layout.add(f));
+        FormLayout formLayout = new FormLayout();
+        getFormComponents().forEach(f -> formLayout.add(f));
+        layout.add(formLayout);
         layout.add(getClassLevelViolationsDisplay());
         layout.add(getToolbar());
         return layout;
