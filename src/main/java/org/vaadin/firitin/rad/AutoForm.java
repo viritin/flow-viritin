@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.vaadin.firitin.components.button.DefaultButton;
 import org.vaadin.firitin.components.button.DeleteButton;
 import org.vaadin.firitin.components.button.VButton;
+import org.vaadin.firitin.fields.ElementCollectionField;
 import org.vaadin.firitin.form.FormBinder;
 
 import java.util.ArrayList;
@@ -206,6 +207,10 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
     }
 
     protected boolean requireFullWidthForFormLayout(Component c) {
+        if(c instanceof ElementCollectionField<?>) {
+            // These are usually 500+ pixels wide (and should be spawned on full row)
+            return true;
+        }
         return c instanceof FormLayout || c.getClassNames().contains("full-width");
     }
 

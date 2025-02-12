@@ -10,6 +10,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -43,8 +44,7 @@ import java.util.Map;
  *
  * <p>Usage example: selecting runners to a relay team.</p>
  */
-public class ElementCollectionField<T> extends Composite<VerticalLayout>
-        implements HasValue<HasValue.ValueChangeEvent<List<T>>, List<T>>, HasSize {
+public class ElementCollectionField<T> extends CustomField<List<T>> {
 
     // Helper "Jack" to do introspection
     private static final ObjectMapper jack = new ObjectMapper();
@@ -74,8 +74,7 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
         this.clazz = clazz;
         this.editorClass = editorClass;
         table = new Table();
-        getContent().setPadding(false);
-        getContent().add(table);
+        add(table);
     }
 
     /**
@@ -87,8 +86,7 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
         this.clazz = clazz;
         this.editorClass = null;
         table = new Table();
-        getContent().setPadding(false);
-        getContent().add(table);
+        add(table);
     }
 
     /**
@@ -147,19 +145,11 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
             fireValueChange();
         }));
     }
+
     private void fireValueChange() {
         fireEvent(new AbstractField.ComponentValueChangeEvent<ElementCollectionField, List<T>>(this,this,null,true));
     };
 
-
-    @Override
-    public void setValue(List<T> value) {
-        this.value = value;
-        table.removeAllRows();
-        configureColumneHeaders();
-        value.forEach(this::addNewRow);
-        addRowForNewItem();
-    }
 
     private void addRowForNewItem() {
         if(!clazz.isRecord()) {
@@ -240,6 +230,7 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
      * @return map of editors for properties
      */
     private Map<String, HasValue> generateEditors() {
+        // TODO fix all below by refactoring AutoFormContext to support this field
         // TODO figure out how to/if should use field factory from Vaadin core
         // TODO figure out how to make this configurable
         // TODO figure out all possible types that could be supported out of the box with various fields & converters
@@ -291,38 +282,16 @@ public class ElementCollectionField<T> extends Composite<VerticalLayout>
     }
 
     @Override
-    public List<T> getValue() {
+    protected List<T> generateModelValue() {
         return value;
     }
 
     @Override
-    public Registration addValueChangeListener(ValueChangeListener<? super ValueChangeEvent<List<T>>> listener) {
-        @SuppressWarnings("rawtypes")
-        ComponentEventListener componentListener = event -> {
-            AbstractField.ComponentValueChangeEvent<ElementCollectionField, List<T>> valueChangeEvent = (AbstractField.ComponentValueChangeEvent<ElementCollectionField, List<T>>) event;
-            listener.valueChanged(valueChangeEvent);
-        };
-        return addListener(AbstractField.ComponentValueChangeEvent.class,
-                componentListener);
-    }
-
-    @Override
-    public void setReadOnly(boolean readOnly) {
-
-    }
-
-    @Override
-    public boolean isReadOnly() {
-        return false;
-    }
-
-    @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-
-    }
-
-    @Override
-    public boolean isRequiredIndicatorVisible() {
-        return false;
+    protected void setPresentationValue(List<T> ts) {
+        this.value = ts;
+        table.removeAllRows();
+        configureColumneHeaders();
+        value.forEach(this::addNewRow);
+        addRowForNewItem();
     }
 }
