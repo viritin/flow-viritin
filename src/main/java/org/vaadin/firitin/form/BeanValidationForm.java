@@ -19,6 +19,7 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -88,7 +89,7 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
     private Class<?>[] validationGroups;
     private Validator validator;
 
-    private Div classLevelViolationsDisplay = new Div();
+    private HasComponents classLevelViolationsDisplay = new Div();
 
     /**
      * Constructor for the abstract form.
@@ -299,9 +300,17 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
     protected Component createContent() {
         VVerticalLayout layout = new VVerticalLayout();
         getFormComponents().forEach(f -> layout.add(f));
-        layout.add(classLevelViolationsDisplay);
+        layout.add(getClassLevelViolationsDisplay());
         layout.add(getToolbar());
         return layout;
+    }
+
+    public Component getClassLevelViolationsDisplay() {
+        return (Component) classLevelViolationsDisplay;
+    }
+
+    public void setClassLevelViolationsDisplay(HasComponents classLevelViolationsDisplay) {
+        this.classLevelViolationsDisplay = classLevelViolationsDisplay;
     }
 
     /**
