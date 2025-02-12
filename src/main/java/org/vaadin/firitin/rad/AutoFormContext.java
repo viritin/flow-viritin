@@ -9,9 +9,14 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.customfield.CustomField;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.FieldSet;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.textfield.IntegerField;
 import org.vaadin.firitin.components.checkbox.VCheckBox;
+import org.vaadin.firitin.components.customfield.VCustomField;
 import org.vaadin.firitin.components.datepicker.VDatePicker;
 import org.vaadin.firitin.components.datetimepicker.VDateTimePicker;
 import org.vaadin.firitin.components.textfield.VBigDecimalField;
@@ -25,6 +30,7 @@ import org.vaadin.firitin.fields.EnumSelect;
 import org.vaadin.firitin.fields.LongField;
 import org.vaadin.firitin.fields.ShortField;
 import org.vaadin.firitin.layouts.HorizontalFloatLayout;
+import org.vaadin.firitin.util.VStyleUtil;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -233,25 +239,38 @@ public class AutoFormContext {
                 AutoForm owner = (AutoForm) ctx.owner();
                 AutoFormContext autoFormContext = owner.getAutoFormContext();
                 AutoForm<?> form = autoFormContext.createForm(ctx.beanPropertyDefinition().getPrimaryType().getRawClass());
-                // TODO refactor somehow so that the fields within RecordField could be moved to upper level, maybe with
-                // a header or fieldset or similar
                 return new RecordField<>(form);
             }
             return null;
         }
 
-        private static class RecordField<T> extends AbstractCompositeField<HorizontalFloatLayout,RecordField<T>, T> {
+        private static class RecordField<T> extends VCustomField<T> {
             private final AutoForm<T> form;
 
             public RecordField(AutoForm<T> form) {
                 super(null);
                 this.form = form;
-                getContent().add(form);
+                addClassNames("full-width","v-record-field");
+                VStyleUtil.injectAsFirst("""
+                        .v-record-field fieldset  {
+                            padding: 0 var(--lumo-space-m);
+                            border: 1px dashed var(--lumo-contrast-30pct);
+                            border-radius: var(--lumo-border-radius-l);
+                        }
+                """);
+                FieldSet fieldSet = new FieldSet();
+                add(fieldSet);
+                fieldSet.add(form);
                 form.getBinder().addValueChangeListener(e -> {
                     if(e.isFromClient()) {
                         setModelValue(e.getValue(), true);
                     }
                 });
+            }
+
+            @Override
+            protected T generateModelValue() {
+                return form.getValue();
             }
 
             @Override

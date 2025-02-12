@@ -178,6 +178,10 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
             if (value != null) {
                 if (value instanceof Component c) {
                     formLayout.add(c);
+                    if(requireFullWidthForFormLayout(c)) {
+                        // TODO refactor right colspan
+                        formLayout.setColspan(c, 2);
+                    }
                 } else {
                     formLayout.add(value.toString());
                 }
@@ -199,6 +203,10 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
         if (value != null) {
             formBinder.setValue(value);
         }
+    }
+
+    protected boolean requireFullWidthForFormLayout(Component c) {
+        return c instanceof FormLayout || c.getClassNames().contains("full-width");
     }
 
     @Override
