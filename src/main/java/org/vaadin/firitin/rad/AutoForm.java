@@ -386,4 +386,8 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
         dialog.open();
         return dialog;
     }
+
+    AutoFormContext getAutoFormContext() {
+        return autoFormContext;
+    }
 }

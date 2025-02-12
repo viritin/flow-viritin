@@ -36,7 +36,7 @@ public class AutoFormView extends VerticalLayout {
             "John", "Doe", 42,
             List.of(new PhoneNumber("Home", "1234567890"),
                     new PhoneNumber("Work", "12345666")
-            )
+            ), new PhoneNumber("Mobile", "12345666")
     );
 
     List<PersonPojo> friends = new ArrayList<>();
@@ -44,10 +44,10 @@ public class AutoFormView extends VerticalLayout {
         personPojo.setDescription("This is a person with soem description");
         //personPojo.setOldSchoolDate(new Date());
 
-        friends.add(new PersonPojo("Jane", "Doe", 42, List.of(new PhoneNumber("Home", "1234567890"))));
-        friends.add(new PersonPojo("Jack", "Doe", 43, List.of(new PhoneNumber("Home", "1234567890"))));
-        friends.add(new PersonPojo("Jill", "Doe", 44, List.of(new PhoneNumber("Home", "1234567890"))));
-        friends.add(new PersonPojo("Jim", "Doe", 45, List.of(new PhoneNumber("Home", "1234567890"))));
+        friends.add(new PersonPojo("Jane", "Doe", 42, List.of(new PhoneNumber("Home", "1234567890")), new PhoneNumber("Mobile", "12345666")));
+        friends.add(new PersonPojo("Jack", "Doe", 43, List.of(new PhoneNumber("Home", "1234567890")), new PhoneNumber("Mobile", "12345666")));
+        friends.add(new PersonPojo("Jill", "Doe", 44, List.of(new PhoneNumber("Home", "1234567890")), new PhoneNumber("Mobile", "12345666")));
+        friends.add(new PersonPojo("Jim", "Doe", 45, List.of(new PhoneNumber("Home", "1234567890")), new PhoneNumber("Mobile", "12345666")));
     }
 
     public AutoFormView() {
@@ -165,6 +165,7 @@ public class AutoFormView extends VerticalLayout {
         private LocalDate birthDate;
         private LocalDateTime joinTimeStamp;
         private Date oldSchoolDate;
+        private PhoneNumber mainPhoneNumber;
         private List<PhoneNumber> phoneNumbers;
         private Category category;
         private PersonPojo friend;
@@ -176,11 +177,12 @@ public class AutoFormView extends VerticalLayout {
         private Long longNumberToo;
 
 
-        public PersonPojo(String firstName, String lastName, int age, List<PhoneNumber> phoneNumbers) {
+        public PersonPojo(String firstName, String lastName, int age, List<PhoneNumber> phoneNumbers, PhoneNumber mainPhone) {
             this.firstName = firstName;
             this.lastName = lastName;
             this.age = age;
             this.phoneNumbers = new ArrayList<>(phoneNumbers);
+            this.mainPhoneNumber = mainPhone;
             lastModified = Instant.now();
         }
 
@@ -214,6 +216,14 @@ public class AutoFormView extends VerticalLayout {
 
         public void setPhoneNumbers(List<PhoneNumber> phoneNumbers) {
             this.phoneNumbers = phoneNumbers;
+        }
+
+        public PhoneNumber getMainPhoneNumber() {
+            return mainPhoneNumber;
+        }
+
+        public void setMainPhoneNumber(PhoneNumber mainPhoneNumber) {
+            this.mainPhoneNumber = mainPhoneNumber;
         }
 
         public String getDescription() {

@@ -3,6 +3,7 @@ package org.vaadin.firitin.rad;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
+import com.vaadin.flow.component.AbstractCompositeField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
@@ -16,7 +17,6 @@ import org.vaadin.firitin.components.datetimepicker.VDateTimePicker;
 import org.vaadin.firitin.components.textfield.VBigDecimalField;
 import org.vaadin.firitin.components.textfield.VIntegerField;
 import org.vaadin.firitin.components.textfield.VNumberField;
-import org.vaadin.firitin.components.textfield.VPasswordField;
 import org.vaadin.firitin.components.textfield.VTextArea;
 import org.vaadin.firitin.components.textfield.VTextField;
 import org.vaadin.firitin.components.timepicker.VTimePicker;
@@ -24,6 +24,7 @@ import org.vaadin.firitin.fields.ElementCollectionField;
 import org.vaadin.firitin.fields.EnumSelect;
 import org.vaadin.firitin.fields.LongField;
 import org.vaadin.firitin.fields.ShortField;
+import org.vaadin.firitin.layouts.HorizontalFloatLayout;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -41,14 +42,15 @@ public class AutoFormContext {
 
     // Helper "Jack" to do introspection, TODO check to use the same instance as in FormBinder
     static final ObjectMapper jack = new ObjectMapper();
-
+    static List<PropertyPrinter> _defaultPropertyPrinters = new ArrayList<>();
     private final List<PropertyPrinter> propertyEditors;
     private final List<PropertyHeaderPrinter> propertyHeaderPrinters;
     private Locale locale;
     // TODO consider changing this to a filterchain that can hide properties based on
     // conxtex (not just by names as now)
-    private Set<String> hiddenProperties = new HashSet<>(){{add("id");}};
-
+    private Set<String> hiddenProperties = new HashSet<>() {{
+        add("id");
+    }};
     private boolean annotateTypes = false;
     private boolean defaultBeanValidation = true;
 
@@ -61,9 +63,8 @@ public class AutoFormContext {
         this.propertyHeaderPrinters = new ArrayList<>();
     }
 
-    static List<PropertyPrinter> _defaultPropertyPrinters = new ArrayList<>();
     public static List<PropertyPrinter> getDefaultPropertyPrinters() {
-        if(_defaultPropertyPrinters.isEmpty()) {
+        if (_defaultPropertyPrinters.isEmpty()) {
             _defaultPropertyPrinters.add(new StringEditor());
             _defaultPropertyPrinters.add(new TypeBasePrinter(VIntegerField.class, int.class, Integer.class));
             _defaultPropertyPrinters.add(new TypeBasePrinter(LongField.class, Long.class, long.class));
@@ -77,6 +78,7 @@ public class AutoFormContext {
             _defaultPropertyPrinters.add(new TypeBasePrinter(EnumSelect.class, java.lang.Enum.class));
             _defaultPropertyPrinters.add(new EnumSelectPrinter());
             _defaultPropertyPrinters.add(new ElementCollectionPrinter());
+            _defaultPropertyPrinters.add(new EmbeddablePrinter());
             // This eats everything else, shows the toString() of the object
             _defaultPropertyPrinters.add(new ObjectPrinter());
         }
@@ -221,6 +223,44 @@ public class AutoFormContext {
         }
     }
 
+    private static class EmbeddablePrinter implements PropertyPrinter {
+        // TODO this is a very quick and dirty implementation, but seems to work for trivial records, should be refactored
+
+        @Override
+        public Component printValue(PropertyContext ctx) {
+            if (ctx.beanPropertyDefinition().getPrimaryType().isRecordType()) {
+                // TODO refactor, the PropertyContext should be able to provide AutoFormContext in some clean way
+                AutoForm owner = (AutoForm) ctx.owner();
+                AutoFormContext autoFormContext = owner.getAutoFormContext();
+                AutoForm<?> form = autoFormContext.createForm(ctx.beanPropertyDefinition().getPrimaryType().getRawClass());
+                // TODO refactor somehow so that the fields within RecordField could be moved to upper level, maybe with
+                // a header or fieldset or similar
+                return new RecordField<>(form);
+            }
+            return null;
+        }
+
+        private static class RecordField<T> extends AbstractCompositeField<HorizontalFloatLayout,RecordField<T>, T> {
+            private final AutoForm<T> form;
+
+            public RecordField(AutoForm<T> form) {
+                super(null);
+                this.form = form;
+                getContent().add(form);
+                form.getBinder().addValueChangeListener(e -> {
+                    if(e.isFromClient()) {
+                        setModelValue(e.getValue(), true);
+                    }
+                });
+            }
+
+            @Override
+            protected void setPresentationValue(T newPresentationValue) {
+                form.getBinder().setValue(newPresentationValue);
+            }
+
+        }
+    }
 
     private static class EnumSelectPrinter implements PropertyPrinter {
         @Override
@@ -249,8 +289,8 @@ public class AutoFormContext {
     private static class StringEditor implements PropertyPrinter {
         @Override
         public Object printValue(PropertyContext ctx) {
-            if(String.class == ctx.beanPropertyDefinition().getPrimaryType().getRawClass()) {
-                if(ctx.getName().toString().equals("description")) {
+            if (String.class == ctx.beanPropertyDefinition().getPrimaryType().getRawClass()) {
+                if (ctx.getName().toString().equals("description")) {
                     return new VTextArea();
                 }
                 // PasswordField probably makes no sense with autoform
