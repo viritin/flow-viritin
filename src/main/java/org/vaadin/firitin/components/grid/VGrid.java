@@ -482,11 +482,20 @@ public class VGrid<T> extends Grid<T>
      * @param <T> the Item type
      */
     public interface CellFormatter<T> {
+
         public static String defaultVaadinFormatting(Object value) {
             if (value == null) {
                 return "";
             }
-            return String.valueOf(value);
+            String string = String.valueOf(value);
+            // strip avoid object name from records default toString (repeated in the column header anyways...)
+            if(value.getClass().isRecord() && string.startsWith(value.getClass().getSimpleName())) {
+                string =  string.substring(value.getClass().getSimpleName().length() + 1);
+                if(string.endsWith("]")) {
+                    string = string.substring(0, string.length() - 1);
+                }
+            }
+            return string;
         }
 
         /**
