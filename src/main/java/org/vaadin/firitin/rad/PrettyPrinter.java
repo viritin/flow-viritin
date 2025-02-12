@@ -88,7 +88,7 @@ public class PrettyPrinter {
 
     public static String printOneLiner(final Object entity, final int maxLength, final String delim, final String prefix) {
         // TODO figure out how to allow customizing the one-liner format
-        if(entity == null) {
+        if (entity == null) {
             return "null";
         }
 
@@ -285,13 +285,29 @@ public class PrettyPrinter {
                             });
                         }
                     } else if (collection instanceof Iterable<?> iterable) {
-                        iterable.forEach(e -> {
-                            TableRow subTableRow = subTable.addRow();
-                            contentTypeBbd.findProperties().forEach(subP -> {
-                                Object value = subP.getGetter().getValue(e);
-                                subTableRow.addCells(""+value);
+                        try {
+                            iterable.forEach(e -> {
+                                TableRow subTableRow = subTable.addRow();
+                                contentTypeBbd.findProperties().forEach(subP -> {
+                                    try {
+                                        Object value = subP.getGetter().getValue(e);
+                                        subTableRow.addCells("" + value);
+                                    } catch (Exception e1) {
+                                        if (e1.getMessage().contains("failed to lazily")) {
+                                            subTableRow.addCells("[Hbn proxy]");
+                                        } else {
+                                            throw e1;
+                                        }
+                                    }
+                                });
                             });
-                        });
+                        } catch (Exception e1) {
+                            if (e1.getMessage().contains("failed to lazily")) {
+                                subTable.addRow().addCells("[Hbn proxy]");
+                            } else {
+                                throw e1;
+                            }
+                        }
                     }
                     return subTable;
                 }
