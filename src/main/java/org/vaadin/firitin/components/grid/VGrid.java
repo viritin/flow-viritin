@@ -97,6 +97,17 @@ public class VGrid<T> extends Grid<T>
     }
 
     @Override
+    public void focus() {
+        //super.focus();
+        // see https://github.com/vaadin/flow-components/issues/2180
+        getElement().executeJs("""
+                    setTimeout(function() {
+                        $0.shadowRoot.querySelector("tr").focus();
+                    }, 100);
+                """);
+    }
+
+    @Override
     protected BiFunction<Renderer<T>, String, Column<T>> getDefaultColumnFactory() {
         return (tRenderer, s) -> new VColumn<>(VGrid.this, s, tRenderer);
     }
