@@ -2,6 +2,7 @@ package org.vaadin.firitin.components.grid;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -173,6 +175,9 @@ public class VGrid<T> extends Grid<T>
                 AnnotatedMethod getter = d.getGetter();
                 Column<T> col = addColumn(i -> {
                     try {
+                        if(getter == null) {
+                            return d.getAccessor().getValue(i);
+                        }
                         return getter.callOn(i);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -506,6 +511,20 @@ public class VGrid<T> extends Grid<T>
                     string = string.substring(0, string.length() - 1);
                 }
             }
+            // Show first n bytes of byte arrays as hex string
+            if (value instanceof byte[] bytes) {
+                if (bytes.length > 0) {
+                    int max = Integer.min(10, bytes.length);
+                    String formatHex = HexFormat.ofDelimiter("").formatHex(bytes, 0, max);
+                    if(max < bytes.length) {
+                        formatHex += "...";
+                    }
+                    string = "[#"+formatHex+"]";
+                } else {
+                    string = "[]";
+                }
+            }
+
             return string;
         }
 
