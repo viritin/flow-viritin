@@ -1,5 +1,6 @@
 package org.vaadin.firitin.rad;
 
+import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 
@@ -18,7 +19,11 @@ public interface PropertyContext {
             AnnotatedMethod getter = beanPropertyDefinition().getGetter();
             value = getter.getValue(ownerValue);
         } else {
-            value = beanPropertyDefinition().getAccessor().getValue(ownerValue);
+            AnnotatedMember accessor = beanPropertyDefinition().getAccessor();
+            if(accessor == null) {
+                return "??";
+            }
+            value = accessor.getValue(ownerValue);
         }
         return value;
     };

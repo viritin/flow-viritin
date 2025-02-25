@@ -290,7 +290,7 @@ public class PrettyPrinter {
                                 TableRow subTableRow = subTable.addRow();
                                 contentTypeBbd.findProperties().forEach(subP -> {
                                     try {
-                                        Object value = subP.getGetter().getValue(e);
+                                        Object value = subP.getAccessor().getValue(e);
                                         subTableRow.addCells("" + value);
                                     } catch (Exception e1) {
                                         if (e1.getMessage().contains("failed to lazily")) {
