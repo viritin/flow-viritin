@@ -15,17 +15,18 @@
  */
 package org.vaadin.firitin.components;
 
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.shared.ui.LoadMode;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
-import com.vladsch.flexmark.util.data.MutableDataSet;
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 /**
  * @author mstahv
@@ -41,8 +42,6 @@ import java.io.InputStreamReader;
 public class RichText extends Div {
 
     private static final long serialVersionUID = -6926829115110918731L;
-    private static Parser parser;
-    private static HtmlRenderer renderer;
     transient private Safelist safelist;
     private String richText;
 
@@ -56,38 +55,20 @@ public class RichText extends Div {
     }
 
 
-    protected Parser getMdParser() {
-        if (parser == null) {
-            MutableDataSet options = new MutableDataSet();
-
-            // uncomment to set optional extensions
-            //options.set(Parser.EXTENSIONS, Arrays.asList(TablesExtension.create(), StrikethroughExtension.create()));
-
-            // uncomment to convert soft-breaks to hard breaks
-            //options.set(HtmlRenderer.SOFT_BREAK, "<br />\n");
-
-            parser = Parser.builder(options).build();
-
-        }
-        return parser;
-    }
-
-    protected HtmlRenderer getMdRenderer() {
-        if (renderer == null) {
-            renderer = HtmlRenderer.builder().build();
-        }
-        return renderer;
-    }
-
 
     public RichText withMarkDown(String markdown) {
-        return setRichText(getMdRenderer().render(getMdParser().parse(markdown)));
+        markdownStrategy.toElement(markdown, this);
+        return this;
     }
 
 
     public RichText withMarkDown(InputStream markdown) {
         try {
-            return setRichText(getMdRenderer().render(getMdParser().parseReader(new InputStreamReader(markdown))));
+            // Note, this is now reading the whole markdown file into memory
+            // previously it was read line by line. Probably a tiny bit less efficient.
+            String mdString = IOUtils.toString(markdown, "UTF-8");
+            markdownStrategy.toElement(mdString, this);
+            return this;
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -178,6 +159,71 @@ public class RichText extends Div {
 
     public RichText withContent(String content) {
         return setRichText(content);
+    }
+
+    public interface MarkdownStrategy {
+         void toElement(String markdown, RichText component);
+    }
+
+    public static class MarkdownItStrategy implements MarkdownStrategy {
+
+        @Override
+        public void toElement(String markdown, RichText component) {
+            ensureMarkdownIt();
+            component.getElement().executeJs("""
+                const md = window.markdownit(); 
+                const input = $0;
+                const html = md.render(input);
+                this.innerHTML = html;
+            """, markdown);
+        }
+
+        private void ensureMarkdownIt() {
+            UI ui = UI.getCurrent();
+            if (ui == null) {
+                throw new IllegalStateException("UI is not available");
+            }
+            final String jsloadedflag = MarkdownItStrategy.class.getName()+"_jsloaded";
+            Object flag = ComponentUtil.getData(ui, jsloadedflag);
+            if(flag == null) {
+                ui.getPage().addJavaScript("https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js", LoadMode.EAGER);
+                ComponentUtil.setData(ui, jsloadedflag, true);
+                ui.addDetachListener(e -> {
+                    ComponentUtil.setData(ui, jsloadedflag, null);
+                    e.unregisterListener();
+                });
+            }
+        }
+    }
+
+    public static MarkdownStrategy markdownStrategy;
+
+    static {
+        // Use flexmark-java if available, otherwise fallback to MarkdownIt in browser
+        try {
+            Class.forName("com.vladsch.flexmark.parser.Parser");
+            markdownStrategy = new FlexMarkJavaStrategy();
+        } catch (ClassNotFoundException e) {
+            markdownStrategy = new MarkdownItStrategy();
+        }
+    }
+
+    static class FlexMarkJavaStrategy implements MarkdownStrategy {
+
+        private Parser parser;
+        private HtmlRenderer renderer;
+
+        public FlexMarkJavaStrategy() {
+            parser = Parser.builder().build();
+            renderer = HtmlRenderer.builder().build();
+
+        }
+
+        @Override
+        public void toElement(String markdown, RichText component) {
+            String html = renderer.render(parser.parse(markdown));
+            component.getElement().executeJs("this.innerHTML = $0", Jsoup.clean(html, component.getWhitelist()));
+        }
     }
 
 }

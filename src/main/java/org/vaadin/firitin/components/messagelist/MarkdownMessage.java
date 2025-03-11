@@ -9,7 +9,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.server.Command;
-import com.vaadin.flow.server.auth.AnnotatedViewAccessChecker;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
@@ -42,8 +41,10 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
         };
     };
 
+    // TODO Use flexmark only if available in the classpath, else fallback to markdown-it on browser
     private static HtmlRenderer renderer;
     private static Parser parser;
+
     private UI ui;
 
     private String markdown;

@@ -86,6 +86,7 @@
             <groupId>com.vladsch.flexmark</groupId>
             <artifactId>flexmark</artifactId>
             <version>0.64.8</version>
+            <optional>true</optional>
         </dependency>
 
         <dependency>

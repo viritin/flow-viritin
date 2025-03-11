@@ -15,8 +15,14 @@
  */
 package org.vaadin.firitin;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.shared.ui.LoadMode;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.vaadin.firitin.components.RichText;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
@@ -39,6 +45,16 @@ public class RichTextExample extends VVerticalLayout {
                 
                 This is another paragraph with multiple
                 lines belonging to same paragraph.
+                
+                Table syntax is not supported out of the box (not "standard markdown"), if
+                using the flexmark parser on the server (used if on classpath). Can be configured separately
+                and also supported by default as using markdown-it on the browser.
+                
+                | First Header  | Second Header |
+                | ------------- | ------------- |
+                | Content Cell  | Content Cell  |
+                | Content Cell  | Content Cell  |
+
                 """));
 
         add(new RichText().withSafeHtml("""
@@ -55,6 +71,24 @@ public class RichTextExample extends VVerticalLayout {
         // but this consumes 100kB of (uncompressed) memory, while users
         // session is active
         add(new RichText().setRichTextAndSaveReference(RandomStringUtils.randomAlphabetic(100000)));
+
+
+        add(new Button("Try with JS MarkdownIT (default without flexmark dependency)", e -> {
+            // classloader global configuration
+            RichText.markdownStrategy = new RichText.MarkdownItStrategy();
+
+            add(new RichText().withMarkDown("""
+            # Tables supported, but bit more JS loaded
+            
+            | First Header  | Second Header |
+            | ------------- | ------------- |
+            | Content Cell  | Content Cell  |
+            | Content Cell  | Content Cell  |
+            
+            """));
+
+
+        }));
 
     }
 
