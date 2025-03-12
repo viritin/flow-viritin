@@ -178,7 +178,7 @@ public class RichText extends Div {
             """, markdown);
         }
 
-        private void ensureMarkdownIt() {
+        public static void ensureMarkdownIt() {
             UI ui = UI.getCurrent();
             if (ui == null) {
                 throw new IllegalStateException("UI is not available");

@@ -55,6 +55,10 @@ public class MarkdownMessageProblemView extends VVerticalLayout {
         
         Ja puhutko välillä suomeekin?Ja puhutko välillä suomeekin? Ja puhutko välillä suomeekin?Ja puhutko välillä suomeekin?Ja puhutko välillä suomeekin?Ja puhutko välillä suomeekin?Ja puhutko välillä suomeekin?Ja puhutko välillä suomeekin?Ja puhutko välillä suomeekin?Ja puhutko välillä suomeekin?Ja puhutko välillä suomeekin?Ja puhutko välillä suomeekin?Ja puhutko välillä suomeekin?Ja puhutko välillä suomeekin?Ja puhutko välillä suomeekin?Ja puhutko välillä suomeekin?
 
+        | First Header  | Second Header |
+        | ------------- | ------------- |
+        | Content Cell  | Content Cell  |
+        | Content Cell  | Content Cell  |
 
         """);
         message.setAvatarColor(MarkdownMessage.Color.AVATAR_PRESETS[1]);

@@ -13,6 +13,7 @@ import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 import org.apache.commons.lang3.StringUtils;
+import org.vaadin.firitin.components.RichText;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -41,19 +42,15 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
         };
     };
 
-    // TODO Use flexmark only if available in the classpath, else fallback to markdown-it on browser
-    private static HtmlRenderer renderer;
-    private static Parser parser;
-
     private UI ui;
 
-    private String markdown;
     private String previousHtml;
 
     private boolean autoScroll = true;
 
     private Element content = new Element("div");
     private Element scrollHelper = new Element("div");
+    private MarkdownStrategy markdownStrategy;
 
     /**
      * Constructs a new MarkdownMessages with all the bells and whistles,
@@ -64,12 +61,12 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
      * @param color the color used for user avatar
      */
     public MarkdownMessage(String name, LocalDateTime timestamp, Color color) {
-        if(color != null) {
-            setAvatarColor(color);
-        }
         getElement().setProperty("userName", name);
         getElement().setProperty("time", timestamp.format(DateTimeFormatter.ofPattern("YYYY-MM-dd hh:mm")));
         getElement().appendChild(content, scrollHelper);
+        if(color != null) {
+            setAvatarColor(color);
+        }
         content.getStyle().setWhiteSpace(Style.WhiteSpace.NORMAL);
     }
 
@@ -151,26 +148,43 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
     public void setAvatarColor(Color color) {
         getElement().getStyle().set("--vaadin-avatar-user-color", color.cssColorCode);
         // remove the once set by constructor && ensure the flag making it use
-        getElement().executeJs("$0.querySelector('vaadin-avatar').style.setProperty('--vaadin-avatar-user-color', null);$0.querySelector('vaadin-avatar').setAttribute('has-color-index', true);");
+
+        getElement().executeJs("\n" +
+                "$0.querySelector('vaadin-avatar').style.setProperty('--vaadin-avatar-user-color', null);$0.querySelector('vaadin-avatar').setAttribute('has-color-index', true);");
+
     }
 
     public void setUserColorIndex(int index) {
         getElement().setProperty("userColorIndex", index);
     }
 
+    /**
+     * @return current markdown content
+     * @deprecated not necessarily supported by the implementation
+     */
+    @Deprecated
     public String getMarkdown() {
-        return markdown;
+        try {
+            FlexmarkStrategy flexmarkStrategy = (FlexmarkStrategy) getMarkdownStrategy();
+            return flexmarkStrategy.markdown;
+        } catch (Exception e) {
+            throw new UnsupportedOperationException("Markdown now cached by the component");
+        }
+    }
+
+    protected MarkdownStrategy getMarkdownStrategy() {
+        if(markdownStrategy == null) {
+            markdownStrategy = new MarkdownItStrategy();
+        }
+        return markdownStrategy;
+    }
+
+    public void useFlexmarkJava() {
+        markdownStrategy = new FlexmarkStrategy();
     }
 
     protected void setMarkdown(String markdown, boolean uiAccess) {
-        this.markdown = markdown == null ? PLACEHOLDER : markdown;
-        String html = getMdRenderer().render(getMdParser().parse(this.markdown));
-        previousHtml = html;
-        if (uiAccess) {
-            getUi().access(() -> appendHtml(html,0));
-        } else {
-            appendHtml(html,0);
-        }
+        getMarkdownStrategy().setMarkdown(markdown, uiAccess);
     }
 
     public void setMarkdown(String markdown) {
@@ -192,21 +206,6 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
                 this.curHtml = this.curHtml ? this.curHtml.substring(0, $2) + $0 : $0; 
                 $1.innerHTML = this.curHtml;
                 """, html, content, replaceFrom);
-    }
-
-    protected HtmlRenderer getMdRenderer() {
-        if (renderer == null) {
-            renderer = HtmlRenderer.builder().build();
-        }
-        return renderer;
-    }
-
-    protected Parser getMdParser() {
-        if (parser == null) {
-            MutableDataSet options = new MutableDataSet();
-            parser = Parser.builder(options).build();
-        }
-        return parser;
     }
 
     @Override
@@ -247,32 +246,7 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
     }
 
     protected void appendMarkdown(String markdownSnippet, boolean uiAccess) {
-        markdownSnippet = markdownSnippet != null ? markdownSnippet : ""; // Avoid nulls
-        if(markdown == null || PLACEHOLDER.equals(markdown)) {
-            markdown = markdownSnippet;
-        } else {
-            markdown += markdownSnippet;
-        }
-        String html = getMdRenderer().render(getMdParser().parse(markdown));
-        Command c;
-        if(previousHtml == null) {
-            c = () -> appendHtml(html);
-        } else {
-            String commonPrefix = StringUtils.getCommonPrefix(html, previousHtml);
-            int startOfNew = commonPrefix.length();
-            String newPart = html.substring(startOfNew);
-            c  = () -> {
-                appendHtml(newPart, startOfNew);
-                doAutoScroll();
-            };
-        }
-        previousHtml = html;
-        if(uiAccess) {
-            getUi().access(c);
-        } else {
-            c.execute();
-        }
-
+        getMarkdownStrategy().appendMarkdown(markdownSnippet, uiAccess);
     }
 
     public boolean isAutoScroll() {
@@ -295,5 +269,129 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
             """);
         }
     }
+
+    interface MarkdownStrategy {
+        void appendMarkdown(String markdown, boolean uiAccess);
+        void setMarkdown(String markdown, boolean uiAccess);
+    }
+
+    class FlexmarkStrategy implements MarkdownStrategy {
+
+        // TODO Use flexmark only if available in the classpath, else fallback to markdown-it on browser
+        private static HtmlRenderer renderer;
+        private static Parser parser;
+        private String markdown;
+
+        protected HtmlRenderer getMdRenderer() {
+            if (renderer == null) {
+                renderer = HtmlRenderer.builder().build();
+            }
+            return renderer;
+        }
+
+        protected Parser getMdParser() {
+            if (parser == null) {
+                MutableDataSet options = new MutableDataSet();
+                parser = Parser.builder(options).build();
+            }
+            return parser;
+        }
+
+        @Override
+        public void appendMarkdown(String markdownSnippet, boolean uiAccess) {
+            markdownSnippet = markdownSnippet != null ? markdownSnippet : ""; // Avoid nulls
+            if(markdown == null || PLACEHOLDER.equals(markdown)) {
+                markdown = markdownSnippet;
+            } else {
+                markdown += markdownSnippet;
+            }
+            String html = getMdRenderer().render(getMdParser().parse(markdown));
+            Command c;
+            if(previousHtml == null) {
+                c = () -> appendHtml(html);
+            } else {
+                String commonPrefix = StringUtils.getCommonPrefix(html, previousHtml);
+                int startOfNew = commonPrefix.length();
+                String newPart = html.substring(startOfNew);
+                c  = () -> {
+                    appendHtml(newPart, startOfNew);
+                    doAutoScroll();
+                };
+            }
+            previousHtml = html;
+            if(uiAccess) {
+                getUi().access(c);
+            } else {
+                c.execute();
+            }
+        }
+
+        @Override
+        public void setMarkdown(String markdown, boolean uiAccess) {
+            this.markdown = markdown == null ? PLACEHOLDER : markdown;
+            String html = getMdRenderer().render(getMdParser().parse(this.markdown));
+            previousHtml = html;
+            if (uiAccess) {
+                getUi().access(() -> appendHtml(html,0));
+            } else {
+                appendHtml(html,0);
+            }
+
+        }
+    }
+
+    /**
+     * The new default strategy in 2.13.0. This does not keep value on the
+     * server side state at all, but pushes the content for browser to render.
+     * Less server utilization, but less flexible and a bit less secure.
+     */
+    class MarkdownItStrategy implements MarkdownStrategy {
+
+        @Override
+        public void appendMarkdown(String markdown, boolean uiAccess) {
+            Command c = () -> {
+                RichText.MarkdownItStrategy.ensureMarkdownIt();
+                content.executeJs("""
+                    const md = window.markdownit();\s
+                    const input = $0;
+                    if(this.markdown) {
+                        this.markdown = this.markdown + input;
+                    } else {
+                        this.markdown = input;
+                    }
+                    const html = md.render(this.markdown);
+                    this.innerHTML = html;
+                """, markdown);
+            };
+            if (uiAccess) {
+                getUi().access(c);
+            } else {
+                c.execute();
+            }
+        }
+
+        @Override
+        public void setMarkdown(String markdown, boolean uiAccess) {
+            Command c = () -> {
+                RichText.MarkdownItStrategy.ensureMarkdownIt();
+                content.executeJs("""
+                    const md = window.markdownit();\s
+                    const input = $0;
+                    this.markdown = input;
+                    const html = md.render(input);
+                    this.innerHTML = html;
+                """, (markdown == null) ? "" : markdown);
+            };
+            if (uiAccess) {
+                getUi().access(c);
+            } else {
+                c.execute();
+            }
+
+
+        }
+
+    }
+
 
 }
