@@ -27,11 +27,20 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.vaadin.firitin.components.RichText;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 
+import java.util.Random;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.vaadin.firitin.MessageListView.executorService;
+
 /**
  * @author mstahv
  */
 @Route
 public class RichTextExample extends VVerticalLayout {
+
+    private ScheduledFuture<?> scheduledFuture;
 
     public RichTextExample() {
 
@@ -87,6 +96,47 @@ public class RichTextExample extends VVerticalLayout {
             
             """));
 
+
+        }));
+
+
+        add(new Button("Subscribe to streaming", event -> {
+
+            // This is default unless flexmark java is on classpath
+            RichText.markdownStrategy = new RichText.MarkdownItStrategy();
+
+            RichText richText = new RichText();
+            add(richText);
+
+            String md = """
+                    # Appended markdown title
+                    
+                    So this is [an anchor](https://github.com/mstahv) to resource in the GitHub.
+                    
+                     * List 1 is pretty long one
+                     * List 2
+                    
+                    Some more text...
+                    """;
+            Random r = new Random(0);
+            AtomicInteger sent = new AtomicInteger();
+
+            scheduledFuture = executorService.scheduleAtFixedRate(() -> {
+                int charsToSend = r.nextInt(5, 10);
+                int start = sent.get();
+                int end = start + charsToSend;
+                if(start + charsToSend > md.length()) {
+                    end = md.length();
+                }
+                String token = md.substring(start, end);
+
+                richText.appendMarkDownAsync(token);
+
+                int currentlySent = sent.addAndGet(charsToSend);
+                if(currentlySent > md.length()) {
+                    scheduledFuture.cancel(true);
+                }
+            }, 500, 500, TimeUnit.MILLISECONDS);
 
         }));
 
