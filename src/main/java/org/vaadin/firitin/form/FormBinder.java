@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyName;
 import com.fasterxml.jackson.databind.introspect.AnnotatedConstructor;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
@@ -207,9 +208,10 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         }
 
         try {
-            return property.getGetter().getAnnotation(NotEmpty.class) != null
-                    || property.getGetter().getAnnotation(NotNull.class) != null
-                    || property.getGetter().getAnnotation(NotBlank.class) != null;
+            AnnotatedMember accessor = property.getAccessor();
+            return accessor.getAnnotation(NotEmpty.class) != null
+                    || accessor.getAnnotation(NotNull.class) != null
+                    || accessor.getAnnotation(NotBlank.class) != null;
         } catch (java.lang.NoClassDefFoundError ex) {
             // No Bean Validation on classpath (or no getter)
             return false;
@@ -353,12 +355,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         for (BeanPropertyDefinition pd : bbd.findProperties()) {
             HasValue hasValue = bpdToEditorField.get(pd);
             if (hasValue != null) {
-                Object pValue;
-                if (isImmutable()) {
-                    pValue = pd.getAccessor().getValue(valueObject);
-                } else {
-                    pValue = pd.getGetter().getValue(valueObject);
-                }
+                Object pValue = pd.getAccessor().getValue(valueObject);
 
                 if (pValue == null) {
                     hasValue.clear();

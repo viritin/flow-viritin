@@ -300,12 +300,16 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
      */
     protected Component createContent() {
         VVerticalLayout layout = new VVerticalLayout();
-        FormLayout formLayout = new FormLayout();
+        HasComponents formLayout = getFormLayout();
         getFormComponents().forEach(f -> formLayout.add(f));
-        layout.add(formLayout);
+        layout.add((Component) formLayout);
         layout.add(getClassLevelViolationsDisplay());
         layout.add(getToolbar());
         return layout;
+    }
+
+    protected HasComponents getFormLayout() {
+        return new FormLayout();
     }
 
     public Component getClassLevelViolationsDisplay() {
