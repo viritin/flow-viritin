@@ -164,32 +164,41 @@ public class Geolocation {
         });
         geolocation.geoerror.addEventData("event.detail");
         try {
-            ui.getElement().executeJs("var el = $1;\n"
-                    + "return navigator.geolocation." + method + "(" +
-                      "        p => {\n" +
-                      "          const event = new CustomEvent('geoupdate', { \n" +
-                    "              detail: JSON.stringify(\n" +
-                    "               {\n" +
-                    "                   coords : {\n" +
-                    "                       longitude : p.coords.longitude,\n" +
-                    "                       latitude : p.coords.latitude,\n" +
-                    "                       accuracy : p.coords.accuracy,\n" +
-                    "                       altitude : p.coords.altitude,\n" +
-                    "                       altitudeAccuracy : p.coords.altitudeAccuracy,\n" +
-                    "                       heading : p.coords.heading,\n" +
-                    "                       speed : p.coords.speed\n" +
-                    "                   },\n" +
-                    "                   timestamp: p.timestamp\n" +
-                    "               })\n" +
-                    "           });\n" +
-                    "           el.dispatchEvent(event);\n" +
-                    "         },\n" +
-                    "         e => {\n" +
-                    "           const event = new CustomEvent('geoerror', {detail: {code: e.code, message: e.message}});\n" +
-                    "           el.dispatchEvent(event);\n" +
-                    "         },\n" +
-                    "         JSON.parse($0)\n" +
-                    "       );\n"
+            ui.getElement().executeJs("""
+                    var el = $1;
+                    return navigator.geolocation.""" + method + """
+                    (
+                            p => {
+                              var timestamp = p.timestamp;
+                              // Desktop Safari has weird epoch of 2001-1-1 ...
+                              const safari = (Date.now() - timestamp) > 1000*60*60*24*1000;
+                              if(safari) {
+                                timestamp = timestamp + 978307200000;
+                              }
+                              const event = new CustomEvent('geoupdate', {
+                                detail: JSON.stringify(
+                                 {
+                                     coords : {
+                                         longitude : p.coords.longitude,
+                                         latitude : p.coords.latitude,
+                                         accuracy : p.coords.accuracy,
+                                         altitude : p.coords.altitude,
+                                         altitudeAccuracy : p.coords.altitudeAccuracy,
+                                         heading : p.coords.heading,
+                                         speed : p.coords.speed
+                                     },
+                                     timestamp: timestamp
+                                 })
+                             });
+                             el.dispatchEvent(event);
+                           },
+                           e => {
+                             const event = new CustomEvent('geoerror', {detail: {code: e.code, message: e.message}});
+                             el.dispatchEvent(event);
+                           },
+                           JSON.parse($0)
+                         );
+                    """
                      , om.writeValueAsString(options), eventSourceElement).then(Integer.class, s -> geolocation.setId(s));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

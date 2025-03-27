@@ -22,13 +22,13 @@ import java.util.List;
 @Route
 public class GeolocationView extends VVerticalLayout {
 
-    private Geolocation geolocation = null;
     Paragraph location = new Paragraph();
+    private Geolocation geolocation = null;
 
     public GeolocationView() {
         VerticalLayout layout;
 
-        if(false) {
+        if (false) {
             Dialog dialog = new Dialog();
             layout = new VerticalLayout();
             dialog.add(layout);
@@ -48,11 +48,11 @@ public class GeolocationView extends VVerticalLayout {
 
         Button button = new Button("Start tracking");
         button.addClickListener(e -> {
-            if(geolocation == null) {
+            if (geolocation == null) {
                 geolocation = Geolocation.watchPosition(
                         event -> {
                             System.out.println(Instant.ofEpochMilli(event.getTimestamp()) + ":" + event.getCoords());
-                            updateMyLocation(event.getCoords().getLatitude(), event.getCoords().getLongitude());
+                            updateMyLocation(event.getTimestamp(), event.getCoords().getLatitude(), event.getCoords().getLongitude());
                         },
                         browserError -> {
                             Notification.show("ERROR, code: %s, msg: %s".formatted(browserError.getError(), browserError));
@@ -75,7 +75,7 @@ public class GeolocationView extends VVerticalLayout {
             Geolocation.getCurrentPosition(
                     event -> {
                         System.out.println(Instant.ofEpochMilli(event.getTimestamp()) + ":" + event.getCoords());
-                        updateMyLocation(event.getCoords().getLatitude(), event.getCoords().getLongitude());
+                        updateMyLocation(event.getTimestamp(), event.getCoords().getLatitude(), event.getCoords().getLongitude());
                     },
                     browserError -> {
                         Notification.show("ERROR, code: %s, msg: %s".formatted(browserError.getError(), browserError));
@@ -87,7 +87,8 @@ public class GeolocationView extends VVerticalLayout {
 
     }
 
-    private void updateMyLocation(double latitude, double longitude) {
-        location.setText("Last update " + LocalTime.now() + " : " + latitude + ", " + longitude);
+    private void updateMyLocation(long ts, double latitude, double longitude) {
+        Instant instant = Instant.ofEpochMilli(ts);
+        location.setText("Last update " + Instant.now() + "/" + instant + " : " + latitude + ", " + longitude);
     }
 }
