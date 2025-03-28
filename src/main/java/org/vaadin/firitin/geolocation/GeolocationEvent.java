@@ -1,5 +1,7 @@
 package org.vaadin.firitin.geolocation;
 
+import java.time.Instant;
+
 public class GeolocationEvent {
     private GeolocationCoordinates coords;
     private long timestamp;
@@ -16,5 +18,9 @@ public class GeolocationEvent {
      */
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public Instant getInstant() {
+        return Instant.ofEpochMilli(timestamp);
     }
 }
