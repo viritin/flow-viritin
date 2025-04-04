@@ -1,7 +1,9 @@
 package org.vaadin.firitin;
 
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.select.Select;
 import org.vaadin.firitin.components.grid.PagingGrid;
+import org.vaadin.firitin.layouts.HorizontalFloatLayout;
 import org.vaadin.firitin.testdomain.Person;
 import org.vaadin.firitin.testdomain.Service;
 
@@ -25,7 +27,7 @@ public class TraditionalPaging extends VerticalLayout {
 	public TraditionalPaging() {
 		final PagingGrid<Person> table = new PagingGrid<>(Person.class);
 
-		table.sort(GridSortOrder.desc(table.getColumnByKey("age")).build());
+		//table.sort(GridSortOrder.desc(table.getColumnByKey("age")).build());
 
 		// Define results with a simpler data provider API, that just gives you page to
 		// request
@@ -33,14 +35,16 @@ public class TraditionalPaging extends VerticalLayout {
 			// This is demo specific line, normally, e.g. with spring data, page number is
 			// enough
 			int start = (int) (page * table.getPageSize());
+			String sortProperty = "id";
+			boolean asc = true;
+
 			// Optional, sorting
 			if (!table.getSortOrder().isEmpty()) {
 				GridSortOrder<Person> sortOrder = table.getSortOrder().get(0);
-				String propertyId = sortOrder.getSorted().getKey();
-				boolean asc = sortOrder.getDirection() == SortDirection.ASCENDING;
-				return Service.findAll(start, pageSize, propertyId, asc);
+				sortProperty = sortOrder.getSorted().getKey();
+				asc = sortOrder.getDirection() == SortDirection.ASCENDING;
 			}
-			return Service.findAll(start, pageSize);
+			return Service.findAll(start, pageSize, sortProperty, asc);
 		});
 
 		// Optional
@@ -71,7 +75,26 @@ public class TraditionalPaging extends VerticalLayout {
 			table.setPaginationBarMode(e.getValue());
 		});
 
-		add(table, b, b2, b3, select, b4);
+		Button resetData = new Button("Reset data", e -> {
+			Notification.show("Resetting data, should get to the first page");
+			table.setPagingDataProvider((page, pageSize) -> {
+				// This is demo specific line, normally, e.g. with spring data, page number is
+				// enough
+				int start = (int) (page * table.getPageSize());
+				// Optional, sorting
+				String sortProperty = "id";
+				boolean asc = true;
+
+				if (!table.getSortOrder().isEmpty()) {
+					GridSortOrder<Person> sortOrder = table.getSortOrder().get(0);
+					sortProperty = sortOrder.getSorted().getKey();
+					asc = sortOrder.getDirection() == SortDirection.ASCENDING;
+				}
+				return Service.findAll(start, pageSize, sortProperty, asc);
+			});
+		});
+
+		add(table, new HorizontalFloatLayout(b, b2, b3, select, b4, resetData));
 	}
 
 }

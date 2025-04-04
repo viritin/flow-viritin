@@ -82,6 +82,9 @@ public class PagingGrid<T> extends VGrid<T> {
         setAllRowsVisible(true);
     }
 
+    /**
+     * Sets the mode of the pagination bar. The default is TOP. Also resets to first page.
+     */
     protected void preparePaginationBar() {
         if (paginationBar == null) {
             paginationBar = new PaginationBar(null);
@@ -160,6 +163,15 @@ public class PagingGrid<T> extends VGrid<T> {
         this.dataProvider = provider;
         preparePaginationBar();
         setItems(dataProvider.pageRequested(0, getPageSize()));
+        // Make sure on the first page after resetting the data
+        if(paginationBar.currentPage != 0) {
+            paginationBar.currentPage = 0;
+            paginationBar.updateState();
+            if(secondaryBar != null) {
+                secondaryBar.currentPage = 0;
+                secondaryBar.updateState();
+            }
+        }
     }
 
     /**
