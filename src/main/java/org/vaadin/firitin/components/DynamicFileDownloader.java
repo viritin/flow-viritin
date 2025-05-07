@@ -178,8 +178,8 @@ public class DynamicFileDownloader extends Anchor implements
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
-        super.setEnabled(enabled);
+    public void onEnabledStateChanged(boolean enabled) {
+        super.onEnabledStateChanged(enabled);
         if(isAttached()) {
             adjustHref();
         }
