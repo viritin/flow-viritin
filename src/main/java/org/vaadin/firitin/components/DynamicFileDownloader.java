@@ -217,13 +217,13 @@ public class DynamicFileDownloader extends Anchor implements
             requestHandler = new RequestHandler() {
                 @Override
                 public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) throws IOException {
-                    if(hasStartedListeners) {
-                        ui.access(() -> {
-                            DynamicFileDownloader.this.getEventBus().fireEvent(new DownloadStartedEvent(DynamicFileDownloader.this, false));
-                        });
-                    }
                     String id = request.getParameter("id");
                     if (id != null && id.equals(identifier)) {
+                        if(hasStartedListeners) {
+                            ui.access(() -> {
+                                DynamicFileDownloader.this.getEventBus().fireEvent(new DownloadStartedEvent(DynamicFileDownloader.this, false));
+                            });
+                        }
                         response.setStatus(200);
                         String filename = getFileName(session, request);
                         if (filename == null) {
