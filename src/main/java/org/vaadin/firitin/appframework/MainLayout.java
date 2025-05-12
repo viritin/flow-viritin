@@ -18,15 +18,12 @@ import com.vaadin.flow.router.RouteBaseData;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -230,7 +227,7 @@ public abstract class MainLayout extends AppLayout implements AfterNavigationObs
                 }
             }
 
-            private static @NotNull Double getOrder1(NavigationItem o1) {
+            private static Double getOrder1(NavigationItem o1) {
                 MenuItem a1 = o1.getNavigationTarget().
                         getAnnotation(MenuItem.class);
                 Double order1;
