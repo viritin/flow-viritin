@@ -118,7 +118,11 @@ public class ResizeObserver {
             int top,
             int right,
             int bottom,
-            int left
+            int left,
+            int offsetLeft,
+            int offsetTop,
+            int offsetWidth,
+            int offsetHeight
     ) {}
 
     private record ComponentMapping(int id, Component component, ArrayList<SizeChangeListener> listeners) {
@@ -167,8 +171,13 @@ public class ResizeObserver {
                   for (const entry of entries) {
                     if (entry.target.isConnected && entry.contentBoxSize) {
                       const id = entry.target._resizeObserverId;
-                      const contentBoxSize = entry.contentBoxSize[0];
-                      sizes[id] = JSON.stringify(entry.contentRect);
+                      const dimensions = {};
+                      Object.assign(dimensions, entry.contentRect);
+                      dimensions.offsetLeft = entry.target.offsetLeft;
+                      dimensions.offsetTop = entry.target.offsetTop;
+                      dimensions.offsetWidth = entry.target.offsetWidth;
+                      dimensions.offsetHeight = entry.target.offsetHeight;
+                      sizes[id] = JSON.stringify(dimensions);
                     } else {
                       console.log("Ignoring resize event for detached element " + entry.target._resizeObserverId +  ", TODO: cleanup??");
                     }
