@@ -67,10 +67,11 @@ public class LineBetweenButtonsView extends HorizontalLayout {
 
     }
 
-    private class ConnectingLine extends Svg {
+    static class ConnectingLine extends Svg {
         public ConnectingLine() {
             super("<svg ><line style=\"stroke:red;stroke-width:2\" /></svg>");
             Style style = getStyle();
+            // Position the SVG absolutely, so it doesn't disturb actual components
             style.setPosition(Style.Position.ABSOLUTE);
             style.setTop("0");
             style.setLeft("0");
@@ -88,22 +89,8 @@ public class LineBetweenButtonsView extends HorizontalLayout {
                         const b1 = $0;
                         const b2 = $1;
                         const line = this.querySelector("line");
-                        /*
-                        new ResizeObserver((entries) => {
-                             debugger;
-                             for (const entry of entries) {
-                                if (entry.target === b1) {
-                                    line.setAttribute("x1", entry.contentRect.x + entry.contentRect.width / 2);
-                                    line.setAttribute("y1", entry.contentRect.y + entry.contentRect.height / 2);
-                                } else if (entry.target === b2) {
-                                    line.setAttribute("x2", entry.contentRect.x + entry.contentRect.width / 2);
-                                    line.setAttribute("y2", entry.contentRect.y + entry.contentRect.height / 2);
-                                }
-                             }
-                        }).observe(b1, b2);
-                        */
-                    
                         setTimeout(() => {
+                            // some math to determine the center of the buttons and draw the line
                             const rect2 = b2.getBoundingClientRect();
                             line.setAttribute("x2", rect2.x + rect2.width / 2);
                             line.setAttribute("y2", rect2.y + rect2.height / 2);

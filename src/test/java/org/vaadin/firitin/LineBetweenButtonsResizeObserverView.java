@@ -20,6 +20,8 @@ public class LineBetweenButtonsResizeObserverView extends HorizontalLayout {
     public LineBetweenButtonsResizeObserverView() {
         setWidthFull();
 
+        getStyle().setPosition(Style.Position.RELATIVE);
+
         VStyleUtil.injectAsFirst("""
             vaadin-button {
                 background-color: lightblue;
@@ -87,8 +89,6 @@ public class LineBetweenButtonsResizeObserverView extends HorizontalLayout {
             style.setPosition(Style.Position.ABSOLUTE);
             style.setTop("0");
             style.setLeft("0");
-            style.setBottom("0");
-            style.setRight("0");
         }
 
         private void drawLine(int x1, int y1, int x2, int y2) {
@@ -99,6 +99,8 @@ public class LineBetweenButtonsResizeObserverView extends HorizontalLayout {
                         <line style="stroke:red;stroke-width:2" x1="%d" y1="%d" x2="%d" y2="%d" />
                     </svg>
                     """.formatted(width, height, x1, y1, x2, y2));
+            getStyle().setWidth(width + "px");
+            getStyle().setHeight(height + "px");
         }
 
         public void drawLine(Component component1, Component component2) {
@@ -111,7 +113,6 @@ public class LineBetweenButtonsResizeObserverView extends HorizontalLayout {
                 this.y2 = dimensions.offsetTop() + dimensions.offsetHeight() / 2;
                 drawLine(x1, y1, x2, y2);
             });
-
         }
     }
 
