@@ -438,7 +438,9 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     }
 
     protected T constructRecord() {
-        AnnotatedConstructor annotatedConstructor = bbd.getConstructors().get(0);
+        List<AnnotatedConstructor> constructors = bbd.getConstructors();
+        // The default constructor is the last one with Jackson utils
+        AnnotatedConstructor annotatedConstructor = constructors.get(constructors.size() - 1);
         List<BeanPropertyDefinition> properties = bbd.findProperties();
         Object[] args = new Object[annotatedConstructor.getParameterCount()];
         for (int i = 0; i < annotatedConstructor.getParameterCount(); i++) {
