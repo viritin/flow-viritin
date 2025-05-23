@@ -1,6 +1,8 @@
 package org.vaadin.firitin.fluency.ui;
 
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.dom.Style;
+import org.vaadin.firitin.util.VStyle;
 
 @SuppressWarnings("unchecked")
 public interface FluentHasStyle<S extends FluentHasStyle<S>> extends HasStyle {
@@ -36,5 +38,10 @@ public interface FluentHasStyle<S extends FluentHasStyle<S>> extends HasStyle {
     default S withStyle(String name, String value) {
         getStyle().set(name, value);
         return (S) this;
+    }
+
+    @Override
+    default VStyle getStyle() {
+        return new VStyle(HasStyle.super.getStyle());
     }
 }

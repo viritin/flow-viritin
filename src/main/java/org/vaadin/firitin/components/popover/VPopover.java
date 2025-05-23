@@ -3,8 +3,10 @@ package org.vaadin.firitin.components.popover;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.popover.Popover;
 import com.vaadin.flow.component.popover.PopoverVariant;
+import com.vaadin.flow.dom.Style;
 import org.vaadin.firitin.fluency.ui.FluentHasSize;
 import org.vaadin.firitin.fluency.ui.FluentHasStyle;
+import org.vaadin.firitin.util.VStyle;
 
 public class VPopover extends Popover implements FluentHasStyle<VPopover>, FluentHasSize<VPopover> {
 
@@ -40,4 +42,8 @@ public class VPopover extends Popover implements FluentHasStyle<VPopover>, Fluen
         super.add(components);
     }
 
+    @Override
+    public VStyle getStyle() {
+        return new VStyle(super.getStyle());
+    }
 }

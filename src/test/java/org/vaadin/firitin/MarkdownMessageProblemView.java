@@ -1,19 +1,15 @@
 package org.vaadin.firitin;
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.dom.StyleUtil;
 import com.vaadin.flow.router.Route;
+import in.virit.color.NamedColor;
 import org.vaadin.firitin.components.messagelist.MarkdownMessage;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 import org.vaadin.firitin.util.VStyleUtil;
 
 import java.time.LocalDateTime;
-import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Route
 public class MarkdownMessageProblemView extends VVerticalLayout {
@@ -62,7 +58,7 @@ public class MarkdownMessageProblemView extends VVerticalLayout {
 
         """);
         message.setAvatarColor(MarkdownMessage.Color.AVATAR_PRESETS[1]);
-        message.setAvatarColor(new MarkdownMessage.Color("red"));
+        message.setAvatarColor(NamedColor.RED);
         add(message);
 
     }

@@ -2,6 +2,7 @@ package org.vaadin.firitin;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.router.Route;
+import in.virit.color.NamedColor;
 import org.vaadin.firitin.components.messagelist.MarkdownMessage;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 
@@ -21,8 +22,7 @@ public class MessageListView extends VVerticalLayout {
 
     public MessageListView() {
         MarkdownMessage message = new MarkdownMessage("Hello!\n","John", LocalDateTime.now());
-        message.setAvatarColor(MarkdownMessage.Color.AVATAR_PRESETS[1]);
-        message.setAvatarColor(new MarkdownMessage.Color("red"));
+        message.setAvatarColor(NamedColor.DARKCYAN);
         add(message);
 
         add(

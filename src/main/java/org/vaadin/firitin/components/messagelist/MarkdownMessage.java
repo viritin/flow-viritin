@@ -12,6 +12,7 @@ import com.vaadin.flow.server.Command;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
+import in.virit.color.HexColor;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.firitin.components.RichText;
 
@@ -28,17 +29,17 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
 
     private static final String PLACEHOLDER = "...";
 
-    public record Color(String cssColorCode){
+    public interface Color {
 
         // "Stolen" from https://github.com/vaadin/web-components/blob/1875686236814dcc065a0e067c87adb80153ce60/packages/vaadin-lumo-styles/user-colors.js#L12
-        public static Color[] AVATAR_PRESETS = new Color[] {
-                new Color("#df0b92"),
-                new Color("#650acc"),
-                new Color("#097faa"),
-                new Color("#ad6200"),
-                new Color("#bf16f3"),
-                new Color("#084391"),
-                new Color("#078836")
+        public static in.virit.color.Color[] AVATAR_PRESETS = new in.virit.color.Color[] {
+                HexColor.of("#df0b92"),
+                HexColor.of("#650acc"),
+                HexColor.of("#097faa"),
+                HexColor.of("#ad6200"),
+                HexColor.of("#bf16f3"),
+                HexColor.of("#084391"),
+                HexColor.of("#078836")
         };
     };
 
@@ -60,7 +61,7 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
      * @param timestamp time of the message
      * @param color the color used for user avatar
      */
-    public MarkdownMessage(String name, LocalDateTime timestamp, Color color) {
+    public MarkdownMessage(String name, LocalDateTime timestamp, in.virit.color.Color color) {
         getElement().setProperty("userName", name);
         getElement().setProperty("time", timestamp.format(DateTimeFormatter.ofPattern("YYYY-MM-dd hh:mm")));
         getElement().appendChild(content, scrollHelper);
@@ -100,7 +101,7 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
      * @param name the name of the user
      * @param avatarColor the avatar color
      */
-    public MarkdownMessage(String name, Color avatarColor) {
+    public MarkdownMessage(String name, in.virit.color.Color avatarColor) {
         this(name, LocalDateTime.now(), avatarColor);
         setMarkdown(null);
     }
@@ -114,7 +115,7 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
      * @param name the name of the user
      * @param avatarColor the color of the avatar
      */
-    public MarkdownMessage(String markdown, String name, Color avatarColor) {
+    public MarkdownMessage(String markdown, String name, in.virit.color.Color avatarColor) {
         this(name, LocalDateTime.now(), avatarColor);
         setMarkdown(markdown);
     }
@@ -145,8 +146,8 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
         setMarkdown(markdown);
     }
 
-    public void setAvatarColor(Color color) {
-        getElement().getStyle().set("--vaadin-avatar-user-color", color.cssColorCode);
+    public void setAvatarColor(in.virit.color.Color color) {
+        getElement().getStyle().set("--vaadin-avatar-user-color", color.toString());
         // remove the once set by constructor && ensure the flag making it use
 
         getElement().executeJs("\n" +
