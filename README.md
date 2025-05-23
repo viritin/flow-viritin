@@ -75,6 +75,7 @@ e.g. in field declaration or without declaring an extra variable. When used in a
 ### Rapid Application Development
 
  * DtoDisplay, a component to visualize a given DTO value in a grid layout.
+ * Automatic form generation for POJOs and Java records. The generated form is a simple grid layout with labels and text fields. The form is automatically bound to the given POJO/record, so you can easily edit the values. See AutoFormContext class that is used to generate the form and configure app specific hints for special types. 
 
 ### Uncategorised helpers
 
@@ -85,6 +86,8 @@ e.g. in field declaration or without declaring an extra variable. When used in a
  * A generic MainLayout suitable for many small to medium sized projects, based on the AppLayout and SideNave components. Populates your views to the menu automatically and this way removes a ton of boilerplate code of your app.
  * TreeTable. Like TreeGrid in the core, but with much easier API to populate items. Also properly supports [lazy loading](https://vaadin.com/blog/lazy-loading-hierarchical-data-from-ui-to-database) and scrolling to given item without extra hacks.
  * JsPromise, an Element.executeJs replacement for modern async JS APIs.
+ * Share API aka navigator.share()
+ * VStyle, an extension to the Style object from core with support for typed colors.
 
 ## Documentation
 
