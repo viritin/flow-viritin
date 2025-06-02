@@ -16,7 +16,7 @@ public class ShareAPIView extends VVerticalLayout {
 
     public ShareAPIView() {
         add(new H1("Share API"));
-        add(new Paragraph("This is a demo for the Web Share API. It opens native share dialog on the devices."));
+        add(new Paragraph("This is a demo for the Web Share API. It opens native share dialog on the devices. On FF it falls back to copying the text and URL to the clipboard and showing a notification."));
         add(new Button("Share a link to vaadin.com", e -> {
             try {
                 Share.share("Vaadin", "Vaadin is a must have tools that make all Java developers web developers.", new URI("https://vaadin.com/"))
@@ -33,7 +33,7 @@ public class ShareAPIView extends VVerticalLayout {
         }));
         add(new Button("Share weird link", e -> {
             try {
-                Share.share("Vaa'das`df\"in", "Vaadin is a must have tools that make all Java developers web developers.", new URI("https://vaadin.com/"))
+                Share.share("Vaa'das`df\"in", "Vaa'das`df\"in is a must have tools that make all Java developers web developers.", new URI("https://vaadin.com/"))
                         // optionally you can handle the result or cancellation...
                         .then(voidJson -> {
                                     Notification.show("Shared successfully");
