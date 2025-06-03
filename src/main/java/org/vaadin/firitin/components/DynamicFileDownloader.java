@@ -171,9 +171,14 @@ public class DynamicFileDownloader extends Anchor implements
                         setTimeout(() => el.removeAttribute("href"), 0);
                     });
                     """);
+            // TODO/NOTE/FIXME? this happens "too early" now (See #85), commented out and seems to work
+            // Didn't see ay issues though, although I can assume there is some client-server
+            // syncing issue now.
+            /*
             disableOnclick = getElement().addEventListener("click", e -> {
-                setEnabled(false);
+                 setEnabled(false);
             });
+             */
         }
     }
 
