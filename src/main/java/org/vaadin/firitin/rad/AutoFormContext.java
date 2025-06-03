@@ -133,6 +133,19 @@ public class AutoFormContext {
      * The editors are tried in order, first one that returns a non-null value is used.
      * The given editor is added to the beginning of the list, so it is tried first.
      *
+     * @param propertyType the type of the property to edit
+     * @param editorType the type of the editor to use, must be a subclass of {@link HasValue}
+     * @return this for chaining
+     */
+    public AutoFormContext withPropertyEditor(Class<?> propertyType, Class<? extends HasValue> editorType) {
+        return withPropertyEditor(new TypeBasePrinter(editorType, propertyType));
+    }
+
+    /**
+     * Registers a custom property editor that can be used to edit a property of a bean.
+     * The editors are tried in order, first one that returns a non-null value is used.
+     * The given editor is added to the beginning of the list, so it is tried first.
+     *
      * @param propertyEditor the editor to add
      * @return this for chaining
      */
