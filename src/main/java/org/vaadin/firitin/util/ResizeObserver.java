@@ -171,8 +171,7 @@ public class ResizeObserver {
                   for (const entry of entries) {
                     if (entry.target.isConnected && entry.contentBoxSize) {
                       const id = entry.target._resizeObserverId;
-                      const dimensions = {};
-                      Object.assign(dimensions, entry.contentRect);
+                      const dimensions = JSON.parse(JSON.stringify(entry.contentRect));
                       dimensions.offsetLeft = entry.target.offsetLeft;
                       dimensions.offsetTop = entry.target.offsetTop;
                       dimensions.offsetWidth = entry.target.offsetWidth;
