@@ -95,7 +95,7 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
      * A collection of metadata about the uploaded files. Currently file name 
      * and mime type, but might be extended in the future.
      */
-    public record FileDetails(String fileName, String mimeType) {
+    public record FileDetails(String fileName, String mimeType, long contentLenght) {
 
     }
 
@@ -285,7 +285,7 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                         const file = event.detail.file;
                         const name = encodeURIComponent(file.name);
                         xhr.setRequestHeader('Content-Type', file.type);
-                        xhr.setRequestHeader('Content-Disposition', 'attachment;name="'+ name + '"');
+                        xhr.setRequestHeader('Content-Disposition', 'name=upload;attachment;filename="'+ name + '"');
                         xhr.send(file);
                     });
                 """, clearAutomatically, maxConcurrentUploads);
@@ -320,12 +320,13 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
     private class FileRequestHandler implements ElementRequestHandler {
         @Override
         public void handleRequest(VaadinRequest request, VaadinResponse response, VaadinSession session, Element owner) throws IOException {
+            String cl = request.getHeader("Content-Length");
             String cd = request.getHeader("Content-Disposition");
             String contentType = request.getHeader("Content-Type");
-            String name = cd.split(";")[1].split("=")[1].substring(1);
+            String name = cd.split(";")[2].split("=")[1].substring(1);
             name = name.substring(0, name.indexOf("\""));
             name = URLDecoder.decode(name, "UTF-8");
-            Command cb = fileHandler.handleFile(request.getInputStream(), new FileDetails(name, contentType));
+            Command cb = fileHandler.handleFile(request.getInputStream(), new FileDetails(name, contentType, Long.parseLong(cl)));
             if (cb != null) {
                 ui.access(cb);
             }
