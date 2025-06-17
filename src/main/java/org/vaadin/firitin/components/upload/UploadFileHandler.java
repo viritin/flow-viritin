@@ -25,19 +25,17 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.Uses;
-import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.server.Command;
-import com.vaadin.flow.server.RequestHandler;
-import com.vaadin.flow.server.StreamReceiver;
-import com.vaadin.flow.server.StreamVariable;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.ElementRequestHandler;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
 import elemental.json.JsonType;
@@ -48,11 +46,8 @@ import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URLDecoder;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -221,17 +216,8 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         this.frh = new FileRequestHandler();
-
-        StreamReceiver fakeSR = new StreamReceiver(getElement().getNode(), "s", dummySV());
-        this.frh.id = fakeSR.getId();
-        runBeforeClientResponse(ui -> getElement().setAttribute("fakesr", fakeSR));
-        attachEvent.getSession().addRequestHandler(frh);
-
+        getElement().setAttribute("target", frh);
         getElement().executeJs("""
-                    const ufhid = $2;
-                    this.setAttribute("target", 
-                    this.getAttribute("fakesr").substring(0, this.getAttribute("fakesr").indexOf("VAADIN"))
-                    + "?v-r=ufh");
                     // override default dragover so that it works                    
                     this.addEventListener("dragover", event => {
                         event.stopPropagation();
@@ -299,10 +285,10 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                         const file = event.detail.file;
                         const name = encodeURIComponent(file.name);
                         xhr.setRequestHeader('Content-Type', file.type);
-                        xhr.setRequestHeader('Content-Disposition', 'attachment;name="'+ufhid+'"; filename="' + name + '"');
+                        xhr.setRequestHeader('Content-Disposition', 'attachment;name="'+ name + '"');
                         xhr.send(file);
                     });
-                """, clearAutomatically, maxConcurrentUploads, frh.id);
+                """, clearAutomatically, maxConcurrentUploads);
 
         this.ui = attachEvent.getUI();
         super.onAttach(attachEvent);
@@ -314,50 +300,8 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
 
     }
 
-    private StreamVariable dummySV() {
-        // Dummy Stream variable. This stream receiver/variable are not
-        // really used
-        return new StreamVariable() {
-            @Override
-            public OutputStream getOutputStream() {
-                return null;
-            }
-
-            @Override
-            public boolean listenProgress() {
-                return false;
-            }
-
-            @Override
-            public void onProgress(StreamingProgressEvent event) {
-
-            }
-
-            @Override
-            public void streamingStarted(StreamingStartEvent event) {
-
-            }
-
-            @Override
-            public void streamingFinished(StreamingEndEvent event) {
-
-            }
-
-            @Override
-            public void streamingFailed(StreamingErrorEvent event) {
-
-            }
-
-            @Override
-            public boolean isInterrupted() {
-                return false;
-            }
-        };
-    }
-
     @Override
     protected void onDetach(DetachEvent detachEvent) {
-        detachEvent.getSession().removeRequestHandler(frh);
         ui = null;
         super.onDetach(detachEvent);
     }
@@ -373,35 +317,21 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
         return this;
     }
 
-    private class FileRequestHandler implements RequestHandler {
-
-        private String id;
-
-        private List<String> files = new LinkedList<>();
-
+    private class FileRequestHandler implements ElementRequestHandler {
         @Override
-        public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) throws IOException {
-            String contextPath = request.getContextPath();
+        public void handleRequest(VaadinRequest request, VaadinResponse response, VaadinSession session, Element owner) throws IOException {
             String cd = request.getHeader("Content-Disposition");
-            if (cd != null && cd.contains(id)) {
-                // Vaadin's StreamReceiver & friends has this odd
-                // inversion of streams, thus handle here
-                // TODO figure out if content type or name needs some sanitation
-                String contentType = request.getHeader("Content-Type");
-                String name = cd.split(";")[2].split("=")[1].substring(1);
-                name = name.substring(0, name.indexOf("\""));
-                name = URLDecoder.decode(name, "UTF-8");
-                Command cb = fileHandler.handleFile(request.getInputStream(), new FileDetails(name, contentType));
-                if (cb != null) {
-                    ui.access(cb);
-                }
-                response.setStatus(200);
-                response.getWriter().println("OK");  // Viritin approves
-                return true;
+            String contentType = request.getHeader("Content-Type");
+            String name = cd.split(";")[1].split("=")[1].substring(1);
+            name = name.substring(0, name.indexOf("\""));
+            name = URLDecoder.decode(name, "UTF-8");
+            Command cb = fileHandler.handleFile(request.getInputStream(), new FileDetails(name, contentType));
+            if (cb != null) {
+                ui.access(cb);
             }
-            return false;
+            response.setStatus(200);
+            response.getWriter().println("OK");  // Viritin approves
         }
-
     }
 
     public Registration addUploadSucceededListener(ComponentEventListener<UploadSucceededEvent> listener) {
