@@ -53,7 +53,9 @@ public class UploadFileHandler2Example extends VerticalLayout {
                     try {
                         long lastUpdate = System.currentTimeMillis();
                         int b = 0;
+                        long bytesRead = 0;
                         while ((b = content.read()) != -1) {
+                            bytesRead++;
                             if (b == "\n".getBytes()[0]) {
                                 count++;
                                 if((System.currentTimeMillis()-lastUpdate) > 200) {
@@ -61,7 +63,8 @@ public class UploadFileHandler2Example extends VerticalLayout {
                                     // is possible, see https://stackoverflow.com/questions/75165362/vaadin-flow-upload-component-streaming-upload
                                     int curcount = count;
                                     System.out.println(LocalTime.now() + " counting... (%s, %s)".formatted(curcount, d.fileName()));
-                                    ui.access(() -> liveLogger.setText("counting... (%s)".formatted(curcount)));
+                                    long perscentDone = 100*bytesRead / d.contentLenght();
+                                    ui.access(() -> liveLogger.setText("counting... (%s), %s%% read".formatted(curcount, perscentDone)));
                                     lastUpdate = System.currentTimeMillis();
                                 }
                             }
