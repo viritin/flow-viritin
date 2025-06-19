@@ -17,7 +17,7 @@
     <description>General purpose helpers for Vaadin Flow users.</description>
 
     <properties>
-        <vaadin.version>24.8.0.rc2</vaadin.version>
+        <vaadin.version>25.0-SNAPSHOT</vaadin.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -53,12 +53,16 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-server</artifactId>
+            <version>25.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
             <version>6.0.0</version>
             <scope>provided</scope>
         </dependency>
-
 
         <dependency>
             <groupId>in.virit</groupId>
@@ -115,6 +119,14 @@
             <artifactId>reactor-core</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.parttio</groupId>
+            <artifactId>colorful</artifactId>
+            <version>1.1.1</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
