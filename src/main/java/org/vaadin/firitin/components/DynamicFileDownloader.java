@@ -24,7 +24,6 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.AnchorTargetValue;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.Tooltip;
@@ -36,6 +35,12 @@ import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.shared.Registration;
+import jakarta.servlet.http.Cookie;
+import org.vaadin.firitin.components.button.VButton;
+import org.vaadin.firitin.fluency.ui.FluentComponent;
+import org.vaadin.firitin.fluency.ui.FluentHasEnabled;
+import org.vaadin.firitin.fluency.ui.FluentHasTooltip;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -46,15 +51,24 @@ import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.vaadin.flow.shared.Registration;
-import jakarta.servlet.http.Cookie;
-import org.vaadin.firitin.components.button.VButton;
-import org.vaadin.firitin.fluency.ui.FluentComponent;
-import org.vaadin.firitin.fluency.ui.FluentHasEnabled;
-import org.vaadin.firitin.fluency.ui.FluentHasTooltip;
-
 /**
  * An anchor which links to a file whose content is produced dynamically.
+ * <p>
+ * Note, since Vaadin 24.8, this component can in some trivial cases be replaced with standard
+ * features 🥳See <a href="https://vaadin.com/docs/latest/flow/advanced/downloads#using-downloadevent-and-lambda-expression">Flow docs</a>.
+ * <p>
+ * DynamicFileDownloadingDemoWithFlowAnchor class in test sources shows how to replace it and what
+ * kind of limitations it has compared to this class. Some of the limitations are:
+ *     <ul>
+ *         <li>No events. With Push and UI.access hacks some things can be worked-around.</li>
+ *         <li>No disableOnClick behaviour</li>
+ *         <li>Filenames probably broken in some encodings</li>
+ *         <li>Needs some hacks to show generated content in new windows</li>
+ *         <li>Half written content not sent, content buffered?</li>
+ *         <li>No shorthands to use as button</li>
+ *     </ul>
+ *
+ * </p>
  *
  * @author mstahv
  * @see #setFileName(java.lang.String)
@@ -105,6 +119,7 @@ public class DynamicFileDownloader extends Anchor implements
         setText(linkText);
         setWriter(contentWriter);
     }
+
     /**
      * Constructs a new download link with given text, static file name and
      * writer.
@@ -120,6 +135,7 @@ public class DynamicFileDownloader extends Anchor implements
         this.fileNameGenerator = r -> fileName;
         setWriter(contentWriter);
     }
+
     /**
      * Constructs a download link with given component as the content that
      * ignites the download.
@@ -135,6 +151,7 @@ public class DynamicFileDownloader extends Anchor implements
         fileNameGenerator = r -> fileName;
         setWriter(contentWriter);
     }
+
     /**
      * Constructs a download link with given component as the content that
      * ignites the download.
@@ -148,6 +165,7 @@ public class DynamicFileDownloader extends Anchor implements
         add(downloadComponent);
         setWriter(contentWriter);
     }
+
     /**
      * Empty constructor file downloader. Be sure to call setFileHandler
      * before the component is attached.
@@ -185,7 +203,7 @@ public class DynamicFileDownloader extends Anchor implements
     @Override
     public void onEnabledStateChanged(boolean enabled) {
         super.onEnabledStateChanged(enabled);
-        if(isAttached()) {
+        if (isAttached()) {
             adjustHref();
         }
     }
@@ -224,7 +242,7 @@ public class DynamicFileDownloader extends Anchor implements
                 public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) throws IOException {
                     String id = request.getParameter("id");
                     if (id != null && id.equals(identifier)) {
-                        if(hasStartedListeners) {
+                        if (hasStartedListeners) {
                             ui.access(() -> {
                                 DynamicFileDownloader.this.getEventBus().fireEvent(new DownloadStartedEvent(DynamicFileDownloader.this, false));
                             });
@@ -242,7 +260,7 @@ public class DynamicFileDownloader extends Anchor implements
                         Cookie marker = new Cookie("filedownloadmarker-" + id, "filewritten");
                         marker.setPath("/");
                         // Client side ought to clear this (if attached), but set a reasonable max age anyways...
-                        marker.setMaxAge(60*60);
+                        marker.setMaxAge(60 * 60);
                         response.addCookie(marker);
                         try {
                             contentWriter.accept(response.getOutputStream());
@@ -258,7 +276,7 @@ public class DynamicFileDownloader extends Anchor implements
                             e.printStackTrace();
                             return true;
                         }
-                        if(hasFinishedListeners) {
+                        if (hasFinishedListeners) {
                             ui.access(() -> {
                                 DynamicFileDownloader.this.getEventBus().fireEvent(new DownloadFinishedEvent(DynamicFileDownloader.this, false));
                             });
@@ -271,7 +289,7 @@ public class DynamicFileDownloader extends Anchor implements
 
             ui.getSession().addRequestHandler(requestHandler);
 
-            if(!newWindow) {
+            if (!newWindow) {
                 getElement().setAttribute("download", "");
             } else {
                 setRouterIgnore(true);
@@ -283,43 +301,43 @@ public class DynamicFileDownloader extends Anchor implements
     private String adjustHref() {
         String identifier = resource.getId();
         VaadinSession session = getUI().get().getSession();
-        if(isEnabled()) {
-            if(requestHandler != null && !session.getRequestHandlers().contains(requestHandler)) {
+        if (isEnabled()) {
+            if (requestHandler != null && !session.getRequestHandlers().contains(requestHandler)) {
                 // re-enabling disabled component
                 session.addRequestHandler(requestHandler);
             }
             getElement().executeJs("""
-                const id = '%s';
-                this.setAttribute("href",
-                        this.getAttribute("fakesr").substring(0, this.getAttribute("fakesr").indexOf("VAADIN"))
-                                + "?v-r=dfd&id=" + id);
-                
-                this.onclick = e=> {
-
-                    if(this.downloadStartedListener) {
-                        setTimeout(() => {
-                            this.$server.ping();
-                        }, 100);
-                    }
+                    const id = '%s';
+                    this.setAttribute("href",
+                            this.getAttribute("fakesr").substring(0, this.getAttribute("fakesr").indexOf("VAADIN"))
+                                    + "?v-r=dfd&id=" + id);
                     
-                    // start an interval that checks if a cookie with identifier has been set,
-                    // if so, stop interval, hit server for possible errors & UI modifications
-                    this.interval = setInterval(() => {
-                        if(document.cookie.indexOf(id + '=filewritten') > -1) {
-                            var d = new Date();
-                            d.setDate(d.getDate() - 1);
-                            var expires = ";expires=" + d;
-                            document.cookie = "filedownloadmarker-"+ id + "=registered" + expires + "; path=/";
-                            clearInterval(this.interval);
-                            this.$server.ping();
+                    this.onclick = e=> {
+                    
+                        if(this.downloadStartedListener) {
+                            setTimeout(() => {
+                                this.$server.ping();
+                            }, 100);
                         }
-                    }, 1000);
-                }
-                """.formatted(identifier));
+                    
+                        // start an interval that checks if a cookie with identifier has been set,
+                        // if so, stop interval, hit server for possible errors & UI modifications
+                        this.interval = setInterval(() => {
+                            if(document.cookie.indexOf(id + '=filewritten') > -1) {
+                                var d = new Date();
+                                d.setDate(d.getDate() - 1);
+                                var expires = ";expires=" + d;
+                                document.cookie = "filedownloadmarker-"+ id + "=registered" + expires + "; path=/";
+                                clearInterval(this.interval);
+                                this.$server.ping();
+                            }
+                        }, 1000);
+                    }
+                    """.formatted(identifier));
         } else {
             getElement().executeJs("this.removeAttribute('href');");
             // make sure the request handler can't be access by hacking if disabled
-            if(requestHandler != null) {
+            if (requestHandler != null) {
                 session.removeRequestHandler(requestHandler);
             }
         }
