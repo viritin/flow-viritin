@@ -15,7 +15,6 @@
  */
 package org.vaadin.firitin;
 
-import com.helger.commons.mutable.MutableInt;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Paragraph;
@@ -35,6 +34,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.upload.UploadFileHandler;
 
@@ -91,7 +91,7 @@ public class UploadFileHandlerExample extends VerticalLayout {
                                 count++;
                             }
                         }
-                        lineCount.inc(count);
+                        lineCount.add(count);
                         String msg = "Counted " + lineCount + "lines so far. Last file name " + fileName;
                         getUI().get().access(() -> Notification.show(msg));
                     } catch (IOException ex) {

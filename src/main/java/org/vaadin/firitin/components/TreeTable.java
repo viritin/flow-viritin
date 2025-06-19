@@ -1,6 +1,5 @@
 package org.vaadin.firitin.components;
 
-import com.helger.commons.mutable.MutableInt;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasText;
@@ -14,6 +13,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.function.SerializableFunction;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.vaadin.firitin.components.grid.VGrid;
 
 import java.util.ArrayList;
@@ -125,13 +125,13 @@ public class TreeTable<T> extends VGrid<T> {
         if (getOpenModel().isOpen(rootItem)) {
             List<T> children = childrenProvider.apply(rootItem);
             if (children != null) {
-                level.inc();
+                level.increment();
                 for (T child : children) {
                     visibleRows.add(child);
                     levelMap.put(child, level.intValue());
                     addChildrenRecursively(child, levelMap, level, childrenProvider, visibleRows);
                 }
-                level.dec();
+                level.decrement();
             }
         }
     }

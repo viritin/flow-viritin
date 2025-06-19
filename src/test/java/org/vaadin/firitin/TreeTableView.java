@@ -1,6 +1,5 @@
 package org.vaadin.firitin;
 
-import com.helger.commons.mutable.MutableInt;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
@@ -8,6 +7,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.vaadin.firitin.components.TreeTable;
 import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
 
@@ -140,7 +140,7 @@ public class TreeTableView extends VerticalLayout {
                         boolean open = dir == root || model.isOpen(dir);
 
                         if (skipped.intValue() < offset) {
-                            skipped.inc();
+                            skipped.increment();
                             return open ? FileVisitResult.CONTINUE : FileVisitResult.SKIP_SUBTREE;
                         }
                         if (page.size() >= limit) {
@@ -155,7 +155,7 @@ public class TreeTableView extends VerticalLayout {
                     @Override
                     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                         if (skipped.intValue() < offset) {
-                            skipped.inc();
+                            skipped.increment();
                             return FileVisitResult.CONTINUE;
                         }
                         if (page.size() >= limit) {
