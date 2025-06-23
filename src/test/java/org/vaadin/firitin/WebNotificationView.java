@@ -15,6 +15,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 @Route
 public class WebNotificationView extends VerticalLayout {
+    private PageVisibility.Visibility visibility = PageVisibility.Visibility.VISIBLE;
 
     private final WebNotification webNotification;
     ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -103,31 +104,23 @@ public class WebNotificationView extends VerticalLayout {
         }));
 
         add(new VButton("Web notification if page is visible and focused, else Vaadin Notification", e -> {
-            UI current = UI.getCurrent();
+            UI ui = UI.getCurrent();
             executorService.schedule(() -> {
-                current.access(() -> {
-                    PageVisibility.get().isVisible().thenAccept(visibility -> {
-                        switch (visibility) {
-                            case VISIBLE -> Notification.show("\"Normal\" Vaadin Notification, page: " + visibility);
-                            // The page is visible and focused, so we use the regular Vaadin notification.
-                            case VISIBLE_NON_FOCUSED, HIDDEN -> webNotification.showNotificationAsync("Web, page: " + visibility);
-                        }
-                    });
-                });
+                    switch (visibility) {
+                        // The page is visible and focused, so we use the regular Vaadin notification, we can expect it
+                        // is actively used by the user.
+                        case VISIBLE -> ui.access(() -> Notification.show("\"Normal\" Vaadin Notification, page: " + visibility));
+                        // Else we use the Web Notification, which is shown even if the browser tab is not focused or hidden.
+                        case VISIBLE_NON_FOCUSED, HIDDEN -> webNotification.showNotificationAsync("Web, page: " + visibility);
+                    }
             }, 2, java.util.concurrent.TimeUnit.SECONDS);
         }));
 
-
-    }
-
-    private void hookVisibilityChangeListener() {
-        getElement().addEventListener("visibilitychange", event -> {
-            if (getElement().getProperty("hidden", false)) {
-                webNotification.showNotificationAsync("Browser tab is now hidden.");
-            } else {
-                webNotification.showNotificationAsync("Browser tab is now visible.");
-            }
+        // Maintain the visibility state of the page, so we can use it in the button above.
+        PageVisibility.get().addVisibilityChangeListener(v -> {
+            visibility = v;
         });
+
     }
 
 }
