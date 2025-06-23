@@ -4,6 +4,21 @@ import com.vaadin.flow.component.UI;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * A utility class for displaying web notifications (aka native OS displayed notifications)
+ * in a Vaadin application. It provides methods to show notifications, check permission status, and request permissions.
+ *
+ * Usage:
+ * <pre>
+ * WebNotification notification = WebNotification.get();
+ * notification.showNotification("Hello World!");
+ * </pre>
+ * <p>
+ * Compared to Vaadin's built-in notification system, this allows notifications to be displayed
+ * even when the browser window is not in focus, using the native OS notification system.
+ * Regular Vaadin notifications are more flexible for in-app notifications.
+ * </p>
+ */
 public class WebNotification {
 
     private final UI ui;
