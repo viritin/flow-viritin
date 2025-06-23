@@ -30,10 +30,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * @author mstahv
- */
-
-/**
  * XSS safe rich text label with either Markdown syntax or raw html (sanitized
  * with Jsoup). In case markdown format is used, the default is to use dynamcally
  * loaded markdown-it JS library in the browser (and omitting Jsoup sanitizing),
@@ -49,6 +45,13 @@ import java.io.InputStream;
  * customize behaviour by implementing custom {@link MarkdownStrategy} (and e.g.
  * use a bundled markdown-it instead of the dynamically loaded one).
  * </p>
+ * <p>
+ *     Note, that for basic Markdown usage, the Markdown component from Vaadin core
+ *     is now available since Vaadin 24.8. This component though provides more efficiency
+ *     (does not save content to the server memory), easier to use append method (no need
+ *     for UI.access dance) and more flexibility (uses the excellent Flexmark library for
+ *     server side rendering if available, else falls back to the client side markdown-it)
+ * </p>>
  */
 public class RichText extends Div {
 
