@@ -58,9 +58,7 @@ public class WebNotification {
     public CompletableFuture<Permission> checkPermission() {
         return ui.getPage().executeJs("""
             return Notification.permission;
-        """).toCompletableFuture(String.class).thenApply(str -> {
-            return Permission.valueOf(str.toUpperCase());
-        });
+        """).toCompletableFuture(String.class).thenApply(str -> Permission.valueOf(str.toUpperCase()));
     }
 
     public void requestPermission(Runnable onSuccess, Runnable onError) {
