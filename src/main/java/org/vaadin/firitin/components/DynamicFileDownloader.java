@@ -56,9 +56,12 @@ import java.util.logging.Logger;
  * <p>
  * Note, since Vaadin 24.8, this component can in some trivial cases be replaced with standard
  * features 🥳See <a href="https://vaadin.com/docs/latest/flow/advanced/downloads#using-downloadevent-and-lambda-expression">Flow docs</a>.
+ * </p>
  * <p>
  * DynamicFileDownloadingDemoWithFlowAnchor class in test sources shows how to replace it and what
  * kind of limitations it has compared to this class. Some of the limitations are:
+ * </p>
+ *
  *     <ul>
  *         <li>No events. With Push and UI.access hacks some things can be worked-around.</li>
  *         <li>No disableOnClick behaviour</li>
@@ -68,7 +71,6 @@ import java.util.logging.Logger;
  *         <li>No shorthands to use as button</li>
  *     </ul>
  *
- * </p>
  *
  * @author mstahv
  * @see #setFileName(java.lang.String)
