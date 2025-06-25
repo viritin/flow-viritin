@@ -1,9 +1,19 @@
-package org.vaadin.firitin.util;
+package org.vaadin.firitin.util.clipboard;
 
 import com.vaadin.flow.component.UI;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Utility class for clipboard operations in a Vaadin application.
+ * This class provides methods to copy text to the clipboard and read text from the clipboard
+ * using the Clipboard API.
+ * <p>
+ *     Note that this is helper is early experiment and may not work in all browsers, most especially
+ *     in Safari, due to its incomplete handling of transient activation regarding clipboard. See
+ *     test class for more details and workarounds.
+ * </p>
+ */
 public class Clipboard {
 
     /**
