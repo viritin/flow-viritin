@@ -80,7 +80,7 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
         DynamicFileDownloader downloadFromIcon = new DynamicFileDownloader(
                 // in theory any component should do here, but button/plain icon etc are appropriate
                 VaadinIcon.DROP.create(),
-                "foobar with spaces and utf char's in its name öä.txt", // static default name for generated files
+                "foobar with spaces and utf char's in شريط ف its name öä.txt", // static default name for generated files
                 outputStream -> {
                     try {
                         outputStream.write("HelloWorld".getBytes());
