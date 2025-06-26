@@ -44,7 +44,13 @@ public class VStyleUnreferencedElements extends VerticalLayout {
 
         style.applyToShadowRoot(grid, "th");
 
-
+        // VStyle can also be used to create CSS for given selector, not just to apply inline styles
+        // Here we create a style to apply to all selected rows in a grid
+        VStyle yellowBgBoldedText = new VStyle() {{
+            setBackgroundColor(NamedColor.YELLOW);
+            setFontWeight(FontWeight.BOLD);
+        }};
+        yellowBgBoldedText.injectWithSelectors("vaadin-grid::part(selected-row-cell)");
 
     }
 }

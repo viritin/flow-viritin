@@ -4,6 +4,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.dom.Style;
 import in.virit.color.Color;
 
+import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -140,6 +141,29 @@ public class VStyle implements Style {
      */
     public void apply(Component component, String cssSelector) {
         apply(component, cssSelector, false);
+    }
+
+    /**
+     * Injects the styles defined in this object to the host page as CSS, for the given CSS selector.
+     *
+     * @param cssSelectors the CSS selector to target the specific element within the host page
+     */
+    public void injectWithSelectors(String... cssSelectors) {
+        VStyleUtil.inject(toCss(cssSelectors));
+    }
+
+    public String toCss(String... cssSelectors) {
+        StringBuilder styleBuilder = new StringBuilder();
+        styleBuilder.append(Arrays.stream(cssSelectors).collect(Collectors.joining(", ")));
+        styleBuilder.append(" {\n");
+        getNames().forEach(name -> {
+            String value = get(name);
+            if (value != null) {
+                styleBuilder.append(name).append(": ").append(value).append(";\n");
+            }
+        });
+        styleBuilder.append("}\n");
+        return styleBuilder.toString();
     }
 
     /**
