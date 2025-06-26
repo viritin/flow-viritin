@@ -43,13 +43,18 @@ import org.vaadin.firitin.fluency.ui.FluentHasEnabled;
 import org.vaadin.firitin.fluency.ui.FluentHasTooltip;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * An anchor which links to a file whose content is produced dynamically.
@@ -254,7 +259,7 @@ public class DynamicFileDownloader extends Anchor implements
                         if (filename == null) {
                             filename = fileNameGenerator.getFileName(request);
                         }
-                        response.setHeader("Content-Disposition", (newWindow ? "" : "attachment;") + "filename*=UTF-8''" + URLEncoder.encode(filename, StandardCharsets.UTF_8));
+                        response.setHeader("Content-Disposition", (newWindow ? "" : "attachment;") + "filename*=" + encodeRfc5987Filename(filename));
                         response.setHeader("Content-Type", contentTypeGenerator.getContentType());
                         // Set a cookie to indicate that the file has been downloaded, browser registers after the
                         // download is complete, and we can then hit the server (from the client) to check for possible
@@ -667,4 +672,44 @@ public class DynamicFileDownloader extends Anchor implements
         }
 
     }
+
+    /**
+     * Encodes the given header field param as described in RFC 5987. Only UTF-8 chars are supported.
+     * Principles for the implementation taken from Spring Framework's ContentDisposition class
+     *
+     * @param input the filename
+     * @return the encoded header field param
+     * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
+     */
+    private static String encodeRfc5987Filename(String input) {
+        byte[] source = input.getBytes(StandardCharsets.UTF_8);
+        StringBuilder sb = new StringBuilder(source.length << 1);
+        sb.append(StandardCharsets.UTF_8.name());
+        sb.append("''");
+        for (byte b : source) {
+            if (isRFC5987AttrChar(b)) {
+                sb.append((char) b);
+            }
+            else {
+                sb.append('%');
+                char hex1 = hexDigit(b >> 4);
+                char hex2 = hexDigit(b);
+                sb.append(hex1);
+                sb.append(hex2);
+            }
+        }
+        return sb.toString();
+    }
+
+    private static char hexDigit(int b) {
+        return Character.toUpperCase(Character.forDigit(b & 0xF, 16));
+    }
+
+
+    private static boolean isRFC5987AttrChar(byte c) {
+        return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+                c == '!' || c == '#' || c == '$' || c == '&' || c == '+' || c == '-' ||
+                c == '.' || c == '^' || c == '_' || c == '`' || c == '|' || c == '~';
+    }
+
 }
