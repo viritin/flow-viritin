@@ -90,6 +90,7 @@ public class DynamicFileDownloader extends Anchor implements
      * The request handler that handles the download request.
      */
     protected RequestHandler requestHandler;
+    // TODO replace this hack with ElementRequestHandler as was done in UploadFileHandler
     StreamResource resource = new StreamResource("dummy", (InputStreamFactory) () -> new ByteArrayInputStream(new byte[0]));
     FileNameGenerator fileNameGenerator = (r) -> "downloadedFile";
     private Button button;
