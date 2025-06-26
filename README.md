@@ -22,11 +22,12 @@ e.g. in field declaration or without declaring an extra variable. When used in a
 ### Uploads & Download like they should be
 
  * UploadFileHandler aka Upload component with [a proper Java API](https://vaadin.com/blog/uploads-and-downloads-inputs-and-outputs).
-   * Simply passes the input stream for you to handle, no weird Vaadin specific APIs
-   * Read/handle the contents while it is being uploaded, also works with Spring Boot
-   * Throttles amount of concurrent connections used, instead of choking the network
+   * Simply passes the input stream for you to handle, no weird Vaadin specific APIs. Note, 24.8 fixes the API oddities of built-in Upload so that defaults are now correct 🥳 
+   * Read/handle the contents while it is being uploaded, also works with Spring Boot. Also, no need to add special configuration to your Spring Boot application to accept large files.
+   * Throttles amount of concurrent connections used, instead of choking the network with multiple parallel uploads (if in multi-file mode).
    * Implements HasEnabled
  * DynamicFileDownloader for simple generation of dynamically generated file downloads. No need to buffer content in memory, but simply write it to the OutputStream, like you would do with e.g. raw Servlet API
+   * Note, 24.8 improves the core functionality to this direction, but there are still [some cases where this component can be needed](https://github.com/viritin/flow-viritin/commit/98edd31029694dff809bde70190d5ec49603ba4e).
  * ByteArrayUploadField to bind a file upload to a `byte[]` field with Binder.
 
 ### Access to browser API & others
