@@ -6,6 +6,8 @@
 A similar helper library as "old Viritin" was for Vaadin 8 and earlier. See [the Directory page](https://vaadin.com/directory/component/flow-viritin) for more details. Tries to add missing features, fix some issues in the core components and to work as an agile arena to test new potential features for Vaadin.
 
 *Version matrix:*
+ * 2.16.0+ built against 24.8+ and at least some features are incompatible with older versions.
+ * 2.13.0+ drops dependency to java flexmark and renders markdown by default with markdown-it on the browser
  * 2.x series for Vaadin 24 (Maven central)
  * 1.7.1+ for Vaadin 23.3+ (distribution via Maven central, directory repository is not necessary needed, "coordinates": in.virit:viritin)
  * 0.9.0 for Vaadin 22+ (distribution via Maven central, directory repository is not necessary needed, "coordinates": in.virit:viritin)
@@ -37,6 +39,10 @@ e.g. in field declaration or without declaring an extra variable. When used in a
  * LumoProps, Java enumeration for easier discoverability (& redefining/using) of the handy Lumo theme css properties.
  * ~WebStorage helper to save data in the browsers localStorage or sessionStorage~ (available for backwards compatibility, but the same implementation found in core as well these days)
  * Like with [JS developer can with the ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver), with Viritin one can observe the component sizes and hook Java logic to changes. If you are using Viritin components or implementing `FluentHasSize` on your component, you can [hook listener directly to the component](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/resizeobserver/ResizeObserverCoreApiDrafting.java#L32-L38). Otherwise, you can use the [ResizeObserver utility](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/resizeobserver/ResizeObserverView.java).
+ * Share API aka navigator.share()
+ * VStyle, an extension to the Style object from core with support for typed colors. Allows also to assign styles to different elements (not necessarily bound to an element/component), with Element reference, css selector or by injecting as CSS to the document head (with given selectors).
+ * PageVisibility API to detect when the page is visible or hidden. Also detects if focus is lost from the web page as related detail. Useful for e.g. pausing animations, refreshing data when the user returns to the page or changing notification settigns based on presence.
+ * Web Notification API to show notifications to the user. Uses the browser's native notification system, so the user can see the notifications even if the web page is behind another tab or application.
 
 ### VGrid
 
@@ -87,8 +93,6 @@ e.g. in field declaration or without declaring an extra variable. When used in a
  * A generic MainLayout suitable for many small to medium sized projects, based on the AppLayout and SideNave components. Populates your views to the menu automatically and this way removes a ton of boilerplate code of your app.
  * TreeTable. Like TreeGrid in the core, but with much easier API to populate items. Also properly supports [lazy loading](https://vaadin.com/blog/lazy-loading-hierarchical-data-from-ui-to-database) and scrolling to given item without extra hacks.
  * JsPromise, an Element.executeJs replacement for modern async JS APIs.
- * Share API aka navigator.share()
- * VStyle, an extension to the Style object from core with support for typed colors.
 
 ## Documentation
 
