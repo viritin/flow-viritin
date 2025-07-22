@@ -1,4 +1,4 @@
-/* Styles derived from https://github.com/vaadin-component-factory/toggle-button *
+/* Styles derived from https://github.com/vaadin-component-factory/toggle-button */
 
 vaadin-checkbox.toggle-button::part(checkbox),
 vaadin-checkbox.toggle-button > input {
