@@ -8,7 +8,7 @@ import com.vaadin.flow.component.customfield.CustomField;
  * toggles the checkbox, it will switch from non-checked (false) to a non-indeterminate
  * state (null) and from there again to checked (true).
  */
-public class IndeterminateCheckbox extends CustomField<Boolean> {
+public class TriStateCheckbox extends CustomField<Boolean> {
 
     private final Checkbox impl;
     boolean indeterminate = true;
@@ -16,7 +16,7 @@ public class IndeterminateCheckbox extends CustomField<Boolean> {
     /**
      * Creates an IndeterminateCheckbox with the initial state set to indeterminate (null).
      */
-    public IndeterminateCheckbox() {
+    public TriStateCheckbox() {
         this.impl = new Checkbox();
         impl.setIndeterminate(true);
         impl.addValueChangeListener(event -> {
@@ -37,7 +37,7 @@ public class IndeterminateCheckbox extends CustomField<Boolean> {
      *
      * @param label the label for the checkbox
      */
-    public IndeterminateCheckbox(String label) {
+    public TriStateCheckbox(String label) {
         this();
         setLabel(label);
     }

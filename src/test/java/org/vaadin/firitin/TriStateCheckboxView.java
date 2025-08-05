@@ -3,14 +3,14 @@ package org.vaadin.firitin;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.router.Route;
-import org.vaadin.firitin.components.checkbox.IndeterminateCheckbox;
+import org.vaadin.firitin.components.checkbox.TriStateCheckbox;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 import org.vaadin.firitin.form.FormBinder;
 
 @Route
-public class IndeterminateCheckboxView extends VVerticalLayout {
+public class TriStateCheckboxView extends VVerticalLayout {
 
-    IndeterminateCheckbox value = new IndeterminateCheckbox("Value from a record");
+    TriStateCheckbox value = new TriStateCheckbox("Value from a record");
 
     public record DataWithBoolean(Boolean value) {
         public Boolean getValue() {
@@ -18,11 +18,11 @@ public class IndeterminateCheckboxView extends VVerticalLayout {
         }
     }
 
-    public IndeterminateCheckboxView() {
+    public TriStateCheckboxView() {
 
         add(new H2("Plain IndeterminateCheckbox"));
 
-        IndeterminateCheckbox checkbox = new IndeterminateCheckbox();
+        TriStateCheckbox checkbox = new TriStateCheckbox();
         checkbox.setLabel("Indeterminate Checkbox");
         checkbox.addValueChangeListener(event -> {
             add(new Paragraph("IndeterminateCheckbox value changed: " + event.getValue() + " (null means indeterminate)"));
