@@ -6,6 +6,8 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.server.Command;
@@ -25,6 +27,7 @@ import java.time.format.DateTimeFormatter;
  * usecase: LLM chatbots slowly giving you the answer.
  */
 @Tag("vaadin-message")
+@Uses(MessageList.class)
 public class MarkdownMessage extends Component implements HasStyle, HasSize {
 
     private static final String PLACEHOLDER = "...";
