@@ -3,6 +3,7 @@ package org.vaadin.firitin.util.fullscreen;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
 import java.util.concurrent.CompletableFuture;
@@ -20,12 +21,15 @@ public class FullScreen {
     /**
      * Requests full screen mode for the given component.
      * <p>
-     * This method will request full screen mode for the element of the provided component.
-     * Due to a limitation in current Vaadin version, certain "floating" components (or pieces
-     * of components) may not work correctly in full screen mode. Examples: Notification, popup
-     * part of ComboBox, etc. See
+     * Note that on the client side, fullscreen mode is technically requested for the html element
+     * and the rest of the view is hidden during the full screen mode. This is to work around
+     * current limitation in "overlay components" (like Notification, ComboBox popup, etc.)
+     * and theme. Thus, if you have some elements in the "index.html" that are not part of the
+     * Vaadin Flow view, they may not be visible in full screen mode. Same if you are using embedding.
+     * In these cases you might try using {@link #requestFullscreenRaw(Component)} method instead.
      *
      * @param component the component for which to request full screen mode
+     * @see <a href="https://github.com/vaadin/flow/issues/21902">Related Vaadin Flow issue</a>
      */
     public static void requestFullscreen(Component component) {
         if (component == null) {
@@ -66,6 +70,34 @@ public class FullScreen {
                     };
                     document.documentElement.addEventListener("fullscreenchange", restoreOriginalParent);
                 """, component.getElement(), UI.getCurrent().wrapperElement);
+    }
+
+    /**
+     * Requests full screen mode for the given element.
+     *
+     * @param el the element for which to request full screen mode
+     * @deprecated Requesting full screen for a specific element may have limitations
+     * in the current Vaadin version. Consider using {@link #requestFullscreen(Component)}
+     * instead.
+     */
+    @Deprecated(forRemoval = false)
+    public static void requestFullscreenRaw(Element el) {
+        UI.getCurrent().getPage().executeJs("""
+                    const element = $0;
+                    element.requestFullscreen();
+                """, el);
+    }
+
+    /**
+     * Requests full screen mode for the given component's element.
+     *
+     * @param component the component for which to request full screen mode
+     * @deprecated Consider using {@link #requestFullscreen(Component)} instead.
+     * See implementation notes in {@link #requestFullscreen(Component)} for more information.
+     */
+    @Deprecated(forRemoval = false)
+    public static void requestFullscreenRaw(Component component) {
+        requestFullscreenRaw(component.getElement());
     }
 
     public static void exitFullscreen() {
