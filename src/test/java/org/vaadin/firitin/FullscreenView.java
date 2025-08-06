@@ -26,6 +26,16 @@ public class FullscreenView extends VVerticalLayout {
         Page page = UI.getCurrent().getPage();
 
         buttons = new HorizontalFloatLayout() {{
+            add(new Button("Fullscreen.fullScreenAvailable()", e -> {
+                // Check if the current UI is in full screen mode
+                FullScreen.fullScreenAvailable().thenAccept(available -> {
+                    if (available) {
+                        Notification.show("The browser supports Fullscreen mode");
+                    } else {
+                        Notification.show("The full screen mode is not available for a reason or another (like beeing an iPhone :-) ).");
+                    }
+                });
+            }));
 
 
             add(new Button("Fullscreen.requestFullscreen()", e -> {

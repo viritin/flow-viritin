@@ -124,7 +124,7 @@ public class FullScreen {
      */
     public static CompletableFuture<Boolean> fullScreenAvailable() {
         return UI.getCurrent().getPage().executeJs("""
-                return document.fullscreenEnabled;
+                return document.fullscreenEnabled === true;
                 """).toCompletableFuture(Boolean.class);
     }
 
