@@ -8,6 +8,15 @@ import com.vaadin.flow.shared.Registration;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Java API for requesting full screen mode in a Vaadin application.
+ * <p>
+ *     Note that the browsers require user interaction to enter full screen mode,
+ *     so this API should be called in response to a user action, like a button click
+ *     or a similar event. Requesting full screen mode in a constructor of a view or
+ *     using server push will likely not work as expected.
+ * </p>
+ */
 public class FullScreen {
 
     public static void requestFullscreen() {
@@ -49,26 +58,27 @@ public class FullScreen {
          * restored to its original parent when exiting full screen mode.
          */
         UI.getCurrent().getPage().executeJs("""
-                    const wrapper = $1;
-                    const element = $0;
-                
-                    const placeholder = document.createComment("placeholder");
-                    const originalParent = element.parentNode;
-                    element.parentNode.insertBefore(placeholder, element);
-                
-                    wrapper.appendChild(element);
-                    wrapper.firstChild.style.display = "none";
-                    document.documentElement.requestFullscreen();
-                
-                    const restoreOriginalParent = evt => {
-                        if(!document.fullscreenElement) {
-                            originalParent.appendChild(element);
-                            placeholder.remove();
-                            wrapper.firstChild.style.display = "";
-                            document.documentElement.removeEventListener("fullscreenchange", restoreOriginalParent);
-                        }
-                    };
-                    document.documentElement.addEventListener("fullscreenchange", restoreOriginalParent);
+                    if(document.fullscreenEnabled === true) {
+                        const wrapper = $1;
+                        const element = $0;
+                        const placeholder = document.createComment("placeholder");
+                        const originalParent = element.parentNode;
+                        element.parentNode.insertBefore(placeholder, element);
+                    
+                        wrapper.appendChild(element);
+                        wrapper.firstChild.style.display = "none";
+                        document.documentElement.requestFullscreen();
+                    
+                        const restoreOriginalParent = evt => {
+                            if(!document.fullscreenElement) {
+                                originalParent.appendChild(element);
+                                placeholder.remove();
+                                wrapper.firstChild.style.display = "";
+                                document.documentElement.removeEventListener("fullscreenchange", restoreOriginalParent);
+                            }
+                        };
+                        document.documentElement.addEventListener("fullscreenchange", restoreOriginalParent);
+                    }
                 """, component.getElement(), UI.getCurrent().wrapperElement);
     }
 
