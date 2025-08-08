@@ -94,8 +94,13 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
     /**
      * A collection of metadata about the uploaded files. Currently file name 
      * and mime type, but might be extended in the future.
+     *
+     * @param fileName the name of the file in users device
+     * @param mimeType the mime type parsed from the file name
+     * @param contentLenght the length of the file in bytes
+     * @param folderPath the path of the file within the dropped folder, if available
      */
-    public record FileDetails(String fileName, String mimeType, long contentLenght) {
+    public record FileDetails(String fileName, String mimeType, long contentLenght, String folderPath) {
 
     }
 
@@ -285,9 +290,51 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                         const file = event.detail.file;
                         const name = encodeURIComponent(file.name);
                         xhr.setRequestHeader('Content-Type', file.type);
-                        xhr.setRequestHeader('Content-Disposition', 'name=upload;attachment;filename="'+ name + '"');
+                        xhr.setRequestHeader('Content-Disposition', 'name=upload;attachment;filename="'+ name + '"' + ';folderPath="' + file.__folderPath + '"');
                         xhr.send(file);
                     });
+                    
+                    this.__getFilesFromDropEvent = (dropEvent) => {
+                      async function getFilesFromEntry(entry) {
+                        if (entry.isFile) {
+                          return new Promise((resolve) => {
+                            // In case of an error, resolve without any files
+                            entry.file(resolve, () => resolve([]));
+                          });
+                        } else if (entry.isDirectory) {
+                          const reader = entry.createReader();
+                          const entries = await new Promise((resolve) => {
+                            // In case of an error, resolve without any files
+                            reader.readEntries(resolve, () => resolve([]));
+                          });
+                          const files = await Promise.all(entries.map(getFilesFromEntry));
+                          for (let i = 0; i < files.length; i++) {
+                            files[i].__folderPath = entry.fullPath + '/' + files[i].name;
+                          }
+                          return files.flat();
+                        }
+                      }
+            
+                      // In some cases (like dragging attachments from Outlook on Windows), "webkitGetAsEntry"
+                      // can return null for "dataTransfer" items. Also, there is no reason to check for
+                      // "webkitGetAsEntry" when there are no folders. Therefore, "dataTransfer.files" is used
+                      // to handle such cases.
+                      const containsFolders = Array.from(dropEvent.dataTransfer.items)
+                        .filter((item) => !!item)
+                        .filter((item) => typeof item.webkitGetAsEntry === 'function')
+                        .map((item) => item.webkitGetAsEntry())
+                        .some((entry) => !!entry && entry.isDirectory);
+                      if (!containsFolders) {
+                        return Promise.resolve(dropEvent.dataTransfer.files ? Array.from(dropEvent.dataTransfer.files) : []);
+                      }
+            
+                      const filePromises = Array.from(dropEvent.dataTransfer.items)
+                        .map((item) => item.webkitGetAsEntry())
+                        .filter((entry) => !!entry)
+                        .map(getFilesFromEntry);
+            
+                      return Promise.all(filePromises).then((files) => files.flat());
+                    };
                 """, clearAutomatically, maxConcurrentUploads);
 
         this.ui = attachEvent.getUI();
@@ -323,10 +370,18 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
             String cl = request.getHeader("Content-Length");
             String cd = request.getHeader("Content-Disposition");
             String contentType = request.getHeader("Content-Type");
+            String folderPath = null;
+            // name=upload;attachment;filename="text-on-level1.txt";folderPath="/folder to upload/text-on-level1.txt"
             String name = cd.split(";")[2].split("=")[1].substring(1);
             name = name.substring(0, name.indexOf("\""));
             name = URLDecoder.decode(name, "UTF-8");
-            Command cb = fileHandler.handleFile(request.getInputStream(), new FileDetails(name, contentType, Long.parseLong(cl)));
+            // if folderPath is provided, we can use it to the full path within the dropped folder
+            if (cd.contains("folderPath")) {
+                folderPath = cd.split(";")[3].split("=")[1].substring(1);
+                folderPath = folderPath.substring(0, folderPath.indexOf("\""));
+            }
+
+            Command cb = fileHandler.handleFile(request.getInputStream(), new FileDetails(name, contentType, Long.parseLong(cl), folderPath));
             if (cb != null) {
                 ui.access(cb);
             }
