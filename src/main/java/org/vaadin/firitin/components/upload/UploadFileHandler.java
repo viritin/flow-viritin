@@ -379,8 +379,10 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
             if (cd.contains("folderPath")) {
                 folderPath = cd.split(";")[3].split("=")[1].substring(1);
                 folderPath = folderPath.substring(0, folderPath.indexOf("\""));
+                if("undefined".equals(folderPath)) { // paths start with / anyways, so even undefined as foldername is ok
+                    folderPath = null; // no folder path provided
+                }
             }
-
             Command cb = fileHandler.handleFile(request.getInputStream(), new FileDetails(name, contentType, Long.parseLong(cl), folderPath));
             if (cb != null) {
                 ui.access(cb);
