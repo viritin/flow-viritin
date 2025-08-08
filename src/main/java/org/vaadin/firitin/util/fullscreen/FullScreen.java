@@ -22,7 +22,12 @@ public class FullScreen {
     public static void requestFullscreen() {
         // Vaadin sets background color to html element, so we need to request full screen on it
         // not to make "theme explode" when entering full screen mode.
+        // Also, in case a specific component is already in full screen mode, we need to
+        // restore it to its original parent...
         UI.getCurrent().getPage().executeJs("""
+                    if(document.__viritin_restoreOriginalParent) {
+                        document.__viritin_resetView();
+                    }
                     document.documentElement.requestFullscreen();
                 """);
     }
@@ -58,27 +63,36 @@ public class FullScreen {
          * restored to its original parent when exiting full screen mode.
          */
         UI.getCurrent().getPage().executeJs("""
-                    if(document.fullscreenEnabled === true) {
-                        const wrapper = $1;
-                        const element = $0;
-                        const placeholder = document.createComment("placeholder");
-                        const originalParent = element.parentNode;
-                        element.parentNode.insertBefore(placeholder, element);
-                    
-                        wrapper.appendChild(element);
-                        wrapper.firstChild.style.display = "none";
-                        document.documentElement.requestFullscreen();
-                    
-                        const restoreOriginalParent = evt => {
-                            if(!document.fullscreenElement) {
-                                originalParent.appendChild(element);
-                                placeholder.remove();
-                                wrapper.firstChild.style.display = "";
-                                document.documentElement.removeEventListener("fullscreenchange", restoreOriginalParent);
-                            }
-                        };
-                        document.documentElement.addEventListener("fullscreenchange", restoreOriginalParent);
-                    }
+                if(document.__viritin_restoreOriginalParent) {
+                    document.__viritin_resetView();
+                }
+                if(document.fullscreenEnabled === true) {
+                    const wrapper = $1;
+                    const element = $0;
+                    const placeholder = document.createComment("placeholder");
+                    const originalParent = element.parentNode;
+                    element.parentNode.insertBefore(placeholder, element);
+                
+                    wrapper.appendChild(element);
+                    wrapper.firstChild.style.display = "none";
+                    document.documentElement.requestFullscreen();
+                
+                    document.__viritin_resetView = () => {
+                        originalParent.appendChild(element);
+                        placeholder.remove();
+                        wrapper.firstChild.style.display = "";
+                        document.documentElement.removeEventListener("fullscreenchange", document.__viritin_restoreOriginalParent);
+                        document.__viritin_restoreOriginalParent = null;
+                        document.__viritin_resetView = null;
+                    };
+                
+                    document.__viritin_restoreOriginalParent = evt => {
+                        if(!document.fullscreenElement) {
+                            document.__viritin_resetView();
+                        }
+                    };
+                    document.documentElement.addEventListener("fullscreenchange", document.__viritin_restoreOriginalParent);
+                }
                 """, component.getElement(), UI.getCurrent().wrapperElement);
     }
 
@@ -93,6 +107,9 @@ public class FullScreen {
     @Deprecated(forRemoval = false)
     public static void requestFullscreenRaw(Element el) {
         UI.getCurrent().getPage().executeJs("""
+                    if(document.__viritin_restoreOriginalParent) {
+                        document.__viritin_resetView();
+                    }
                     const element = $0;
                     element.requestFullscreen();
                 """, el);
