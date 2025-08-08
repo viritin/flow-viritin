@@ -292,7 +292,7 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                         const file = event.detail.file;
                         const name = encodeURIComponent(file.name);
                         xhr.setRequestHeader('Content-Type', file.type);
-                        const folderPath = file.webkitRelativePath ? ("/" + file.webkitRelativePath) : file.__folderPath;
+                        const folderPath = encodeURIComponent(file.webkitRelativePath ? ("/" + file.webkitRelativePath) : file.__folderPath);
                         xhr.setRequestHeader('Content-Disposition', 'name=upload;attachment;filename="'+ name + '"' + ';folderPath="' + folderPath + '"');
                         xhr.send(file);
                     });
@@ -381,7 +381,7 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
             // if folderPath is provided, we can use it to the full path within the dropped folder
             if (cd.contains("folderPath")) {
                 folderPath = cd.split(";")[3].split("=")[1].substring(1);
-                folderPath = folderPath.substring(0, folderPath.indexOf("\""));
+                folderPath = URLDecoder.decode(folderPath.substring(0, folderPath.indexOf("\"")), "UTF-8");
                 if("undefined".equals(folderPath)) { // paths start with / anyways, so even undefined as foldername is ok
                     folderPath = null; // no folder path provided
                 }
