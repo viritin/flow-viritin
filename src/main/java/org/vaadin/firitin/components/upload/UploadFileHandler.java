@@ -92,13 +92,15 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
     }
 
     /**
-     * A collection of metadata about the uploaded files. Currently file name 
-     * and mime type, but might be extended in the future.
+     * A collection of metadata about the uploaded files.
      *
      * @param fileName the name of the file in users device
      * @param mimeType the mime type parsed from the file name
      * @param contentLenght the length of the file in bytes
-     * @param folderPath the path of the file within the dropped folder, if available
+     * @param folderPath the full path and filename within the dropped folder,
+     *                   if available (only when a folder is dropped or
+     *                   {@link #chooseFolders()} is used). The path starts with
+     *                   a slash and is relative to the dropped folder.
      */
     public record FileDetails(String fileName, String mimeType, long contentLenght, String folderPath) {
 
@@ -290,7 +292,8 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                         const file = event.detail.file;
                         const name = encodeURIComponent(file.name);
                         xhr.setRequestHeader('Content-Type', file.type);
-                        xhr.setRequestHeader('Content-Disposition', 'name=upload;attachment;filename="'+ name + '"' + ';folderPath="' + file.__folderPath + '"');
+                        const folderPath = file.webkitRelativePath ? ("/" + file.webkitRelativePath) : file.__folderPath;
+                        xhr.setRequestHeader('Content-Disposition', 'name=upload;attachment;filename="'+ name + '"' + ';folderPath="' + folderPath + '"');
                         xhr.send(file);
                     });
                     
@@ -505,6 +508,20 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
 
     public UploadFileHandler withDropLabelIcon(Component icon) {
         setDropLabelIcon(icon);
+        return this;
+    }
+
+    /**
+     * Clicking on the upload component opeens a dialog for choosing folders instead of files.
+     * Note, that with drag and drop, you can still drop both files and folders.
+     *
+     * @return this for further configuration
+     */
+    public UploadFileHandler chooseFolders() {
+        allowMultiple();
+        getElement().executeJs("""
+            this.shadowRoot.querySelector("input").webkitdirectory = true;
+        """);
         return this;
     }
 
