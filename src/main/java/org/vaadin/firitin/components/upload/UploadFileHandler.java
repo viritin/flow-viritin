@@ -46,9 +46,12 @@ import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.Serializable;
 import java.net.URLDecoder;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A vaadin-upload component that just passes the input stream (and name and
@@ -70,6 +73,40 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
 
     private UploadI18N i18n;
     private int maxFiles = 1;
+
+    private boolean splitToChunks = false; // if true, the file is split to chunks of maxChunkSize bytes, and uploaded in multiple requests
+    private int maxChunkSize = 1024 * 1024; // 1MB, default chunk size for uploads, this usually goes through front proxies etc
+
+    /**
+     * Configures the component to split the file to chunks of default size (1MB)
+     * and upload them one by one.
+     *
+     * @return The component for further configuration
+     * @deprecated This is currently very little tested feature. Although I expect it to work,
+     * and hope to make this the default in the future, it is not yet ready for production use.
+     */
+    @Deprecated(forRemoval = false)
+    public UploadFileHandler chunked() {
+        this.splitToChunks = true;
+        return this;
+    }
+
+    /**
+     * Configures the component to split the file to chunks of given size and
+     * upload them one by one.
+     *
+     * @param maxChunkSize the maximum size of a chunk in bytes, default is 1MB
+     * @return The component for further configuration
+     *
+     * @deprecated This is currently very little tested feature. Although I expect it to work,
+     * and hope to make this the default in the future, it is not yet ready for production use.
+     */
+    @Deprecated(forRemoval = false)
+    public UploadFileHandler withChunkSize(int maxChunkSize) {
+        this.splitToChunks = true;
+        this.maxChunkSize = maxChunkSize;
+        return this;
+    }
 
     @FunctionalInterface
     public interface FileHandler extends Serializable {
@@ -254,6 +291,8 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                     this.noAuto = true;
                     const CLEAR = $0;
                     const MAX_CONNECTIONS = $1;
+                    const SEND_AS_CHUNKS = $2;
+                    const MAX_CHUNK_SIZE = $3;
                     this.queueNext = () => {
                         const numConnections = this.files.filter(file => file.uploading).length;
                         if(numConnections < MAX_CONNECTIONS) {
@@ -288,14 +327,108 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                     // This sends the request without obsolete and somewhat problematic multipart request
                     this.addEventListener("upload-request", e => {
                         e.preventDefault(true); // I'll send this instead!!
-                        const xhr = event.detail.xhr;
                         const file = event.detail.file;
                         const name = encodeURIComponent(file.name);
-                        xhr.setRequestHeader('Content-Type', file.type);
                         const folderPath = encodeURIComponent(file.webkitRelativePath ? ("/" + file.webkitRelativePath) : file.__folderPath);
-                        xhr.setRequestHeader('Content-Disposition', 'name=upload;attachment;filename="'+ name + '"' + ';folderPath="' + folderPath + '"');
-                        xhr.send(file);
+                        const cd = 'name=upload;attachment;filename="'+ name + '"' + ';folderPath="' + folderPath + '"';
+                        if(SEND_AS_CHUNKS) {
+                            // This splits the file to chunks and uploads them one by one
+                            this.__sendAsChunks(file, cd);
+                        } else {
+                            // This mosly relies the default behaviour, just not using multipart request
+                            const xhr = event.detail.xhr;
+                            xhr.setRequestHeader('Content-Type', file.type);
+                            xhr.setRequestHeader('Content-Disposition', cd);
+                            xhr.send(file);
+                        }
                     });
+                    
+                    async function uploadChunk(url, chunk, offset, total, cd, retries = 3) {
+                      try {
+                        await fetch(url, {
+                          method: 'POST',
+                          headers: {
+                            "Chunk-Offset": offset,
+                            "Total-File-Size": total,
+                            "Content-Disposition": cd,
+                          },
+                          body: chunk,
+                        });
+                      } catch (error) {
+                        if (retries > 0) {
+                          await uploadChunk(chunk, retries - 1);
+                        } else {
+                          console.error('Failed to upload chunk: ', error);
+                        }
+                      }
+                    }
+                    
+                    this.__sendAsChunks = (file, cd) => {
+                        const chunkSize = Math.min(file.size, MAX_CHUNK_SIZE);
+                        let offset = 0;
+                        file.status = this.__effectiveI18n.uploading.status.connecting;
+                        file.uploading = file.indeterminate = true;
+                        file.complete = file.abort = file.error = file.held = false;
+                        this._renderFileList();
+    
+                        const ini = Date.now();
+                        let stalledId, last;
+                
+                        const sendNextChunk = () => {
+                            if (offset < file.size) {
+                                const chunk = file.slice(offset, offset + chunkSize);
+                                console.debug("Uploading chunk of size " + chunk.size + " at offset " + offset);
+                                uploadChunk(file.uploadTarget, chunk, offset, file.size, cd).then(() => {
+                                    offset += chunkSize;
+
+                                    clearTimeout(stalledId);
+
+                                    last = Date.now();
+                                    const elapsed = (last - ini) / 1000;
+                                    const loaded = offset,
+                                      total = file.size,
+                                      progress = ~~((loaded / total) * 100);
+                                    file.loaded = loaded;
+                                    file.progress = progress;
+                                    file.indeterminate = loaded <= 0 || loaded >= total;
+
+                                    if (file.error) {
+                                      file.indeterminate = file.status = undefined;
+                                    } else if (!file.abort) {
+                                      if (progress < 100) {
+                                        this._setStatus(file, total, loaded, elapsed);
+                                        stalledId = setTimeout(() => {
+                                          file.status = this.__effectiveI18n.uploading.status.stalled;
+                                          this._renderFileList();
+                                        }, 2000);
+                                      } else {
+                                        file.loadedStr = file.totalStr;
+                                        file.status = this.__effectiveI18n.uploading.status.processing;
+                                      }
+                                    }
+
+                                    this._renderFileList();
+                                    this.dispatchEvent(new CustomEvent('upload-progress', { detail: { file } }));
+
+                                    sendNextChunk();
+                                }).catch(error => {
+                                    console.error('Error uploading chunk:', error);
+                                    this.dispatchEvent(new CustomEvent('upload-error', {
+                                        detail: { file: file, error: error }
+                                    }));
+                                    this._renderFileList();
+                                });
+                            } else {
+                                // All chunks uploaded, notify the server
+                                console.debug("All chunks uploaded for file: " + file.name);
+                                file.complete = true; // mark the file as complete
+                                this.dispatchEvent(new CustomEvent('upload-success', {
+                                    detail: { file: file }
+                                }));
+                            }
+                        };
+                        sendNextChunk();
+                    }
                     
                     this.__getFilesFromDropEvent = (dropEvent) => {
                       async function getFilesFromEntry(entry) {
@@ -338,7 +471,7 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
             
                       return Promise.all(filePromises).then((files) => files.flat());
                     };
-                """, clearAutomatically, maxConcurrentUploads);
+                """, clearAutomatically, maxConcurrentUploads, splitToChunks, maxChunkSize);
 
         this.ui = attachEvent.getUI();
         super.onAttach(attachEvent);
@@ -367,12 +500,20 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
         return this;
     }
 
+    private FileDetails activeUpload;
+    private long bytesRead = 0;
+
+    PipedOutputStream pos;
+    PipedInputStream pis;
+
     private class FileRequestHandler implements ElementRequestHandler {
         @Override
         public void handleRequest(VaadinRequest request, VaadinResponse response, VaadinSession session, Element owner) throws IOException {
             String cl = request.getHeader("Content-Length");
             String cd = request.getHeader("Content-Disposition");
             String contentType = request.getHeader("Content-Type");
+            String chunkOffset = request.getHeader("Chunk-Offset");
+            String totalSize = request.getHeader("Total-File-Size");
             String folderPath = null;
             // name=upload;attachment;filename="text-on-level1.txt";folderPath="/folder to upload/text-on-level1.txt"
             String name = cd.split(";")[2].split("=")[1].substring(1);
@@ -386,9 +527,72 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                     folderPath = null; // no folder path provided
                 }
             }
-            Command cb = fileHandler.handleFile(request.getInputStream(), new FileDetails(name, contentType, Long.parseLong(cl), folderPath));
-            if (cb != null) {
-                ui.access(cb);
+            long fileSize = (totalSize == null ) ? Long.parseLong(cl) : Long.parseLong(totalSize);
+            FileDetails metaData = new FileDetails(name, contentType, fileSize, folderPath);
+            if(splitToChunks && chunkOffset != null) {
+                // This is a chunked upload, so we need to handle it differently
+                long offset = Long.parseLong(chunkOffset);
+                if(offset == 0) {
+                    // Prepare the file handler for a new file and save for later
+                    if(activeUpload != null) {
+                        throw new IllegalStateException("Already uploading a file, cannot start a new one!");
+                    }
+                    activeUpload = metaData;
+                    bytesRead = 0l;
+                    pos = new PipedOutputStream();
+                    pis = new PipedInputStream(pos);
+
+                    // start streaming the file to the handler in a separate thread
+                    CompletableFuture.supplyAsync(() -> {
+                                try {
+                                    return fileHandler.handleFile(pis, metaData);
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            })
+                            .thenAccept(command -> {
+                                if (ui != null) {
+                                    ui.access(command);
+                                    // close the streams
+                                    try {
+                                        pis.close();
+                                    } catch (IOException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                            })
+                            .exceptionally(e -> {
+                                throw new RuntimeException("Error while handling file upload", e);
+                            });
+                } else {
+                    // verify that we are still uploading the same file
+                    if(!metaData.equals(activeUpload)) {
+                        throw new IllegalStateException("Cannot upload chunk for a different file than the one started earlier! " +
+                                "Expected: " + activeUpload + ", but got: " + metaData);
+                    }
+                    if(offset != bytesRead) {
+                        throw new IllegalStateException("Chunk offset is not correct! Expected: " + bytesRead + ", but got: " + offset);
+                    }
+                }
+
+                // continue streaming...
+                InputStream content = request.getInputStream();
+                content.transferTo(pos);
+                bytesRead += Long.parseLong(cl);
+
+                // close if this is the last chunk
+                if(bytesRead < fileSize) {
+                    // TODO could e.g. fire some middle event here if needed 🤷‍♂️
+                } else {
+                    // this is the last chunk, so we close the streams
+                    activeUpload = null; // reset the active upload
+                    pos.close();
+                }
+            } else {
+                Command cb = fileHandler.handleFile(request.getInputStream(), metaData);
+                if (cb != null) {
+                    ui.access(cb);
+                }
             }
             response.setStatus(200);
             response.getWriter().println("OK");  // Viritin approves
