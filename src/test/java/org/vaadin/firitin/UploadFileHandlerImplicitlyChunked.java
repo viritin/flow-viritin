@@ -48,6 +48,11 @@ public class UploadFileHandlerImplicitlyChunked extends VerticalLayout {
         MutableInt lineCount = new MutableInt(0);
 
         UploadFileHandler multiUploadFileHandler = new UploadFileHandler( (content, metadata) -> {
+
+            if(false) {
+                // enable to test regular error handling
+                throw new RuntimeException("SDFSD");
+            }
             try {
                         int b = 0;
                         int count = 0;

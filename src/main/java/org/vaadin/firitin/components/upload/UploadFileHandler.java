@@ -327,8 +327,12 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                     
                     // start uploading next file in queue also when there is an error when uploading the file
                     this.addEventListener('upload-error', e => {
+                        console.error("Upload error for file: " + e.detail.file.name, e.detail.error);
+                        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                        // http2, safari && xhr, status codes not available for 413 (although one sees it via inspector) !!!
+                        const safariIsWeirdWithHttp2AndXhr = isSafari && e.detail.xhr.status === 0 && e.detail.xhr.responseText === "";
                         // if e.g. front proxy rejects too large file (std error code 413), try sending as chunks
-                        if(e.detail.xhr.status === 413) {
+                        if(e.detail.xhr.status === 413 || safariIsWeirdWithHttp2AndXhr) {
                             event.preventDefault(); // prevent the default upload error handling
                             event.stopPropagation();
                             console.warn("Upload failed with status 413, trying to upload as chunks instead.");
@@ -368,7 +372,7 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                     
                     async function uploadChunk(url, chunk, offset, total, cd, retries = 3) {
                       try {
-                        await fetch(url, {
+                        return await fetch(url, {
                           method: 'POST',
                           headers: {
                             "Chunk-Offset": offset,
@@ -379,7 +383,7 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                         });
                       } catch (error) {
                         if (retries > 0) {
-                          await uploadChunk(chunk, retries - 1);
+                          return await uploadChunk(chunk, retries - 1);
                         } else {
                           console.error('Failed to upload chunk: ', error);
                         }
@@ -401,7 +405,16 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                             if (offset < file.size) {
                                 const chunk = file.slice(offset, offset + chunkSize);
                                 console.debug("Uploading chunk of size " + chunk.size + " at offset " + offset);
-                                uploadChunk(file.uploadTarget, chunk, offset, file.size, cd).then(() => {
+                                uploadChunk(file.uploadTarget, chunk, offset, file.size, cd).then(r => {
+                                    if(r.ok) {
+                                        console.debug("Chunk uploaded successfully");
+                                    } else {
+                                        // stop uploading this file
+                                        file.error = "Server error: " + r.status + " " + r.statusText;
+                                        file.indeterminate = file.status = undefined;
+                                        this._renderFileList();
+                                        return;
+                                    }
                                     offset += chunkSize;
 
                                     clearTimeout(stalledId);
@@ -576,7 +589,13 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                             Command command = fileHandler.handleFile(pis, metaData);
                             ui.access(command);
                             pis.close();
-                        } catch (IOException e) {
+                        } catch (Exception e) {
+                            try {
+                                pis.close();
+                                pos.close();
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
                             throw new RuntimeException(e);
                         }
                     });
