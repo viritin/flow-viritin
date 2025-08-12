@@ -1,0 +1,3 @@
+A docker compose setup for running an Nginx reverse proxy with Docker over a local
+development server. Allows testing in typical production conditions, features
+like large file uploads (often terminated by proxy, UploadFileHandler has a workaroud).

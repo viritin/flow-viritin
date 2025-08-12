@@ -52,6 +52,7 @@ import java.io.Serializable;
 import java.net.URLDecoder;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 /**
  * A vaadin-upload component that just passes the input stream (and name and
@@ -78,12 +79,21 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
     private int maxChunkSize = 1024 * 1024; // 1MB, default chunk size for uploads, this usually goes through front proxies etc
 
     /**
-     * Configures the component to split the file to chunks of default size (1MB)
-     * and upload them one by one.
+     * Configures the component to split the file to chunks of default size (1MB) by
+     * default and upload them one by one. Chunks are combined on the server, so that
+     * the API user does not need to care about the chunking at all. Combining chunsk
+     * on server side is done with PipedInputStream and PipedOutputStream, so there is
+     * a tiny buffer 1kb and possibly a thread utilizing it, but otherwise the resource
+     * overhead ought to be minimal.
+     * <p>
+     *     Note, that the component will implicitly try sending in chunks if the upload
+     *     fails with status code 413 (Request Entity Too Large), which is a common error
+     *     when the front proxy (e.g. nginx) has a small limit.
+     * </p>
      *
      * @return The component for further configuration
-     * @deprecated This is currently very little tested feature. Although I expect it to work,
-     * and hope to make this the default in the future, it is not yet ready for production use.
+     * @deprecated This is currently very little tested feature. Please provide all feedback you can if there are issues,
+     * so that I can improve this.
      */
     @Deprecated(forRemoval = false)
     public UploadFileHandler chunked() {
@@ -97,9 +107,9 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
      *
      * @param maxChunkSize the maximum size of a chunk in bytes, default is 1MB
      * @return The component for further configuration
+     * @see #chunked()
      *
-     * @deprecated This is currently very little tested feature. Although I expect it to work,
-     * and hope to make this the default in the future, it is not yet ready for production use.
+     * @deprecated This is currently very little tested feature.
      */
     @Deprecated(forRemoval = false)
     public UploadFileHandler withChunkSize(int maxChunkSize) {
@@ -316,8 +326,21 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                     });
                     
                     // start uploading next file in queue also when there is an error when uploading the file
-                    this.addEventListener('upload-error', () => {
-                        this.queueNext();
+                    this.addEventListener('upload-error', e => {
+                        // if e.g. front proxy rejects too large file (std error code 413), try sending as chunks
+                        if(e.detail.xhr.status === 413) {
+                            event.preventDefault(); // prevent the default upload error handling
+                            event.stopPropagation();
+                            console.warn("Upload failed with status 413, trying to upload as chunks instead.");
+                            const file = event.detail.file;
+                            const name = encodeURIComponent(file.name);
+                            const folderPath = encodeURIComponent(file.webkitRelativePath ? ("/" + file.webkitRelativePath) : file.__folderPath);
+                            const cd = 'name=upload;attachment;filename="'+ name + '"' + ';folderPath="' + folderPath + '"';
+                            this.__sendAsChunks(file, cd);
+                            return;
+                        } else {
+                            this.queueNext();
+                        }
                     });
                     
                     this.addEventListener('files-changed', (event) => {
@@ -529,7 +552,7 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
             }
             long fileSize = (totalSize == null ) ? Long.parseLong(cl) : Long.parseLong(totalSize);
             FileDetails metaData = new FileDetails(name, contentType, fileSize, folderPath);
-            if(splitToChunks && chunkOffset != null) {
+            if(chunkOffset != null) {
                 // This is a chunked upload, so we need to handle it differently
                 long offset = Long.parseLong(chunkOffset);
                 if(offset == 0) {
@@ -543,27 +566,20 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                     pis = new PipedInputStream(pos);
 
                     // start streaming the file to the handler in a separate thread
-                    CompletableFuture.supplyAsync(() -> {
-                                try {
-                                    return fileHandler.handleFile(pis, metaData);
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            })
-                            .thenAccept(command -> {
-                                if (ui != null) {
-                                    ui.access(command);
-                                    // close the streams
-                                    try {
-                                        pis.close();
-                                    } catch (IOException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                }
-                            })
-                            .exceptionally(e -> {
-                                throw new RuntimeException("Error while handling file upload", e);
-                            });
+
+                    // Using Executor provided by Vaadin Service, e.g. in Spring Boot this ends
+                    // up using the Spring Boot's AsyncExecutor, which can be easily configured
+                    // utilizing Virtual Threads, etc. 🤓
+                    Executor executor = session.getService().getExecutor();
+                    executor.execute(() -> {
+                        try {
+                            Command command = fileHandler.handleFile(pis, metaData);
+                            ui.access(command);
+                            pis.close();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
                 } else {
                     // verify that we are still uploading the same file
                     if(!metaData.equals(activeUpload)) {

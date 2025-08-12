@@ -1,0 +1,8 @@
+services:
+  nginx:
+    image: nginx:latest
+    restart: always
+    volumes:
+      - ./conf/:/etc/nginx/conf.d
+    ports:
+      - 9997:80
