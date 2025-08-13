@@ -264,7 +264,9 @@ public class DynamicFileDownloadingDemoWithFlowAnchor extends VerticalLayout {
             setText("\"Download\" a pdf file in a new window");
             setHref((DownloadHandler) downloadEvent -> {
                 downloadEvent.setContentType("application/pdf");
-                downloadEvent.getResponse().setHeader("Content-Disposition","filename*=UTF-8''" + URLEncoder.encode("inlöäöäineشريط.pdf", StandardCharsets.UTF_8));
+                downloadEvent.getResponse().setHeader("Content-Disposition","filename*=UTF-8''" +
+                        // NOTE, should do like encodeRfc5987Filename() in DynamicFileDownloader
+                        URLEncoder.encode("inlöäöäineشريط.pdf", StandardCharsets.UTF_8));
                 OutputStream outputStream = downloadEvent.getOutputStream();
                 Files.copy(Path.of("src/test/resources/pdf.pdf"), outputStream);
             }, AttachmentType.INLINE);
