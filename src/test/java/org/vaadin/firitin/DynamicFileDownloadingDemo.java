@@ -31,6 +31,8 @@ import org.vaadin.firitin.components.DynamicFileDownloader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -221,6 +223,20 @@ public class DynamicFileDownloadingDemo extends VerticalLayout {
                 .asButton()
                 .inNewWindow();
         add(inNewWindow);
+
+        /*
+         *  Based on quick testing on Mac, only Firefox behaves correctly with the filename,
+         *  Chrome and Safari seem to ignore the filename and use something else instead.
+         *  Changing the implementation to use filename also in the URL might help (in case the
+         *  filename is provided statically). This might be possible by relying on the new
+         *  Flow features introduced in Vaadin 24.8
+         */
+        var inlinePdf = new DynamicFileDownloader("Download inline PDF", "inlöäöäineشريط.pdf",
+                out -> Files.copy(Path.of("src/test/resources/pdf.pdf"), out))
+                .withContentTypeGenerator(() -> "application/pdf")
+                .inNewWindow();
+        add(inlinePdf);
+
 
         add(new Button("Test UI serialization", event -> {
 
