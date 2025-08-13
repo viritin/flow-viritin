@@ -31,6 +31,8 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 
 /**
@@ -257,6 +259,18 @@ public class DynamicFileDownloadingDemoWithFlowAnchor extends VerticalLayout {
             setTarget("_blank");
         }};
         add(inNewWindow);
+
+        var pdfInNewWindow = new Anchor(){{
+            setText("\"Download\" a pdf file in a new window");
+            setHref((DownloadHandler) downloadEvent -> {
+                downloadEvent.setContentType("application/pdf");
+                downloadEvent.getResponse().setHeader("Content-Disposition","filename*=UTF-8''" + URLEncoder.encode("inlöäöäineشريط.pdf", StandardCharsets.UTF_8));
+                OutputStream outputStream = downloadEvent.getOutputStream();
+                Files.copy(Path.of("src/test/resources/pdf.pdf"), outputStream);
+            }, AttachmentType.INLINE);
+            setTarget("_blank");
+        }};
+        add(pdfInNewWindow);
 
         if(true) {
             add(new Button("Test UI serialization", event -> {
