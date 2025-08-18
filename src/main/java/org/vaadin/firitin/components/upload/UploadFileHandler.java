@@ -543,6 +543,12 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
     PipedInputStream pis;
 
     private class FileRequestHandler implements ElementRequestHandler {
+
+        @Override
+        public String getUrlPostfix() {
+            return "upload";
+        }
+
         @Override
         public void handleRequest(VaadinRequest request, VaadinResponse response, VaadinSession session, Element owner) throws IOException {
             String cl = request.getHeader("Content-Length");
