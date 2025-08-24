@@ -1,0 +1,166 @@
+viritin-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0.4em calc(0.5em + var(--lumo-border-radius-s) / 4);
+  color: var(--lumo-primary-text-color);
+  background-color: var(--lumo-primary-color-10pct);
+  border-radius: var(--lumo-border-radius-s);
+  font-family: var(--lumo-font-family);
+  font-size: var(--lumo-font-size-s);
+  line-height: 1;
+  font-weight: 500;
+  text-transform: initial;
+  letter-spacing: initial;
+  min-width: calc(var(--lumo-line-height-xs) * 1em + 0.45em);
+  flex-shrink: 0;
+}
+
+/* Ensure proper vertical alignment */
+viritin-badge::before {
+  display: inline-block;
+  content: '\2003';
+  width: 0;
+}
+
+viritin-badge.small {
+  font-size: var(--lumo-font-size-xxs);
+  line-height: 1;
+}
+
+/* Colors */
+viritin-badge.success {
+  color: var(--lumo-success-text-color);
+  background-color: var(--lumo-success-color-10pct);
+}
+
+viritin-badge.error {
+  color: var(--lumo-error-text-color);
+  background-color: var(--lumo-error-color-10pct);
+}
+
+viritin-badge.warning {
+  color: var(--lumo-warning-text-color);
+  background-color: var(--lumo-warning-color-10pct);
+}
+
+viritin-badge.contrast {
+  color: var(--lumo-contrast-80pct);
+  background-color: var(--lumo-contrast-5pct);
+}
+
+/* Primary */
+
+viritin-badge.primary {
+  color: var(--lumo-primary-contrast-color);
+  background-color: var(--lumo-primary-color);
+}
+
+viritin-badge.success.primary {
+  color: var(--lumo-success-contrast-color);
+  background-color: var(--lumo-success-color);
+}
+
+viritin-badge.success.primary {
+  color: var(--lumo-success-contrast-color);
+  background-color: var(--lumo-success-color);
+}
+
+viritin-badge.error.primary {
+  color: var(--lumo-error-contrast-color);
+  background-color: var(--lumo-error-color);
+}
+
+viritin-badge.warning.primary {
+  color: var(--lumo-warning-contrast-color);
+  background-color: var(--lumo-warning-color);
+}
+
+viritin-badge.contrast.primary {
+  color: var(--lumo-base-color);
+  background-color: var(--lumo-contrast);
+}
+
+/* Links */
+
+viritin-badge a[href]:hover {
+  text-decoration: none;
+}
+
+/* Icon */
+
+viritin-badge > vaadin-icon {
+  margin: -0.25em 0;
+}
+
+viritin-badge > vaadin-icon:first-child {
+  margin-left: -0.375em;
+}
+
+viritin-badge > vaadin-icon:last-child {
+  margin-right: -0.375em;
+}
+
+viritin-badge vaadin-icon[icon] {
+  min-width: 0;
+  padding: 0;
+  font-size: 1rem;
+  width: var(--lumo-icon-size-m);
+  height: var(--lumo-icon-size-m);
+}
+
+viritin-badge.small vaadin-icon {
+  width: var(--lumo-icon-size-s);
+  height: var(--lumo-icon-size-s);
+}
+
+/* Empty */
+
+viritin-badge:not([icon]):empty {
+  min-width: 0;
+  width: 1em;
+  height: 1em;
+  padding: 0;
+  border-radius: 50%;
+  background-color: var(--lumo-primary-color);
+}
+
+viritin-badge.small:not([icon]):empty {
+  width: 0.75em;
+  height: 0.75em;
+}
+
+viritin-badge.contrast:not([icon]):empty {
+  background-color: var(--lumo-contrast);
+}
+
+viritin-badge.success:not([icon]):empty {
+  background-color: var(--lumo-success-color);
+}
+
+viritin-badge.error:not([icon]):empty {
+  background-color: var(--lumo-error-color);
+}
+
+viritin-badge.warning:not([icon]):empty {
+  background-color: var(--lumo-warning-color);
+}
+
+/* Pill */
+
+viritin-badge.pill {
+  --lumo-border-radius-s: 1em;
+}
+
+/* RTL specific styles */
+
+viritin-badge[dir='rtl'] vaadin-icon:first-child {
+  margin-right: -0.375em;
+  margin-left: 0;
+}
+
+viritin-badge[dir='rtl'] vaadin-icon:last-child {
+  margin-left: -0.375em;
+  margin-right: 0;
+}
