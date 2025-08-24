@@ -43,6 +43,7 @@ e.g. in field declaration or without declaring an extra variable. When used in a
  * VStyle, an extension to the Style object from core with support for typed colors. Allows also to assign styles to different elements (not necessarily bound to an element/component), with Element reference, css selector or by injecting as CSS to the document head (with given selectors).
  * PageVisibility API to detect when the page is visible or hidden. Also detects if focus is lost from the web page as related detail. Useful for e.g. pausing animations, refreshing data when the user returns to the page or changing notification settigns based on presence.
  * Web Notification API to show notifications to the user. Uses the browser's native notification system, so the user can see the notifications even if the web page is behind another tab or application.
+ * Fullscreen API to make the web page or a specific component fullscreen. Also detects when the user exits fullscreen mode.
 
 ### VGrid
 
@@ -66,6 +67,8 @@ e.g. in field declaration or without declaring an extra variable. When used in a
  * ~LocalDateTimeField for editing LocalDateTime objects with Binder~ Use DateTimePicker from core, that is available these days.
  * VLocalDateTimePicker and VLocalDatePicker who use the month names from the selected locale.
  * Text [Selection API](https://javadoc.dokku1.parttio.org/in.virit/viritin/2.5.2/org/vaadin/firitin/components/textfield/SelectionApi.html) (selectAll, getCursorPosition setSelection, getSelection et al.) for inputs that are based on keyboard input. Essentials to fine tune the UX of "pro user views".
+ * Badge - an actual Component/Java API for the Lumo badge styles. Uses though raw class names instead for simplicity.
+ * IndeterminateCheckbox (aka TriStateCheckbox ) to represent a Boolean that can be null as well.
 
 ### Forms and Form binding
 
