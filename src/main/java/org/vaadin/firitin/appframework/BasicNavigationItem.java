@@ -2,6 +2,7 @@ package org.vaadin.firitin.appframework;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Menu;
@@ -38,7 +39,12 @@ public class BasicNavigationItem extends SideNavItem implements NavigationItem {
         } else if(navigationTarget.isAnnotationPresent(Menu.class)) {
             Menu menu = navigationTarget.getAnnotation(Menu.class);
             if(menu.icon() != null) {
-                setPrefixComponent(new Icon(menu.icon()));
+                String icon = menu.icon();
+                if(icon.endsWith(".svg")) {
+                    setPrefixComponent(new SvgIcon(icon));
+                } else {
+                    setPrefixComponent(new Icon(icon));
+                }
             }
         }
         this.navigationTarget = navigationTarget;
