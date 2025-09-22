@@ -2,6 +2,7 @@ package org.vaadin.firitin.appframework;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.Footer;
@@ -17,6 +18,11 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.RouteBaseData;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouterLayout;
+import com.vaadin.flow.router.internal.RouteUtil;
+import com.vaadin.flow.server.RouteRegistry;
+import com.vaadin.flow.server.VaadinContext;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import java.lang.reflect.Modifier;
@@ -127,8 +133,14 @@ public abstract class MainLayout extends AppLayout implements AfterNavigationObs
     }
 
     protected void init() {
-        RouteConfiguration.forSessionScope().getAvailableRoutes().stream().filter(routeData -> {
+        RouteConfiguration routeConfiguration = RouteConfiguration.forSessionScope();
+        routeConfiguration.getAvailableRoutes().stream().filter(routeData -> {
             Class<? extends RouterLayout> parentLayout = routeData.getParentLayout();
+            if(parentLayout == null) {
+                // Try to find from route registry (the @Layout annotation way)
+                parentLayout = routeConfiguration.getHandledRegistry().getLayout(routeConfiguration.getUrl(routeData.getNavigationTarget()));
+            }
+
             if (parentLayout != null) {
                 boolean assignableFrom = MainLayout.class.isAssignableFrom(parentLayout);
                 return assignableFrom;
