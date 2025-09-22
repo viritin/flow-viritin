@@ -1,0 +1,8 @@
+.viritin-tree-item td {
+    vertical-align: top;
+}
+
+.viritin-tree-item .expander vaadin-icon {
+    width: 1em;
+    height: 1em;
+}

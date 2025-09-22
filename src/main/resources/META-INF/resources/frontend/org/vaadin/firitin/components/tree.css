@@ -2,10 +2,6 @@
     padding: 0;
 }
 
-.viritin-tree td {
-    vertical-align: top;
-}
-
 .viritin-tree .expander vaadin-icon {
     width: var(--lumo-font-size-m);
     height: var(--lumo-font-size-m);

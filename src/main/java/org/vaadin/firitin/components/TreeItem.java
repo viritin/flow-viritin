@@ -23,6 +23,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -34,6 +35,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author mstahv
  */
+@StyleSheet("context://frontend/org/vaadin/firitin/components/tree-item.css")
 public class TreeItem extends Component implements ClickNotifier<TreeItem> {
 
     private static final long serialVersionUID = -5047062207386723618L;
@@ -73,10 +75,15 @@ public class TreeItem extends Component implements ClickNotifier<TreeItem> {
 
         getElement().appendChild(tr);
         this.nodeContent = nodeContent;
+        addClassName();
     }
 
     public TreeItem(String stringContent) {
         this(new Div(new Text(stringContent)));
+    }
+
+    protected void addClassName() {
+        getElement().getClassList().add("viritin-tree-item");
     }
 
     public TreeItem addChild(Component childComponent) {
