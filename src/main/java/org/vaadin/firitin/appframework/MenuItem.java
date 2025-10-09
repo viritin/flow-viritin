@@ -1,5 +1,6 @@
 package org.vaadin.firitin.appframework;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.icon.VaadinIcon;
 
 import java.lang.annotation.ElementType;
@@ -33,6 +34,13 @@ public @interface MenuItem {
     public VaadinIcon icon() default VaadinIcon.FILE;
 
     /**
+     * A URL for custom {@link com.vaadin.flow.component.icon.Icon} or {@link com.vaadin.flow.component.icon.SvgIcon}.
+     * Takes a presence over {@link #icon()}.
+     * @return URL for icon or empty string if not defined.
+     */
+    public String iconUrl() default "";
+
+    /**
      * @return the parent view class in the menu hierarchy. Defaults to MenuItem.NO_PARENT
      * (Class.class) which means this is a top level view.
      */
@@ -47,4 +55,5 @@ public @interface MenuItem {
      * @return true if this (parent) view should be collapsible in the menu (in case it is a grouping item)
      */
     boolean collapsible() default true;
+
 }

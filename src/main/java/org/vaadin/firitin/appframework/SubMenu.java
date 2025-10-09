@@ -2,7 +2,7 @@ package org.vaadin.firitin.appframework;
 
 import com.vaadin.flow.router.Menu;
 
-public class SubMenu extends MainLayout.AdvancedSideNav implements NavigationItem {
+public class SubMenu extends AdvancedSideNav implements NavigationItem {
 
     private final Class<?> navigationTarget;
     private NavigationItem parentItem;

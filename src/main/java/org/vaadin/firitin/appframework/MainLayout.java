@@ -2,28 +2,24 @@ package org.vaadin.firitin.appframework;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Header;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.sidenav.SideNav;
-import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.RouteBaseData;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouterLayout;
-import com.vaadin.flow.router.internal.RouteUtil;
-import com.vaadin.flow.server.RouteRegistry;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.vaadin.firitin.util.style.LumoProps;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -48,87 +44,14 @@ import java.util.logging.Logger;
  * <p>
  * Check usage example from the text package org.vaadin.firitin.appframework</p>
  */
-public abstract class MainLayout extends AppLayout implements AfterNavigationObserver {
-
-    public static class AdvancedSideNav extends SideNav {
-
-        public void addSubMenu(AdvancedSideNav subMenu) {
-            // This seems to work, although probably not supported really
-            getElement().appendChild(subMenu.getElement());
-        }
-
-        public void addNavigationItem(NavigationItem item) {
-            if (item instanceof SubMenu) {
-                addSubMenu((SubMenu) item);
-            } else {
-                addItem((SideNavItem) item);
-            }
-        }
-    }
-
-
-
-    private H2 viewTitle;
-    private AdvancedSideNav menu;
-    //private List<NavigationItem> navigationItems = new ArrayList<>();
+public abstract class MainLayout extends VAppLayout {
     private Map<Class<?>, NavigationItem> targetToItem = new HashMap<>();
-    private Stack<Component> viewStack = new Stack<>();
-    private Map<Component, String> explicitViewTitles = new WeakHashMap<>();
 
     public MainLayout() {
-//		getElement().getClassList().add("v-applayout");
-        setPrimarySection(Section.DRAWER);
-        addDrawerContent();
-        addHeaderContent();
-    }
-
-    private void addHeaderContent() {
-        DrawerToggle toggle = new DrawerToggle();
-        toggle.getElement().setAttribute("aria-label", "Menu toggle");
-
-        viewTitle = new H2();
-        viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
-
-        addToNavbar(true, toggle, viewTitle);
-    }
-
-    private void addDrawerContent() {
-        H1 appName = new H1(getDrawerHeader());
-        appName.getStyle().setMargin("var(--lumo-space-m)");
-        appName.getStyle().set("font-size", "var(--lumo-font-size-l)");
-        Header header = new Header(appName);
-
-        Scroller scroller = new Scroller(prepareNav());
-        scroller.addClassNames(LumoUtility.Padding.SMALL);
-
-        addToDrawer(header, scroller, prepareFooter());
-    }
-
-    protected AdvancedSideNav prepareNav() {
-        // SideNav is a production-ready official component under a feature flag.
-        // However, it has accessibility issues and is missing some features.
-        // Both will be addressed in an upcoming minor version.
-        // These changes are likely to cause some breaking change to the custom css
-        // applied to the component.
-        AdvancedSideNav nav = new AdvancedSideNav();
-        this.menu = nav;
-        return nav;
-    }
-
-    public SideNav getMenu() {
-        return menu;
-    }
-
-    private Footer prepareFooter() {
-        Footer layout = new Footer();
-        return layout;
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
-        if (targetToItem.isEmpty()) {
-            init();
-        }
         super.onAttach(attachEvent);
     }
 
@@ -286,9 +209,9 @@ public abstract class MainLayout extends AppLayout implements AfterNavigationObs
 
         sortMenuItems(navigationItems);
 
-        menu.removeAll();
+        getMenu().removeAll();
         navigationItems.stream().filter(this::checkAccess).forEach(item -> {
-            menu.addNavigationItem(item);
+            getMenu().addNavigationItem(item);
             // possible sub-items
             List<NavigationItem> subItems = new ArrayList<>(targetToItem.values().stream().filter(ni -> ni.getParentItem() == item).toList());
             sortMenuItems(subItems);
@@ -297,7 +220,7 @@ public abstract class MainLayout extends AppLayout implements AfterNavigationObs
     }
 
     /**
-     * Application that has access control can limit the appearance of the
+     * Application that has e.g. role based access control can limit the appearance of the
      * navigation item in the menu by returning false here.
      *
      * @param navigationItem the navigation item
@@ -307,19 +230,13 @@ public abstract class MainLayout extends AppLayout implements AfterNavigationObs
         return true;
     }
 
-    protected abstract String getDrawerHeader();
-
     @Override
     protected void afterNavigation() {
+        updateSelectedNavigationItem();
         super.afterNavigation();
-        updateViewTitle();
-        updateSelectedNavigationItem();
-    }
-
-    @Override
-    public void afterNavigation(AfterNavigationEvent event) {
-        updateViewTitle();
-        updateSelectedNavigationItem();
+        if (targetToItem.isEmpty()) {
+            init();
+        }
     }
 
     private void updateSelectedNavigationItem() {
@@ -329,80 +246,5 @@ public abstract class MainLayout extends AppLayout implements AfterNavigationObs
         });
     }
 
-    private void updateViewTitle() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < viewStack.size(); i++) {
-            if (i > 0) {
-                sb.append(" / ");
-            }
-            Component component = viewStack.get(i);
-            if (explicitViewTitles.containsKey(component)) {
-                sb.append(explicitViewTitles.get(component));
-            } else {
-                sb.append(NavigationItem.getMenuTextFromClass(component.getClass()));
-            }
-        }
-        viewTitle.setText(sb.toString());
-    }
-
-    @Override
-    public void setContent(Component content) {
-        while (viewStack.size() > 1) {
-            closeSubView();
-        }
-        super.setContent(content);
-        viewStack.clear();
-        viewStack.push(content);
-    }
-
-    public void openSubView(Component component, String viewTitle) {
-        viewStack.push(component);
-        if (viewTitle != null) {
-            explicitViewTitles.put(component, viewTitle);
-        }
-        super.setContent(component);
-        updateViewTitle();
-    }
-
-    public void openSubView(Component component) {
-        openSubView(component, null);
-    }
-
-    public void closeSubView(Component component) {
-        Component pop = viewStack.pop();
-        if (pop != component) {
-            throw new IllegalStateException();
-        }
-        if (pop == null) {
-            throw new IllegalStateException();
-        }
-        explicitViewTitles.remove(pop);
-        super.setContent(viewStack.peek());
-        updateViewTitle();
-    }
-
-    public void closeSubView() {
-        Component pop = viewStack.pop();
-        if (pop == null) {
-            throw new IllegalStateException();
-        }
-        explicitViewTitles.remove(pop);
-        super.setContent(viewStack.peek());
-        updateViewTitle();
-    }
-
-    protected Footer createFooter() {
-        Footer layout = new Footer();
-        return layout;
-    }
-
-    /**
-     * Manually override the current view title.
-     *
-     * @param title the title to set
-     */
-    public void setViewTitle(String title) {
-        viewTitle.setText(title);
-    }
 
 }
