@@ -4,7 +4,7 @@ import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 
 /**
- * A helper class for {@link VAppLayout} & {@link MainLayout}, not mean to designed to be used separately.
+ * A helper class for {@link VAppLayout} and {@link MainLayout}, not mean to designed to be used separately.
  */
 @Deprecated()
 public class AdvancedSideNav extends SideNav {
