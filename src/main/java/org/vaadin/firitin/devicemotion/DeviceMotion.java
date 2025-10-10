@@ -59,22 +59,36 @@ public class DeviceMotion {
     }
 
     /**
+     * Functional interface for handling DeviceMotion instance after permission is granted.
+     */
+    @FunctionalInterface
+    public interface DeviceMotionHandler {
+        void onDeviceMotionCreated(DeviceMotion deviceMotion);
+    }
+
+    /**
      * Requests permission (if needed) and then starts listening to device motion events.
      * This is a convenience method that combines permission request with listening.
      * The button click will trigger the permission request on iOS 13+.
+     * The handler is called with the DeviceMotion instance so you can configure it (e.g., throttling).
      *
      * @param button the button that will trigger the permission request
      * @param listener the listener called when device motion is detected
+     * @param handler callback with DeviceMotion instance for configuration (can be null)
      * @param onError callback if permission is denied
      * @return the configured button
      */
-    public static Button requestPermissionAndListen(Button button, MotionListener listener, Runnable onError) {
+    public static Button requestPermissionAndListen(Button button, MotionListener listener,
+                                                     DeviceMotionHandler handler, Runnable onError) {
         final DeviceMotion[] holder = new DeviceMotion[1];
 
         DeviceSensorPermissions.configurePermissionRequest(button,
             DeviceSensorPermissions.SensorType.MOTION,
             () -> {
                 holder[0] = DeviceMotion.listen(listener);
+                if (handler != null) {
+                    handler.onDeviceMotionCreated(holder[0]);
+                }
                 button.setText("Stop Listening");
             },
             onError
@@ -90,6 +104,20 @@ public class DeviceMotion {
         });
 
         return button;
+    }
+
+    /**
+     * Requests permission (if needed) and then starts listening to device motion events.
+     * This is a convenience method that combines permission request with listening.
+     * The button click will trigger the permission request on iOS 13+.
+     *
+     * @param button the button that will trigger the permission request
+     * @param listener the listener called when device motion is detected
+     * @param onError callback if permission is denied
+     * @return the configured button
+     */
+    public static Button requestPermissionAndListen(Button button, MotionListener listener, Runnable onError) {
+        return requestPermissionAndListen(button, listener, null, onError);
     }
 
     /**

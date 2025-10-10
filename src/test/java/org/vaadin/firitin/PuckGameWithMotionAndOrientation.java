@@ -1,9 +1,6 @@
 package org.vaadin.firitin;
 
-import com.vaadin.flow.component.ClientCallable;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
@@ -11,25 +8,21 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
 import org.vaadin.firitin.components.html.VDiv;
-import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 import org.vaadin.firitin.devicemotion.DeviceMotion;
-import org.vaadin.firitin.devicemotion.DeviceOrientation;
+import org.vaadin.firitin.devicemotion.ScreenOrientation;
+import org.vaadin.firitin.devicemotion.ScreenOrientationInfo;
 import org.vaadin.firitin.util.VStyle;
 
 @Route("puck-game")
-public class PuckGameWithMotionAndOrientation extends VVerticalLayout {
+public class PuckGameWithMotionAndOrientation extends Div {
 
     private DeviceMotion deviceMotion;
-    private DeviceOrientation deviceOrientation;
+    private ScreenOrientation screenOrientation;
     private GameBoard gameBoard;
     private boolean isPlaying = false;
-    private Checkbox rotateWithDevice;
-    private double currentRotation = 0;
 
     public PuckGameWithMotionAndOrientation() {
         setSizeFull();
-        setPadding(false);
-        setSpacing(false);
 
         add(new Paragraph("Puck Game - Tilt your device to move the puck!"));
         add(new Paragraph("Requires HTTPS. Click 'Start Game' to begin."));
@@ -43,28 +36,69 @@ public class PuckGameWithMotionAndOrientation extends VVerticalLayout {
         add(gameBoard);
 
         // Controls
-        rotateWithDevice = new Checkbox("Rotate board with device orientation");
-        rotateWithDevice.setValue(false);
-
         Button startButton = new Button("Start Game");
-        startButton.addClickListener(e -> {
+        Button resetButton = new Button("Reset Puck", e -> resetPuck());
+
+        // Set up screen orientation listener
+        screenOrientation = ScreenOrientation.listen(orientation -> {
+            System.out.println("Orientation changed: " + orientation);
+            ScreenOrientationInfo.OrientationType orientationType = orientation.getOrientationType();
+            // In iOS, DeviceMotion is "normal" when in portrait-primary, degrees depend on device (iphone 0, ipad 90)
+            // Rotate the GameBoard based on orientation for better UX
+            // TODO test in some android devices, probably broken there...
+            switch (orientationType) {
+                case PORTRAIT_PRIMARY:
+                    gameBoard.rotate(0);
+                    break;
+                case LANDSCAPE_PRIMARY:
+                    gameBoard.rotate(-90);
+                    break;
+                case PORTRAIT_SECONDARY:
+                    gameBoard.rotate(180);
+                    break;
+                case LANDSCAPE_SECONDARY:
+                    gameBoard.rotate(90);
+                    break;
+            }
+        });
+
+        // Use requestPermissionAndListen to handle permissions automatically
+        DeviceMotion.requestPermissionAndListen(startButton,
+            event -> {
+                if (event.getAccelerationIncludingGravity() != null && isPlaying) {
+                    Double x = event.getAccelerationIncludingGravity().getX();
+                    Double y = event.getAccelerationIncludingGravity().getY();
+
+                    if (x != null && y != null) {
+                        // Transform acceleration based on screen orientation
+                        gameBoard.applyAcceleration(x,-y);
+                    }
+                }
+            },
+            deviceMotion -> {
+                // Configure throttling for smooth movement (20 updates per second)
+                deviceMotion.throttleEvents(300);
+            },
+            () -> {
+                Notification.show("Motion permission denied!");
+                if (isPlaying) {
+                    stopGame(startButton);
+                }
+            }
+        );
+
+        // Override click to handle start/stop
+        startButton.getElement().addEventListener("click", e -> {
             if (!isPlaying) {
                 startGame(startButton);
             } else {
                 stopGame(startButton);
             }
-        });
+        }).addEventData("event.preventDefault()");
 
-        Button resetButton = new Button("Reset Puck", e -> resetPuck());
+        add(new HorizontalLayout(startButton, resetButton));
 
-        add(new HorizontalLayout(startButton, resetButton, rotateWithDevice));
-
-        // Info panel
-        Paragraph info = new Paragraph();
-        info.getStyle().set("font-size", "14px").set("color", "#666");
-        info.setText("Tilt your device to move the red puck around the board. " +
-                "Enable rotation to match the board orientation with your device.");
-        add(info);
+        add(new Paragraph("Tilt your device to move the red puck around the board."));
     }
 
     private void initializeGame() {
@@ -75,75 +109,12 @@ public class PuckGameWithMotionAndOrientation extends VVerticalLayout {
     private void startGame(Button startButton) {
         isPlaying = true;
         startButton.setText("Stop Game");
-
-        // Start device motion listening
-        deviceMotion = DeviceMotion.listen(event -> {
-            // Use accelerationIncludingGravity as it's more widely supported
-            if (event.getAccelerationIncludingGravity() != null) {
-                Double x = event.getAccelerationIncludingGravity().getX();
-                Double y = event.getAccelerationIncludingGravity().getY();
-
-                if (x != null && y != null) {
-                    // Apply acceleration to puck (inverted for natural tilt control)
-                    // Pass current board rotation so physics compensates
-                    gameBoard.applyAcceleration(x, -y, currentRotation);
-                }
-            }
-        });
-        deviceMotion.throttleEvents(50); // Update 20 times per second for smooth movement
-
-        // Start orientation listening if rotation is enabled
-        if (rotateWithDevice.getValue()) {
-            startOrientationListening();
-        }
-
-        // Watch checkbox changes
-        rotateWithDevice.addValueChangeListener(e -> {
-            if (e.getValue() && isPlaying) {
-                startOrientationListening();
-            } else if (!e.getValue() && deviceOrientation != null) {
-                stopOrientationListening();
-                gameBoard.rotateBoard(0);
-            }
-        });
-
         Notification.show("Game started! Tilt your device to move the puck.");
-    }
-
-    private void startOrientationListening() {
-        if (deviceOrientation == null) {
-            deviceOrientation = DeviceOrientation.listen(event -> {
-                if (rotateWithDevice.getValue() && event.getAlpha() != null) {
-                    // Alpha represents device rotation around Z axis (compass heading)
-                    // Store rotation for physics calculation
-                    currentRotation = event.getAlpha();
-                    gameBoard.rotateBoard(currentRotation);
-                }
-            });
-            deviceOrientation.throttleEvents(1000);
-        }
-    }
-
-    private void stopOrientationListening() {
-        if (deviceOrientation != null) {
-            deviceOrientation.cancel();
-            deviceOrientation = null;
-            currentRotation = 0;
-        }
     }
 
     private void stopGame(Button startButton) {
         isPlaying = false;
         startButton.setText("Start Game");
-
-        if (deviceMotion != null) {
-            deviceMotion.cancel();
-            deviceMotion = null;
-        }
-
-        stopOrientationListening();
-        gameBoard.rotateBoard(0);
-
         Notification.show("Game stopped");
     }
 
@@ -153,63 +124,48 @@ public class PuckGameWithMotionAndOrientation extends VVerticalLayout {
 
     private static class GameBoard extends Div {
 
-        private static final int BOARD_SIZE = 400;
-        private static final int PUCK_RADIUS = 40;
-        private static final double FRICTION = 0.95;
-        private static final double BOUNCE = 0.7;
-        private static final double ACCELERATION_SCALE = 2.0;
+        private static final double FRICTION = 0.96;
+        private static final double BOUNCE = 0.5;
+        private static final double ACCELERATION_SCALE = 0.5;
+        private static final int PUCK_SIZE_PERCENT = 8; // Puck is 8% of board size
 
-        // Physics state
-        private double x = BOARD_SIZE / 2.0;
-        private double y = BOARD_SIZE / 2.0;
+        // Physics state (0-100 for percentage-based positioning)
+        private double x = 50.0;
+        private double y = 50.0;
         private double vx = 0;
         private double vy = 0;
 
         private final Div puck = new VDiv(){{
             new VStyle() {{
                 setPosition(Position.ABSOLUTE);
-                setWidth((PUCK_RADIUS*2) + "px");
-                setHeight((PUCK_RADIUS*2) + "px");
+                setWidth(PUCK_SIZE_PERCENT + "%");
+                setHeight(PUCK_SIZE_PERCENT + "%");
                 setBorderRadius("50%");
                 setBackground("radial-gradient(circle at 30% 30%, #ff6b6b, #c92a2a)");
                 setBoxShadow("0 4px 10px rgba(0,0,0,0.4), inset -2px -2px 5px rgba(0,0,0,0.3)");
                 setBorder("2px solid #fff");
-                setTransition("transform 1.0s ease-out");
+                setTransition("1s all ease-out");
             }}.apply(this);
         }};
-        private double previousRotation;
 
         {
-            setWidth(BOARD_SIZE + "px");
-            setHeight(BOARD_SIZE + "px");
+            setWidth("min(100vw, 100vh, 600px)");
+            setHeight("min(100vw, 100vh, 600px)");
             getStyle()
+                    .setPosition(Style.Position.RELATIVE)
                     .setBorder("3px solid #333")
                     .setBackground("linear-gradient(135deg, #667eea 0%, #764ba2 100%)")
-                    .setPosition(Style.Position.RELATIVE)
-                    .setMargin("20px auto")
                     .setBorderRadius("10px")
                     .setBoxShadow("0 10px 30px rgba(0,0,0,0.3)")
-                    .setOverflow(Style.Overflow.HIDDEN)
-                    .setTransition("transform 1.0s ease-out");
+                    .setTransition("transform 1.0s ease-out")
+                    .setMargin("20px auto")
+                    .set("aspect-ratio", "1");
 
             add(puck);
             updatePuckPosition();
         }
 
-        public void applyAcceleration(double ax, double ay, double rotation) {
-            // Apply inverse rotation to acceleration vectors so the puck moves correctly
-            // relative to the rotated board. When the board rotates, the acceleration
-            // vectors need to be rotated in the opposite direction to maintain natural physics.
-            if (rotation != 0) {
-                // Negative rotation because we want the inverse transformation
-                double rad = Math.toRadians(-rotation);
-                double cos = Math.cos(rad);
-                double sin = Math.sin(rad);
-                double rotatedAx = ax * cos - ay * sin;
-                double rotatedAy = ax * sin + ay * cos;
-                ax = rotatedAx;
-                ay = rotatedAy;
-            }
+        public void applyAcceleration(double ax, double ay) {
 
             // Apply acceleration (scaled for better control)
             vx += ax * ACCELERATION_SCALE;
@@ -223,20 +179,21 @@ public class PuckGameWithMotionAndOrientation extends VVerticalLayout {
             x += vx;
             y += vy;
 
-            // Boundary collision with bounce
-            if (x - PUCK_RADIUS < 0) {
-                x = PUCK_RADIUS;
+            // Boundary collision with bounce (puck size is PUCK_SIZE_PERCENT)
+            double halfPuck = PUCK_SIZE_PERCENT / 2.0;
+            if (x - halfPuck < 0) {
+                x = halfPuck;
                 vx = Math.abs(vx) * BOUNCE;
-            } else if (x + PUCK_RADIUS > BOARD_SIZE) {
-                x = BOARD_SIZE - PUCK_RADIUS;
+            } else if (x + halfPuck > 100) {
+                x = 100 - halfPuck;
                 vx = -Math.abs(vx) * BOUNCE;
             }
 
-            if (y - PUCK_RADIUS < 0) {
-                y = PUCK_RADIUS;
+            if (y - halfPuck < 0) {
+                y = halfPuck;
                 vy = Math.abs(vy) * BOUNCE;
-            } else if (y + PUCK_RADIUS > BOARD_SIZE) {
-                y = BOARD_SIZE - PUCK_RADIUS;
+            } else if (y + halfPuck > 100) {
+                y = 100 - halfPuck;
                 vy = -Math.abs(vy) * BOUNCE;
             }
 
@@ -244,27 +201,22 @@ public class PuckGameWithMotionAndOrientation extends VVerticalLayout {
         }
 
         public void reset() {
-            x = BOARD_SIZE / 2.0;
-            y = BOARD_SIZE / 2.0;
+            x = 50.0;
+            y = 50.0;
             vx = 0;
             vy = 0;
             updatePuckPosition();
         }
 
-        public void rotateBoard(double degrees) {
-            if(degrees - previousRotation > 180) {
-                degrees -= 360;
-            } else if(degrees - previousRotation < -180) {
-                degrees += 360;
-            }
-            getStyle().set("transform", "rotate(" + degrees + "deg)");
-            previousRotation = degrees;
+        private void updatePuckPosition() {
+            double halfPuck = PUCK_SIZE_PERCENT / 2.0;
+            puck.getStyle()
+                    .setLeft((x - halfPuck) + "%")
+                    .setTop((y - halfPuck) + "%");
         }
 
-        private void updatePuckPosition() {
-            puck.getStyle()
-                    .setLeft((x - PUCK_RADIUS) + "px")
-                    .setTop((y - PUCK_RADIUS) + "px");
+        public void rotate(int deg) {
+            getStyle().setTransform("rotate(" + deg + "deg)");
         }
     }
 }
