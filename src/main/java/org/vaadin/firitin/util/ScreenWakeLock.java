@@ -15,17 +15,14 @@ import java.util.concurrent.atomic.AtomicReference;
  * like e-book readers, navigation apps, recipe viewers, presentation software, QR/barcode scanners,
  * or any voice or gesture-controlled applications.
  * </p>
- * <p>
- * <strong>Important Notes:</strong>
+ * <p>Notes:</p>
  * <ul>
  *   <li>Only active documents can acquire screen wake locks. Previously acquired locks are automatically
  *       released when the document becomes inactive (e.g., when the page is hidden or minimized).</li>
  *   <li>Applications should listen for visibility changes and reacquire the wake lock when the page
  *       becomes visible again if continuous lock is required.</li>
  *   <li>The API requires a secure context (HTTPS) and browser support may vary.</li>
- *   <li>Access is controlled through the Permissions Policy directive {@code screen-wake-lock}.</li>
  * </ul>
- * </p>
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API">MDN Web Docs - Screen Wake Lock API</a>
  */
