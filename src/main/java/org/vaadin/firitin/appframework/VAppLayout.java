@@ -205,7 +205,6 @@ public abstract class VAppLayout extends AppLayout {
 
     @Override
     protected void afterNavigation() {
-        System.out.println("VAppLayout afterNavigation");
         super.afterNavigation();
         if(!initialized) {
             addDrawerContent();

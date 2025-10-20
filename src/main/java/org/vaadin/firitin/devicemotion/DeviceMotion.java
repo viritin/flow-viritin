@@ -89,7 +89,6 @@ public class DeviceMotion {
                 if (handler != null) {
                     handler.onDeviceMotionCreated(holder[0]);
                 }
-                button.setText("Stop Listening");
             },
             onError
         );
@@ -99,7 +98,6 @@ public class DeviceMotion {
             if (holder[0] != null) {
                 holder[0].cancel();
                 holder[0] = null;
-                button.setText("Start Listening");
             }
         });
 
