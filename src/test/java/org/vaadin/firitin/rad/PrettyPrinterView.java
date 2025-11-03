@@ -1,7 +1,5 @@
 package org.vaadin.firitin.rad;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -10,6 +8,7 @@ import org.vaadin.firitin.components.RichText;
 import org.vaadin.firitin.rad.datastructures.PersonWithThings;
 import org.vaadin.firitin.testdomain.Address;
 import org.vaadin.firitin.testdomain.Group;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -98,11 +97,7 @@ public class PrettyPrinterView extends VerticalLayout {
     }
 
     public static String toPrettyJson(Object dto) {
-        try {
-            return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(dto);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(dto);
     }
 
 

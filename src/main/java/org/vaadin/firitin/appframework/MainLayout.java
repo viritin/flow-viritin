@@ -310,13 +310,6 @@ public abstract class MainLayout extends AppLayout implements AfterNavigationObs
     protected abstract String getDrawerHeader();
 
     @Override
-    protected void afterNavigation() {
-        super.afterNavigation();
-        updateViewTitle();
-        updateSelectedNavigationItem();
-    }
-
-    @Override
     public void afterNavigation(AfterNavigationEvent event) {
         updateViewTitle();
         updateSelectedNavigationItem();

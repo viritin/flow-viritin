@@ -3,7 +3,6 @@ package org.vaadin.firitin.components.radiobutton;
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ItemLabelGenerator;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;

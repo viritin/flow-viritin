@@ -124,11 +124,11 @@ public class PageVisibility {
                     });
                     """);
             domListenerRegistration = ui.getElement().addEventListener("viritin-visibilitychange", event -> {
-                        String detail = event.getEventData().getString("event.detail");
+                        String detail = event.getEventDetail(String.class);
                         Visibility visibility = Visibility.valueOf(detail.toUpperCase());
                         // shallow copy the listeners to avoid concurrent modification issues
                         listeners.stream().toList().forEach(l -> l.accept(visibility));
-                    }).addEventData("event.detail")
+                    }).addEventDetail()
                     .debounce(100); // this helps to avoid some duplicates in Safari
 
         }

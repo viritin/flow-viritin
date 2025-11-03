@@ -119,7 +119,7 @@ public class VTabSheet extends TabSheet {
             scrollreg = getElement().addEventListener("myscroll", (DomEvent de) -> {
                 getEventBus().fireEvent(new ScrollEvent(
                         this,
-                        (String) de.getEventData().getString("event.detail")
+                        (String) de.getEventData().asText("event.detail")
                 ));
             });
             scrollreg.debounce(100); // use reasonable debouncing

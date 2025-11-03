@@ -116,8 +116,7 @@ public class AttachementListField extends Composite<VerticalLayout>
             getValue().add(attachment);
             addRow(attachment);
             fireValueChange();
-            // WTF Vaadin component developers, this is NOT cool :-(
-            multiFileUpload.getElement().setPropertyJson("files", Json.createArray());
+            multiFileUpload.clearFileList();
         });
 
 

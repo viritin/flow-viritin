@@ -1,8 +1,5 @@
 package org.vaadin.firitin.rad;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
 import com.vaadin.flow.component.AbstractCompositeField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
@@ -31,6 +28,9 @@ import org.vaadin.firitin.fields.LongField;
 import org.vaadin.firitin.fields.ShortField;
 import org.vaadin.firitin.layouts.HorizontalFloatLayout;
 import org.vaadin.firitin.util.VStyleUtil;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.introspect.BasicBeanDescription;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -101,7 +101,7 @@ public class AutoFormContext {
 
     static BasicBeanDescription introspectClass(Class<?> type) {
         JavaType javaType = jack.getTypeFactory().constructType(type);
-        return (BasicBeanDescription) jack.getSerializationConfig().introspect(javaType);
+        return (BasicBeanDescription) jack._deserializationContext().introspectBeanDescription(javaType);
     }
 
     public boolean isAnnotateTypes() {

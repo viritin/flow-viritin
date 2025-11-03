@@ -33,7 +33,9 @@ public class VAccordionPanel extends AccordionPanel implements FluentComponent<V
     }
 
     public VAccordionPanel withContent(Component content) {
-        setContent(content);
+        add(content);
+        // TODO test if this was migrated in right way
+        //setContent(content);
         return this;
     }
 

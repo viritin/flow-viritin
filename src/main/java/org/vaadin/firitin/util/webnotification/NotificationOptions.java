@@ -1,8 +1,7 @@
 package org.vaadin.firitin.util.webnotification;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import java.net.URI;
 import java.time.Instant;
@@ -20,12 +19,9 @@ import java.util.List;
  * that need service worker and those are not supported by Vaadin already.
  * </p>
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class NotificationOptions {
 
-    private static ObjectMapper mapper = new ObjectMapper();
-    static {
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    }
     private URI badge;
     private String body;
     private Object data;
@@ -178,15 +174,6 @@ public class NotificationOptions {
     @Deprecated
     public void setVibrate(List<Long> vibrate) {
         this.vibrate = vibrate;
-    }
-
-    @Override
-    public String toString() {
-        try {
-            return mapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            return "{}";
-        }
     }
 
     public enum Direction {

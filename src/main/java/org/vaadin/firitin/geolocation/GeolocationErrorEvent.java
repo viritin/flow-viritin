@@ -9,28 +9,28 @@ public class GeolocationErrorEvent {
         UNKNOWN, PERMISSION_DENIED, POSITION_UNAVAILABLE, TIMEOUT
     }
 
-    private int errorCode;
-    private String errorMessage;
+    private int code;
+    private String message;
 
-    public GeolocationErrorEvent(int errorCode, String errorMessage) {
-        this.errorCode = errorCode;
-        this.errorMessage = errorMessage;
+    public GeolocationErrorEvent(int code, String message) {
+        this.code = code;
+        this.message = message;
     }
 
     public GeolocationPositionError getError() {
-        return GeolocationPositionError.values()[errorCode];
+        return GeolocationPositionError.values()[code];
     }
 
     public int getRawErrorCode() {
-        return errorCode;
+        return code;
     }
 
     public String getErrorMessage() {
-        return errorMessage;
+        return message;
     }
 
     @Override
     public String toString() {
-        return errorMessage.toString();
+        return message.toString();
     }
 }

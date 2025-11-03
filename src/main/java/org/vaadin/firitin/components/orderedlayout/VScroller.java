@@ -62,8 +62,8 @@ public class VScroller extends Scroller implements
          * event originated from the client side or the server side.
          *
          * @param source the source component
-         * @param fromClient <code>true</code> if the event originated from the
-         * client
+         * @param scrollTop scroll top position in pixels
+         * @param scrollLeft scroll left position in pixels
          */
         ScrollEvent(VScroller source, int scrollTop, int scrollLeft) {
             super(source, true);
@@ -132,8 +132,8 @@ public class VScroller extends Scroller implements
             scrollreg = getElement().addEventListener("scroll", de -> {
                 getEventBus().fireEvent(new ScrollEvent(
                         this,
-                        (int) de.getEventData().getNumber("event.target.scrollTop"),
-                        (int) de.getEventData().getNumber("event.target.scrollLeft")
+                        de.getEventData().get("event.target.scrollTop").asInt(),
+                        de.getEventData().get("event.target.scrollLeft").asInt()
                 ));
             });
             scrollreg.debounce(100); // use reasonable debouncing

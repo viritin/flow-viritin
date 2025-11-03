@@ -1,7 +1,5 @@
 package org.vaadin.firitin.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -11,10 +9,14 @@ import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
+import elemental.json.JsonValue;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.logging.Logger;
@@ -188,25 +190,22 @@ public class ResizeObserver {
                 el._resizeObserverElements = {};
                 """);
         reg = uiElement.addEventListener("element-resize", event -> {
-                    JsonObject object = event.getEventData().getObject("event.dimensions");
-                    for(String idx : object.keys()) {
-                        String json = object.getString(idx);
-                        try {
-                            Dimensions dimensions = om.readValue(json, Dimensions.class);
-                            ComponentMapping componentMapping = idToComponentMapping.get(Integer.valueOf(idx));
-                            if(componentMapping != null) {
-                                // Old deprecated API
-                                new ArrayList<>(componentMapping.listeners()).forEach(l -> l.onChange(dimensions));
-                                // Vaadin core style API
-                                SizeChangeEvent sizeChangeEvent = new SizeChangeEvent(ui, componentMapping.component, dimensions);
-                                // Ugly but I guess there is no other way to fire an event from UI
-                                ComponentUtil.fireEvent(ui, sizeChangeEvent);
-                            } else {
-                                // Timing issue in Flow navigation can make this happen, simply ignore
-                                Logger.getLogger(ResizeObserver.class.getName()).fine("Resize listener called for component that is already de-registered, id:" + idx);
-                            }
-                        } catch (JsonProcessingException e) {
-                            throw new RuntimeException(e);
+                    // TODO fix this stupidity, quickly converted form elemental.json to jackson...
+                    ObjectNode object = (ObjectNode) event.getEventData().get("event.dimensions");
+                    for(String idx : object.propertyNames()) {
+                        String json = object.get(idx).asText();
+                        Dimensions dimensions = om.readValue(json, Dimensions.class);
+                        ComponentMapping componentMapping = idToComponentMapping.get(Integer.valueOf(idx));
+                        if(componentMapping != null) {
+                            // Old deprecated API
+                            new ArrayList<>(componentMapping.listeners()).forEach(l -> l.onChange(dimensions));
+                            // Vaadin core style API
+                            SizeChangeEvent sizeChangeEvent = new SizeChangeEvent(ui, componentMapping.component, dimensions);
+                            // Ugly but I guess there is no other way to fire an event from UI
+                            ComponentUtil.fireEvent(ui, sizeChangeEvent);
+                        } else {
+                            // Timing issue in Flow navigation can make this happen, simply ignore
+                            Logger.getLogger(ResizeObserver.class.getName()).fine("Resize listener called for component that is already de-registered, id:" + idx);
                         }
                     }
                 })

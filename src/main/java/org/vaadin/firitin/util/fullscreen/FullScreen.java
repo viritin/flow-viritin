@@ -172,7 +172,7 @@ public class FullScreen {
                 """);
 
         return ui.getElement().addEventListener("viritin-fullscreenchange", event -> {
-            boolean isFullscreen = event.getEventData().getBoolean("event.detail");
+            boolean isFullscreen = event.getEventData().get("event.detail").asBoolean();
             listener.onComponentEvent(new FullscreenChangeEvent(ui, isFullscreen));
         }).addEventData("event.detail");
     }

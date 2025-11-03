@@ -1,7 +1,5 @@
 package org.vaadin.firitin.formbinder.hibernatecrossfieldexample;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Pre;
@@ -15,6 +13,7 @@ import org.vaadin.firitin.components.RichText;
 import org.vaadin.firitin.components.textfield.VIntegerField;
 import org.vaadin.firitin.fields.CommaSeparatedStringField;
 import org.vaadin.firitin.form.BeanValidationForm;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Arrays;
 import java.util.List;
@@ -66,13 +65,9 @@ public class FormBinderCarForm extends BeanValidationForm<Car> {
     }
 
     private void showCurrentStateAsJson(Car car) {
-        try {
-            String string = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(car);
-            display.setText(string);
-            getContent().add(display);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        String string = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(car);
+        display.setText(string);
+        getContent().add(display);
     }
 
     @Override

@@ -1,13 +1,12 @@
 package org.vaadin.firitin.formbinder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import org.vaadin.firitin.form.FormBinder;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Collections;
 import java.util.Map;
@@ -40,13 +39,9 @@ public class FormBinderWithoutBeanValidationAPIView extends VerticalLayout {
                         binder.setRawConstraintViolations(Collections.emptyMap());
                     }
 
-                    try {
-                        String string = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(dto);
-                        value.setText(string);
-                        add(value);
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
+                    String string = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(dto);
+                    value.setText(string);
+                    add(value);
                 });
 
         add(button);

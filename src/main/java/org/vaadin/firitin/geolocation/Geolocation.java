@@ -1,7 +1,5 @@
 package org.vaadin.firitin.geolocation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.DomListenerRegistration;
@@ -26,7 +24,6 @@ import elemental.json.JsonObject;
  */
 public class Geolocation {
 
-    private static ObjectMapper om = new ObjectMapper();
     private DomListenerRegistration geoupdate;
     private DomListenerRegistration geoerror;
 
@@ -142,9 +139,8 @@ public class Geolocation {
          */
 
         geolocation.geoupdate = eventSourceElement.addEventListener("geoupdate", e -> {
-            String detail = e.getEventData().getString("event.detail");
             try {
-                GeolocationEvent geolocationEvent = om.readValue(detail, GeolocationEvent.class);
+                GeolocationEvent geolocationEvent = e.getEventData(GeolocationEvent.class);
                 listener.geolocationUpdate(geolocationEvent);
                 if(get) {
                     geolocation.clearListeners();
@@ -153,56 +149,53 @@ public class Geolocation {
                 throw new RuntimeException(ex);
             }
         });
-        geolocation.geoupdate.addEventData("event.detail");
+        geolocation.geoupdate.addEventDetail();
 
         geolocation.geoerror = eventSourceElement.addEventListener("geoerror", e -> {
-            final JsonObject detail = e.getEventData().getObject("event.detail");
-            errorListener.geolocationError(new GeolocationErrorEvent(((int) detail.getNumber("code")), detail.getString("message")));
+
+            GeolocationErrorEvent error = e.getEventDetail(GeolocationErrorEvent.class);
+            errorListener.geolocationError(error);
             if(get) {
                 geolocation.clearListeners();
             }
         });
-        geolocation.geoerror.addEventData("event.detail");
-        try {
-            ui.getElement().executeJs("""
-                    var el = $1;
-                    return navigator.geolocation.""" + method + """
-                    (
-                            p => {
-                              var timestamp = p.timestamp;
-                              // Desktop Safari has weird epoch of 2001-1-1 ...
-                              const safari = (Date.now() - timestamp) > 1000*60*60*24*1000;
-                              if(safari) {
-                                timestamp = timestamp + 978307200000;
-                              }
-                              const event = new CustomEvent('geoupdate', {
-                                detail: JSON.stringify(
-                                 {
-                                     coords : {
-                                         longitude : p.coords.longitude,
-                                         latitude : p.coords.latitude,
-                                         accuracy : p.coords.accuracy,
-                                         altitude : p.coords.altitude,
-                                         altitudeAccuracy : p.coords.altitudeAccuracy,
-                                         heading : p.coords.heading,
-                                         speed : p.coords.speed
-                                     },
-                                     timestamp: timestamp
-                                 })
-                             });
-                             el.dispatchEvent(event);
-                           },
-                           e => {
-                             const event = new CustomEvent('geoerror', {detail: {code: e.code, message: e.message}});
-                             el.dispatchEvent(event);
-                           },
-                           JSON.parse($0)
-                         );
-                    """
-                     , om.writeValueAsString(options), eventSourceElement).then(Integer.class, s -> geolocation.setId(s));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        geolocation.geoerror.addEventDetail();
+        ui.getElement().executeJs("""
+                var el = $1;
+                return navigator.geolocation.""" + method + """
+                (
+                        p => {
+                          var timestamp = p.timestamp;
+                          // Desktop Safari has weird epoch of 2001-1-1 ...
+                          const safari = (Date.now() - timestamp) > 1000*60*60*24*1000;
+                          if(safari) {
+                            timestamp = timestamp + 978307200000;
+                          }
+                          const event = new CustomEvent('geoupdate', {
+                            detail: JSON.stringify(
+                             {
+                                 coords : {
+                                     longitude : p.coords.longitude,
+                                     latitude : p.coords.latitude,
+                                     accuracy : p.coords.accuracy,
+                                     altitude : p.coords.altitude,
+                                     altitudeAccuracy : p.coords.altitudeAccuracy,
+                                     heading : p.coords.heading,
+                                     speed : p.coords.speed
+                                 },
+                                 timestamp: timestamp
+                             })
+                         });
+                         el.dispatchEvent(event);
+                       },
+                       e => {
+                         const event = new CustomEvent('geoerror', {detail: {code: e.code, message: e.message}});
+                         el.dispatchEvent(event);
+                       },
+                       $0
+                     );
+                """
+                 , options, eventSourceElement).then(Integer.class, s -> geolocation.setId(s));
         return geolocation;
     }
 

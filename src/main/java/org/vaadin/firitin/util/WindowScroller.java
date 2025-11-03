@@ -38,7 +38,7 @@ public class WindowScroller {
         );
 
         DomListenerRegistration domlistener = ui.getElement().addEventListener("windowscroll", e -> {
-            String[] split = e.getEventData().getString("event.detail").split(",");
+            String[] split = e.getEventData().get("event.detail").asText().split(",");
             boolean isEnd = Boolean.parseBoolean(split[0]);
             int x = Integer.parseInt(split[1]);
             int y = Integer.parseInt(split[2]);

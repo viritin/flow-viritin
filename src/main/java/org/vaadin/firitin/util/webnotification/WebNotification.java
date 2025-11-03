@@ -33,9 +33,8 @@ public class WebNotification {
 
     public void showNotification(String msg, NotificationOptions options) {
         ui.getPage().executeJs("""
-            const options = %s;
-            new Notification($0, options);
-        """.formatted(options), msg);
+            new Notification($0, $1);
+        """, msg, options);
     }
     public void showNotification(String msg) {
         ui.getPage().executeJs("""

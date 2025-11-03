@@ -1,7 +1,5 @@
 package org.vaadin.firitin;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.notification.Notification;
@@ -10,6 +8,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.RequestHandler;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.util.JsPromise;
+import tools.jackson.databind.ObjectMapper;
 
 @Route
 public class PromiseBlogExamplesView extends VerticalLayout {
@@ -79,12 +78,9 @@ public class PromiseBlogExamplesView extends VerticalLayout {
                     return jsonToServer;
                 }).apply(this, arguments); // anonymous async func -> Promise
                 """).toCompletableFuture(String.class).thenAccept(json -> {
-                    try {
+                    // TODO SHOULD BE ABLE TO MAP TO DTO DIRECTLY NOW
                         showDtoInUI(new ObjectMapper()
                                 .readValue(json, PersonDto.class));
-                    } catch (JsonProcessingException ex) {
-                        throw new RuntimeException(ex);
-                    }
                 });
   }
 
@@ -97,24 +93,16 @@ public class PromiseBlogExamplesView extends VerticalLayout {
                         return jsonStringToServer;
                     });
                 """).then(String.class, json -> {
-                    try {
                         showDtoInUI(new ObjectMapper()
                                 .readValue(json, PersonDto.class));
-                    } catch (JsonProcessingException ex) {
-                        throw new RuntimeException(ex);
-                    }
                 });
     }
 
     private void returnValueUsingEvent() {
         getElement().addEventListener("my-custom-event", e -> {
-            String json = e.getEventData().getString("event.data");
-            try {
+            String json = e.getEventData().get("event.data").asText();
                 showDtoInUI(new ObjectMapper()
                         .readValue(json, PersonDto.class));
-            } catch (JsonProcessingException ex) {
-                throw new RuntimeException(ex);
-            }
         }).addEventData("event.data");
         getElement().executeJs("""
             const el = this; // closure to element
@@ -144,11 +132,8 @@ public class PromiseBlogExamplesView extends VerticalLayout {
 
     @ClientCallable
     private void clientCallable(String msg) {
-        try {
+        // TODO THIS SHOULD BE POSSIBLE TO MAP TO DTO WITH FRAMEWORK NOW
             showDtoInUI(new ObjectMapper().readValue(msg, PersonDto.class));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private void showDtoInUI(PersonDto dto) {

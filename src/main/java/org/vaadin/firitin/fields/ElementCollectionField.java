@@ -1,9 +1,5 @@
 package org.vaadin.firitin.fields;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -29,6 +25,10 @@ import org.vaadin.firitin.fields.internalhtmltable.TableDataCell;
 import org.vaadin.firitin.fields.internalhtmltable.TableRow;
 import org.vaadin.firitin.form.AbstractForm;
 import org.vaadin.firitin.form.FormBinder;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.introspect.BasicBeanDescription;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -108,8 +108,9 @@ public class ElementCollectionField<T> extends CustomField<List<T>> {
             fieldNames = Arrays.stream(editorClass.getDeclaredFields()).map(f -> f.getName()).toList();
         } else {
             // Full autogeneration, let mr Jackson do it on the element type
+
             JavaType javaType = jack.getTypeFactory().constructType(clazz);
-            bbd = (BasicBeanDescription) jack.getSerializationConfig().introspect(javaType);
+            bbd = (BasicBeanDescription) jack._deserializationContext().introspectBeanDescription(javaType);
             fieldNames = bbd.findProperties().stream().map(p -> p.getName()).toList();
         }
         TableRow tr = new TableRow();

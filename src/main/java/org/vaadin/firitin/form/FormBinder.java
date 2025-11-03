@@ -1,13 +1,5 @@
 package org.vaadin.firitin.form;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyName;
-import com.fasterxml.jackson.databind.introspect.AnnotatedConstructor;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
-import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.googlecode.gentyref.GenericTypeReflector;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
@@ -27,6 +19,13 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.PropertyName;
+import tools.jackson.databind.introspect.AnnotatedConstructor;
+import tools.jackson.databind.introspect.AnnotatedMember;
+import tools.jackson.databind.introspect.BasicBeanDescription;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -96,7 +95,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
             classLevelViolationDisplay = hc;
         }
         JavaType javaType = jack.getTypeFactory().constructType(tClass);
-        this.bbd = (BasicBeanDescription) jack.getSerializationConfig().introspect(javaType);
+        this.bbd = (BasicBeanDescription) jack._deserializationContext().introspectBeanDescription(javaType);;
 
         for (Component formComponent : containerComponents) {
             Class<? extends Component> aClass = formComponent.getClass();
@@ -140,7 +139,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
             classLevelViolationDisplay = hc;
         }
         JavaType javaType = jack.getTypeFactory().constructType(tClass);
-        this.bbd = (BasicBeanDescription) jack.getSerializationConfig().introspect(javaType);
+        this.bbd = (BasicBeanDescription) jack._deserializationContext().introspectBeanDescription(javaType);
         Class<?> aClass = editorObject.getClass();
         Field[] declaredFields = aClass.getDeclaredFields();
         for (Field f : declaredFields) {
@@ -171,7 +170,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     public FormBinder(Class<T> tClass, Map<String, HasValue> propertyNameToEditor) {
         this.tClass = tClass;
         JavaType javaType = jack.getTypeFactory().constructType(tClass);
-        this.bbd = (BasicBeanDescription) jack.getSerializationConfig().introspect(javaType);
+        this.bbd = (BasicBeanDescription) jack._deserializationContext().introspectBeanDescription(javaType);;
         for (BeanPropertyDefinition property : bbd.findProperties()) {
             if (propertyNameToEditor.containsKey(property.getName())) {
                 HasValue hasValue = propertyNameToEditor.get(property.getName());
@@ -247,7 +246,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
             hvcm.setValueChangeMode(ValueChangeMode.LAZY);
         }
         if (!isImmutable()) {
-            ValueContext ctx = new ValueContext((Component) hasValue);
+            ValueContext ctx = fakeValueContext(hasValue);
             // Mutate
             registrations.add(hasValue.addValueChangeListener(e -> {
                 boolean dropServerOriginateEvent = !e.isFromClient() && ignoreServerOriginatedChanges;
@@ -274,6 +273,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
 
     private Object convertInputValue(Object value, BeanPropertyDefinition property, ValueContext ctx) {
         Converter converter = nameToConverter.get(property.getName());
+
         if (converter != null) {
             Result result = converter.convertToModel(value, ctx);
             try {
@@ -362,7 +362,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
                 } else {
                     Converter converter = nameToConverter.get(pd.getName());
                     if (converter != null) {
-                        pValue = converter.convertToPresentation(pValue, new ValueContext((Component) hasValue));
+                        pValue = converter.convertToPresentation(pValue, fakeValueContext(hasValue));
                     }
                     try {
                         hasValue.setValue(pValue);
@@ -375,7 +375,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
                             Class<?> fieldValueClazz = GenericTypeReflector.erase(fieldValueType);
                             converter = DefaultConverterFactory.INSTANCE.newInstance(fieldValueClazz, pd.getPrimaryType().getRawClass())
                                     .orElseThrow(() -> new RuntimeException("No converter found for " + pd.getPrimaryType().getRawClass().getName()));
-                            Object converted = converter.convertToPresentation(pValue, new ValueContext((Component) hasValue));
+                            Object converted = converter.convertToPresentation(pValue, fakeValueContext(hasValue));
                             hasValue.setValue(converted);
                         } catch (Exception e) {
                             new RuntimeException("Conversion failed for " + pd.getPrimaryType().getRawClass().getName(), e);
@@ -447,7 +447,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
             BeanPropertyDefinition definition = properties.get(i);
             HasValue hasValue = bpdToEditorField.get(definition);
             Object value = hasValue.getValue();
-            value = convertInputValue(value, definition, new ValueContext((Component) hasValue));
+            value = convertInputValue(value, definition, fakeValueContext(hasValue));
             args[i] = value;
             Class<?> rawType = definition.getGetter().getRawType();
             boolean primitive = definition.getGetter().getRawType().isPrimitive();
@@ -468,7 +468,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         bpdToEditorField.forEach((bpd, hasValue) -> {
             try {
                 Object value = hasValue.getValue();
-                value = convertInputValue(value, bpd, new ValueContext((Component) hasValue));
+                value = convertInputValue(value, bpd, fakeValueContext(hasValue));
                 bpd.getSetter().callOnWith(o, value);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -671,6 +671,12 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
             paragraph.setText(message);
             return paragraph;
         }
+    }
+
+    private ValueContext fakeValueContext(HasValue hasValue) {
+        Component component = (Component) hasValue;
+        // TODO figure out if binder is really needed here, the constructor without it was removed in 25
+        return new ValueContext(null, component);
     }
 
 }

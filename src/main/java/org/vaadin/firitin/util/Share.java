@@ -82,7 +82,7 @@ public class Share {
                 """, data.title, data.text, data.url);
 
         pendingJavaScriptResult.then(json -> {
-            String string = json.asString();
+            String string = json.asText();
             if ("CLIPBOARD_COPY_SUCCESS".equals(string)) {
                 firefoxFallbackNotification.run();
                 return;

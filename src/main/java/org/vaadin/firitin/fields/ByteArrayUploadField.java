@@ -15,16 +15,10 @@
  */
 package org.vaadin.firitin.fields;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.text.DecimalFormat;
-
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -32,14 +26,14 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.internal.AbstractFieldSupport;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.upload.Receiver;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.server.StreamResource;
-import com.vaadin.flow.server.StreamResourceWriter;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
-import elemental.json.Json;
+
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.text.DecimalFormat;
 
 /**
  *
@@ -82,8 +76,7 @@ public class ByteArrayUploadField extends Composite<Div>
 
 		upload.addSucceededListener(e -> {
 			setValue(bout.toByteArray());
-			// WTF Vaadin component developers, this is NOT cool :-(
-			upload.getElement().setPropertyJson("files", Json.createArray());
+            upload.clearFileList();
 		});
 		getContent().add(upload);
 

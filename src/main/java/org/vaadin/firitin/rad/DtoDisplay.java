@@ -1,6 +1,5 @@
 package org.vaadin.firitin.rad;
 
-import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
@@ -11,6 +10,7 @@ import org.vaadin.firitin.fields.internalhtmltable.Table;
 import org.vaadin.firitin.fields.internalhtmltable.TableHeaderCell;
 import org.vaadin.firitin.fields.internalhtmltable.TableRow;
 import org.vaadin.firitin.util.VStyleUtil;
+import tools.jackson.databind.introspect.BasicBeanDescription;
 
 import java.util.ArrayList;
 import java.util.Collections;

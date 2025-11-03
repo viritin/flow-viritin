@@ -54,7 +54,9 @@ public class VDetails extends Details implements FluentComponent<VDetails>, Flue
     }
 
     public VDetails withContent(Component content) {
-        setContent(content);
+        add(content);
+        // TODO test if this was migrated in right way
+        // setContent(content);
         return this;
     }
 

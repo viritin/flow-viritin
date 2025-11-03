@@ -1,8 +1,9 @@
 package org.vaadin.firitin.rad;
 
-import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
+
+import tools.jackson.databind.introspect.AnnotatedMember;
+import tools.jackson.databind.introspect.AnnotatedMethod;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
 import java.util.Locale;
 

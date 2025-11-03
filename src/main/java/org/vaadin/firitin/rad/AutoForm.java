@@ -1,7 +1,5 @@
 package org.vaadin.firitin.rad;
 
-import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
@@ -28,6 +26,8 @@ import org.vaadin.firitin.components.button.DeleteButton;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.fields.ElementCollectionField;
 import org.vaadin.firitin.form.FormBinder;
+import tools.jackson.databind.introspect.BasicBeanDescription;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
 import java.util.ArrayList;
 import java.util.List;

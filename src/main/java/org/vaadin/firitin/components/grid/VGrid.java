@@ -1,11 +1,5 @@
 package org.vaadin.firitin.components.grid;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
-import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
@@ -29,6 +23,14 @@ import org.vaadin.firitin.fluency.ui.FluentHasSize;
 import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 import org.vaadin.firitin.fluency.ui.FluentHasTheme;
 import org.vaadin.firitin.util.VStyleUtil;
+import tools.jackson.databind.BeanDescription;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.introspect.AnnotatedClass;
+import tools.jackson.databind.introspect.AnnotatedMethod;
+import tools.jackson.databind.introspect.BasicBeanDescription;
+import tools.jackson.databind.introspect.BasicClassIntrospector;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -82,8 +84,10 @@ public class VGrid<T> extends Grid<T>
         if (dummyOm == null) {
             dummyOm = new ObjectMapper();
         }
+
         JavaType javaType = dummyOm.getTypeFactory().constructType(beanType);
-        this.bbd = (BasicBeanDescription) dummyOm.getSerializationConfig().introspect(javaType);
+
+        this.bbd = (BasicBeanDescription) dummyOm._deserializationContext().introspectBeanDescription(javaType);
         if (autoCreateColumns) {
             List<String> propertyNames = getBeanPropertyNames();
             setColumns(propertyNames.toArray(new String[0]));
@@ -98,7 +102,6 @@ public class VGrid<T> extends Grid<T>
         return getBeanPropertyDefinitions().stream().map(BeanPropertyDefinition::getName).toList();
     }
 
-    @Override
     public void focus() {
         //super.focus();
         // see https://github.com/vaadin/flow-components/issues/2180

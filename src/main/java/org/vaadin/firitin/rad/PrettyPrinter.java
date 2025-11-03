@@ -1,12 +1,5 @@
 package org.vaadin.firitin.rad;
 
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.fasterxml.jackson.databind.type.ArrayType;
-import com.fasterxml.jackson.databind.type.CollectionLikeType;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Paragraph;
@@ -16,6 +9,13 @@ import org.vaadin.firitin.components.details.VDetails;
 import org.vaadin.firitin.components.html.VCode;
 import org.vaadin.firitin.fields.internalhtmltable.Table;
 import org.vaadin.firitin.fields.internalhtmltable.TableRow;
+import tools.jackson.databind.BeanDescription;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.introspect.BasicBeanDescription;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
+import tools.jackson.databind.type.ArrayType;
+import tools.jackson.databind.type.CollectionLikeType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -79,7 +79,7 @@ public class PrettyPrinter {
             return null;
         }
         JavaType javaType = jack.getTypeFactory().constructType(dto.getClass());
-        return (BasicBeanDescription) jack.getSerializationConfig().introspect(javaType);
+        return (BasicBeanDescription) jack._deserializationContext().introspectBeanDescription(javaType);
     }
 
     public static String printOneLiner(final Object entity, final int maxLength) {
@@ -93,7 +93,7 @@ public class PrettyPrinter {
         }
 
         JavaType javaType = jack.getTypeFactory().constructType(entity.getClass());
-        BasicBeanDescription bdd = (BasicBeanDescription) jack.getSerializationConfig().introspect(javaType);
+        BasicBeanDescription bdd = (BasicBeanDescription) jack._deserializationContext().introspectBeanDescription(javaType);
 
         StringBuilder sb = new StringBuilder();
         sb.append(prefix);
@@ -113,7 +113,7 @@ public class PrettyPrinter {
             }
             if (isEntityType(p)) {
                 // try to get id from value and use that instead of probably useless/overwhelming tosString
-                BeanDescription introspect = jack.getSerializationConfig().introspect(jack.getTypeFactory().constructType(p.getRawPrimaryType()));
+                BeanDescription introspect = jack._deserializationContext().introspectBeanDescription(jack.getTypeFactory().constructType(p.getRawPrimaryType()));
                 introspect.findProperties().stream().filter(pp -> pp.getName().equals("id")).findFirst().ifPresent(pp -> {
                     Object id = pp.getAccessor().getValue(value);
                     sb.append("⇢");
@@ -218,7 +218,7 @@ public class PrettyPrinter {
             if (primaryType instanceof CollectionLikeType || primaryType instanceof ArrayType) {
 
                 JavaType contentType = primaryType.getContentType();
-                BasicBeanDescription contentTypeBbd = (BasicBeanDescription) jack.getSerializationConfig().introspect(contentType);
+                BasicBeanDescription contentTypeBbd = (BasicBeanDescription) jack._deserializationContext().introspectBeanDescription(contentType);
                 List<BeanPropertyDefinition> properties = contentTypeBbd.findProperties();
                 Object collection = ctx.getPropertyValue();
                 if (collection == null) {

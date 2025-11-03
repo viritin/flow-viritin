@@ -1,9 +1,8 @@
 package org.vaadin.firitin.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.Element;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.Serializable;
 import java.util.concurrent.CompletableFuture;
@@ -156,20 +155,20 @@ public class JsPromise {
                 return executeAsyncPromise;
                 """.formatted(promiseBody), args).then(jsonValue -> {
             if (String.class.isAssignableFrom(returnType)) {
-                future.complete((T) jsonValue.asString());
+                future.complete((T) jsonValue.asText());
             } else if (Integer.class.isAssignableFrom(returnType)) {
-                int number = (int) jsonValue.asNumber();
+                int number = (int) jsonValue.asInt();
                 future.complete((T) Integer.valueOf(number));
             } else if (Double.class.isAssignableFrom(returnType)) {
-                double number = jsonValue.asNumber();
+                double number = jsonValue.asDouble();
                 future.complete((T) Double.valueOf(number));
             } else if (Boolean.class.isAssignableFrom(returnType)) {
                 boolean b = jsonValue.asBoolean();
                 future.complete((T) Boolean.valueOf(b));
             } else {
                 try {
-                    future.complete(jackson.readValue(jsonValue.asString(), returnType));
-                } catch (JsonProcessingException ex) {
+                    future.complete(jackson.readValue(jsonValue.asText(), returnType));
+                } catch (Exception ex) {
                     future.completeExceptionally(ex);
                 }
             }
@@ -206,20 +205,20 @@ public class JsPromise {
                 });
                 """.formatted(asyncMethodBody), args).then(jsonValue -> {
             if (String.class.isAssignableFrom(returnType)) {
-                future.complete((T) jsonValue.asString());
+                future.complete((T) jsonValue.asText());
             } else if (Integer.class.isAssignableFrom(returnType)) {
-                int number = (int) jsonValue.asNumber();
+                int number = (int) jsonValue.asInt();
                 future.complete((T) Integer.valueOf(number));
             } else if (Double.class.isAssignableFrom(returnType)) {
-                double number = jsonValue.asNumber();
+                double number = jsonValue.asDouble();
                 future.complete((T) Double.valueOf(number));
             } else if (Boolean.class.isAssignableFrom(returnType)) {
                 boolean b = jsonValue.asBoolean();
                 future.complete((T) Boolean.valueOf(b));
             } else {
                 try {
-                    future.complete(jackson.readValue(jsonValue.asString(), returnType));
-                } catch (JsonProcessingException ex) {
+                    future.complete(jackson.readValue(jsonValue.asText(), returnType));
+                } catch (Exception ex) {
                     future.completeExceptionally(ex);
                 }
             }
