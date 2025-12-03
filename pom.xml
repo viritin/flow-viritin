@@ -5,7 +5,7 @@
     <parent>
         <groupId>in.virit.sb</groupId>
         <artifactId>viritin-addon-project-parent</artifactId>
-        <version>0.0.9-SNAPSHOT</version>
+        <version>0.0.10-SNAPSHOT</version>
         <relativePath />
     </parent>
 
@@ -17,7 +17,7 @@
     <description>General purpose helpers for Vaadin Flow users.</description>
 
     <properties>
-        <vaadin.version>25.0.0-beta4</vaadin.version>
+        <vaadin.version>25.0.0-beta8</vaadin.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

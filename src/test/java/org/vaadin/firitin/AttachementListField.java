@@ -12,7 +12,6 @@ import com.vaadin.flow.component.upload.MultiFileReceiver;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.shared.Registration;
-import elemental.json.Json;
 import org.vaadin.firitin.components.button.ConfirmButton;
 import org.vaadin.firitin.components.button.DeleteButton;
 import org.vaadin.firitin.components.button.VButton;

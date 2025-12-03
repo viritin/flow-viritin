@@ -8,17 +8,12 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
-import elemental.json.JsonObject;
-import elemental.json.JsonValue;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.logging.Logger;
 
 /**
@@ -193,7 +188,7 @@ public class ResizeObserver {
                     // TODO fix this stupidity, quickly converted form elemental.json to jackson...
                     ObjectNode object = (ObjectNode) event.getEventData().get("event.dimensions");
                     for(String idx : object.propertyNames()) {
-                        String json = object.get(idx).asText();
+                        String json = object.get(idx).asString();
                         Dimensions dimensions = om.readValue(json, Dimensions.class);
                         ComponentMapping componentMapping = idToComponentMapping.get(Integer.valueOf(idx));
                         if(componentMapping != null) {

@@ -22,12 +22,12 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.shared.ui.LoadMode;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
-import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * XSS safe rich text label with either Markdown syntax or raw html (sanitized
@@ -80,7 +80,7 @@ public class RichText extends Div {
         try {
             // Note, this is now reading the whole markdown file into memory
             // previously it was read line by line. Probably a tiny bit less efficient.
-            String mdString = IOUtils.toString(markdown, "UTF-8");
+            String mdString = new String(markdown.readAllBytes(), StandardCharsets.UTF_8);
             markdownStrategy.setMarkdown(mdString, this);
             return this;
         } catch (IOException ex) {
@@ -114,7 +114,7 @@ public class RichText extends Div {
 
     public RichText withSafeHtml(InputStream markdown) {
         try {
-            return setRichText(IOUtils.toString(markdown, "UTF-8"));
+            return setRichText(new String(markdown.readAllBytes(), StandardCharsets.UTF_8));
         } catch (IOException ex) {
             throw new RuntimeException("Input stream coulnd't be read!", ex);
         }
