@@ -5,7 +5,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
-import org.apache.commons.lang3.StringUtils;
+import com.vaadin.flow.shared.util.SharedUtil;
 import org.vaadin.firitin.fields.internalhtmltable.Table;
 import org.vaadin.firitin.fields.internalhtmltable.TableHeaderCell;
 import org.vaadin.firitin.fields.internalhtmltable.TableRow;
@@ -78,7 +78,7 @@ public class DtoDisplay extends Composite<Div> {
 
     static String deCamelCased(String propertyName) {
         String deCamelCased = propertyName.replaceAll("([a-z])([A-Z]+)", "$1 $2");
-        deCamelCased = StringUtils.capitalize(deCamelCased);
+        deCamelCased = SharedUtil.capitalize(deCamelCased);
         return deCamelCased;
     }
 

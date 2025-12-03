@@ -13,6 +13,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.shared.util.SharedUtil;
 import jakarta.validation.Configuration;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.MessageInterpolator;
@@ -20,7 +21,6 @@ import jakarta.validation.Path;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import org.apache.commons.lang3.StringUtils;
 import org.vaadin.firitin.components.button.DefaultButton;
 import org.vaadin.firitin.components.button.DeleteButton;
 import org.vaadin.firitin.components.button.VButton;
@@ -123,7 +123,7 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
 
     static String deCamelCased(String propertyName) {
         String deCamelCased = propertyName.replaceAll("([a-z])([A-Z]+)", "$1 $2");
-        deCamelCased = StringUtils.capitalize(deCamelCased);
+        deCamelCased = SharedUtil.capitalize(deCamelCased);
         return deCamelCased;
     }
 

@@ -16,6 +16,7 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.shared.util.SharedUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentFocusable;
@@ -196,7 +197,7 @@ public class VGrid<T> extends Grid<T>
                 if (Comparable.class.isAssignableFrom(d.getPrimaryType().getRawClass())) {
                     col.setSortable(true);
                 }
-                col.setHeader(StringUtils.capitalize(propertyName));
+                col.setHeader(SharedUtil.capitalize(propertyName));
                 return col;
             } else {
                 throw exception;
@@ -214,7 +215,7 @@ public class VGrid<T> extends Grid<T>
             } catch (InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
-        }).setKey(name).setHeader(StringUtils.capitalize(name));
+        }).setKey(name).setHeader(SharedUtil.capitalize(name));
     }
 
     public VGrid<T> withThemeVariants(GridVariant... variants) {
