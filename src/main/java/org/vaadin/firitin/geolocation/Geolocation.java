@@ -4,7 +4,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.Element;
-import elemental.json.JsonObject;
 
 /**
  * A helper class to detect the geographical position of the end users.
@@ -209,7 +208,7 @@ public class Geolocation {
     public void cancel() {
         ui.getElement().executeJs("navigator.geolocation.clearWatch($0);", id);
         clearListeners();
-    };
+    }
 
     private void clearListeners() {
         if(geoerror != null) {

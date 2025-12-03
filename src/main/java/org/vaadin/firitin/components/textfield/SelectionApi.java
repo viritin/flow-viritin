@@ -2,10 +2,9 @@ package org.vaadin.firitin.components.textfield;
 
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.function.SerializableConsumer;
-import elemental.json.JsonObject;
-import elemental.json.JsonValue;
 
 import java.io.Serializable;
+import tools.jackson.databind.node.ObjectNode;
 
 public interface SelectionApi extends HasElement {
 
@@ -60,12 +59,12 @@ public interface SelectionApi extends HasElement {
                 "res.end = this.inputElement.selectionEnd;" +
                 "res.content = this.inputElement.value.substring(res.start, res.end);" +
                 "return res;").then(jsonValue -> {
-                    if (jsonValue instanceof JsonObject) {
-                        JsonObject jso = (JsonObject) jsonValue;
+                    if (jsonValue instanceof ObjectNode) {
+                        ObjectNode jso = (ObjectNode) jsonValue;
                         callback.selectionRange(
-                                (int) jso.getNumber("start"),
-                                (int) jso.getNumber("end"),
-                                jso.getString("content")
+                                jso.get("start").asInt(),
+                                jso.get("end").asInt(),
+                                jso.get("content").asString()
                         );
                     }
                 });
