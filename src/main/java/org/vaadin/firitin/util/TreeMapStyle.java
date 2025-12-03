@@ -2,6 +2,7 @@ package org.vaadin.firitin.util;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.signals.Signal;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -45,6 +46,11 @@ class TreeMapStyle implements Style {
     @Override
     public Stream<String> getNames() {
         return styleRules.keySet().stream();
+    }
+
+    @Override
+    public Style bind(String name, Signal<String> signal) {
+        return null;
     }
 
     @JsonValue

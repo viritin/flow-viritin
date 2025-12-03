@@ -2,6 +2,7 @@ package org.vaadin.firitin.util;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.signals.Signal;
 import in.virit.color.Color;
 
 import java.util.Arrays;
@@ -81,6 +82,11 @@ public class VStyle implements Style {
     @Override
     public Stream<String> getNames() {
         return wrapped.getNames();
+    }
+
+    @Override
+    public Style bind(String name, Signal<String> signal) {
+        return null;
     }
 
     /**
