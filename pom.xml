@@ -95,13 +95,6 @@
             <version>9.0.1.Final</version>
             <scope>test</scope>
         </dependency>
-        <!-- Markdown support for RichText, this IntelliJ teams library is faster and better than the original unmaintained Google library that was used before, can be safely excluded if Markdown usage not needed. -->
-        <dependency>
-            <groupId>com.vladsch.flexmark</groupId>
-            <artifactId>flexmark</artifactId>
-            <version>0.64.8</version>
-            <optional>true</optional>
-        </dependency>
 
         <dependency>
             <groupId>jakarta.validation</groupId>

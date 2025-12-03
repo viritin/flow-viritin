@@ -20,8 +20,6 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.shared.ui.LoadMode;
-import com.vladsch.flexmark.html.HtmlRenderer;
-import com.vladsch.flexmark.parser.Parser;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 
@@ -251,35 +249,7 @@ public class RichText extends Div {
     public static MarkdownStrategy markdownStrategy;
 
     static {
-        // Use flexmark-java if available, otherwise fallback to MarkdownIt in browser
-        try {
-            Class.forName("com.vladsch.flexmark.parser.Parser");
-            markdownStrategy = new FlexMarkJavaStrategy();
-        } catch (ClassNotFoundException e) {
-            markdownStrategy = new MarkdownItStrategy();
-        }
-    }
-
-    static class FlexMarkJavaStrategy implements MarkdownStrategy {
-
-        private Parser parser;
-        private HtmlRenderer renderer;
-
-        public FlexMarkJavaStrategy() {
-            parser = Parser.builder().build();
-            renderer = HtmlRenderer.builder().build();
-        }
-
-        @Override
-        public void setMarkdown(String markdown, RichText component) {
-            String html = renderer.render(parser.parse(markdown));
-            component.getElement().executeJs("this.innerHTML = $0", Jsoup.clean(html, component.getWhitelist()));
-        }
-
-        @Override
-        public void appendMarkdown(String markdownFragment, RichText component) {
-            throw new UnsupportedOperationException();
-        }
+        markdownStrategy = new MarkdownItStrategy();
     }
 
     @Override

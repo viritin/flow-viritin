@@ -11,11 +11,7 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.server.Command;
-import com.vladsch.flexmark.html.HtmlRenderer;
-import com.vladsch.flexmark.parser.Parser;
-import com.vladsch.flexmark.util.data.MutableDataSet;
 import in.virit.color.HexColor;
-import org.apache.commons.lang3.StringUtils;
 import org.vaadin.firitin.components.RichText;
 
 import java.time.LocalDateTime;
@@ -162,29 +158,11 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
         getElement().setProperty("userColorIndex", index);
     }
 
-    /**
-     * @return current markdown content
-     * @deprecated not necessarily supported by the implementation
-     */
-    @Deprecated
-    public String getMarkdown() {
-        try {
-            FlexmarkStrategy flexmarkStrategy = (FlexmarkStrategy) getMarkdownStrategy();
-            return flexmarkStrategy.markdown;
-        } catch (Exception e) {
-            throw new UnsupportedOperationException("Markdown now cached by the component");
-        }
-    }
-
     protected MarkdownStrategy getMarkdownStrategy() {
         if(markdownStrategy == null) {
             markdownStrategy = new MarkdownItStrategy();
         }
         return markdownStrategy;
-    }
-
-    public void useFlexmarkJava() {
-        markdownStrategy = new FlexmarkStrategy();
     }
 
     protected void setMarkdown(String markdown, boolean uiAccess) {
@@ -277,71 +255,6 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
     interface MarkdownStrategy {
         void appendMarkdown(String markdown, boolean uiAccess);
         void setMarkdown(String markdown, boolean uiAccess);
-    }
-
-    class FlexmarkStrategy implements MarkdownStrategy {
-
-        // TODO Use flexmark only if available in the classpath, else fallback to markdown-it on browser
-        private static HtmlRenderer renderer;
-        private static Parser parser;
-        private String markdown;
-
-        protected HtmlRenderer getMdRenderer() {
-            if (renderer == null) {
-                renderer = HtmlRenderer.builder().build();
-            }
-            return renderer;
-        }
-
-        protected Parser getMdParser() {
-            if (parser == null) {
-                MutableDataSet options = new MutableDataSet();
-                parser = Parser.builder(options).build();
-            }
-            return parser;
-        }
-
-        @Override
-        public void appendMarkdown(String markdownSnippet, boolean uiAccess) {
-            markdownSnippet = markdownSnippet != null ? markdownSnippet : ""; // Avoid nulls
-            if(markdown == null || PLACEHOLDER.equals(markdown)) {
-                markdown = markdownSnippet;
-            } else {
-                markdown += markdownSnippet;
-            }
-            String html = getMdRenderer().render(getMdParser().parse(markdown));
-            Command c;
-            if(previousHtml == null) {
-                c = () -> appendHtml(html);
-            } else {
-                String commonPrefix = StringUtils.getCommonPrefix(html, previousHtml);
-                int startOfNew = commonPrefix.length();
-                String newPart = html.substring(startOfNew);
-                c  = () -> {
-                    appendHtml(newPart, startOfNew);
-                    doAutoScroll();
-                };
-            }
-            previousHtml = html;
-            if(uiAccess) {
-                getUi().access(c);
-            } else {
-                c.execute();
-            }
-        }
-
-        @Override
-        public void setMarkdown(String markdown, boolean uiAccess) {
-            this.markdown = markdown == null ? PLACEHOLDER : markdown;
-            String html = getMdRenderer().render(getMdParser().parse(this.markdown));
-            previousHtml = html;
-            if (uiAccess) {
-                getUi().access(() -> appendHtml(html,0));
-            } else {
-                appendHtml(html,0);
-            }
-
-        }
     }
 
     /**

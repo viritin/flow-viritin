@@ -9,7 +9,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.Route;
-import org.jetbrains.annotations.NotNull;
 import org.vaadin.firitin.components.button.ActionButton;
 import org.vaadin.firitin.components.button.UIFuture;
 import org.vaadin.firitin.components.checkbox.VCheckBox;
@@ -204,7 +203,7 @@ public class SlowTaskView extends VerticalLayout {
 
     }
 
-    private static @NotNull String slowGetString() {
+    private static String slowGetString() {
         LocalTime start = LocalTime.now();
         try {
             Thread.sleep(5000);
@@ -214,7 +213,7 @@ public class SlowTaskView extends VerticalLayout {
         return "Done! " + start + " -> " + LocalTime.now();
     }
 
-    private static @NotNull String slowGetStringWithNotifier(Consumer<Double> progressListener) {
+    private static String slowGetStringWithNotifier(Consumer<Double> progressListener) {
         progressListener.accept(0.0);
         LocalTime start = LocalTime.now();
         for (int i = 0; i < 20; i++) {
