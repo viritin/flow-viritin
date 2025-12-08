@@ -4,7 +4,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
-import org.apache.commons.lang3.ClassUtils;
 import org.vaadin.firitin.components.details.VDetails;
 import org.vaadin.firitin.components.html.VCode;
 import org.vaadin.firitin.fields.internalhtmltable.Table;
@@ -317,12 +316,19 @@ public class PrettyPrinter {
         }
     }
 
+    private static boolean isStringOrSimpleWrapper(Class<?> type) {
+        return type == String.class || type == Boolean.class || type == Byte.class
+                || type == Character.class || type == Short.class
+                || type == Integer.class || type == Long.class
+                || type == Float.class || type == Double.class;
+    }
+
     private static class PrimitivePrinter implements PropertyPrinter {
         @Override
         public Component printValue(PropertyContext ctx) {
-            if (ctx.beanPropertyDefinition().getPrimaryType().isPrimitive() ||
-                    String.class == ctx.beanPropertyDefinition().getPrimaryType().getRawClass() ||
-                    ClassUtils.isPrimitiveOrWrapper(ctx.beanPropertyDefinition().getRawPrimaryType())) {
+            JavaType primaryType = ctx.beanPropertyDefinition().getPrimaryType();
+            if (primaryType.isPrimitive() ||
+                    isStringOrSimpleWrapper(primaryType.getRawClass())) {
                 // TODO improve basic formatting. E.g. for numbers we could use NumberFormat and booleans with more
                 // visual checkboxes or similar.
                 Object propertyValue = ctx.getPropertyValue();

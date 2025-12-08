@@ -4,7 +4,6 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.shared.util.SharedUtil;
-import org.apache.commons.lang3.StringUtils;
 
 import java.lang.annotation.Annotation;
 
@@ -36,7 +35,7 @@ public interface NavigationItem extends HasStyle {
                     if (simpleName.endsWith("View")) {
                         simpleName = simpleName.substring(0, simpleName.length() - 4);
                     }
-                    text = SharedUtil.join(StringUtils.splitByCharacterTypeCamelCase(simpleName), " ");
+                    text = SharedUtil.camelCaseToHumanFriendly(simpleName);
                 } else {
                     text = title.value();
                 }

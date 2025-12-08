@@ -13,7 +13,6 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.function.SerializableFunction;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.vaadin.firitin.components.grid.VGrid;
 
 import java.util.ArrayList;
@@ -121,17 +120,17 @@ public class TreeTable<T> extends VGrid<T> {
         reloadData();
     }
 
-    private void addChildrenRecursively(T rootItem, Map<T, Integer> levelMap, MutableInt level, Function<T, List<T>> childrenProvider, List<T> visibleRows) {
+    private void addChildrenRecursively(T rootItem, Map<T, Integer> levelMap, Integer level, Function<T, List<T>> childrenProvider, List<T> visibleRows) {
         if (getOpenModel().isOpen(rootItem)) {
             List<T> children = childrenProvider.apply(rootItem);
             if (children != null) {
-                level.increment();
+                level = level + 1;
                 for (T child : children) {
                     visibleRows.add(child);
                     levelMap.put(child, level.intValue());
                     addChildrenRecursively(child, levelMap, level, childrenProvider, visibleRows);
                 }
-                level.decrement();
+                level = level -1;
             }
         }
     }
@@ -173,7 +172,7 @@ public class TreeTable<T> extends VGrid<T> {
             // in-memory mode, rebuild visible rows from root items
             List<T> visibleRows = new ArrayList<>();
             Map<T, Integer> levelMap = new HashMap<>();
-            MutableInt level = new MutableInt(0);
+            Integer level = 0;
             // add all root items and their children recursively
             for (T rootItem : rootItems) {
                 visibleRows.add(rootItem);
