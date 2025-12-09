@@ -119,7 +119,7 @@ public abstract class MainLayout extends AppLayout implements AfterNavigationObs
         return menu;
     }
 
-    private Footer prepareFooter() {
+    protected Footer prepareFooter() {
         Footer layout = new Footer();
         return layout;
     }
@@ -382,11 +382,6 @@ public abstract class MainLayout extends AppLayout implements AfterNavigationObs
         explicitViewTitles.remove(pop);
         super.setContent(viewStack.peek());
         updateViewTitle();
-    }
-
-    protected Footer createFooter() {
-        Footer layout = new Footer();
-        return layout;
     }
 
     /**
