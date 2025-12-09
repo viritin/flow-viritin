@@ -24,9 +24,8 @@ public class BasicNavigationItem extends SideNavItem implements NavigationItem {
         setLabel(text);
         MenuItem me = navigationTarget.getAnnotation(MenuItem.class);
         if (me != null) {
-            if(me.icon() != null) {
-                setPrefixComponent(new Icon(me.icon()));
-            }
+            setPrefixComponent(createIcon(me));
+
             if(me.hidden()) {
                 setVisible(false);
             }
@@ -116,5 +115,15 @@ public class BasicNavigationItem extends SideNavItem implements NavigationItem {
         return parentItem;
     }
 
+    public static Component createIcon(MenuItem menuItem) {
+        String iconUrl = menuItem.iconUrl();
+        if(iconUrl.endsWith(".svg")) {
+            return new SvgIcon(iconUrl);
+        } else if(!iconUrl.isEmpty()) {
+            return new Icon(iconUrl);
+        } else {
+            return menuItem.icon().create();
+        }
+    }
 
 }
