@@ -1,6 +1,5 @@
 package org.vaadin.firitin.devicemotion;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -31,7 +30,6 @@ import java.util.concurrent.CompletableFuture;
  */
 public class DeviceOrientation {
 
-    private static ObjectMapper om = new ObjectMapper();
     private DomListenerRegistration orientationListener;
     private UI ui;
 
@@ -137,14 +135,15 @@ public class DeviceOrientation {
         }
 
         deviceOrientation.orientationListener = eventSourceElement.addEventListener("deviceorientationevent", e -> {
-            String detail = e.getEventData().getString("event.detail");
             try {
-                DeviceOrientationEvent orientationEvent = om.readValue(detail, DeviceOrientationEvent.class);
+                DeviceOrientationEvent orientationEvent = e.getEventDetail(DeviceOrientationEvent.class);
                 listener.deviceOrientationUpdate(orientationEvent);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
-        }).throttle(DeviceMotion.DEFAULT_THROTTLE_TIMEOUT); // limit the event rate to 1 per second by default
+        })
+                .addEventDetail()
+                .throttle(DeviceMotion.DEFAULT_THROTTLE_TIMEOUT); // limit the event rate to 1 per second by default
         deviceOrientation.orientationListener.addEventData("event.detail");
 
         String eventName = absolute ? "deviceorientationabsolute" : "deviceorientation";

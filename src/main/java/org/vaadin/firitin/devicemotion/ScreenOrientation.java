@@ -1,6 +1,5 @@
 package org.vaadin.firitin.devicemotion;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.DomListenerRegistration;
 
@@ -22,7 +21,6 @@ import java.util.concurrent.CompletableFuture;
  */
 public class ScreenOrientation {
 
-    private static ObjectMapper om = new ObjectMapper();
     private DomListenerRegistration orientationListener;
     private UI ui;
 
@@ -48,10 +46,10 @@ public class ScreenOrientation {
     public static CompletableFuture<ScreenOrientationInfo> getCurrentOrientation(UI ui) {
         return ui.getPage().executeJs("""
             if (screen.orientation) {
-                return JSON.stringify({
+                return {
                     type: screen.orientation.type,
                     angle: screen.orientation.angle
-                });
+                };
             } else {
                 // Fallback for browsers without screen.orientation
                 const angle = window.orientation || 0;
@@ -59,16 +57,9 @@ public class ScreenOrientation {
                 if (angle === 90 || angle === -90) {
                     type = angle === 90 ? 'landscape-primary' : 'landscape-secondary';
                 }
-                return JSON.stringify({ type: type, angle: Math.abs(angle) });
+                return { type: type, angle: Math.abs(angle) };
             }
-            """).toCompletableFuture(String.class)
-            .thenApply(json -> {
-                try {
-                    return om.readValue(json, ScreenOrientationInfo.class);
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to parse screen orientation", e);
-                }
-            });
+            """).toCompletableFuture(ScreenOrientationInfo.class);
     }
 
     /**
@@ -95,14 +86,14 @@ public class ScreenOrientation {
         // Register listener on the UI element
         screenOrientation.orientationListener = ui.getElement()
             .addEventListener("screen-orientation-change", e -> {
-                String detail = e.getEventData().getString("event.detail");
                 try {
-                    ScreenOrientationInfo info = om.readValue(detail, ScreenOrientationInfo.class);
+                    ScreenOrientationInfo info = e.getEventDetail(ScreenOrientationInfo.class);
                     listener.onOrientationChanged(info);
                 } catch (Exception ex) {
                     throw new RuntimeException("Failed to parse orientation event", ex);
                 }
             })
+                .addEventDetail()
                 .debounce(100); // iphone...
         screenOrientation.orientationListener.addEventData("event.detail");
 

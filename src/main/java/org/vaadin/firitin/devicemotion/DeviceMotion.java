@@ -1,6 +1,5 @@
 package org.vaadin.firitin.devicemotion;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -32,7 +31,6 @@ import java.util.concurrent.CompletableFuture;
 public class DeviceMotion {
 
     static final int DEFAULT_THROTTLE_TIMEOUT = 1000;
-    private static ObjectMapper om = new ObjectMapper();
     private DomListenerRegistration motionListener;
     private UI ui;
 
@@ -135,14 +133,15 @@ public class DeviceMotion {
             eventSourceElement = activeModalComponent.getElement();
         }
         deviceMotion.motionListener = eventSourceElement.addEventListener("devicemotionevent", e -> {
-            String detail = e.getEventData().getString("event.detail");
             try {
-                DeviceMotionEvent motionEvent = om.readValue(detail, DeviceMotionEvent.class);
+                DeviceMotionEvent motionEvent = e.getEventDetail(DeviceMotionEvent.class);
                 listener.deviceMotionUpdate(motionEvent);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
-        }).throttle(DEFAULT_THROTTLE_TIMEOUT); // limit the event rate to 1 per second by default
+        })
+                .addEventDetail()
+                .throttle(DEFAULT_THROTTLE_TIMEOUT); // limit the event rate to 1 per second by default
         deviceMotion.motionListener.addEventData("event.detail");
 
         // Register the devicemotion event listener

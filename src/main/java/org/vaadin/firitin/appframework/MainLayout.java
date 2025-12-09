@@ -2,24 +2,11 @@ package org.vaadin.firitin.appframework;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasComponents;
-import com.vaadin.flow.component.applayout.DrawerToggle;
-import com.vaadin.flow.component.html.Footer;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Header;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.Scroller;
-import com.vaadin.flow.component.sidenav.SideNav;
-import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.AfterNavigationEvent;
-import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.RouteBaseData;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouterLayout;
-import com.vaadin.flow.theme.lumo.LumoUtility;
-import org.vaadin.firitin.util.style.LumoProps;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -28,8 +15,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
-import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -230,10 +215,11 @@ public abstract class MainLayout extends VAppLayout {
         return true;
     }
 
+
     @Override
-    protected void afterNavigation() {
+    public void afterNavigation(AfterNavigationEvent event) {
         updateSelectedNavigationItem();
-        super.afterNavigation();
+        super.afterNavigation(event);
         if (targetToItem.isEmpty()) {
             init();
         }

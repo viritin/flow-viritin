@@ -14,6 +14,8 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.vaadin.firitin.components.orderedlayout.VScroller;
 import org.vaadin.firitin.util.style.LumoProps;
@@ -26,7 +28,7 @@ import java.util.WeakHashMap;
  * Opinionated helpers and defaults for Vaadin {@link AppLayout}. Provides subviews and
  * a slot for view specific components in navbar (will be automatically cleaned up on navigation).
  */
-public abstract class VAppLayout extends AppLayout {
+public abstract class VAppLayout extends AppLayout implements AfterNavigationObserver {
 
     private AdvancedSideNav menu;
     private Footer drawerFooter;
@@ -204,8 +206,7 @@ public abstract class VAppLayout extends AppLayout {
     }
 
     @Override
-    protected void afterNavigation() {
-        super.afterNavigation();
+    public void afterNavigation(AfterNavigationEvent event) {
         if(!initialized) {
             addDrawerContent();
             addHeaderContent();
@@ -213,7 +214,5 @@ public abstract class VAppLayout extends AppLayout {
         }
         updateViewTitle();
     }
-
-
 
 }
