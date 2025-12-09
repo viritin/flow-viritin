@@ -2,18 +2,11 @@ package org.vaadin.firitin.fields;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.function.SerializableSupplier;
-import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.shared.util.SharedUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.datepicker.VDatePicker;
 import org.vaadin.firitin.components.datetimepicker.VDateTimePicker;
@@ -31,7 +24,6 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.introspect.BasicBeanDescription;
 import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -129,9 +121,7 @@ public class ElementCollectionField<T> extends CustomField<List<T>> {
      * @return a string to be used as a header in the editor
      */
     protected String getHeaderForField(String fieldName) {
-        return SharedUtil.capitalize(
-                SharedUtil.join(
-                        StringUtils.splitByCharacterTypeCamelCase(fieldName), " "));
+        return SharedUtil.camelCaseToHumanFriendly(fieldName);
     }
 
     /**

@@ -3,7 +3,6 @@ package org.vaadin.firitin.fields;
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.vaadin.firitin.components.textfield.VTextField;
 
 import java.time.Duration;
@@ -75,11 +74,16 @@ public class DurationField extends CustomField<Duration> implements HasPlacehold
             return "";
         }
         long secs = d.get(ChronoUnit.SECONDS);
-        boolean hasSecs = (secs % 60) != 0;
-        if (hasSecs) {
-            return DurationFormatUtils.formatDuration(secs * 1000, "H:mm:ss", true);
+        boolean includeSeconds = (secs % 60) != 0;
+
+        long hours = d.toHours();
+        int minutes = d.toMinutesPart();
+        int seconds = d.toSecondsPart();
+
+        if (includeSeconds) {
+            return String.format("%d:%02d:%02d", hours, minutes, seconds);
         } else {
-            return DurationFormatUtils.formatDuration(secs * 1000, "H:mm", true);
+            return String.format("%d:%02d", hours, minutes);
         }
     }
 
