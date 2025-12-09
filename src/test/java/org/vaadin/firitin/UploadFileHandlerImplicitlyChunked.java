@@ -18,11 +18,11 @@ package org.vaadin.firitin;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.vaadin.firitin.components.upload.UploadFileHandler;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,11 +41,11 @@ public class UploadFileHandlerImplicitlyChunked extends VerticalLayout {
         done by the front-proxy, e.g. nginx, which has a default limit of 1 MB. To apply
         chunked mode, use docker compose file from project root ./nginx-proxy/ and then
         access this app server via port 9997. If you for e.g. upload a 20MB file,
-        you will see that the upload is done in chunks on the brosers "inspector", 
+        you will see that the upload is done in chunks on the brosers "inspector",
         but via direct port 9998 there is only one request. For the API user, there is no differrece.
         """);
 
-        MutableInt lineCount = new MutableInt(0);
+        AtomicInteger lineCount = new AtomicInteger(0);
 
         UploadFileHandler multiUploadFileHandler = new UploadFileHandler( (content, metadata) -> {
 
@@ -62,9 +62,9 @@ public class UploadFileHandlerImplicitlyChunked extends VerticalLayout {
                                 System.out.println("Found a line break in file " + metadata.fileName() + " at " + Instant.now());
                             }
                         }
-                        lineCount.add(count);
+                        lineCount.addAndGet(count);
                         String msg = "Counted " + lineCount + "lines. Last file name " + metadata.fileName() + " folderpath: " + metadata.folderPath();
-                        lineCount.setValue(0);
+                        lineCount.set(0);
                         return () -> Notification.show(msg);
                     } catch (IOException ex) {
                         Logger.getLogger(UploadFileHandlerImplicitlyChunked.class.getName()).log(Level.SEVERE, null, ex);

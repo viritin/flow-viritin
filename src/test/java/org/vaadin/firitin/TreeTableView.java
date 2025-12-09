@@ -7,7 +7,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.vaadin.firitin.components.TreeTable;
 import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
 
@@ -23,6 +22,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 @Route
@@ -125,7 +125,7 @@ public class TreeTableView extends VerticalLayout {
          */
         public static Stream<Path> streamPaths(int offset, int limit, TreeTable.OpenModel<Path> model) {
             ArrayList<Path> page = new ArrayList<>();
-            MutableInt skipped = new MutableInt(0);
+            AtomicInteger skipped = new AtomicInteger(0);
             try {
                 Files.walkFileTree(root, new FileVisitor<>() {
 
@@ -139,8 +139,8 @@ public class TreeTableView extends VerticalLayout {
 
                         boolean open = dir == root || model.isOpen(dir);
 
-                        if (skipped.intValue() < offset) {
-                            skipped.increment();
+                        if (skipped.get() < offset) {
+                            skipped.incrementAndGet();
                             return open ? FileVisitResult.CONTINUE : FileVisitResult.SKIP_SUBTREE;
                         }
                         if (page.size() >= limit) {
@@ -154,8 +154,8 @@ public class TreeTableView extends VerticalLayout {
 
                     @Override
                     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                        if (skipped.intValue() < offset) {
-                            skipped.increment();
+                        if (skipped.get() < offset) {
+                            skipped.incrementAndGet();
                             return FileVisitResult.CONTINUE;
                         }
                         if (page.size() >= limit) {

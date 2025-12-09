@@ -13,7 +13,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.shared.util.SharedUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.datepicker.VDatePicker;
 import org.vaadin.firitin.components.datetimepicker.VDateTimePicker;
@@ -129,9 +128,7 @@ public class ElementCollectionField<T> extends CustomField<List<T>> {
      * @return a string to be used as a header in the editor
      */
     protected String getHeaderForField(String fieldName) {
-        return SharedUtil.capitalize(
-                SharedUtil.join(
-                        StringUtils.splitByCharacterTypeCamelCase(fieldName), " "));
+        return SharedUtil.camelCaseToHumanFriendly(fieldName);
     }
 
     /**

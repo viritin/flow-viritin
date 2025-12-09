@@ -23,7 +23,6 @@ import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.ui.LoadMode;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.vaadin.firitin.components.RichText;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 
@@ -74,12 +73,12 @@ public class RichTextExample extends VVerticalLayout {
 
         // even though adding a large content, RichText don't consume memory
         // in the user session
-        add(new RichText(RandomStringUtils.randomAlphabetic(100000)));
+        add(new RichText(generateRandomAlphabetic(100000)));
 
         // for this you could call getText and get meaningful return value,
         // but this consumes 100kB of (uncompressed) memory, while users
         // session is active
-        add(new RichText().setRichTextAndSaveReference(RandomStringUtils.randomAlphabetic(100000)));
+        add(new RichText().setRichTextAndSaveReference(generateRandomAlphabetic(100000)));
 
 
         add(new Button("Try with JS MarkdownIT (default without flexmark dependency)", e -> {
@@ -140,6 +139,14 @@ public class RichTextExample extends VVerticalLayout {
 
         }));
 
+    }
+
+    private static String generateRandomAlphabetic(int length) {
+        Random random = new Random();
+        return random.ints('a', 'z' + 1)
+                .limit(length)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
     }
 
 }

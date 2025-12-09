@@ -23,7 +23,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.router.Route;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.upload.UploadFileHandler;
 
@@ -34,6 +33,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,7 +51,7 @@ public class UploadFileHandleFolderDD extends VerticalLayout {
         Paragraph liveLogger = new Paragraph("...");
         UI ui = UI.getCurrent();
 
-        MutableInt lineCount = new MutableInt(0);
+        AtomicInteger lineCount = new AtomicInteger(0);
 
         UploadFileHandler multiUploadFileHandler = new UploadFileHandler( (content, metadata) ->{
                     try {
@@ -62,7 +62,7 @@ public class UploadFileHandleFolderDD extends VerticalLayout {
                                 count++;
                             }
                         }
-                        lineCount.add(count);
+                        lineCount.addAndGet(count);
                         String msg = "Counted " + lineCount + "lines so far. Last file name " + metadata.fileName() + " folderpath: " + metadata.folderPath();
                         return () -> Notification.show(msg);
                     } catch (IOException ex) {

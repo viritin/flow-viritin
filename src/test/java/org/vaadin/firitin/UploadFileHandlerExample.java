@@ -31,10 +31,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.upload.UploadFileHandler;
 
@@ -79,7 +79,7 @@ public class UploadFileHandlerExample extends VerticalLayout {
                     }
                 });
 
-        MutableInt lineCount = new MutableInt(0);
+        AtomicInteger lineCount = new AtomicInteger(0);
 
         UploadFileHandler multiUploadFileHandler = new UploadFileHandler(
                 (InputStream content, String fileName, String mimeType) -> {
@@ -91,7 +91,7 @@ public class UploadFileHandlerExample extends VerticalLayout {
                                 count++;
                             }
                         }
-                        lineCount.add(count);
+                        lineCount.addAndGet(count);
                         String msg = "Counted " + lineCount + "lines so far. Last file name " + fileName;
                         getUI().get().access(() -> Notification.show(msg));
                     } catch (IOException ex) {
