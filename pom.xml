@@ -14,10 +14,10 @@
     <version>3.0.0-SNAPSHOT</version>
     <name>Flow Viritin</name>
     <packaging>jar</packaging>
-    <description>General purpose helpers for Vaadin Flow users.</description>
+    <description>General purpose helpers for Vaadin users. Java only additions, that don't require custom client-bundle.</description>
 
     <properties>
-        <vaadin.version>25.0.0-beta9</vaadin.version>
+        <vaadin.version>25.0.0-rc1</vaadin.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

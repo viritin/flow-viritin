@@ -17,7 +17,6 @@ import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.util.SharedUtil;
-import com.vaadin.signals.Signal;
 import org.vaadin.firitin.fluency.ui.FluentComponent;
 import org.vaadin.firitin.fluency.ui.FluentFocusable;
 import org.vaadin.firitin.fluency.ui.FluentHasSize;
@@ -437,10 +436,6 @@ public class VGrid<T> extends Grid<T>
                     return styleRules.keySet().stream();
                 }
 
-                @Override
-                public Style bind(String name, Signal<String> signal) {
-                    return null;
-                }
             };
             rowStyler.styleRow(t, style);
             if (styleRules.isEmpty()) {
@@ -670,10 +665,6 @@ public class VGrid<T> extends Grid<T>
                     return customStyle.getNames();
                 }
 
-                @Override
-                public Style bind(String name, Signal<String> signal) {
-                    return null;
-                }
             };
 
             return customStyle;
