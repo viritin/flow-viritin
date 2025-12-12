@@ -13,7 +13,10 @@ import java.util.concurrent.CompletableFuture;
  * and wrapped into a promise, either using Promise with resolve
  * and reject exposed to your script body or using an anonymous
  * async function.
+ *
+ * @deprecated Vaadin core should support everything this does these days.
  */
+@Deprecated(forRemoval = true)
 public class JsPromise {
 
     private static final ObjectMapper jackson = new ObjectMapper();
@@ -27,6 +30,7 @@ public class JsPromise {
      * @param args        the extra arguments interpolated into JS as in Element.executeJs
      * @return the string as {@link CompletableFuture}
      */
+    @Deprecated(forRemoval = true)
     public static CompletableFuture<String> resolveString(String promiseBody, Serializable... args) {
         return resolve(promiseBody, String.class, args);
     }
@@ -40,6 +44,7 @@ public class JsPromise {
      * @param args            the extra arguments interpolated into JS as in Element.executeJs
      * @return the future to get the value
      */
+    @Deprecated(forRemoval = true)
     public static CompletableFuture<String> computeString(String asyncMethodBody, Serializable... args) {
         return compute(asyncMethodBody, String.class, args);
     }
@@ -53,6 +58,7 @@ public class JsPromise {
      * @param args            the extra arguments interpolated into JS as in Element.executeJs
      * @return the future to get the value
      */
+    @Deprecated(forRemoval = true)
     public static CompletableFuture<Integer> computeInteger(String asyncMethodBody, Serializable... args) {
         return compute(asyncMethodBody, Integer.class, args);
     }
@@ -66,6 +72,7 @@ public class JsPromise {
      * @param args            the extra arguments interpolated into JS as in Element.executeJs
      * @return the future to get the value
      */
+    @Deprecated(forRemoval = true)
     public static CompletableFuture<Double> computeDouble(String asyncMethodBody, Serializable... args) {
         return compute(asyncMethodBody, Double.class, args);
     }
@@ -79,6 +86,7 @@ public class JsPromise {
      * @param args            the extra arguments interpolated into JS as in Element.executeJs
      * @return the future to get the value
      */
+    @Deprecated(forRemoval = true)
     public static CompletableFuture<Boolean> computeBoolean(String asyncMethodBody, Serializable... args) {
         return compute(asyncMethodBody, Boolean.class, args);
     }
@@ -92,6 +100,7 @@ public class JsPromise {
      * @param args        the extra arguments interpolated into JS as in Element.executeJs
      * @return the boolean as {@link CompletableFuture}
      */
+    @Deprecated(forRemoval = true)
     public static CompletableFuture<Boolean> resolveBoolean(String promiseBody, Serializable... args) {
         return resolve(promiseBody, Boolean.class, args);
     }
@@ -105,6 +114,7 @@ public class JsPromise {
      * @param args        the extra arguments interpolated into JS as in Element.executeJs
      * @return the integer as {@link CompletableFuture}
      */
+    @Deprecated(forRemoval = true)
     public static CompletableFuture<Integer> resolveInteger(String promiseBody, Serializable... args) {
         return resolve(promiseBody, Integer.class, args);
     }
@@ -118,6 +128,7 @@ public class JsPromise {
      * @param args        the extra arguments interpolated into JS as in Element.executeJs
      * @return the double as {@link CompletableFuture}
      */
+    @Deprecated(forRemoval = true)
     public static CompletableFuture<Double> resolveDouble(String promiseBody, Serializable... args) {
         return resolve(promiseBody, Double.class, args);
     }
@@ -133,6 +144,7 @@ public class JsPromise {
      * @param args        the extra arguments interpolated into JS as in Element.executeJs
      * @return the future to get the value
      */
+    @Deprecated(forRemoval = true)
     public static <T> CompletableFuture<T> resolve(String promiseBody, Class<T> returnType, Serializable... args) {
         CompletableFuture<T> future = new CompletableFuture<>();
         UI current = UI.getCurrent();
@@ -189,6 +201,7 @@ public class JsPromise {
      * @param <T>             the return type, if not a basic data type, the return parameter in browser is expected to be JSON that is then mapped to given type with Jackson
      * @return the future to get the value
      */
+    @Deprecated(forRemoval = true)
     public static <T> CompletableFuture<T> compute(String asyncMethodBody, Class<T> returnType, Serializable... args) {
         CompletableFuture<T> future = new CompletableFuture<>();
         UI current = UI.getCurrent();
