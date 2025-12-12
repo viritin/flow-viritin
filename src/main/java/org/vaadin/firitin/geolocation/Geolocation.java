@@ -139,7 +139,7 @@ public class Geolocation {
 
         geolocation.geoupdate = eventSourceElement.addEventListener("geoupdate", e -> {
             try {
-                GeolocationEvent geolocationEvent = e.getEventData(GeolocationEvent.class);
+                GeolocationEvent geolocationEvent = e.getEventDetail(GeolocationEvent.class);
                 listener.geolocationUpdate(geolocationEvent);
                 if(get) {
                     geolocation.clearListeners();
@@ -160,7 +160,8 @@ public class Geolocation {
         });
         geolocation.geoerror.addEventDetail();
         ui.getElement().executeJs("""
-                var el = $1;
+                const el = $1;
+                const options = $0;
                 return navigator.geolocation.""" + method + """
                 (
                         p => {
@@ -171,8 +172,7 @@ public class Geolocation {
                             timestamp = timestamp + 978307200000;
                           }
                           const event = new CustomEvent('geoupdate', {
-                            detail: JSON.stringify(
-                             {
+                            detail: {
                                  coords : {
                                      longitude : p.coords.longitude,
                                      latitude : p.coords.latitude,
@@ -183,7 +183,7 @@ public class Geolocation {
                                      speed : p.coords.speed
                                  },
                                  timestamp: timestamp
-                             })
+                            }
                          });
                          el.dispatchEvent(event);
                        },
@@ -191,7 +191,7 @@ public class Geolocation {
                          const event = new CustomEvent('geoerror', {detail: {code: e.code, message: e.message}});
                          el.dispatchEvent(event);
                        },
-                       $0
+                       options
                      );
                 """
                  , options, eventSourceElement).then(Integer.class, s -> geolocation.setId(s));
