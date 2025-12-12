@@ -8,7 +8,10 @@ import com.vaadin.flow.component.UI;
  * client side, instead of e.g. database on the server. An
  * example could be certain UI settings that the same users
  * might want to have set differently based on their device.
+ *
+ * @deprecated Available as pretty much such in Vaadin core.
  */
+@Deprecated(forRemoval = true)
 public class WebStorage {
 
     public enum Storage {
@@ -32,6 +35,7 @@ public class WebStorage {
      * @param key   the key
      * @param value the value
      */
+    @Deprecated(forRemoval = true)
     public static void setItem(String key, String value) {
         setItem(Storage.localStorage, key, value);
     }
@@ -43,6 +47,7 @@ public class WebStorage {
      * @param key     the key
      * @param value   the value
      */
+    @Deprecated(forRemoval = true)
     public static void setItem(Storage storage, String key, String value) {
         setItem(UI.getCurrent(), storage, key, value);
     }
@@ -55,6 +60,7 @@ public class WebStorage {
      * @param key     the key
      * @param value   the value
      */
+    @Deprecated(forRemoval = true)
     public static void setItem(UI ui, Storage storage, String key, String value) {
         ui.getPage().executeJs("window[$0].setItem($1,$2)", storage.toString(), key, value);
     }
@@ -64,6 +70,7 @@ public class WebStorage {
      *
      * @param key the key to be deleted
      */
+    @Deprecated(forRemoval = true)
     public static void removeItem(String key) {
         removeItem(Storage.localStorage, key);
     }
@@ -74,6 +81,7 @@ public class WebStorage {
      * @param storage the storage type from which the value will be removed
      * @param key     the key to be deleted
      */
+    @Deprecated(forRemoval = true)
     public static void removeItem(Storage storage, String key) {
         removeItem(UI.getCurrent(), storage, key);
     }
@@ -85,6 +93,7 @@ public class WebStorage {
      * @param storage the storage type from which the value will be removed
      * @param key     the key to be deleted
      */
+    @Deprecated(forRemoval = true)
     public static void removeItem(UI ui, Storage storage, String key) {
         ui.getPage().executeJs("window[$0].removeItem($1)", storage.toString(), key);
     }
@@ -92,6 +101,7 @@ public class WebStorage {
     /**
      * Clears all values from the Storage.localStorage
      */
+    @Deprecated(forRemoval = true)
     public static void clear() {
         clear(Storage.localStorage);
     }
@@ -111,6 +121,7 @@ public class WebStorage {
      * @param ui      the UI for which the storage is related to
      * @param storage the storage
      */
+    @Deprecated(forRemoval = true)
     public static void clear(UI ui, Storage storage) {
         ui.getPage().executeJs("window[$0].clear()", storage.toString());
     }
@@ -121,6 +132,7 @@ public class WebStorage {
      * @param key      the key for which the value will be fetched
      * @param callback the callback that gets the value once transferred from the client side
      */
+    @Deprecated(forRemoval = true)
     public static void getItem(String key, Callback callback) {
         getItem(Storage.localStorage, key, callback);
     }
@@ -132,6 +144,7 @@ public class WebStorage {
      * @param key      the key for which the value will be fetched
      * @param callback the callback that gets the value once transferred from the client side
      */
+    @Deprecated(forRemoval = true)
     public static void getItem(Storage storage, String key, Callback callback) {
         getItem(UI.getCurrent(), storage, key, callback);
     }
@@ -144,6 +157,7 @@ public class WebStorage {
      * @param key      the key for which the value will be fetched
      * @param callback the callback that gets the value once transferred from the client side
      */
+    @Deprecated(forRemoval = true)
     public static void getItem(UI ui, Storage storage, String key, Callback callback) {
         ui.getPage()
                 .executeJs("return window[$0].getItem($1);", storage.toString(), key)
