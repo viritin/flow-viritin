@@ -32,7 +32,10 @@ import org.vaadin.firitin.components.datepicker.VDatePicker;
  * Currently allows only 24h hh:mm presentation for time part.
  *
  * @author mstahv
+ *
+ * @deprecated Vaadin ships with a built-in component these days.
  */
+@Deprecated(forRemoval = true)
 public class LocalDateTimeField extends CustomField<LocalDateTime> {
 
     private DatePicker datePicker = new VDatePicker();
