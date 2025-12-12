@@ -24,7 +24,7 @@ public class BullShitLayout extends Div {
     public BullShitLayout() {
         addClassNames(
                 LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
-                "mdgrid", // note, a typo in utility classes, this will be broken soon: https://github.com/vaadin/web-components/pull/7416
+                "md:grid",
                 LumoUtility.Grid.Column.COLUMNS_12
         );
         setWidthFull();
