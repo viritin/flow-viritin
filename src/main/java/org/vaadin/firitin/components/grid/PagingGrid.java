@@ -89,7 +89,11 @@ public class PagingGrid<T> extends VGrid<T> {
         if (paginationBar == null) {
             paginationBar = new PaginationBar(null);
         } else {
+            // TODO figure out if could just reset always
             paginationBar.size = null;
+            paginationBar.pages = null;
+            paginationBar.currentPage = 0;
+            paginationBar.updateState();
         }
         if(getColumns().isEmpty()) {
             // no columns yet, we'll add the pagination bar later
