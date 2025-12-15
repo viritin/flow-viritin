@@ -301,6 +301,7 @@ public class PagingGrid<T> extends VGrid<T> {
             } else {
                 last.setEnabled(false);
                 next.setEnabled(true);
+                status.setVisible(true);
                 status.setText(statusMessage.format(new Object[]{
                         (currentPage + 1),
                         getPageSize()
