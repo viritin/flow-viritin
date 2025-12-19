@@ -169,7 +169,7 @@ public class UploadFileHandlerExample extends VerticalLayout {
         public UploadExamplesI18N() {
             setDropFiles(new DropFiles().setOne("-> HERE <--")
                     .setMany("-> HERE <--"));
-            setAddFiles(new AddFiles().setOne("Upload File...")
+            setAddFiles(new AddFiles().setOne("Lataa CSV...")
                     .setMany("Upload Files..."));
             setError(new Error().setTooManyFiles("Too Many Files.")
                     .setFileIsTooBig("File is Too Big.")

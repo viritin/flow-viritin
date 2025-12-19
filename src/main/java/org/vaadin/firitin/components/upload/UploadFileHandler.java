@@ -788,12 +788,6 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
     }
 
     private void setI18nWithJS() {
-        ObjectNode i18nJson = (ObjectNode) JacksonSerializer.toJson(this.i18n);
-
-        // Remove null values so that we don't overwrite existing WC
-        // translations with empty ones
-        deeplyRemoveNullValuesFromJsonObject(i18nJson);
-
         // Assign new I18N object to WC, by deeply merging the existing
         // WC I18N, and the values from the new UploadI18N instance,
         // into an empty object
@@ -811,17 +805,7 @@ public class UploadFileHandler extends Component implements FluentComponent<Uplo
                 + "this.i18n = Object.assign({}, this.i18n, $0, {"
                 + "  addFiles: addFiles,  dropFiles: dropFiles,"
                 + "  uploading: uploading, units: units});",
-                i18nJson);
-    }
-
-    private void deeplyRemoveNullValuesFromJsonObject(ObjectNode objectNode) {
-        for (Map.Entry<String, JsonNode> entry : objectNode.properties()) {
-            if (entry.getValue().isObject()) {
-                deeplyRemoveNullValuesFromJsonObject((ObjectNode) entry.getValue());
-            } else if (entry.getValue().isNull()) {
-                objectNode.remove(entry.getKey());
-            }
-        }
+                i18n);
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
