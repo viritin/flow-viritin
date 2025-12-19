@@ -17,7 +17,7 @@
     <description>General purpose helpers for Vaadin users. Java only additions, that don't require custom client-bundle.</description>
 
     <properties>
-        <vaadin.version>25.0.0-rc1</vaadin.version>
+        <vaadin.version>25.0.0</vaadin.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
