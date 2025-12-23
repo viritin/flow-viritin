@@ -11,7 +11,7 @@
 
     <groupId>in.virit</groupId>
     <artifactId>viritin</artifactId>
-    <version>3.0.2-SNAPSHOT</version>
+    <version>3.1.0-SNAPSHOT</version>
     <name>Flow Viritin</name>
     <packaging>jar</packaging>
     <description>General purpose helpers for Vaadin users. Java only additions, that don't require custom client-bundle.</description>
@@ -72,6 +72,13 @@
             <scope>test</scope>
         </dependency>
          -->
+
+        <dependency>
+            <groupId>org.parttio</groupId>
+            <artifactId>colorful</artifactId>
+            <version>2.0.0</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>commons-beanutils</groupId>
