@@ -10,6 +10,8 @@ import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 import org.vaadin.firitin.element.svg.CircleElement;
 import org.vaadin.firitin.element.svg.EllipseElement;
 import org.vaadin.firitin.element.svg.LineElement;
+import org.vaadin.firitin.element.svg.PathElement;
+import org.vaadin.firitin.element.svg.PolygonElement;
 import org.vaadin.firitin.element.svg.RectElement;
 
 /**
@@ -23,18 +25,26 @@ public class SvgShapesTestView extends VVerticalLayout {
 
         add(new H3("Basic Shapes"));
         add(new VHorizontalLayout(
-                createRectDemo(),
-                createCircleDemo(),
-                createEllipseDemo(),
-                createLineDemo()
+                new RectDemo(),
+                new CircleDemo(),
+                new EllipseDemo(),
+                new LineDemo()
+        ));
+
+        add(new H3("Path and Polygon Shapes"));
+        add(new VHorizontalLayout(
+                new HeartPathDemo(),
+                new PolygonDemo(),
+                new StarDemo()
         ));
 
         add(new H3("Combined Example: Simple Diagram"));
-        add(createDiagramDemo());
+        add(new FlowDiagram());
     }
 
-    private VSvg createRectDemo() {
-        return new VSvg(0, 0, 100, 100) {{
+    static class RectDemo extends VSvg {
+        RectDemo() {
+            super(0, 0, 100, 100);
             setWidth("150px");
             setHeight("150px");
             getStyle().setBorder("1px solid #ccc");
@@ -50,11 +60,12 @@ public class SvgShapesTestView extends VVerticalLayout {
             label.setFill(NamedColor.WHITE);
 
             getElement().appendChild(rect, label);
-        }};
+        }
     }
 
-    private VSvg createCircleDemo() {
-        return new VSvg(0, 0, 100, 100) {{
+    static class CircleDemo extends VSvg {
+        CircleDemo() {
+            super(0, 0, 100, 100);
             setWidth("150px");
             setHeight("150px");
             getStyle().setBorder("1px solid #ccc");
@@ -70,11 +81,12 @@ public class SvgShapesTestView extends VVerticalLayout {
             innerCircle.setFill(NamedColor.WHITE);
 
             getElement().appendChild(circle, innerCircle);
-        }};
+        }
     }
 
-    private VSvg createEllipseDemo() {
-        return new VSvg(0, 0, 100, 100) {{
+    static class EllipseDemo extends VSvg {
+        EllipseDemo() {
+            super(0, 0, 100, 100);
             setWidth("150px");
             setHeight("150px");
             getStyle().setBorder("1px solid #ccc");
@@ -90,11 +102,12 @@ public class SvgShapesTestView extends VVerticalLayout {
             verticalEllipse.setFill(NamedColor.PALEGREEN);
 
             getElement().appendChild(ellipse, verticalEllipse);
-        }};
+        }
     }
 
-    private VSvg createLineDemo() {
-        return new VSvg(0, 0, 100, 100) {{
+    static class LineDemo extends VSvg {
+        LineDemo() {
+            super(0, 0, 100, 100);
             setWidth("150px");
             setHeight("150px");
             getStyle().setBorder("1px solid #ccc");
@@ -120,34 +133,93 @@ public class SvgShapesTestView extends VVerticalLayout {
                     .strokeWidth(2);
 
             getElement().appendChild(line1, line2, line3, line4);
-        }};
+        }
     }
 
-    private VSvg createDiagramDemo() {
-        return new VSvg(0, 0, 300, 150) {{
+    static class HeartPathDemo extends VSvg {
+        HeartPathDemo() {
+            super(0, 0, 100, 100);
+            setWidth("150px");
+            setHeight("150px");
+            getStyle().setBorder("1px solid #ccc");
+
+            var heart = new PathElement()
+                    .moveTo(50, 30)
+                    .cubicBezierTo(50, 25, 45, 15, 30, 15)
+                    .cubicBezierTo(10, 15, 10, 40, 10, 40)
+                    .cubicBezierTo(10, 55, 25, 70, 50, 85)
+                    .cubicBezierTo(75, 70, 90, 55, 90, 40)
+                    .cubicBezierTo(90, 40, 90, 15, 70, 15)
+                    .cubicBezierTo(55, 15, 50, 25, 50, 30)
+                    .closePath()
+                    .fill(NamedColor.CRIMSON);
+
+            getElement().appendChild(heart);
+        }
+    }
+
+    static class PolygonDemo extends VSvg {
+        PolygonDemo() {
+            super(0, 0, 100, 100);
+            setWidth("150px");
+            setHeight("150px");
+            getStyle().setBorder("1px solid #ccc");
+
+            var triangle = new PolygonElement()
+                    .triangle(50, 10, 10, 60, 90, 60)
+                    .fill(NamedColor.DODGERBLUE)
+                    .stroke(NamedColor.DARKBLUE)
+                    .strokeWidth(2);
+
+            var hexagon = new PolygonElement()
+                    .regularPolygon(50, 75, 20, 6)
+                    .fill(NamedColor.GOLD)
+                    .stroke(NamedColor.DARKORANGE)
+                    .strokeWidth(2);
+
+            getElement().appendChild(triangle, hexagon);
+        }
+    }
+
+    static class StarDemo extends VSvg {
+        StarDemo() {
+            super(0, 0, 100, 100);
+            setWidth("150px");
+            setHeight("150px");
+            getStyle().setBorder("1px solid #ccc");
+
+            var star = new PolygonElement()
+                    .star(50, 50, 45, 20, 5)
+                    .fill(NamedColor.GOLD)
+                    .stroke(NamedColor.DARKORANGE)
+                    .strokeWidth(2);
+
+            getElement().appendChild(star);
+        }
+    }
+
+    static class FlowDiagram extends VSvg {
+        FlowDiagram() {
+            super(0, 0, 300, 150);
             setWidth("450px");
             setHeight("225px");
             getStyle().setBorder("1px solid #ccc");
 
-            // Box 1
             var box1 = new RectElement()
                     .bounds(20, 50, 60, 40)
                     .cornerRadius(5);
             box1.setFill(NamedColor.LIGHTBLUE);
 
-            // Box 2
             var box2 = new RectElement()
                     .bounds(120, 50, 60, 40)
                     .cornerRadius(5);
             box2.setFill(NamedColor.LIGHTGREEN);
 
-            // Box 3
             var box3 = new RectElement()
                     .bounds(220, 50, 60, 40)
                     .cornerRadius(5);
             box3.setFill(NamedColor.LIGHTSALMON);
 
-            // Connecting lines
             var line1 = new LineElement()
                     .from(80, 70).to(120, 70)
                     .stroke(NamedColor.GRAY)
@@ -158,7 +230,6 @@ public class SvgShapesTestView extends VVerticalLayout {
                     .stroke(NamedColor.GRAY)
                     .strokeWidth(2);
 
-            // Arrow heads (using small lines)
             var arrow1a = new LineElement()
                     .from(115, 65).to(120, 70)
                     .stroke(NamedColor.GRAY)
@@ -177,7 +248,6 @@ public class SvgShapesTestView extends VVerticalLayout {
                     .stroke(NamedColor.GRAY)
                     .strokeWidth(2);
 
-            // Status indicators (circles)
             var status1 = new CircleElement()
                     .center(50, 45)
                     .r(5);
@@ -199,6 +269,6 @@ public class SvgShapesTestView extends VVerticalLayout {
                     arrow1a, arrow1b, arrow2a, arrow2b,
                     status1, status2, status3
             );
-        }};
+        }
     }
 }
