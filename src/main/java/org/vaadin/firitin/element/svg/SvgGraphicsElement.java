@@ -295,15 +295,140 @@ public class SvgGraphicsElement extends SvgElement {
      * Sets a clipping path for this element.
      * <p>
      * Parts of the element outside the clipping region will not be rendered.
+     * An ID is automatically generated for the clip path if not already set.
      * </p>
      *
-     * @param clipPathId the ID of the clip path element (without #)
+     * @param clipPath the clip path element
      * @return this element for method chaining
      */
     @SuppressWarnings("unchecked")
-    public <T extends SvgGraphicsElement> T clipPath(String clipPathId) {
-        setAttribute("clip-path", "url(#" + clipPathId + ")");
+    public <T extends SvgGraphicsElement> T clipPath(ClipPathElement clipPath) {
+        setAttribute("clip-path", "url(#" + ensureId(clipPath) + ")");
         return (T) this;
+    }
+
+    /**
+     * Sets a mask for this element.
+     * <p>
+     * The mask controls the transparency of the element based on
+     * the luminance or alpha values of the mask contents.
+     * An ID is automatically generated for the mask if not already set.
+     * </p>
+     *
+     * @param mask the mask element
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T mask(MaskElement mask) {
+        setAttribute("mask", "url(#" + ensureId(mask) + ")");
+        return (T) this;
+    }
+
+    /**
+     * Sets the fill to use a gradient.
+     * <p>
+     * An ID is automatically generated for the gradient if not already set.
+     * </p>
+     *
+     * @param gradient the gradient element (linear or radial)
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T fill(LinearGradientElement gradient) {
+        setAttribute("fill", "url(#" + ensureId(gradient) + ")");
+        return (T) this;
+    }
+
+    /**
+     * Sets the fill to use a radial gradient.
+     * <p>
+     * An ID is automatically generated for the gradient if not already set.
+     * </p>
+     *
+     * @param gradient the radial gradient element
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T fill(RadialGradientElement gradient) {
+        setAttribute("fill", "url(#" + ensureId(gradient) + ")");
+        return (T) this;
+    }
+
+    /**
+     * Sets the fill to use a pattern.
+     * <p>
+     * An ID is automatically generated for the pattern if not already set.
+     * </p>
+     *
+     * @param pattern the pattern element
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T fill(PatternElement pattern) {
+        setAttribute("fill", "url(#" + ensureId(pattern) + ")");
+        return (T) this;
+    }
+
+    /**
+     * Sets the stroke to use a gradient.
+     * <p>
+     * An ID is automatically generated for the gradient if not already set.
+     * </p>
+     *
+     * @param gradient the gradient element
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T stroke(LinearGradientElement gradient) {
+        setAttribute("stroke", "url(#" + ensureId(gradient) + ")");
+        return (T) this;
+    }
+
+    /**
+     * Sets the stroke to use a radial gradient.
+     * <p>
+     * An ID is automatically generated for the gradient if not already set.
+     * </p>
+     *
+     * @param gradient the radial gradient element
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T stroke(RadialGradientElement gradient) {
+        setAttribute("stroke", "url(#" + ensureId(gradient) + ")");
+        return (T) this;
+    }
+
+    /**
+     * Sets the stroke to use a pattern.
+     * <p>
+     * An ID is automatically generated for the pattern if not already set.
+     * </p>
+     *
+     * @param pattern the pattern element
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T stroke(PatternElement pattern) {
+        setAttribute("stroke", "url(#" + ensureId(pattern) + ")");
+        return (T) this;
+    }
+
+    private static int idCounter = 0;
+
+    /**
+     * Ensures the element has an ID, generating one if necessary.
+     *
+     * @param element the element to check
+     * @return the element's ID
+     */
+    private static String ensureId(SvgElement element) {
+        String id = element.getAttribute("id");
+        if (id == null || id.isEmpty()) {
+            id = "svg-auto-" + (++idCounter);
+            element.setAttribute("id", id);
+        }
+        return id;
     }
 
     // ========== Transform Attributes ==========

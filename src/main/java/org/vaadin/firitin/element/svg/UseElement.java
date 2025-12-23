@@ -16,22 +16,37 @@ package org.vaadin.firitin.element.svg;
  */
 public class UseElement extends SvgGraphicsElement {
 
+    private static int idCounter = 0;
+
     public UseElement() {
         super("use");
     }
 
     /**
-     * Creates a use element referencing the element with the given ID.
+     * Creates a use element referencing the given element.
+     * An ID is automatically generated for the referenced element if not already set.
      *
-     * @param elementId the ID of the element to reference (without #)
+     * @param element the element to reference (typically a SymbolElement)
      */
-    public UseElement(String elementId) {
+    public UseElement(SvgElement element) {
         super("use");
-        href("#" + elementId);
+        ref(element);
     }
 
     /**
-     * Sets the href attribute to reference another element.
+     * Sets the reference to the given element.
+     * An ID is automatically generated for the referenced element if not already set.
+     *
+     * @param element the element to reference
+     * @return this element for method chaining
+     */
+    public UseElement ref(SvgElement element) {
+        setAttribute("href", "#" + ensureId(element));
+        return this;
+    }
+
+    /**
+     * Sets the href attribute to reference another element by ID.
      *
      * @param href the reference URL (e.g., "#myElement" or "sprites.svg#icon")
      * @return this element for method chaining
@@ -39,6 +54,15 @@ public class UseElement extends SvgGraphicsElement {
     public UseElement href(String href) {
         setAttribute("href", href);
         return this;
+    }
+
+    private static String ensureId(SvgElement element) {
+        String id = element.getAttribute("id");
+        if (id == null || id.isEmpty()) {
+            id = "svg-use-" + (++idCounter);
+            element.setAttribute("id", id);
+        }
+        return id;
     }
 
     /**

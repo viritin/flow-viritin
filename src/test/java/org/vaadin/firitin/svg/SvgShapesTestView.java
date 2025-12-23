@@ -15,14 +15,18 @@ import org.vaadin.firitin.element.svg.GElement;
 import org.vaadin.firitin.element.svg.ImageElement;
 import org.vaadin.firitin.element.svg.LineElement;
 import org.vaadin.firitin.element.svg.LinearGradientElement;
+import org.vaadin.firitin.element.svg.MaskElement;
 import org.vaadin.firitin.element.svg.PathElement;
+import org.vaadin.firitin.element.svg.PatternElement;
 import org.vaadin.firitin.element.svg.PolygonElement;
 import org.vaadin.firitin.element.svg.PolylineElement;
 import org.vaadin.firitin.element.svg.RadialGradientElement;
 import org.vaadin.firitin.element.svg.RectElement;
 import org.vaadin.firitin.element.svg.SvgGraphicsElement;
 import org.vaadin.firitin.element.svg.SymbolElement;
+import org.vaadin.firitin.element.svg.TSpanElement;
 import org.vaadin.firitin.element.svg.TextElement;
+import org.vaadin.firitin.element.svg.TextPathElement;
 import org.vaadin.firitin.element.svg.UseElement;
 
 /**
@@ -77,6 +81,18 @@ public class SvgShapesTestView extends VVerticalLayout {
         add(new H3("Image and Clipping"));
         add(new VHorizontalLayout(
                 new ImageClipDemo()
+        ));
+
+        add(new H3("Patterns and Masks"));
+        add(new VHorizontalLayout(
+                new PatternDemo(),
+                new MaskDemo()
+        ));
+
+        add(new H3("Advanced Text (TSpan, TextPath)"));
+        add(new VHorizontalLayout(
+                new TSpanDemo(),
+                new TextPathDemo()
         ));
 
         add(new H3("Combined Example: Simple Diagram"));
@@ -558,8 +574,8 @@ public class SvgShapesTestView extends VVerticalLayout {
             setHeight("150px");
             getStyle().setBorder("1px solid #ccc");
 
-            // Define a reusable star symbol
-            var starSymbol = new SymbolElement("myStar")
+            // Define a reusable star symbol (no manual ID needed)
+            var starSymbol = new SymbolElement()
                     .viewBox(0, 0, 100, 100)
                     .add(new PolygonElement()
                             .star(50, 50, 45, 20, 5)
@@ -567,8 +583,8 @@ public class SvgShapesTestView extends VVerticalLayout {
                             .stroke(NamedColor.DARKORANGE)
                             .strokeWidth(2));
 
-            // Define a reusable circle symbol
-            var circleSymbol = new SymbolElement("myCircle")
+            // Define a reusable circle symbol (no manual ID needed)
+            var circleSymbol = new SymbolElement()
                     .viewBox(0, 0, 100, 100)
                     .add(new CircleElement()
                             .center(50, 50)
@@ -580,14 +596,14 @@ public class SvgShapesTestView extends VVerticalLayout {
             // Put symbols in defs
             var defs = new DefsElement().add(starSymbol, circleSymbol);
 
-            // Use the symbols multiple times
-            var star1 = new UseElement("myStar").position(5, 5).size(40, 40);
-            var star2 = new UseElement("myStar").position(50, 30).size(30, 30);
-            var star3 = new UseElement("myStar").position(95, 5).size(50, 50);
+            // Use the symbols multiple times - pass element directly
+            var star1 = new UseElement(starSymbol).position(5, 5).size(40, 40);
+            var star2 = new UseElement(starSymbol).position(50, 30).size(30, 30);
+            var star3 = new UseElement(starSymbol).position(95, 5).size(50, 50);
 
-            var circle1 = new UseElement("myCircle").position(5, 55).size(40, 40);
-            var circle2 = new UseElement("myCircle").position(55, 55).size(40, 40);
-            var circle3 = new UseElement("myCircle").position(105, 55).size(40, 40);
+            var circle1 = new UseElement(circleSymbol).position(5, 55).size(40, 40);
+            var circle2 = new UseElement(circleSymbol).position(55, 55).size(40, 40);
+            var circle3 = new UseElement(circleSymbol).position(105, 55).size(40, 40);
 
             getElement().appendChild(defs, star1, star2, star3, circle1, circle2, circle3);
         }
@@ -600,42 +616,42 @@ public class SvgShapesTestView extends VVerticalLayout {
             setHeight("150px");
             getStyle().setBorder("1px solid #ccc");
 
-            // Linear gradient
-            var linearGrad = new LinearGradientElement("linearGrad")
+            // Linear gradient (no manual ID needed)
+            var linearGrad = new LinearGradientElement()
                     .horizontal()
                     .addStop(0, NamedColor.STEELBLUE)
                     .addStop(0.5, NamedColor.WHITE)
                     .addStop(1, NamedColor.CORAL);
 
-            // Radial gradient
-            var radialGrad = new RadialGradientElement("radialGrad")
+            // Radial gradient (no manual ID needed)
+            var radialGrad = new RadialGradientElement()
                     .addStop(0, NamedColor.YELLOW)
                     .addStop(0.5, NamedColor.ORANGE)
                     .addStop(1, NamedColor.RED);
 
-            // Vertical gradient
-            var verticalGrad = new LinearGradientElement("verticalGrad")
+            // Vertical gradient (no manual ID needed)
+            var verticalGrad = new LinearGradientElement()
                     .vertical()
                     .addStop(0, NamedColor.LIGHTGREEN)
                     .addStop(1, NamedColor.DARKGREEN);
 
             var defs = new DefsElement().add(linearGrad, radialGrad, verticalGrad);
 
-            // Shapes using gradients
+            // Shapes using gradients - pass elements directly
             var rect1 = new RectElement()
                     .bounds(5, 5, 65, 40)
                     .cornerRadius(5)
-                    .fill("url(#linearGrad)");
+                    .fill(linearGrad);
 
             var circle = new CircleElement()
                     .center(115, 25)
                     .r(20)
-                    .fill("url(#radialGrad)");
+                    .fill(radialGrad);
 
             var rect2 = new RectElement()
                     .bounds(5, 55, 140, 40)
                     .cornerRadius(5)
-                    .fill("url(#verticalGrad)");
+                    .fill(verticalGrad);
 
             getElement().appendChild(defs, rect1, circle, rect2);
         }
@@ -647,6 +663,14 @@ public class SvgShapesTestView extends VVerticalLayout {
             setWidth("225px");
             setHeight("150px");
             getStyle().setBorder("1px solid #ccc");
+
+            // Gradient for text (no manual ID needed)
+            var textGrad = new LinearGradientElement()
+                    .horizontal()
+                    .addStop(0, NamedColor.PURPLE)
+                    .addStop(1, NamedColor.ORANGE);
+
+            var defs = new DefsElement().add(textGrad);
 
             var text1 = new TextElement(10, 20, "Hello SVG!")
                     .fontSize(16)
@@ -666,14 +690,7 @@ public class SvgShapesTestView extends VVerticalLayout {
             var text4 = new TextElement(10, 85, "With gradient")
                     .fontSize(18)
                     .fontWeight(TextElement.FontWeight.BOLD)
-                    .fill("url(#textGrad)");
-
-            var textGrad = new LinearGradientElement("textGrad")
-                    .horizontal()
-                    .addStop(0, NamedColor.PURPLE)
-                    .addStop(1, NamedColor.ORANGE);
-
-            var defs = new DefsElement().add(textGrad);
+                    .fill(textGrad);
 
             getElement().appendChild(defs, text1, text2, text3, text4);
         }
@@ -686,31 +703,31 @@ public class SvgShapesTestView extends VVerticalLayout {
             setHeight("225px");
             getStyle().setBorder("1px solid #ccc");
 
-            // Define clip paths
-            var circleClip = new ClipPathElement("circleClip")
+            // Define clip paths (no manual IDs needed)
+            var circleClip = new ClipPathElement()
                     .add(new CircleElement().center(75, 75).r(60));
 
-            var starClip = new ClipPathElement("starClip")
+            var starClip = new ClipPathElement()
                     .add(new PolygonElement().star(225, 75, 60, 25, 5));
 
             var defs = new DefsElement().add(circleClip, starClip);
 
-            // Image with circle clip
+            // Image with circle clip - pass the element directly
             var clippedCircle = new ImageElement("dog.jpeg")
                     .bounds(15, 15, 120, 120)
                     .preserveAspectRatio("xMidYMid slice");
-            clippedCircle.clipPath("circleClip");
+            clippedCircle.clipPath(circleClip);
 
             var label2 = new TextElement(75, 145, "Circle clip")
                     .fontSize(12)
                     .textAnchor(TextElement.TextAnchor.MIDDLE)
                     .fill(NamedColor.GRAY);
 
-            // Image with star clip
+            // Image with star clip - pass the element directly
             var clippedStar = new ImageElement("dog.jpeg")
                     .bounds(165, 15, 120, 120)
                     .preserveAspectRatio("xMidYMid slice");
-            clippedStar.clipPath("starClip");
+            clippedStar.clipPath(starClip);
 
             var label3 = new TextElement(225, 145, "Star clip")
                     .fontSize(12)
@@ -718,6 +735,206 @@ public class SvgShapesTestView extends VVerticalLayout {
                     .fill(NamedColor.GRAY);
 
             getElement().appendChild(defs, clippedCircle, label2, clippedStar, label3);
+        }
+    }
+
+    static class PatternDemo extends VSvg {
+        PatternDemo() {
+            super(0, 0, 150, 100);
+            setWidth("225px");
+            setHeight("150px");
+            getStyle().setBorder("1px solid #ccc");
+
+            // Create a checkerboard pattern (no manual ID needed)
+            var checkerPattern = new PatternElement()
+                    .size(20, 20)
+                    .patternUnits(PatternElement.PatternUnits.USER_SPACE_ON_USE)
+                    .add(
+                            new RectElement().bounds(0, 0, 10, 10).fill(NamedColor.GRAY),
+                            new RectElement().bounds(10, 10, 10, 10).fill(NamedColor.GRAY)
+                    );
+
+            // Create a dots pattern (no manual ID needed)
+            var dotsPattern = new PatternElement()
+                    .size(15, 15)
+                    .patternUnits(PatternElement.PatternUnits.USER_SPACE_ON_USE)
+                    .add(new CircleElement().center(7.5, 7.5).r(3).fill(NamedColor.STEELBLUE));
+
+            var defs = new DefsElement().add(checkerPattern, dotsPattern);
+
+            // Rectangle with checkerboard pattern - pass element directly
+            var rect1 = new RectElement()
+                    .bounds(5, 5, 65, 60)
+                    .fill(checkerPattern)
+                    .stroke(NamedColor.DARKGRAY)
+                    .strokeWidth(1);
+
+            // Circle with dots pattern - pass element directly
+            var circle = new CircleElement()
+                    .center(110, 35)
+                    .r(30)
+                    .fill(dotsPattern)
+                    .stroke(NamedColor.DARKBLUE)
+                    .strokeWidth(1);
+
+            var label1 = new TextElement(37, 85, "Checkerboard")
+                    .fontSize(10)
+                    .textAnchor(TextElement.TextAnchor.MIDDLE)
+                    .fill(NamedColor.GRAY);
+
+            var label2 = new TextElement(110, 85, "Dots")
+                    .fontSize(10)
+                    .textAnchor(TextElement.TextAnchor.MIDDLE)
+                    .fill(NamedColor.GRAY);
+
+            getElement().appendChild(defs, rect1, circle, label1, label2);
+        }
+    }
+
+    static class MaskDemo extends VSvg {
+        MaskDemo() {
+            super(0, 0, 150, 100);
+            setWidth("225px");
+            setHeight("150px");
+            getStyle().setBorder("1px solid #ccc");
+
+            // Create a gradient for the mask (white = visible, black = hidden)
+            var gradientForMask = new LinearGradientElement()
+                    .horizontal()
+                    .addStop(0, "white")
+                    .addStop(1, "black");
+
+            // Gradient mask - use typed fill
+            var gradientMask = new MaskElement()
+                    .add(new RectElement()
+                            .bounds(0, 0, 150, 100)
+                            .fill(gradientForMask));
+
+            // Circle mask (no manual ID needed)
+            var circleMask = new MaskElement()
+                    .add(new CircleElement()
+                            .center(110, 50)
+                            .r(35)
+                            .fill("white"));
+
+            var defs = new DefsElement().add(gradientForMask, gradientMask, circleMask);
+
+            // Rectangle with gradient fade mask - pass element directly
+            var rect = new RectElement()
+                    .bounds(5, 10, 60, 50)
+                    .fill(NamedColor.CORAL);
+            rect.mask(gradientMask);
+
+            // Image with circle mask - pass element directly
+            var image = new ImageElement("dog.jpeg")
+                    .bounds(75, 15, 70, 70)
+                    .preserveAspectRatio("xMidYMid slice");
+            image.mask(circleMask);
+
+            var label1 = new TextElement(35, 80, "Fade mask")
+                    .fontSize(10)
+                    .textAnchor(TextElement.TextAnchor.MIDDLE)
+                    .fill(NamedColor.GRAY);
+
+            var label2 = new TextElement(110, 95, "Circle mask")
+                    .fontSize(10)
+                    .textAnchor(TextElement.TextAnchor.MIDDLE)
+                    .fill(NamedColor.GRAY);
+
+            getElement().appendChild(defs, rect, image, label1, label2);
+        }
+    }
+
+    static class TSpanDemo extends VSvg {
+        TSpanDemo() {
+            super(0, 0, 150, 100);
+            setWidth("225px");
+            setHeight("150px");
+            getStyle().setBorder("1px solid #ccc");
+
+            // Text with styled spans
+            var span1 = new TSpanElement("Hello ");
+            span1.fill(NamedColor.STEELBLUE);
+            var span2 = new TSpanElement("World!");
+            span2.fill(NamedColor.CORAL);
+            span2.fontWeight(TextElement.FontWeight.BOLD);
+
+            var text1 = new TextElement()
+                    .position(10, 25)
+                    .fontSize(14)
+                    .add(span1, span2);
+
+            // Text with positioned spans (multiline)
+            var text2 = new TextElement()
+                    .position(10, 50)
+                    .fontSize(12)
+                    .add(
+                            new TSpanElement("Line 1"),
+                            new TSpanElement("Line 2").x(10).dy(15),
+                            new TSpanElement("Line 3").x(10).dy(15)
+                    );
+
+            // Text with subscript/superscript
+            var text3 = new TextElement()
+                    .position(10, 95)
+                    .fontSize(14)
+                    .add(
+                            new TSpanElement("H"),
+                            new TSpanElement("2")
+                                    .baselineShift(TSpanElement.BaselineShift.SUB)
+                                    .fontSize(10),
+                            new TSpanElement("O + E=mc"),
+                            new TSpanElement("2")
+                                    .baselineShift(TSpanElement.BaselineShift.SUPER)
+                                    .fontSize(10)
+                    );
+
+            getElement().appendChild(text1, text2, text3);
+        }
+    }
+
+    static class TextPathDemo extends VSvg {
+        TextPathDemo() {
+            super(0, 0, 150, 100);
+            setWidth("225px");
+            setHeight("150px");
+            getStyle().setBorder("1px solid #ccc");
+
+            // Create a curved path for text to follow (no manual ID needed)
+            PathElement curvePath = new PathElement()
+                    .moveTo(10, 70)
+                    .quadraticBezierTo(75, 10, 140, 70);
+            curvePath.noFill().stroke(NamedColor.LIGHTGRAY).strokeWidth(1);
+
+            // Create a circle path (no manual ID needed)
+            PathElement circlePath = new PathElement()
+                    .d("M 75,90 A 25,25 0 1,1 74.99,90");
+            circlePath.noFill().stroke(NamedColor.LIGHTGRAY).strokeWidth(1);
+
+            var defs = new DefsElement().add(curvePath, circlePath);
+
+            // Text along the curve - pass PathElement directly
+            var curvedText = new TextElement()
+                    .fontSize(12)
+                    .add(new TextPathElement(curvePath, "Text along a curved path!"));
+            curvedText.fill(NamedColor.STEELBLUE);
+
+            // Text along circle - pass PathElement directly
+            var circleText = new TextElement()
+                    .fontSize(10)
+                    .add(new TextPathElement(circlePath, "Circular text • "));
+            circleText.fill(NamedColor.CORAL);
+
+            // Show the paths for reference
+            var visibleCurve = new PathElement()
+                    .moveTo(10, 70)
+                    .quadraticBezierTo(75, 10, 140, 70)
+                    .noFill()
+                    .stroke(NamedColor.LIGHTGRAY)
+                    .strokeWidth(1)
+                    .strokeDasharray(3, 3);
+
+            getElement().appendChild(defs, visibleCurve, curvedText, circleText);
         }
     }
 }

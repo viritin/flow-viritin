@@ -394,4 +394,18 @@ public class TextElement extends SvgGraphicsElement {
         setAttribute("word-spacing", String.valueOf(spacing));
         return this;
     }
+
+    /**
+     * Adds child elements to this text element.
+     * <p>
+     * Typically used to add {@link TSpanElement} or {@link TextPathElement} children.
+     * </p>
+     *
+     * @param children the child elements
+     * @return this element for method chaining
+     */
+    public TextElement add(SvgElement... children) {
+        appendChild(children);
+        return this;
+    }
 }
