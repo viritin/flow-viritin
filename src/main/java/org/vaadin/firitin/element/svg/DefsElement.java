@@ -18,7 +18,6 @@ package org.vaadin.firitin.element.svg;
  *   <li>Masks</li>
  *   <li>Reusable symbols</li>
  * </ul>
- * </p>
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/defs">MDN: defs element</a>
  */

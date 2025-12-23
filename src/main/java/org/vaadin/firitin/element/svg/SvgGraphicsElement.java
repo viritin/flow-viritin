@@ -568,7 +568,6 @@ public class SvgGraphicsElement extends SvgElement {
      * x_new = a*x + c*y + e
      * y_new = b*x + d*y + f
      * </pre>
-     * </p>
      *
      * @param a the a component (scale x)
      * @param b the b component (skew y)

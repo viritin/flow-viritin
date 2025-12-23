@@ -15,7 +15,6 @@ package org.vaadin.firitin.element.svg;
  *   <li>Applying common styles to multiple elements</li>
  *   <li>Organizing complex drawings into logical parts</li>
  * </ul>
- * </p>
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g">MDN: g element</a>
  */
