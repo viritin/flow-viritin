@@ -289,6 +289,23 @@ public class SvgGraphicsElement extends SvgElement {
         return (T) this;
     }
 
+    // ========== Clipping ==========
+
+    /**
+     * Sets a clipping path for this element.
+     * <p>
+     * Parts of the element outside the clipping region will not be rendered.
+     * </p>
+     *
+     * @param clipPathId the ID of the clip path element (without #)
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T clipPath(String clipPathId) {
+        setAttribute("clip-path", "url(#" + clipPathId + ")");
+        return (T) this;
+    }
+
     // ========== Transform Attributes ==========
 
     /**

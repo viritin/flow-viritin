@@ -8,16 +8,21 @@ import org.vaadin.firitin.components.VSvg;
 import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 import org.vaadin.firitin.element.svg.CircleElement;
+import org.vaadin.firitin.element.svg.ClipPathElement;
 import org.vaadin.firitin.element.svg.DefsElement;
 import org.vaadin.firitin.element.svg.EllipseElement;
 import org.vaadin.firitin.element.svg.GElement;
+import org.vaadin.firitin.element.svg.ImageElement;
 import org.vaadin.firitin.element.svg.LineElement;
+import org.vaadin.firitin.element.svg.LinearGradientElement;
 import org.vaadin.firitin.element.svg.PathElement;
 import org.vaadin.firitin.element.svg.PolygonElement;
 import org.vaadin.firitin.element.svg.PolylineElement;
+import org.vaadin.firitin.element.svg.RadialGradientElement;
 import org.vaadin.firitin.element.svg.RectElement;
 import org.vaadin.firitin.element.svg.SvgGraphicsElement;
 import org.vaadin.firitin.element.svg.SymbolElement;
+import org.vaadin.firitin.element.svg.TextElement;
 import org.vaadin.firitin.element.svg.UseElement;
 
 /**
@@ -61,6 +66,17 @@ public class SvgShapesTestView extends VVerticalLayout {
         add(new VHorizontalLayout(
                 new GroupDemo(),
                 new SymbolUseDemo()
+        ));
+
+        add(new H3("Gradients and Text"));
+        add(new VHorizontalLayout(
+                new GradientDemo(),
+                new TextDemo()
+        ));
+
+        add(new H3("Image and Clipping"));
+        add(new VHorizontalLayout(
+                new ImageClipDemo()
         ));
 
         add(new H3("Combined Example: Simple Diagram"));
@@ -574,6 +590,134 @@ public class SvgShapesTestView extends VVerticalLayout {
             var circle3 = new UseElement("myCircle").position(105, 55).size(40, 40);
 
             getElement().appendChild(defs, star1, star2, star3, circle1, circle2, circle3);
+        }
+    }
+
+    static class GradientDemo extends VSvg {
+        GradientDemo() {
+            super(0, 0, 150, 100);
+            setWidth("225px");
+            setHeight("150px");
+            getStyle().setBorder("1px solid #ccc");
+
+            // Linear gradient
+            var linearGrad = new LinearGradientElement("linearGrad")
+                    .horizontal()
+                    .addStop(0, NamedColor.STEELBLUE)
+                    .addStop(0.5, NamedColor.WHITE)
+                    .addStop(1, NamedColor.CORAL);
+
+            // Radial gradient
+            var radialGrad = new RadialGradientElement("radialGrad")
+                    .addStop(0, NamedColor.YELLOW)
+                    .addStop(0.5, NamedColor.ORANGE)
+                    .addStop(1, NamedColor.RED);
+
+            // Vertical gradient
+            var verticalGrad = new LinearGradientElement("verticalGrad")
+                    .vertical()
+                    .addStop(0, NamedColor.LIGHTGREEN)
+                    .addStop(1, NamedColor.DARKGREEN);
+
+            var defs = new DefsElement().add(linearGrad, radialGrad, verticalGrad);
+
+            // Shapes using gradients
+            var rect1 = new RectElement()
+                    .bounds(5, 5, 65, 40)
+                    .cornerRadius(5)
+                    .fill("url(#linearGrad)");
+
+            var circle = new CircleElement()
+                    .center(115, 25)
+                    .r(20)
+                    .fill("url(#radialGrad)");
+
+            var rect2 = new RectElement()
+                    .bounds(5, 55, 140, 40)
+                    .cornerRadius(5)
+                    .fill("url(#verticalGrad)");
+
+            getElement().appendChild(defs, rect1, circle, rect2);
+        }
+    }
+
+    static class TextDemo extends VSvg {
+        TextDemo() {
+            super(0, 0, 150, 100);
+            setWidth("225px");
+            setHeight("150px");
+            getStyle().setBorder("1px solid #ccc");
+
+            var text1 = new TextElement(10, 20, "Hello SVG!")
+                    .fontSize(16)
+                    .fontWeight(TextElement.FontWeight.BOLD)
+                    .fill(NamedColor.STEELBLUE);
+
+            var text2 = new TextElement(75, 45, "Centered")
+                    .fontSize(14)
+                    .textAnchor(TextElement.TextAnchor.MIDDLE)
+                    .fill(NamedColor.CORAL);
+
+            var text3 = new TextElement(10, 65, "Italic text")
+                    .fontSize(12)
+                    .fontStyle(TextElement.FontStyle.ITALIC)
+                    .fill(NamedColor.DARKGREEN);
+
+            var text4 = new TextElement(10, 85, "With gradient")
+                    .fontSize(18)
+                    .fontWeight(TextElement.FontWeight.BOLD)
+                    .fill("url(#textGrad)");
+
+            var textGrad = new LinearGradientElement("textGrad")
+                    .horizontal()
+                    .addStop(0, NamedColor.PURPLE)
+                    .addStop(1, NamedColor.ORANGE);
+
+            var defs = new DefsElement().add(textGrad);
+
+            getElement().appendChild(defs, text1, text2, text3, text4);
+        }
+    }
+
+    static class ImageClipDemo extends VSvg {
+        ImageClipDemo() {
+            super(0, 0, 300, 150);
+            setWidth("450px");
+            setHeight("225px");
+            getStyle().setBorder("1px solid #ccc");
+
+            // Define clip paths
+            var circleClip = new ClipPathElement("circleClip")
+                    .add(new CircleElement().center(75, 75).r(60));
+
+            var starClip = new ClipPathElement("starClip")
+                    .add(new PolygonElement().star(225, 75, 60, 25, 5));
+
+            var defs = new DefsElement().add(circleClip, starClip);
+
+            // Image with circle clip
+            var clippedCircle = new ImageElement("dog.jpeg")
+                    .bounds(15, 15, 120, 120)
+                    .preserveAspectRatio("xMidYMid slice");
+            clippedCircle.clipPath("circleClip");
+
+            var label2 = new TextElement(75, 145, "Circle clip")
+                    .fontSize(12)
+                    .textAnchor(TextElement.TextAnchor.MIDDLE)
+                    .fill(NamedColor.GRAY);
+
+            // Image with star clip
+            var clippedStar = new ImageElement("dog.jpeg")
+                    .bounds(165, 15, 120, 120)
+                    .preserveAspectRatio("xMidYMid slice");
+            clippedStar.clipPath("starClip");
+
+            var label3 = new TextElement(225, 145, "Star clip")
+                    .fontSize(12)
+                    .textAnchor(TextElement.TextAnchor.MIDDLE)
+                    .fill(NamedColor.GRAY);
+
+            getElement().appendChild(defs, clippedCircle, label2, clippedStar, label3);
         }
     }
 }
