@@ -200,6 +200,17 @@ public class PatternElement extends SvgElement {
     }
 
     /**
+     * Sets the preserveAspectRatio attribute.
+     *
+     * @param ratio the preserveAspectRatio setting
+     * @return this element for method chaining
+     */
+    public PatternElement preserveAspectRatio(PreserveAspectRatio ratio) {
+        setAttribute("preserveAspectRatio", ratio.toString());
+        return this;
+    }
+
+    /**
      * Adds content elements to this pattern.
      *
      * @param elements the elements that define the pattern

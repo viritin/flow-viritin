@@ -49,6 +49,162 @@ public class SvgElement extends Element {
     }
 
     /**
+     * Sets the viewBox attribute, which defines the position and dimension of the SVG viewport.
+     *
+     * @param minX   the x-coordinate of the viewBox origin
+     * @param minY   the y-coordinate of the viewBox origin
+     * @param width  the width of the viewBox
+     * @param height the height of the viewBox
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgElement> T viewBox(double minX, double minY, double width, double height) {
+        setAttribute("viewBox", "%s %s %s %s".formatted(minX, minY, width, height));
+        return (T) this;
+    }
+
+    /**
+     * Sets the width of the SVG element.
+     *
+     * @param width the width value
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgElement> T width(double width) {
+        setAttribute("width", String.valueOf(width));
+        return (T) this;
+    }
+
+    /**
+     * Sets the width of the SVG element with a unit.
+     *
+     * @param width the width with unit (e.g., "100%", "200px")
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgElement> T width(String width) {
+        setAttribute("width", width);
+        return (T) this;
+    }
+
+    /**
+     * Sets the height of the SVG element.
+     *
+     * @param height the height value
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgElement> T height(double height) {
+        setAttribute("height", String.valueOf(height));
+        return (T) this;
+    }
+
+    /**
+     * Sets the height of the SVG element with a unit.
+     *
+     * @param height the height with unit (e.g., "100%", "200px")
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgElement> T height(String height) {
+        setAttribute("height", height);
+        return (T) this;
+    }
+
+    /**
+     * Sets the size of the SVG element.
+     *
+     * @param width  the width value
+     * @param height the height value
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgElement> T size(double width, double height) {
+        width(width);
+        height(height);
+        return (T) this;
+    }
+
+    /**
+     * Sets the size of the SVG element with units.
+     *
+     * @param width  the width with unit (e.g., "100%", "200px")
+     * @param height the height with unit (e.g., "100%", "200px")
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgElement> T size(String width, String height) {
+        width(width);
+        height(height);
+        return (T) this;
+    }
+
+    /**
+     * Preserve aspect ratio options for the SVG element.
+     */
+    public enum PreserveAspectRatio {
+        /** Do not force uniform scaling */
+        NONE("none"),
+        /** Scale to fit, centered, preserve aspect ratio (default) */
+        XMID_YMID_MEET("xMidYMid meet"),
+        /** Scale to fill, centered, preserve aspect ratio (may crop) */
+        XMID_YMID_SLICE("xMidYMid slice"),
+        /** Scale to fit, aligned to top-left */
+        XMIN_YMIN_MEET("xMinYMin meet"),
+        /** Scale to fill, aligned to top-left (may crop) */
+        XMIN_YMIN_SLICE("xMinYMin slice"),
+        /** Scale to fit, aligned to top-center */
+        XMID_YMIN_MEET("xMidYMin meet"),
+        /** Scale to fit, aligned to top-right */
+        XMAX_YMIN_MEET("xMaxYMin meet"),
+        /** Scale to fit, aligned to middle-left */
+        XMIN_YMID_MEET("xMinYMid meet"),
+        /** Scale to fit, aligned to middle-right */
+        XMAX_YMID_MEET("xMaxYMid meet"),
+        /** Scale to fit, aligned to bottom-left */
+        XMIN_YMAX_MEET("xMinYMax meet"),
+        /** Scale to fit, aligned to bottom-center */
+        XMID_YMAX_MEET("xMidYMax meet"),
+        /** Scale to fit, aligned to bottom-right */
+        XMAX_YMAX_MEET("xMaxYMax meet");
+
+        private final String value;
+
+        PreserveAspectRatio(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return value;
+        }
+    }
+
+    /**
+     * Sets the preserveAspectRatio attribute.
+     *
+     * @param ratio the preserve aspect ratio setting
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgElement> T preserveAspectRatio(PreserveAspectRatio ratio) {
+        setAttribute("preserveAspectRatio", ratio.toString());
+        return (T) this;
+    }
+
+    /**
+     * Sets the preserveAspectRatio attribute with a custom value.
+     *
+     * @param ratio the preserve aspect ratio value
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgElement> T preserveAspectRatio(String ratio) {
+        setAttribute("preserveAspectRatio", ratio);
+        return (T) this;
+    }
+
+    /**
      * Creates an SVG root element with the specified viewBox dimensions.
      *
      * @param minX    The minimum x-coordinate of the viewBox.

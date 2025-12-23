@@ -195,6 +195,17 @@ public class ImageElement extends SvgGraphicsElement {
     }
 
     /**
+     * Sets how the image should be scaled to fit.
+     *
+     * @param ratio the preserveAspectRatio setting
+     * @return this element for method chaining
+     */
+    public ImageElement preserveAspectRatio(PreserveAspectRatio ratio) {
+        setAttribute("preserveAspectRatio", ratio.toString());
+        return this;
+    }
+
+    /**
      * Sets the crossorigin attribute for CORS requests.
      *
      * @param crossorigin the crossorigin value ("anonymous" or "use-credentials")

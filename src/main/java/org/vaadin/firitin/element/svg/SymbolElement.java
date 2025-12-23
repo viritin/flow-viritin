@@ -61,6 +61,17 @@ public class SymbolElement extends SvgElement {
     }
 
     /**
+     * Sets the preserveAspectRatio attribute.
+     *
+     * @param ratio the preserveAspectRatio setting
+     * @return this element for method chaining
+     */
+    public SymbolElement preserveAspectRatio(PreserveAspectRatio ratio) {
+        setAttribute("preserveAspectRatio", ratio.toString());
+        return this;
+    }
+
+    /**
      * Sets the x coordinate for symbol positioning (when used in certain contexts).
      *
      * @param x the x coordinate
