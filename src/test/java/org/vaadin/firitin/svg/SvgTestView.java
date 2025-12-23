@@ -11,7 +11,6 @@ import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 import org.vaadin.firitin.components.VSvg;
 import org.vaadin.firitin.element.svg.CircleElement;
 import org.vaadin.firitin.element.svg.RectElement;
-import org.vaadin.firitin.element.svg.SvgElement;
 
 @Route
 public class SvgTestView extends VVerticalLayout {
@@ -60,28 +59,28 @@ public class SvgTestView extends VVerticalLayout {
                     .width("100%").height("100%");
             circle = new CircleElement()
                     .center("50%", "50%")
-                    .r(4);
-            circle.setFill(NamedColor.WHITE);
+                    .r(4)
+                    .fill(NamedColor.WHITE);
             getElement().appendChild(rect, circle);
 
 
             circle.addEventListener("mouseover", event -> {
-                circle.setFill(NamedColor.PINK);
+                circle.fill(NamedColor.PINK);
                 Notification.show("Mouse over the circle -> circle fill to PINK");
             });
 
             circle.addEventListener("mouseout", event -> {
-                circle.setFill(NamedColor.WHEAT);
+                circle.fill(NamedColor.WHEAT);
                 Notification.show("Mouse over the circle -> circle fill to WHEAT");
             });
         }
 
         public void setRectColor(Color value) {
-            rect.setFill(value);
+            rect.fill(value);
         }
 
         public void setCirleColor(Color value) {
-            circle.setFill(value);
+            circle.fill(value);
         }
     }
 

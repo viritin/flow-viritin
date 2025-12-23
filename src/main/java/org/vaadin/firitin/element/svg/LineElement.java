@@ -1,7 +1,5 @@
 package org.vaadin.firitin.element.svg;
 
-import in.virit.color.Color;
-
 /**
  * A typed Java API for the SVG {@code <line>} element.
  * <p>
@@ -15,7 +13,7 @@ import in.virit.color.Color;
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line">MDN: line element</a>
  */
-public class LineElement extends SvgElement {
+public class LineElement extends SvgGraphicsElement {
 
     public LineElement() {
         super("line");
@@ -180,55 +178,5 @@ public class LineElement extends SvgElement {
      */
     public LineElement points(double x1, double y1, double x2, double y2) {
         return from(x1, y1).to(x2, y2);
-    }
-
-    /**
-     * Sets the stroke color of the line.
-     * <p>
-     * Lines require a stroke to be visible.
-     * </p>
-     *
-     * @param color the stroke color
-     * @return this element for method chaining
-     */
-    public LineElement stroke(Color color) {
-        setAttribute("stroke", color.toString());
-        return this;
-    }
-
-    /**
-     * Sets the stroke color of the line.
-     * <p>
-     * Lines require a stroke to be visible.
-     * </p>
-     *
-     * @param stroke the stroke color (e.g., "black", "#000", "rgb(0,0,0)")
-     * @return this element for method chaining
-     */
-    public LineElement stroke(String stroke) {
-        setAttribute("stroke", stroke);
-        return this;
-    }
-
-    /**
-     * Sets the stroke width of the line.
-     *
-     * @param width the stroke width in user units
-     * @return this element for method chaining
-     */
-    public LineElement strokeWidth(double width) {
-        setAttribute("stroke-width", String.valueOf(width));
-        return this;
-    }
-
-    /**
-     * Sets the stroke width of the line with a unit.
-     *
-     * @param width the stroke width (e.g., "2", "2px")
-     * @return this element for method chaining
-     */
-    public LineElement strokeWidth(String width) {
-        setAttribute("stroke-width", width);
-        return this;
     }
 }

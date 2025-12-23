@@ -10,7 +10,7 @@ package org.vaadin.firitin.element.svg;
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/rect">MDN: rect element</a>
  */
-public class RectElement extends SvgElement {
+public class RectElement extends SvgGraphicsElement {
 
     public RectElement() {
         super("rect");

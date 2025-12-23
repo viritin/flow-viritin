@@ -9,7 +9,7 @@ package org.vaadin.firitin.element.svg;
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/circle">MDN: circle element</a>
  */
-public class CircleElement extends SvgElement {
+public class CircleElement extends SvgGraphicsElement {
 
     public CircleElement() {
         super("circle");

@@ -13,6 +13,7 @@ import org.vaadin.firitin.element.svg.LineElement;
 import org.vaadin.firitin.element.svg.PathElement;
 import org.vaadin.firitin.element.svg.PolygonElement;
 import org.vaadin.firitin.element.svg.RectElement;
+import org.vaadin.firitin.element.svg.SvgGraphicsElement;
 
 /**
  * Test view demonstrating the typed SVG element APIs.
@@ -38,6 +39,12 @@ public class SvgShapesTestView extends VVerticalLayout {
                 new StarDemo()
         ));
 
+        add(new H3("Stroke Styles Demo"));
+        add(new VHorizontalLayout(
+                new StrokeStylesDemo(),
+                new OpacityDemo()
+        ));
+
         add(new H3("Combined Example: Simple Diagram"));
         add(new FlowDiagram());
     }
@@ -51,13 +58,13 @@ public class SvgShapesTestView extends VVerticalLayout {
 
             var rect = new RectElement()
                     .bounds(10, 10, 80, 80)
-                    .cornerRadius(8);
-            rect.setFill(NamedColor.STEELBLUE);
+                    .cornerRadius(8)
+                    .fill(NamedColor.STEELBLUE);
 
             var label = new RectElement()
                     .x(10).y(85)
-                    .width(80).height(12);
-            label.setFill(NamedColor.WHITE);
+                    .width(80).height(12)
+                    .fill(NamedColor.WHITE);
 
             getElement().appendChild(rect, label);
         }
@@ -72,13 +79,13 @@ public class SvgShapesTestView extends VVerticalLayout {
 
             var circle = new CircleElement()
                     .center(50, 50)
-                    .r(40);
-            circle.setFill(NamedColor.CORAL);
+                    .r(40)
+                    .fill(NamedColor.CORAL);
 
             var innerCircle = new CircleElement()
                     .center(50, 50)
-                    .r(20);
-            innerCircle.setFill(NamedColor.WHITE);
+                    .r(20)
+                    .fill(NamedColor.WHITE);
 
             getElement().appendChild(circle, innerCircle);
         }
@@ -93,13 +100,13 @@ public class SvgShapesTestView extends VVerticalLayout {
 
             var ellipse = new EllipseElement()
                     .center(50, 50)
-                    .radii(45, 25);
-            ellipse.setFill(NamedColor.MEDIUMSEAGREEN);
+                    .radii(45, 25)
+                    .fill(NamedColor.MEDIUMSEAGREEN);
 
             var verticalEllipse = new EllipseElement()
                     .center(50, 50)
-                    .radii(15, 35);
-            verticalEllipse.setFill(NamedColor.PALEGREEN);
+                    .radii(15, 35)
+                    .fill(NamedColor.PALEGREEN);
 
             getElement().appendChild(ellipse, verticalEllipse);
         }
@@ -198,6 +205,112 @@ public class SvgShapesTestView extends VVerticalLayout {
         }
     }
 
+    static class StrokeStylesDemo extends VSvg {
+        StrokeStylesDemo() {
+            super(0, 0, 150, 100);
+            setWidth("225px");
+            setHeight("150px");
+            getStyle().setBorder("1px solid #ccc");
+
+            // Solid line
+            var solid = new LineElement()
+                    .from(10, 15).to(140, 15)
+                    .stroke(NamedColor.DARKBLUE)
+                    .strokeWidth(3);
+
+            // Dashed line
+            var dashed = new LineElement()
+                    .from(10, 35).to(140, 35)
+                    .stroke(NamedColor.DARKGREEN)
+                    .strokeWidth(3)
+                    .strokeDasharray(10, 5);
+
+            // Dotted line
+            var dotted = new LineElement()
+                    .from(10, 55).to(140, 55)
+                    .stroke(NamedColor.DARKRED)
+                    .strokeWidth(3)
+                    .strokeDasharray(3, 3);
+
+            // Line with round cap
+            var roundCap = new LineElement()
+                    .from(10, 75).to(70, 75)
+                    .stroke(NamedColor.PURPLE)
+                    .strokeWidth(8)
+                    .strokeLinecap(SvgGraphicsElement.LineCap.ROUND);
+
+            // Line with square cap
+            var squareCap = new LineElement()
+                    .from(80, 75).to(140, 75)
+                    .stroke(NamedColor.ORANGE)
+                    .strokeWidth(8)
+                    .strokeLinecap(SvgGraphicsElement.LineCap.SQUARE);
+
+            // Path with different line joins
+            var miterJoin = new PathElement()
+                    .moveTo(10, 95).lineTo(30, 85).lineTo(50, 95)
+                    .stroke(NamedColor.TEAL)
+                    .strokeWidth(4)
+                    .noFill()
+                    .strokeLinejoin(SvgGraphicsElement.LineJoin.MITER);
+
+            var roundJoin = new PathElement()
+                    .moveTo(60, 95).lineTo(80, 85).lineTo(100, 95)
+                    .stroke(NamedColor.TEAL)
+                    .strokeWidth(4)
+                    .noFill()
+                    .strokeLinejoin(SvgGraphicsElement.LineJoin.ROUND);
+
+            var bevelJoin = new PathElement()
+                    .moveTo(110, 95).lineTo(130, 85).lineTo(150, 95)
+                    .stroke(NamedColor.TEAL)
+                    .strokeWidth(4)
+                    .noFill()
+                    .strokeLinejoin(SvgGraphicsElement.LineJoin.BEVEL);
+
+            getElement().appendChild(solid, dashed, dotted, roundCap, squareCap,
+                    miterJoin, roundJoin, bevelJoin);
+        }
+    }
+
+    static class OpacityDemo extends VSvg {
+        OpacityDemo() {
+            super(0, 0, 100, 100);
+            setWidth("150px");
+            setHeight("150px");
+            getStyle().setBorder("1px solid #ccc");
+
+            // Overlapping circles with different opacities
+            var circle1 = new CircleElement()
+                    .center(35, 40)
+                    .r(30)
+                    .fill(NamedColor.RED)
+                    .fillOpacity(0.6);
+
+            var circle2 = new CircleElement()
+                    .center(65, 40)
+                    .r(30)
+                    .fill(NamedColor.BLUE)
+                    .fillOpacity(0.6);
+
+            var circle3 = new CircleElement()
+                    .center(50, 65)
+                    .r(30)
+                    .fill(NamedColor.GREEN)
+                    .fillOpacity(0.6);
+
+            // Rect with stroke opacity
+            var rect = new RectElement()
+                    .bounds(20, 80, 60, 15)
+                    .fill(NamedColor.GOLD)
+                    .stroke(NamedColor.BLACK)
+                    .strokeWidth(3)
+                    .strokeOpacity(0.3);
+
+            getElement().appendChild(circle1, circle2, circle3, rect);
+        }
+    }
+
     static class FlowDiagram extends VSvg {
         FlowDiagram() {
             super(0, 0, 300, 150);
@@ -207,18 +320,18 @@ public class SvgShapesTestView extends VVerticalLayout {
 
             var box1 = new RectElement()
                     .bounds(20, 50, 60, 40)
-                    .cornerRadius(5);
-            box1.setFill(NamedColor.LIGHTBLUE);
+                    .cornerRadius(5)
+                    .fill(NamedColor.LIGHTBLUE);
 
             var box2 = new RectElement()
                     .bounds(120, 50, 60, 40)
-                    .cornerRadius(5);
-            box2.setFill(NamedColor.LIGHTGREEN);
+                    .cornerRadius(5)
+                    .fill(NamedColor.LIGHTGREEN);
 
             var box3 = new RectElement()
                     .bounds(220, 50, 60, 40)
-                    .cornerRadius(5);
-            box3.setFill(NamedColor.LIGHTSALMON);
+                    .cornerRadius(5)
+                    .fill(NamedColor.LIGHTSALMON);
 
             var line1 = new LineElement()
                     .from(80, 70).to(120, 70)
@@ -250,18 +363,18 @@ public class SvgShapesTestView extends VVerticalLayout {
 
             var status1 = new CircleElement()
                     .center(50, 45)
-                    .r(5);
-            status1.setFill(NamedColor.GREEN);
+                    .r(5)
+                    .fill(NamedColor.GREEN);
 
             var status2 = new CircleElement()
                     .center(150, 45)
-                    .r(5);
-            status2.setFill(NamedColor.YELLOW);
+                    .r(5)
+                    .fill(NamedColor.YELLOW);
 
             var status3 = new CircleElement()
                     .center(250, 45)
-                    .r(5);
-            status3.setFill(NamedColor.RED);
+                    .r(5)
+                    .fill(NamedColor.RED);
 
             getElement().appendChild(
                     box1, box2, box3,

@@ -1,7 +1,5 @@
 package org.vaadin.firitin.element.svg;
 
-import in.virit.color.Color;
-
 /**
  * A typed Java API for the SVG {@code <path>} element.
  * <p>
@@ -16,7 +14,7 @@ import in.virit.color.Color;
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/path">MDN: path element</a>
  */
-public class PathElement extends SvgElement {
+public class PathElement extends SvgGraphicsElement {
 
     private final StringBuilder pathData = new StringBuilder();
 
@@ -372,62 +370,6 @@ public class PathElement extends SvgElement {
                 .append(sweepFlag ? 1 : 0).append(" ")
                 .append(dx).append(",").append(dy);
         updatePathAttribute();
-        return this;
-    }
-
-    // ========== Stroke helpers (paths often need stroke) ==========
-
-    /**
-     * Sets the stroke color of the path.
-     *
-     * @param color the stroke color
-     * @return this element for method chaining
-     */
-    public PathElement stroke(Color color) {
-        setAttribute("stroke", color.toString());
-        return this;
-    }
-
-    /**
-     * Sets the stroke color of the path.
-     *
-     * @param stroke the stroke color (e.g., "black", "#000", "rgb(0,0,0)")
-     * @return this element for method chaining
-     */
-    public PathElement stroke(String stroke) {
-        setAttribute("stroke", stroke);
-        return this;
-    }
-
-    /**
-     * Sets the stroke width of the path.
-     *
-     * @param width the stroke width in user units
-     * @return this element for method chaining
-     */
-    public PathElement strokeWidth(double width) {
-        setAttribute("stroke-width", String.valueOf(width));
-        return this;
-    }
-
-    /**
-     * Sets the fill color of the path.
-     *
-     * @param color the fill color
-     * @return this element for method chaining
-     */
-    public PathElement fill(Color color) {
-        setFill(color);
-        return this;
-    }
-
-    /**
-     * Sets the fill to none (transparent).
-     *
-     * @return this element for method chaining
-     */
-    public PathElement noFill() {
-        setAttribute("fill", "none");
         return this;
     }
 

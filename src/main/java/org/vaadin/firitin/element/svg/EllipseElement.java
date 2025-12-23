@@ -9,7 +9,7 @@ package org.vaadin.firitin.element.svg;
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/ellipse">MDN: ellipse element</a>
  */
-public class EllipseElement extends SvgElement {
+public class EllipseElement extends SvgGraphicsElement {
 
     public EllipseElement() {
         super("ellipse");

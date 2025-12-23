@@ -1,7 +1,5 @@
 package org.vaadin.firitin.element.svg;
 
-import in.virit.color.Color;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +16,7 @@ import java.util.List;
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/polygon">MDN: polygon element</a>
  */
-public class PolygonElement extends SvgElement {
+public class PolygonElement extends SvgGraphicsElement {
 
     private final List<double[]> pointsList = new ArrayList<>();
 
@@ -183,62 +181,6 @@ public class PolygonElement extends SvgElement {
             pointsList.add(new double[]{x, y});
         }
         updatePointsAttribute();
-        return this;
-    }
-
-    // ========== Stroke and fill helpers ==========
-
-    /**
-     * Sets the stroke color of the polygon.
-     *
-     * @param color the stroke color
-     * @return this element for method chaining
-     */
-    public PolygonElement stroke(Color color) {
-        setAttribute("stroke", color.toString());
-        return this;
-    }
-
-    /**
-     * Sets the stroke color of the polygon.
-     *
-     * @param stroke the stroke color (e.g., "black", "#000", "rgb(0,0,0)")
-     * @return this element for method chaining
-     */
-    public PolygonElement stroke(String stroke) {
-        setAttribute("stroke", stroke);
-        return this;
-    }
-
-    /**
-     * Sets the stroke width of the polygon.
-     *
-     * @param width the stroke width in user units
-     * @return this element for method chaining
-     */
-    public PolygonElement strokeWidth(double width) {
-        setAttribute("stroke-width", String.valueOf(width));
-        return this;
-    }
-
-    /**
-     * Sets the fill color of the polygon.
-     *
-     * @param color the fill color
-     * @return this element for method chaining
-     */
-    public PolygonElement fill(Color color) {
-        setFill(color);
-        return this;
-    }
-
-    /**
-     * Sets the fill to none (transparent).
-     *
-     * @return this element for method chaining
-     */
-    public PolygonElement noFill() {
-        setAttribute("fill", "none");
         return this;
     }
 

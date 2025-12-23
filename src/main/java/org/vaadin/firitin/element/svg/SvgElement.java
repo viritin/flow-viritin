@@ -3,7 +3,6 @@ package org.vaadin.firitin.element.svg;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementUtil;
 import com.vaadin.flow.dom.impl.CustomAttribute;
-import in.virit.color.Color;
 import org.jsoup.nodes.Document;
 import org.jsoup.parser.ParseSettings;
 import org.jsoup.parser.Parser;
@@ -96,10 +95,6 @@ public class SvgElement extends Element {
     @Override
     public VStyle getStyle() {
         return VStyle.wrap(super.getStyle());
-    }
-
-    public void setFill(Color value) {
-        setAttribute("fill", value.toString());
     }
 
 }
