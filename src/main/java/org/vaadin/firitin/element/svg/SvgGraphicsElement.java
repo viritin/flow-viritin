@@ -288,4 +288,182 @@ public class SvgGraphicsElement extends SvgElement {
         setAttribute("opacity", String.valueOf(opacity));
         return (T) this;
     }
+
+    // ========== Transform Attributes ==========
+
+    /**
+     * Sets the transform attribute directly.
+     * <p>
+     * Multiple transforms can be specified separated by spaces or commas.
+     * </p>
+     *
+     * @param transform the transform string (e.g., "translate(30,40) rotate(45)")
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T transform(String transform) {
+        setAttribute("transform", transform);
+        return (T) this;
+    }
+
+    /**
+     * Moves the element to a new position.
+     *
+     * @param x the x offset
+     * @param y the y offset
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T translate(double x, double y) {
+        appendTransform("translate(%s,%s)".formatted(x, y));
+        return (T) this;
+    }
+
+    /**
+     * Moves the element horizontally.
+     *
+     * @param x the x offset
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T translateX(double x) {
+        appendTransform("translate(%s,0)".formatted(x));
+        return (T) this;
+    }
+
+    /**
+     * Moves the element vertically.
+     *
+     * @param y the y offset
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T translateY(double y) {
+        appendTransform("translate(0,%s)".formatted(y));
+        return (T) this;
+    }
+
+    /**
+     * Rotates the element around the origin (0,0).
+     *
+     * @param angle the rotation angle in degrees
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T rotate(double angle) {
+        appendTransform("rotate(%s)".formatted(angle));
+        return (T) this;
+    }
+
+    /**
+     * Rotates the element around a specified center point.
+     *
+     * @param angle the rotation angle in degrees
+     * @param cx    the x coordinate of the rotation center
+     * @param cy    the y coordinate of the rotation center
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T rotate(double angle, double cx, double cy) {
+        appendTransform("rotate(%s,%s,%s)".formatted(angle, cx, cy));
+        return (T) this;
+    }
+
+    /**
+     * Scales the element uniformly.
+     *
+     * @param factor the scale factor (1.0 = no change, 0.5 = half size, 2.0 = double size)
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T scale(double factor) {
+        appendTransform("scale(%s)".formatted(factor));
+        return (T) this;
+    }
+
+    /**
+     * Scales the element with different factors for x and y axes.
+     *
+     * @param sx the x scale factor
+     * @param sy the y scale factor
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T scale(double sx, double sy) {
+        appendTransform("scale(%s,%s)".formatted(sx, sy));
+        return (T) this;
+    }
+
+    /**
+     * Skews the element along the x axis.
+     *
+     * @param angle the skew angle in degrees
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T skewX(double angle) {
+        appendTransform("skewX(%s)".formatted(angle));
+        return (T) this;
+    }
+
+    /**
+     * Skews the element along the y axis.
+     *
+     * @param angle the skew angle in degrees
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T skewY(double angle) {
+        appendTransform("skewY(%s)".formatted(angle));
+        return (T) this;
+    }
+
+    /**
+     * Applies a 2D transformation matrix.
+     * <p>
+     * The matrix transforms coordinates as:
+     * <pre>
+     * x_new = a*x + c*y + e
+     * y_new = b*x + d*y + f
+     * </pre>
+     * </p>
+     *
+     * @param a the a component (scale x)
+     * @param b the b component (skew y)
+     * @param c the c component (skew x)
+     * @param d the d component (scale y)
+     * @param e the e component (translate x)
+     * @param f the f component (translate y)
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T matrix(double a, double b, double c, double d, double e, double f) {
+        appendTransform("matrix(%s,%s,%s,%s,%s,%s)".formatted(a, b, c, d, e, f));
+        return (T) this;
+    }
+
+    /**
+     * Clears all transforms from the element.
+     *
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T clearTransform() {
+        removeAttribute("transform");
+        return (T) this;
+    }
+
+    /**
+     * Appends a transform to the existing transform attribute.
+     *
+     * @param transform the transform to append
+     */
+    private void appendTransform(String transform) {
+        String existing = getAttribute("transform");
+        if (existing == null || existing.isEmpty()) {
+            setAttribute("transform", transform);
+        } else {
+            setAttribute("transform", existing + " " + transform);
+        }
+    }
 }

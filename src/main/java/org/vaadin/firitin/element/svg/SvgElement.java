@@ -33,6 +33,22 @@ public class SvgElement extends Element {
     }
 
     /**
+     * Sets the ID of this element.
+     * <p>
+     * The ID can be used to reference this element from other elements,
+     * such as {@code <use>} elements or gradient/pattern fills.
+     * </p>
+     *
+     * @param id the ID for this element
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgElement> T id(String id) {
+        setAttribute("id", id);
+        return (T) this;
+    }
+
+    /**
      * Creates an SVG root element with the specified viewBox dimensions.
      *
      * @param minX    The minimum x-coordinate of the viewBox.

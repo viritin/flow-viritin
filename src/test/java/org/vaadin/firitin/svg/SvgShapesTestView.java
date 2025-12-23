@@ -8,12 +8,17 @@ import org.vaadin.firitin.components.VSvg;
 import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 import org.vaadin.firitin.element.svg.CircleElement;
+import org.vaadin.firitin.element.svg.DefsElement;
 import org.vaadin.firitin.element.svg.EllipseElement;
+import org.vaadin.firitin.element.svg.GElement;
 import org.vaadin.firitin.element.svg.LineElement;
 import org.vaadin.firitin.element.svg.PathElement;
 import org.vaadin.firitin.element.svg.PolygonElement;
+import org.vaadin.firitin.element.svg.PolylineElement;
 import org.vaadin.firitin.element.svg.RectElement;
 import org.vaadin.firitin.element.svg.SvgGraphicsElement;
+import org.vaadin.firitin.element.svg.SymbolElement;
+import org.vaadin.firitin.element.svg.UseElement;
 
 /**
  * Test view demonstrating the typed SVG element APIs.
@@ -29,7 +34,8 @@ public class SvgShapesTestView extends VVerticalLayout {
                 new RectDemo(),
                 new CircleDemo(),
                 new EllipseDemo(),
-                new LineDemo()
+                new LineDemo(),
+                new PolylineDemo()
         ));
 
         add(new H3("Path and Polygon Shapes"));
@@ -43,6 +49,18 @@ public class SvgShapesTestView extends VVerticalLayout {
         add(new VHorizontalLayout(
                 new StrokeStylesDemo(),
                 new OpacityDemo()
+        ));
+
+        add(new H3("Transforms Demo"));
+        add(new VHorizontalLayout(
+                new TransformDemo(),
+                new RotateDemo()
+        ));
+
+        add(new H3("Structural Elements (Group, Defs, Use)"));
+        add(new VHorizontalLayout(
+                new GroupDemo(),
+                new SymbolUseDemo()
         ));
 
         add(new H3("Combined Example: Simple Diagram"));
@@ -140,6 +158,36 @@ public class SvgShapesTestView extends VVerticalLayout {
                     .strokeWidth(2);
 
             getElement().appendChild(line1, line2, line3, line4);
+        }
+    }
+
+    static class PolylineDemo extends VSvg {
+        PolylineDemo() {
+            super(0, 0, 100, 100);
+            setWidth("150px");
+            setHeight("150px");
+            getStyle().setBorder("1px solid #ccc");
+
+            // Stair-step pattern (open shape - not closed like polygon)
+            var stairs = new PolylineElement()
+                    .points(10, 80, 10, 60, 30, 60, 30, 40, 50, 40, 50, 20, 70, 20, 70, 10, 90, 10)
+                    .stroke(NamedColor.STEELBLUE)
+                    .strokeWidth(3)
+                    .noFill();
+
+            // Zigzag pattern
+            var zigzag = new PolylineElement()
+                    .addPoint(10, 95)
+                    .addPoint(25, 85)
+                    .addPoint(40, 95)
+                    .addPoint(55, 85)
+                    .addPoint(70, 95)
+                    .addPoint(85, 85)
+                    .stroke(NamedColor.CORAL)
+                    .strokeWidth(2)
+                    .noFill();
+
+            getElement().appendChild(stairs, zigzag);
         }
     }
 
@@ -311,6 +359,73 @@ public class SvgShapesTestView extends VVerticalLayout {
         }
     }
 
+    static class TransformDemo extends VSvg {
+        TransformDemo() {
+            super(0, 0, 150, 100);
+            setWidth("225px");
+            setHeight("150px");
+            getStyle().setBorder("1px solid #ccc");
+
+            // Original rect (reference)
+            var original = new RectElement()
+                    .bounds(10, 10, 30, 20)
+                    .fill(NamedColor.LIGHTGRAY)
+                    .stroke(NamedColor.GRAY)
+                    .strokeWidth(1);
+
+            // Translated rect
+            var translated = new RectElement()
+                    .bounds(10, 10, 30, 20)
+                    .fill(NamedColor.STEELBLUE)
+                    .translate(50, 0);
+
+            // Scaled rect
+            var scaled = new RectElement()
+                    .bounds(10, 10, 30, 20)
+                    .fill(NamedColor.CORAL)
+                    .translate(0, 40)
+                    .scale(1.5);
+
+            // Skewed rect
+            var skewed = new RectElement()
+                    .bounds(10, 10, 30, 20)
+                    .fill(NamedColor.MEDIUMSEAGREEN)
+                    .translate(80, 40)
+                    .skewX(20);
+
+            getElement().appendChild(original, translated, scaled, skewed);
+        }
+    }
+
+    static class RotateDemo extends VSvg {
+        RotateDemo() {
+            super(0, 0, 100, 100);
+            setWidth("150px");
+            setHeight("150px");
+            getStyle().setBorder("1px solid #ccc");
+
+            // Center point marker
+            var center = new CircleElement()
+                    .center(50, 50)
+                    .r(3)
+                    .fill(NamedColor.RED);
+
+            // Multiple rotated rectangles around center
+            for (int i = 0; i < 8; i++) {
+                var rect = new RectElement()
+                        .bounds(45, 20, 10, 25)
+                        .fill(NamedColor.STEELBLUE)
+                        .fillOpacity(0.7)
+                        .stroke(NamedColor.DARKBLUE)
+                        .strokeWidth(1)
+                        .rotate(i * 45, 50, 50);
+                getElement().appendChild(rect);
+            }
+
+            getElement().appendChild(center);
+        }
+    }
+
     static class FlowDiagram extends VSvg {
         FlowDiagram() {
             super(0, 0, 300, 150);
@@ -382,6 +497,83 @@ public class SvgShapesTestView extends VVerticalLayout {
                     arrow1a, arrow1b, arrow2a, arrow2b,
                     status1, status2, status3
             );
+        }
+    }
+
+    static class GroupDemo extends VSvg {
+        GroupDemo() {
+            super(0, 0, 100, 100);
+            setWidth("150px");
+            setHeight("150px");
+            getStyle().setBorder("1px solid #ccc");
+
+            // Create a group with common styling
+            var group1 = new GElement()
+                    .add(
+                            new RectElement().bounds(5, 5, 20, 20),
+                            new RectElement().bounds(10, 10, 20, 20),
+                            new RectElement().bounds(15, 15, 20, 20)
+                    );
+            group1.fill(NamedColor.STEELBLUE)
+                    .stroke(NamedColor.DARKBLUE)
+                    .strokeWidth(1);
+
+            // Create another group with transform
+            var group2 = new GElement()
+                    .add(
+                            new CircleElement().center(0, 0).r(15),
+                            new CircleElement().center(15, 0).r(10),
+                            new CircleElement().center(-15, 0).r(10)
+                    );
+            group2.fill(NamedColor.CORAL)
+                    .stroke(NamedColor.DARKRED)
+                    .strokeWidth(1)
+                    .translate(50, 50)
+                    .rotate(30);
+
+            getElement().appendChild(group1, group2);
+        }
+    }
+
+    static class SymbolUseDemo extends VSvg {
+        SymbolUseDemo() {
+            super(0, 0, 150, 100);
+            setWidth("225px");
+            setHeight("150px");
+            getStyle().setBorder("1px solid #ccc");
+
+            // Define a reusable star symbol
+            var starSymbol = new SymbolElement("myStar")
+                    .viewBox(0, 0, 100, 100)
+                    .add(new PolygonElement()
+                            .star(50, 50, 45, 20, 5)
+                            .fill(NamedColor.GOLD)
+                            .stroke(NamedColor.DARKORANGE)
+                            .strokeWidth(2));
+
+            // Define a reusable circle symbol
+            var circleSymbol = new SymbolElement("myCircle")
+                    .viewBox(0, 0, 100, 100)
+                    .add(new CircleElement()
+                            .center(50, 50)
+                            .r(40)
+                            .fill(NamedColor.LIGHTBLUE)
+                            .stroke(NamedColor.STEELBLUE)
+                            .strokeWidth(3));
+
+            // Put symbols in defs
+            var defs = new DefsElement().add(starSymbol, circleSymbol);
+
+            // Use the symbols multiple times
+            var star1 = new UseElement("myStar").position(5, 5).size(40, 40);
+            var star2 = new UseElement("myStar").position(50, 30).size(30, 30);
+            var star3 = new UseElement("myStar").position(95, 5).size(50, 50);
+
+            var circle1 = new UseElement("myCircle").position(5, 55).size(40, 40);
+            var circle2 = new UseElement("myCircle").position(55, 55).size(40, 40);
+            var circle3 = new UseElement("myCircle").position(105, 55).size(40, 40);
+
+            getElement().appendChild(defs, star1, star2, star3, circle1, circle2, circle3);
         }
     }
 }
