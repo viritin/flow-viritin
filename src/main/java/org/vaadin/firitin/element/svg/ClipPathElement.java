@@ -12,6 +12,17 @@ package org.vaadin.firitin.element.svg;
  * Clip paths must be placed inside a {@code <defs>} element and referenced
  * by ID using the clip-path attribute (e.g., clip-path="url(#myClip)").
  * </p>
+ * <h2>Write-Only vs Read-Write Methods</h2>
+ * <p>
+ * This class provides two variants for each attribute setter:
+ * </p>
+ * <ul>
+ *   <li><strong>Default methods</strong> (e.g., {@code clipPathUnits()}) - Use an optimized
+ *       write-only approach. Attribute values are NOT stored on the server and cannot be
+ *       retrieved via {@code getAttribute()}.</li>
+ *   <li><strong>RW methods</strong> (e.g., {@code clipPathUnitsRW()}) - Use traditional
+ *       {@code setAttribute()} which stores values on the server for later retrieval.</li>
+ * </ul>
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/clipPath">MDN: clipPath element</a>
  */
@@ -52,13 +63,29 @@ public class ClipPathElement extends SvgElement {
         }
     }
 
+    // ========== clipPathUnits attribute ==========
+
     /**
      * Sets the coordinate system for the clip path contents.
+     * <p>
+     * Uses write-only optimization. Use {@link #clipPathUnitsRW(ClipPathUnits)} if you need to read the value back.
+     * </p>
      *
      * @param units the clip path units
      * @return this element for method chaining
      */
     public ClipPathElement clipPathUnits(ClipPathUnits units) {
+        setWriteOnlyAttribute("clipPathUnits", units.toString());
+        return this;
+    }
+
+    /**
+     * Sets the coordinate system for the clip path contents (read-write).
+     *
+     * @param units the clip path units
+     * @return this element for method chaining
+     */
+    public ClipPathElement clipPathUnitsRW(ClipPathUnits units) {
         setAttribute("clipPathUnits", units.toString());
         return this;
     }

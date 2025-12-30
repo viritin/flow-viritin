@@ -3,12 +3,16 @@ package org.vaadin.firitin.element.svg;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementUtil;
 import com.vaadin.flow.dom.impl.CustomAttribute;
+import com.vaadin.flow.internal.StateNode;
 import org.jsoup.nodes.Document;
 import org.jsoup.parser.ParseSettings;
 import org.jsoup.parser.Parser;
 import org.vaadin.firitin.util.VStyle;
 
+import java.io.Serializable;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -18,8 +22,54 @@ import java.util.Optional;
  * its usage with Svg and MathML elements. E.g.  Can be used to build components that
  * utilise SVG DOM with Element API.
  * </p>
+ * <h2>Write-Only vs Read-Write Attributes</h2>
+ * <p>
+ * This SVG API provides two variants for setting attribute values:
+ * </p>
+ * <ul>
+ *   <li><strong>Default methods</strong> (e.g., {@code x1()}, {@code fill()}) - These use an
+ *       optimized write-only approach where attribute values are batched and sent to the client
+ *       via JavaScript execution. This is more efficient for typical SVG usage where attributes
+ *       are set but rarely read back. The attribute values are NOT stored on the server side.</li>
+ *   <li><strong>RW (Read-Write) methods</strong> (e.g., {@code x1RW()}, {@code fillRW()}) - These
+ *       use the traditional {@link #setAttribute(String, String)} approach where values are stored
+ *       on the server and can be retrieved via {@link #getAttribute(String)}. Use these when you
+ *       need to read attribute values back in your Java code.</li>
+ * </ul>
+ * <p>
+ * The write-only optimization batches multiple attribute changes and sends them in a single
+ * JavaScript call just before the response is sent to the client. Multiple changes to the same
+ * attribute within a request-response cycle are coalesced, sending only the final value.
+ * </p>
+ * <p>
+ * <strong>Important:</strong> Write-only attributes will be lost if the element is removed from
+ * the DOM and later re-attached. Since the values are not stored on the server, they cannot be
+ * restored when the element is re-added. Use the RW (Read-Write) variants if your application
+ * needs to detach and re-attach SVG elements while preserving their attribute values.
+ * </p>
  */
 public class SvgElement extends Element {
+
+    private Map<String, String> pendingAttributes;
+    private boolean beforeClientResponseScheduled = false;
+
+    /**
+     * Gets an attribute value, checking pending write-only attributes first.
+     * <p>
+     * This is useful when you need to read an attribute that may have been set
+     * via {@link #setWriteOnlyAttribute(String, String)} earlier in the same
+     * request-response cycle.
+     * </p>
+     *
+     * @param attribute the attribute name
+     * @return the pending value if set, otherwise the stored attribute value
+     */
+    protected String getPendingOrAttribute(String attribute) {
+        if (pendingAttributes != null && pendingAttributes.containsKey(attribute)) {
+            return pendingAttributes.get(attribute);
+        }
+        return getAttribute(attribute);
+    }
 
     public static SvgElement emptySvgRoot() {
         SvgElement svg = new SvgElement("svg");
@@ -251,6 +301,96 @@ public class SvgElement extends Element {
             throw new IllegalArgumentException("Value cannot be null");
         }
         return lowerCaseAttribute;
+    }
+
+    /**
+     * Sets an attribute using write-only optimization.
+     * <p>
+     * Unlike {@link #setAttribute(String, String)}, this method does NOT store the attribute
+     * value on the server side. Instead, it batches attribute changes and sends them to the
+     * client via JavaScript execution just before the response is sent. This is more efficient
+     * for typical SVG usage where attributes are written once and never read back.
+     * </p>
+     * <p>
+     * Multiple changes to the same attribute within a single request-response cycle are
+     * coalesced, with only the final value being sent to the client.
+     * </p>
+     *
+     * @param attribute the attribute name
+     * @param value the attribute value
+     * @return this element for method chaining
+     */
+    protected Element setWriteOnlyAttribute(String attribute, String value) {
+        validateAttribute(attribute, value);
+        if (pendingAttributes == null) {
+            pendingAttributes = new LinkedHashMap<>();
+        }
+        pendingAttributes.put(attribute, value);
+        scheduleBeforeClientResponse();
+        return this;
+    }
+
+    protected void scheduleBeforeClientResponse() {
+        if (!beforeClientResponseScheduled) {
+            beforeClientResponseScheduled = true;
+            StateNode node = getNode();
+            node.runWhenAttached(ui -> {
+                ui.getInternals().getStateTree().beforeClientResponse(node, ctx -> {
+                    flushPendingAttributes();
+                });
+            });
+        }
+    }
+
+    protected void flushPendingAttributes() {
+        beforeClientResponseScheduled = false;
+        if (pendingAttributes == null || pendingAttributes.isEmpty()) {
+            return;
+        }
+
+        // Build a JavaScript call that sets all pending attributes
+        StringBuilder js = new StringBuilder();
+        js.append("const el=$0;");
+        for (Map.Entry<String, String> entry : pendingAttributes.entrySet()) {
+            String attrName = entry.getKey();
+            String attrValue = entry.getValue();
+            // Use setAttributeNS with null namespace for SVG attributes
+            js.append("el.setAttributeNS(null,");
+            js.append(escapeJsString(attrName));
+            js.append(",");
+            js.append(escapeJsString(attrValue));
+            js.append(");");
+        }
+        executeJs(js.toString());
+        pendingAttributes.clear();
+    }
+
+    private static String escapeJsString(String s) {
+        StringBuilder sb = new StringBuilder("\"");
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            switch (c) {
+                case '"':
+                    sb.append("\\\"");
+                    break;
+                case '\\':
+                    sb.append("\\\\");
+                    break;
+                case '\n':
+                    sb.append("\\n");
+                    break;
+                case '\r':
+                    sb.append("\\r");
+                    break;
+                case '\t':
+                    sb.append("\\t");
+                    break;
+                default:
+                    sb.append(c);
+            }
+        }
+        sb.append("\"");
+        return sb.toString();
     }
 
     @Override

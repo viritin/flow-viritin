@@ -11,12 +11,23 @@ package org.vaadin.firitin.element.svg;
  * the fluent path builder methods like {@link #moveTo(double, double)},
  * {@link #lineTo(double, double)}, etc.
  * </p>
+ * <h2>Write-Only vs Read-Write Methods</h2>
+ * <p>
+ * This class provides two variants for attribute setters:
+ * </p>
+ * <ul>
+ *   <li><strong>Default methods</strong> (e.g., {@code d()}, {@code pathLength()}) - Use an optimized
+ *       write-only approach. Attribute values are NOT stored on the server and cannot be
+ *       retrieved via {@code getAttribute()}.</li>
+ *   <li><strong>RW methods</strong> (e.g., {@code dRW()}, {@code pathLengthRW()}) - Use traditional
+ *       {@code setAttribute()} which stores values on the server for later retrieval.</li>
+ * </ul>
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/path">MDN: path element</a>
  */
 public class PathElement extends SvgGraphicsElement {
 
-    private final StringBuilder pathData = new StringBuilder();
+    private StringBuilder pathData;
 
     public PathElement() {
         super("path");
@@ -27,24 +38,65 @@ public class PathElement extends SvgGraphicsElement {
      * <p>
      * This replaces any path data built using the fluent methods.
      * </p>
+     * <p>
+     * Uses write-only optimization. Use {@link #dRW(String)} if you need to read the value back.
+     * </p>
      *
      * @param d the path data string
      * @return this element for method chaining
      */
     public PathElement d(String d) {
-        pathData.setLength(0);
-        pathData.append(d);
+        pathData = null;
+        setWriteOnlyAttribute("d", d);
+        return this;
+    }
+
+    /**
+     * Sets the path data directly (read-write).
+     * <p>
+     * This replaces any path data built using the fluent methods.
+     * </p>
+     *
+     * @param d the path data string
+     * @return this element for method chaining
+     */
+    public PathElement dRW(String d) {
         setAttribute("d", d);
         return this;
     }
 
     /**
+     * Clears the currently scheduled drawing commands.
+     *
+     * @return this element for method chaining
+     */
+    public PathElement clear() {
+        pathData = new StringBuilder();
+        scheduleBeforeClientResponse();
+        return this;
+    }
+
+    /**
      * Sets the total length for the path in user units.
+     * <p>
+     * Uses write-only optimization. Use {@link #pathLengthRW(double)} if you need to read the value back.
+     * </p>
      *
      * @param pathLength the total path length
      * @return this element for method chaining
      */
     public PathElement pathLength(double pathLength) {
+        setWriteOnlyAttribute("pathLength", String.valueOf(pathLength));
+        return this;
+    }
+
+    /**
+     * Sets the total length for the path in user units (read-write).
+     *
+     * @param pathLength the total path length
+     * @return this element for method chaining
+     */
+    public PathElement pathLengthRW(double pathLength) {
         setAttribute("pathLength", String.valueOf(pathLength));
         return this;
     }
@@ -177,7 +229,7 @@ public class PathElement extends SvgGraphicsElement {
      */
     public PathElement closePath() {
         pathData.append(" Z");
-        updatePathAttribute();
+        scheduleBeforeClientResponse();
         return this;
     }
 
@@ -342,7 +394,7 @@ public class PathElement extends SvgGraphicsElement {
                 .append(largeArcFlag ? 1 : 0).append(",")
                 .append(sweepFlag ? 1 : 0).append(" ")
                 .append(x).append(",").append(y);
-        updatePathAttribute();
+        scheduleBeforeClientResponse();
         return this;
     }
 
@@ -369,22 +421,33 @@ public class PathElement extends SvgGraphicsElement {
                 .append(largeArcFlag ? 1 : 0).append(",")
                 .append(sweepFlag ? 1 : 0).append(" ")
                 .append(dx).append(",").append(dy);
-        updatePathAttribute();
+        scheduleBeforeClientResponse();
         return this;
     }
 
     // ========== Private helpers ==========
 
     private void appendCommand(String command, double... values) {
-        pathData.append(" ").append(command);
+        if(pathData == null) {
+            pathData = new StringBuilder();
+        } else {
+            pathData.append(" ");
+        }
+
+        pathData.append(command);
         for (int i = 0; i < values.length; i++) {
             if (i > 0) pathData.append(",");
             pathData.append(values[i]);
         }
-        updatePathAttribute();
+        scheduleBeforeClientResponse();
     }
 
-    private void updatePathAttribute() {
-        setAttribute("d", pathData.toString().trim());
+    @Override
+    protected void flushPendingAttributes() {
+        if(pathData != null) {
+            setWriteOnlyAttribute("d", pathData.toString());
+            pathData = null;
+        }
+        super.flushPendingAttributes();
     }
 }

@@ -13,6 +13,17 @@ import in.virit.color.Color;
  * Linear gradients must be placed inside a {@code <defs>} element and
  * referenced by ID (e.g., fill="url(#myGradient)").
  * </p>
+ * <h2>Write-Only vs Read-Write Methods</h2>
+ * <p>
+ * This class provides two variants for each attribute setter:
+ * </p>
+ * <ul>
+ *   <li><strong>Default methods</strong> (e.g., {@code x1()}, {@code y1()}) - Use an optimized
+ *       write-only approach. Attribute values are NOT stored on the server and cannot be
+ *       retrieved via {@code getAttribute()}.</li>
+ *   <li><strong>RW methods</strong> (e.g., {@code x1RW()}, {@code y1RW()}) - Use traditional
+ *       {@code setAttribute()} which stores values on the server for later retrieval.</li>
+ * </ul>
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/linearGradient">MDN: linearGradient element</a>
  */
@@ -32,98 +43,223 @@ public class LinearGradientElement extends SvgElement {
         id(id);
     }
 
+    // ========== x1 attribute ==========
+
     /**
      * Sets the x coordinate of the gradient start point.
+     * <p>
+     * Uses write-only optimization. Use {@link #x1RW(double)} if you need to read the value back.
+     * </p>
      *
      * @param x1 the x coordinate (default is 0)
      * @return this element for method chaining
      */
     public LinearGradientElement x1(double x1) {
-        setAttribute("x1", String.valueOf(x1));
+        setWriteOnlyAttribute("x1", String.valueOf(x1));
         return this;
     }
 
     /**
      * Sets the x coordinate of the gradient start point with a unit.
+     * <p>
+     * Uses write-only optimization. Use {@link #x1RW(String)} if you need to read the value back.
+     * </p>
      *
      * @param x1 the x coordinate (e.g., "0%", "50%")
      * @return this element for method chaining
      */
     public LinearGradientElement x1(String x1) {
-        setAttribute("x1", x1);
+        setWriteOnlyAttribute("x1", x1);
         return this;
     }
 
     /**
+     * Sets the x coordinate of the gradient start point (read-write).
+     *
+     * @param x1 the x coordinate (default is 0)
+     * @return this element for method chaining
+     */
+    public LinearGradientElement x1RW(double x1) {
+        setAttribute("x1", String.valueOf(x1));
+        return this;
+    }
+
+    /**
+     * Sets the x coordinate of the gradient start point with a unit (read-write).
+     *
+     * @param x1 the x coordinate (e.g., "0%", "50%")
+     * @return this element for method chaining
+     */
+    public LinearGradientElement x1RW(String x1) {
+        setAttribute("x1", x1);
+        return this;
+    }
+
+    // ========== y1 attribute ==========
+
+    /**
      * Sets the y coordinate of the gradient start point.
+     * <p>
+     * Uses write-only optimization. Use {@link #y1RW(double)} if you need to read the value back.
+     * </p>
      *
      * @param y1 the y coordinate (default is 0)
      * @return this element for method chaining
      */
     public LinearGradientElement y1(double y1) {
-        setAttribute("y1", String.valueOf(y1));
+        setWriteOnlyAttribute("y1", String.valueOf(y1));
         return this;
     }
 
     /**
      * Sets the y coordinate of the gradient start point with a unit.
+     * <p>
+     * Uses write-only optimization. Use {@link #y1RW(String)} if you need to read the value back.
+     * </p>
      *
      * @param y1 the y coordinate (e.g., "0%", "50%")
      * @return this element for method chaining
      */
     public LinearGradientElement y1(String y1) {
-        setAttribute("y1", y1);
+        setWriteOnlyAttribute("y1", y1);
         return this;
     }
 
     /**
+     * Sets the y coordinate of the gradient start point (read-write).
+     *
+     * @param y1 the y coordinate (default is 0)
+     * @return this element for method chaining
+     */
+    public LinearGradientElement y1RW(double y1) {
+        setAttribute("y1", String.valueOf(y1));
+        return this;
+    }
+
+    /**
+     * Sets the y coordinate of the gradient start point with a unit (read-write).
+     *
+     * @param y1 the y coordinate (e.g., "0%", "50%")
+     * @return this element for method chaining
+     */
+    public LinearGradientElement y1RW(String y1) {
+        setAttribute("y1", y1);
+        return this;
+    }
+
+    // ========== x2 attribute ==========
+
+    /**
      * Sets the x coordinate of the gradient end point.
+     * <p>
+     * Uses write-only optimization. Use {@link #x2RW(double)} if you need to read the value back.
+     * </p>
      *
      * @param x2 the x coordinate (default is 1 or 100%)
      * @return this element for method chaining
      */
     public LinearGradientElement x2(double x2) {
-        setAttribute("x2", String.valueOf(x2));
+        setWriteOnlyAttribute("x2", String.valueOf(x2));
         return this;
     }
 
     /**
      * Sets the x coordinate of the gradient end point with a unit.
+     * <p>
+     * Uses write-only optimization. Use {@link #x2RW(String)} if you need to read the value back.
+     * </p>
      *
      * @param x2 the x coordinate (e.g., "100%", "50%")
      * @return this element for method chaining
      */
     public LinearGradientElement x2(String x2) {
-        setAttribute("x2", x2);
+        setWriteOnlyAttribute("x2", x2);
         return this;
     }
 
     /**
+     * Sets the x coordinate of the gradient end point (read-write).
+     *
+     * @param x2 the x coordinate (default is 1 or 100%)
+     * @return this element for method chaining
+     */
+    public LinearGradientElement x2RW(double x2) {
+        setAttribute("x2", String.valueOf(x2));
+        return this;
+    }
+
+    /**
+     * Sets the x coordinate of the gradient end point with a unit (read-write).
+     *
+     * @param x2 the x coordinate (e.g., "100%", "50%")
+     * @return this element for method chaining
+     */
+    public LinearGradientElement x2RW(String x2) {
+        setAttribute("x2", x2);
+        return this;
+    }
+
+    // ========== y2 attribute ==========
+
+    /**
      * Sets the y coordinate of the gradient end point.
+     * <p>
+     * Uses write-only optimization. Use {@link #y2RW(double)} if you need to read the value back.
+     * </p>
      *
      * @param y2 the y coordinate (default is 0)
      * @return this element for method chaining
      */
     public LinearGradientElement y2(double y2) {
-        setAttribute("y2", String.valueOf(y2));
+        setWriteOnlyAttribute("y2", String.valueOf(y2));
         return this;
     }
 
     /**
      * Sets the y coordinate of the gradient end point with a unit.
+     * <p>
+     * Uses write-only optimization. Use {@link #y2RW(String)} if you need to read the value back.
+     * </p>
      *
      * @param y2 the y coordinate (e.g., "100%", "50%")
      * @return this element for method chaining
      */
     public LinearGradientElement y2(String y2) {
+        setWriteOnlyAttribute("y2", y2);
+        return this;
+    }
+
+    /**
+     * Sets the y coordinate of the gradient end point (read-write).
+     *
+     * @param y2 the y coordinate (default is 0)
+     * @return this element for method chaining
+     */
+    public LinearGradientElement y2RW(double y2) {
+        setAttribute("y2", String.valueOf(y2));
+        return this;
+    }
+
+    /**
+     * Sets the y coordinate of the gradient end point with a unit (read-write).
+     *
+     * @param y2 the y coordinate (e.g., "100%", "50%")
+     * @return this element for method chaining
+     */
+    public LinearGradientElement y2RW(String y2) {
         setAttribute("y2", y2);
         return this;
     }
+
+    // ========== Convenience methods ==========
 
     /**
      * Sets the gradient vector from start to end point.
      * <p>
      * Default is horizontal (0,0 to 1,0).
+     * </p>
+     * <p>
+     * Uses write-only optimization. Use {@link #vectorRW(double, double, double, double)} if you need to read the values back.
      * </p>
      *
      * @param x1 start x coordinate
@@ -141,7 +277,27 @@ public class LinearGradientElement extends SvgElement {
     }
 
     /**
+     * Sets the gradient vector from start to end point (read-write).
+     *
+     * @param x1 start x coordinate
+     * @param y1 start y coordinate
+     * @param x2 end x coordinate
+     * @param y2 end y coordinate
+     * @return this element for method chaining
+     */
+    public LinearGradientElement vectorRW(double x1, double y1, double x2, double y2) {
+        x1RW(x1);
+        y1RW(y1);
+        x2RW(x2);
+        y2RW(y2);
+        return this;
+    }
+
+    /**
      * Creates a horizontal gradient (left to right).
+     * <p>
+     * Uses write-only optimization.
+     * </p>
      *
      * @return this element for method chaining
      */
@@ -151,6 +307,9 @@ public class LinearGradientElement extends SvgElement {
 
     /**
      * Creates a vertical gradient (top to bottom).
+     * <p>
+     * Uses write-only optimization.
+     * </p>
      *
      * @return this element for method chaining
      */
@@ -160,12 +319,17 @@ public class LinearGradientElement extends SvgElement {
 
     /**
      * Creates a diagonal gradient (top-left to bottom-right).
+     * <p>
+     * Uses write-only optimization.
+     * </p>
      *
      * @return this element for method chaining
      */
     public LinearGradientElement diagonal() {
         return vector(0, 0, 1, 1);
     }
+
+    // ========== gradientUnits attribute ==========
 
     /**
      * Gradient unit options.
@@ -190,14 +354,30 @@ public class LinearGradientElement extends SvgElement {
 
     /**
      * Sets the coordinate system for the gradient vector.
+     * <p>
+     * Uses write-only optimization. Use {@link #gradientUnitsRW(GradientUnits)} if you need to read the value back.
+     * </p>
      *
      * @param units the gradient units
      * @return this element for method chaining
      */
     public LinearGradientElement gradientUnits(GradientUnits units) {
+        setWriteOnlyAttribute("gradientUnits", units.toString());
+        return this;
+    }
+
+    /**
+     * Sets the coordinate system for the gradient vector (read-write).
+     *
+     * @param units the gradient units
+     * @return this element for method chaining
+     */
+    public LinearGradientElement gradientUnitsRW(GradientUnits units) {
         setAttribute("gradientUnits", units.toString());
         return this;
     }
+
+    // ========== spreadMethod attribute ==========
 
     /**
      * Spread method options for gradients.
@@ -224,33 +404,79 @@ public class LinearGradientElement extends SvgElement {
 
     /**
      * Sets how the gradient behaves outside its bounds.
+     * <p>
+     * Uses write-only optimization. Use {@link #spreadMethodRW(SpreadMethod)} if you need to read the value back.
+     * </p>
      *
      * @param method the spread method
      * @return this element for method chaining
      */
     public LinearGradientElement spreadMethod(SpreadMethod method) {
-        setAttribute("spreadMethod", method.toString());
+        setWriteOnlyAttribute("spreadMethod", method.toString());
         return this;
     }
 
     /**
+     * Sets how the gradient behaves outside its bounds (read-write).
+     *
+     * @param method the spread method
+     * @return this element for method chaining
+     */
+    public LinearGradientElement spreadMethodRW(SpreadMethod method) {
+        setAttribute("spreadMethod", method.toString());
+        return this;
+    }
+
+    // ========== gradientTransform attribute ==========
+
+    /**
      * Sets a transform on the gradient.
+     * <p>
+     * Uses write-only optimization. Use {@link #gradientTransformRW(String)} if you need to read the value back.
+     * </p>
      *
      * @param transform the transform string
      * @return this element for method chaining
      */
     public LinearGradientElement gradientTransform(String transform) {
-        setAttribute("gradientTransform", transform);
+        setWriteOnlyAttribute("gradientTransform", transform);
         return this;
     }
 
     /**
+     * Sets a transform on the gradient (read-write).
+     *
+     * @param transform the transform string
+     * @return this element for method chaining
+     */
+    public LinearGradientElement gradientTransformRW(String transform) {
+        setAttribute("gradientTransform", transform);
+        return this;
+    }
+
+    // ========== href attribute ==========
+
+    /**
      * References another gradient to inherit stops and attributes from.
+     * <p>
+     * Uses write-only optimization. Use {@link #hrefRW(String)} if you need to read the value back.
+     * </p>
      *
      * @param href the reference (e.g., "#otherGradient")
      * @return this element for method chaining
      */
     public LinearGradientElement href(String href) {
+        setWriteOnlyAttribute("href", href);
+        return this;
+    }
+
+    /**
+     * References another gradient to inherit stops and attributes from (read-write).
+     *
+     * @param href the reference (e.g., "#otherGradient")
+     * @return this element for method chaining
+     */
+    public LinearGradientElement hrefRW(String href) {
         setAttribute("href", href);
         return this;
     }

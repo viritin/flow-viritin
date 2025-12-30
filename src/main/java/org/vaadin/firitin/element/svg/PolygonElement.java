@@ -13,6 +13,17 @@ import java.util.List;
  * For an open shape (where the last point is not connected to the first),
  * use a polyline element instead.
  * </p>
+ * <h2>Write-Only vs Read-Write Methods</h2>
+ * <p>
+ * This class provides two variants for attribute setters:
+ * </p>
+ * <ul>
+ *   <li><strong>Default methods</strong> (e.g., {@code points()}, {@code pathLength()}) - Use an optimized
+ *       write-only approach. Attribute values are NOT stored on the server and cannot be
+ *       retrieved via {@code getAttribute()}.</li>
+ *   <li><strong>RW methods</strong> (e.g., {@code pointsRW()}, {@code pathLengthRW()}) - Use traditional
+ *       {@code setAttribute()} which stores values on the server for later retrieval.</li>
+ * </ul>
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/polygon">MDN: polygon element</a>
  */
@@ -29,11 +40,29 @@ public class PolygonElement extends SvgGraphicsElement {
      * <p>
      * This replaces any points added using the fluent methods.
      * </p>
+     * <p>
+     * Uses write-only optimization. Use {@link #pointsRW(String)} if you need to read the value back.
+     * </p>
      *
      * @param points the points string (e.g., "0,100 50,25 50,75 100,0")
      * @return this element for method chaining
      */
     public PolygonElement points(String points) {
+        pointsList.clear();
+        setWriteOnlyAttribute("points", points);
+        return this;
+    }
+
+    /**
+     * Sets the points directly as a string (read-write).
+     * <p>
+     * This replaces any points added using the fluent methods.
+     * </p>
+     *
+     * @param points the points string (e.g., "0,100 50,25 50,75 100,0")
+     * @return this element for method chaining
+     */
+    public PolygonElement pointsRW(String points) {
         pointsList.clear();
         setAttribute("points", points);
         return this;
@@ -97,17 +126,31 @@ public class PolygonElement extends SvgGraphicsElement {
      */
     public PolygonElement clearPoints() {
         pointsList.clear();
-        setAttribute("points", "");
+        setWriteOnlyAttribute("points", "");
         return this;
     }
 
     /**
      * Sets the total length for the polygon's perimeter in user units.
+     * <p>
+     * Uses write-only optimization. Use {@link #pathLengthRW(double)} if you need to read the value back.
+     * </p>
      *
      * @param pathLength the total path length
      * @return this element for method chaining
      */
     public PolygonElement pathLength(double pathLength) {
+        setWriteOnlyAttribute("pathLength", String.valueOf(pathLength));
+        return this;
+    }
+
+    /**
+     * Sets the total length for the polygon's perimeter in user units (read-write).
+     *
+     * @param pathLength the total path length
+     * @return this element for method chaining
+     */
+    public PolygonElement pathLengthRW(double pathLength) {
         setAttribute("pathLength", String.valueOf(pathLength));
         return this;
     }
@@ -193,6 +236,6 @@ public class PolygonElement extends SvgGraphicsElement {
             double[] point = pointsList.get(i);
             sb.append(point[0]).append(",").append(point[1]);
         }
-        setAttribute("points", sb.toString());
+        setWriteOnlyAttribute("points", sb.toString());
     }
 }

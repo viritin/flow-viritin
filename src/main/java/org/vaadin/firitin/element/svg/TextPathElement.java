@@ -7,6 +7,17 @@ package org.vaadin.firitin.element.svg;
  * The text is enclosed within a {@code <text>} element and references a
  * {@code <path>} element using the href attribute.
  * </p>
+ * <h2>Write-Only vs Read-Write Methods</h2>
+ * <p>
+ * This class provides two variants for each attribute setter:
+ * </p>
+ * <ul>
+ *   <li><strong>Default methods</strong> (e.g., {@code startOffset()}, {@code method()}) - Use an optimized
+ *       write-only approach. Attribute values are NOT stored on the server and cannot be
+ *       retrieved via {@code getAttribute()}.</li>
+ *   <li><strong>RW methods</strong> (e.g., {@code startOffsetRW()}, {@code methodRW()}) - Use traditional
+ *       {@code setAttribute()} which stores values on the server for later retrieval.</li>
+ * </ul>
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/textPath">MDN: textPath element</a>
  */
@@ -56,6 +67,9 @@ public class TextPathElement extends SvgGraphicsElement {
     /**
      * Sets the path element for the text to follow.
      * An ID is automatically generated for the path if not already set.
+     * <p>
+     * Note: This method uses read-write approach to ensure ID is properly set.
+     * </p>
      *
      * @param path the path element
      * @return this element for method chaining
@@ -65,13 +79,29 @@ public class TextPathElement extends SvgGraphicsElement {
         return this;
     }
 
+    // ========== href attribute ==========
+
     /**
      * Sets the href to reference a path element by ID.
+     * <p>
+     * Uses write-only optimization. Use {@link #hrefRW(String)} if you need to read the value back.
+     * </p>
      *
      * @param href the reference URL (e.g., "#myPath")
      * @return this element for method chaining
      */
     public TextPathElement href(String href) {
+        setWriteOnlyAttribute("href", href);
+        return this;
+    }
+
+    /**
+     * Sets the href to reference a path element by ID (read-write).
+     *
+     * @param href the reference URL (e.g., "#myPath")
+     * @return this element for method chaining
+     */
+    public TextPathElement hrefRW(String href) {
         setAttribute("href", href);
         return this;
     }
@@ -85,24 +115,54 @@ public class TextPathElement extends SvgGraphicsElement {
         return id;
     }
 
+    // ========== startOffset attribute ==========
+
     /**
      * Sets the offset along the path where text rendering starts.
+     * <p>
+     * Uses write-only optimization. Use {@link #startOffsetRW(double)} if you need to read the value back.
+     * </p>
      *
      * @param offset the start offset
      * @return this element for method chaining
      */
     public TextPathElement startOffset(double offset) {
-        setAttribute("startOffset", String.valueOf(offset));
+        setWriteOnlyAttribute("startOffset", String.valueOf(offset));
         return this;
     }
 
     /**
      * Sets the offset along the path with a unit.
+     * <p>
+     * Uses write-only optimization. Use {@link #startOffsetRW(String)} if you need to read the value back.
+     * </p>
      *
      * @param offset the start offset (e.g., "50%", "100px")
      * @return this element for method chaining
      */
     public TextPathElement startOffset(String offset) {
+        setWriteOnlyAttribute("startOffset", offset);
+        return this;
+    }
+
+    /**
+     * Sets the offset along the path where text rendering starts (read-write).
+     *
+     * @param offset the start offset
+     * @return this element for method chaining
+     */
+    public TextPathElement startOffsetRW(double offset) {
+        setAttribute("startOffset", String.valueOf(offset));
+        return this;
+    }
+
+    /**
+     * Sets the offset along the path with a unit (read-write).
+     *
+     * @param offset the start offset (e.g., "50%", "100px")
+     * @return this element for method chaining
+     */
+    public TextPathElement startOffsetRW(String offset) {
         setAttribute("startOffset", offset);
         return this;
     }
@@ -128,13 +188,29 @@ public class TextPathElement extends SvgGraphicsElement {
         }
     }
 
+    // ========== method attribute ==========
+
     /**
      * Sets the method used to render individual glyphs along the path.
+     * <p>
+     * Uses write-only optimization. Use {@link #methodRW(Method)} if you need to read the value back.
+     * </p>
      *
      * @param method the rendering method
      * @return this element for method chaining
      */
     public TextPathElement method(Method method) {
+        setWriteOnlyAttribute("method", method.toString());
+        return this;
+    }
+
+    /**
+     * Sets the method used to render individual glyphs along the path (read-write).
+     *
+     * @param method the rendering method
+     * @return this element for method chaining
+     */
+    public TextPathElement methodRW(Method method) {
         setAttribute("method", method.toString());
         return this;
     }
@@ -160,13 +236,29 @@ public class TextPathElement extends SvgGraphicsElement {
         }
     }
 
+    // ========== spacing attribute ==========
+
     /**
      * Sets the spacing between glyphs.
+     * <p>
+     * Uses write-only optimization. Use {@link #spacingRW(Spacing)} if you need to read the value back.
+     * </p>
      *
      * @param spacing the spacing mode
      * @return this element for method chaining
      */
     public TextPathElement spacing(Spacing spacing) {
+        setWriteOnlyAttribute("spacing", spacing.toString());
+        return this;
+    }
+
+    /**
+     * Sets the spacing between glyphs (read-write).
+     *
+     * @param spacing the spacing mode
+     * @return this element for method chaining
+     */
+    public TextPathElement spacingRW(Spacing spacing) {
         setAttribute("spacing", spacing.toString());
         return this;
     }
@@ -192,24 +284,56 @@ public class TextPathElement extends SvgGraphicsElement {
         }
     }
 
+    // ========== side attribute ==========
+
     /**
      * Sets which side of the path the text is rendered on.
+     * <p>
+     * Uses write-only optimization. Use {@link #sideRW(Side)} if you need to read the value back.
+     * </p>
      *
      * @param side the side
      * @return this element for method chaining
      */
     public TextPathElement side(Side side) {
-        setAttribute("side", side.toString());
+        setWriteOnlyAttribute("side", side.toString());
         return this;
     }
 
     /**
+     * Sets which side of the path the text is rendered on (read-write).
+     *
+     * @param side the side
+     * @return this element for method chaining
+     */
+    public TextPathElement sideRW(Side side) {
+        setAttribute("side", side.toString());
+        return this;
+    }
+
+    // ========== textLength attribute ==========
+
+    /**
      * Sets the total length of the text.
+     * <p>
+     * Uses write-only optimization. Use {@link #textLengthRW(double)} if you need to read the value back.
+     * </p>
      *
      * @param length the text length
      * @return this element for method chaining
      */
     public TextPathElement textLength(double length) {
+        setWriteOnlyAttribute("textLength", String.valueOf(length));
+        return this;
+    }
+
+    /**
+     * Sets the total length of the text (read-write).
+     *
+     * @param length the text length
+     * @return this element for method chaining
+     */
+    public TextPathElement textLengthRW(double length) {
         setAttribute("textLength", String.valueOf(length));
         return this;
     }
@@ -218,44 +342,104 @@ public class TextPathElement extends SvgGraphicsElement {
 
     /**
      * Sets the font family.
+     * <p>
+     * Uses write-only optimization. Use {@link #fontFamilyRW(String)} if you need to read the value back.
+     * </p>
      *
      * @param fontFamily the font family
      * @return this element for method chaining
      */
     public TextPathElement fontFamily(String fontFamily) {
-        setAttribute("font-family", fontFamily);
+        setWriteOnlyAttribute("font-family", fontFamily);
         return this;
     }
 
     /**
+     * Sets the font family (read-write).
+     *
+     * @param fontFamily the font family
+     * @return this element for method chaining
+     */
+    public TextPathElement fontFamilyRW(String fontFamily) {
+        setAttribute("font-family", fontFamily);
+        return this;
+    }
+
+    // ========== fontSize attribute ==========
+
+    /**
      * Sets the font size.
+     * <p>
+     * Uses write-only optimization. Use {@link #fontSizeRW(double)} if you need to read the value back.
+     * </p>
      *
      * @param size the font size
      * @return this element for method chaining
      */
     public TextPathElement fontSize(double size) {
-        setAttribute("font-size", String.valueOf(size));
+        setWriteOnlyAttribute("font-size", String.valueOf(size));
         return this;
     }
 
     /**
      * Sets the font size with a unit.
+     * <p>
+     * Uses write-only optimization. Use {@link #fontSizeRW(String)} if you need to read the value back.
+     * </p>
      *
      * @param size the font size (e.g., "12px", "1em")
      * @return this element for method chaining
      */
     public TextPathElement fontSize(String size) {
-        setAttribute("font-size", size);
+        setWriteOnlyAttribute("font-size", size);
         return this;
     }
 
     /**
+     * Sets the font size (read-write).
+     *
+     * @param size the font size
+     * @return this element for method chaining
+     */
+    public TextPathElement fontSizeRW(double size) {
+        setAttribute("font-size", String.valueOf(size));
+        return this;
+    }
+
+    /**
+     * Sets the font size with a unit (read-write).
+     *
+     * @param size the font size (e.g., "12px", "1em")
+     * @return this element for method chaining
+     */
+    public TextPathElement fontSizeRW(String size) {
+        setAttribute("font-size", size);
+        return this;
+    }
+
+    // ========== fontWeight attribute ==========
+
+    /**
      * Sets the font weight.
+     * <p>
+     * Uses write-only optimization. Use {@link #fontWeightRW(TextElement.FontWeight)} if you need to read the value back.
+     * </p>
      *
      * @param weight the font weight
      * @return this element for method chaining
      */
     public TextPathElement fontWeight(TextElement.FontWeight weight) {
+        setWriteOnlyAttribute("font-weight", weight.toString());
+        return this;
+    }
+
+    /**
+     * Sets the font weight (read-write).
+     *
+     * @param weight the font weight
+     * @return this element for method chaining
+     */
+    public TextPathElement fontWeightRW(TextElement.FontWeight weight) {
         setAttribute("font-weight", weight.toString());
         return this;
     }
