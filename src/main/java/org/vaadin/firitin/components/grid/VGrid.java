@@ -296,8 +296,7 @@ public class VGrid<T> extends Grid<T>
                     .setMinWidth("1em")
                     .setMarginRight("0")
                     .setMarginTop("0.5em")
-                    .setPadding("0")
-                    .setBackgroundColor("rgba(255,255,255,0.8)");
+                    .setPadding("0");
             getElement().executeJs("""
                     const el = this;
                     const gridel = $0;
