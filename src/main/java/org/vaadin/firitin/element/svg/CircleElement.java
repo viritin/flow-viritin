@@ -271,4 +271,64 @@ public class CircleElement extends SvgGraphicsElement {
     public CircleElement centerRW(String cx, String cy) {
         return cxRW(cx).cyRW(cy);
     }
+
+    // ========== Animation methods ==========
+
+    /**
+     * Creates an animation for the cx (center x) attribute and appends it to this element.
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * circle.animateCx()
+     *     .from(0).to(100)
+     *     .dur(Duration.ofSeconds(2))
+     *     .beginElement();
+     * }</pre>
+     *
+     * @return the animation element for further configuration
+     */
+    public AnimateElement animateCx() {
+        AnimateElement animate = new AnimateElement().attributeName("cx");
+        appendChild(animate);
+        return animate;
+    }
+
+    /**
+     * Creates an animation for the cy (center y) attribute and appends it to this element.
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * circle.animateCy()
+     *     .from(0).to(100)
+     *     .dur(Duration.ofSeconds(2))
+     *     .beginElement();
+     * }</pre>
+     *
+     * @return the animation element for further configuration
+     */
+    public AnimateElement animateCy() {
+        AnimateElement animate = new AnimateElement().attributeName("cy");
+        appendChild(animate);
+        return animate;
+    }
+
+    /**
+     * Creates an animation for the r (radius) attribute and appends it to this element.
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * circle.animateR()
+     *     .from(10).to(50)
+     *     .dur(Duration.ofSeconds(1))
+     *     .repeatIndefinitely()
+     *     .beginElement();
+     * }</pre>
+     *
+     * @return the animation element for further configuration
+     */
+    public AnimateElement animateR() {
+        AnimateElement animate = new AnimateElement().attributeName("r");
+        appendChild(animate);
+        return animate;
+    }
 }

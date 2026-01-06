@@ -367,4 +367,82 @@ public class EllipseElement extends SvgGraphicsElement {
     public EllipseElement radiiRW(String rx, String ry) {
         return rxRW(rx).ryRW(ry);
     }
+
+    // ========== Animation methods ==========
+
+    /**
+     * Creates an animation for the cx (center x) attribute and appends it to this element.
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * ellipse.animateCx()
+     *     .from(0).to(100)
+     *     .dur(Duration.ofSeconds(2))
+     *     .beginElement();
+     * }</pre>
+     *
+     * @return the animation element for further configuration
+     */
+    public AnimateElement animateCx() {
+        AnimateElement animate = new AnimateElement().attributeName("cx");
+        appendChild(animate);
+        return animate;
+    }
+
+    /**
+     * Creates an animation for the cy (center y) attribute and appends it to this element.
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * ellipse.animateCy()
+     *     .from(0).to(100)
+     *     .dur(Duration.ofSeconds(2))
+     *     .beginElement();
+     * }</pre>
+     *
+     * @return the animation element for further configuration
+     */
+    public AnimateElement animateCy() {
+        AnimateElement animate = new AnimateElement().attributeName("cy");
+        appendChild(animate);
+        return animate;
+    }
+
+    /**
+     * Creates an animation for the rx (horizontal radius) attribute and appends it to this element.
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * ellipse.animateRx()
+     *     .from(10).to(50)
+     *     .dur(Duration.ofSeconds(1))
+     *     .beginElement();
+     * }</pre>
+     *
+     * @return the animation element for further configuration
+     */
+    public AnimateElement animateRx() {
+        AnimateElement animate = new AnimateElement().attributeName("rx");
+        appendChild(animate);
+        return animate;
+    }
+
+    /**
+     * Creates an animation for the ry (vertical radius) attribute and appends it to this element.
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * ellipse.animateRy()
+     *     .from(10).to(30)
+     *     .dur(Duration.ofSeconds(1))
+     *     .beginElement();
+     * }</pre>
+     *
+     * @return the animation element for further configuration
+     */
+    public AnimateElement animateRy() {
+        AnimateElement animate = new AnimateElement().attributeName("ry");
+        appendChild(animate);
+        return animate;
+    }
 }

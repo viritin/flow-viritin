@@ -34,4 +34,69 @@ public class GElement extends SvgGraphicsElement {
         appendChild(children);
         return this;
     }
+
+    // ========== Animation methods ==========
+
+    /**
+     * Creates a translation animation and appends it to this group.
+     * <p>
+     * This animates the entire group and all its children.
+     * Example usage:
+     * <pre>{@code
+     * group.animateTranslate()
+     *     .translateFromTo(0, 0, 100, 50)
+     *     .dur(Duration.ofSeconds(2))
+     *     .beginElement();
+     * }</pre>
+     *
+     * @return the animation element for further configuration
+     */
+    public AnimateTransformElement animateTranslate() {
+        AnimateTransformElement animate = new AnimateTransformElement()
+                .type(AnimateTransformElement.Type.TRANSLATE);
+        appendChild(animate);
+        return animate;
+    }
+
+    /**
+     * Creates a rotation animation and appends it to this group.
+     * <p>
+     * This animates the entire group and all its children.
+     * Example usage:
+     * <pre>{@code
+     * group.animateRotate()
+     *     .rotateFromTo(0, 360, 50, 50)  // rotate around center (50,50)
+     *     .dur(Duration.ofSeconds(2))
+     *     .beginElement();
+     * }</pre>
+     *
+     * @return the animation element for further configuration
+     */
+    public AnimateTransformElement animateRotate() {
+        AnimateTransformElement animate = new AnimateTransformElement()
+                .type(AnimateTransformElement.Type.ROTATE);
+        appendChild(animate);
+        return animate;
+    }
+
+    /**
+     * Creates a scale animation and appends it to this group.
+     * <p>
+     * This animates the entire group and all its children.
+     * Example usage:
+     * <pre>{@code
+     * group.animateScale()
+     *     .scaleFromTo(1, 2)  // scale from 1x to 2x
+     *     .dur(Duration.ofSeconds(1))
+     *     .beginElement();
+     * }</pre>
+     *
+     * @return the animation element for further configuration
+     */
+    public AnimateTransformElement animateScale() {
+        AnimateTransformElement animate = new AnimateTransformElement()
+                .type(AnimateTransformElement.Type.SCALE);
+        appendChild(animate);
+        return animate;
+    }
 }
