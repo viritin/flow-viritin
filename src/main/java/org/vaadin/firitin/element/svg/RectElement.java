@@ -511,4 +511,26 @@ public class RectElement extends SvgGraphicsElement {
     public RectElement cornerRadiusRW(double rx, double ry) {
         return rxRW(rx).ryRW(ry);
     }
+
+    // ========== Animation methods ==========
+
+    /**
+     * Creates a motion path animation and appends it to this element.
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * rect.animateMotion()
+     *     .path("M 50,80 Q 100,20 150,80 T 250,80")
+     *     .dur(Duration.ofSeconds(3))
+     *     .rotateAuto()
+     *     .repeatIndefinitely();
+     * }</pre>
+     *
+     * @return the animation element for further configuration
+     */
+    public AnimateMotionElement animateMotion() {
+        AnimateMotionElement animate = new AnimateMotionElement();
+        appendChild(animate);
+        return animate;
+    }
 }

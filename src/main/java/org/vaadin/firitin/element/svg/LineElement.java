@@ -1,5 +1,7 @@
 package org.vaadin.firitin.element.svg;
 
+import java.time.Duration;
+
 /**
  * A typed Java API for the SVG {@code <line>} element.
  * <p>
@@ -449,5 +451,87 @@ public class LineElement extends SvgGraphicsElement {
      */
     public LineElement pointsRW(double x1, double y1, double x2, double y2) {
         return fromRW(x1, y1).toRW(x2, y2);
+    }
+
+    // ========== Animation methods ==========
+
+    /**
+     * Animates the x1 attribute from one value to another.
+     *
+     * @param from the starting x1 value
+     * @param to the ending x1 value
+     * @param duration the animation duration
+     * @return the created AnimateElement for further configuration
+     */
+    public AnimateElement animateX1(double from, double to, Duration duration) {
+        AnimateElement anim = new AnimateElement()
+                .attributeName("x1")
+                .from(from)
+                .to(to)
+                .dur(duration)
+                .freeze();
+        appendChild(anim);
+        anim.beginElement();
+        return anim;
+    }
+
+    /**
+     * Animates the y1 attribute from one value to another.
+     *
+     * @param from the starting y1 value
+     * @param to the ending y1 value
+     * @param duration the animation duration
+     * @return the created AnimateElement for further configuration
+     */
+    public AnimateElement animateY1(double from, double to, Duration duration) {
+        AnimateElement anim = new AnimateElement()
+                .attributeName("y1")
+                .from(from)
+                .to(to)
+                .dur(duration)
+                .freeze();
+        appendChild(anim);
+        anim.beginElement();
+        return anim;
+    }
+
+    /**
+     * Animates the x2 attribute from one value to another.
+     *
+     * @param from the starting x2 value
+     * @param to the ending x2 value
+     * @param duration the animation duration
+     * @return the created AnimateElement for further configuration
+     */
+    public AnimateElement animateX2(double from, double to, Duration duration) {
+        AnimateElement anim = new AnimateElement()
+                .attributeName("x2")
+                .from(from)
+                .to(to)
+                .dur(duration)
+                .freeze();
+        appendChild(anim);
+        anim.beginElement();
+        return anim;
+    }
+
+    /**
+     * Animates the y2 attribute from one value to another.
+     *
+     * @param from the starting y2 value
+     * @param to the ending y2 value
+     * @param duration the animation duration
+     * @return the created AnimateElement for further configuration
+     */
+    public AnimateElement animateY2(double from, double to, Duration duration) {
+        AnimateElement anim = new AnimateElement()
+                .attributeName("y2")
+                .from(from)
+                .to(to)
+                .dur(duration)
+                .freeze();
+        appendChild(anim);
+        anim.beginElement();
+        return anim;
     }
 }

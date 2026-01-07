@@ -17,6 +17,7 @@ import in.virit.color.HslColor;
 import in.virit.color.RgbColor;
 import org.vaadin.firitin.components.VSvg;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
+import org.vaadin.firitin.element.svg.AnimateElement;
 import org.vaadin.firitin.element.svg.AnimateTransformElement;
 import org.vaadin.firitin.element.svg.CircleElement;
 import org.vaadin.firitin.element.svg.DefsElement;
@@ -159,23 +160,43 @@ public class AnimatedPucksView extends VVerticalLayout {
     }
 
     /**
-     * A 3D-looking puck component with shadow and gradient fill.
-     * Uses group-based transform animation for smooth movement.
+     * A 3D-looking puck component with shadow and highlight that respond to
+     * a simulated light source at the top-left corner of the board.
      */
     static class Puck extends Component {
 
         private static final int RADIUS = 25;
-        // Shadow offset relative to puck center
-        private static final int SHADOW_OFFSET_X = 5;
-        private static final int SHADOW_OFFSET_Y = 8;
+
+        // Board dimensions for light calculations
+        private static final double BOARD_WIDTH = 400;
+        private static final double BOARD_HEIGHT = 300;
+
+        // Shadow offset range (min at top-left, max at bottom-right)
+        private static final double SHADOW_BASE_X = 2;
+        private static final double SHADOW_BASE_Y = 3;
+        private static final double SHADOW_RANGE_X = 10;
+        private static final double SHADOW_RANGE_Y = 12;
+
+        // Highlight offset range (moves toward light source)
+        private static final double HIGHLIGHT_BASE_X = -5;
+        private static final double HIGHLIGHT_BASE_Y = -5;
+        private static final double HIGHLIGHT_RANGE_X = 6;
+        private static final double HIGHLIGHT_RANGE_Y = 6;
 
         private final String colorName;
         private final RadialGradientElement gradient;
         private final GElement group;
         private final CircleElement mainCircle;
+        private final EllipseElement shadow;
+        private final CircleElement highlight;
+
         private double currentX;
         private double currentY;
-        private AnimateTransformElement animation;
+        private AnimateTransformElement groupAnimation;
+        private AnimateElement shadowCxAnim;
+        private AnimateElement shadowCyAnim;
+        private AnimateElement highlightCxAnim;
+        private AnimateElement highlightCyAnim;
 
         Puck(String colorName, Color color, double x, double y) {
             super(new GElement());
@@ -197,12 +218,13 @@ public class AnimatedPucksView extends VVerticalLayout {
                     .addStop(0.5, color)
                     .addStop(1, shadowColor);
 
-            // All child elements positioned relative to (0,0)
-            // The group transform handles positioning
+            // Calculate initial shadow/highlight positions based on light
+            double[] shadowOffset = calculateShadowOffset(x, y);
+            double[] highlightOffset = calculateHighlightOffset(x, y);
 
-            // Shadow (ellipse below the puck) - semi-transparent black
-            EllipseElement shadow = new EllipseElement()
-                    .center(SHADOW_OFFSET_X, SHADOW_OFFSET_Y)
+            // Shadow (ellipse below the puck) - position based on light direction
+            shadow = new EllipseElement()
+                    .center(shadowOffset[0], shadowOffset[1])
                     .rx(RADIUS * 0.9)
                     .ry(RADIUS * 0.4)
                     .fill(new RgbColor(0, 0, 0, 0.3))
@@ -216,20 +238,48 @@ public class AnimatedPucksView extends VVerticalLayout {
                     .stroke(HexColor.of("#333333"))
                     .strokeWidth(1);
 
-            // Highlight reflection - semi-transparent white
-            CircleElement highlight = new CircleElement()
-                    .center(-8, -8)
+            // Highlight reflection - position based on light direction
+            highlight = new CircleElement()
+                    .center(highlightOffset[0], highlightOffset[1])
                     .r(6)
-                    .fill(new RgbColor(255, 255, 255, 0.3))
+                    .fill(new RgbColor(255, 255, 255, 0.4))
                     .noStroke();
 
             group.add(shadow, mainCircle, highlight);
 
             // Position the group at initial location
-            group.transform("translate(%s %s)".formatted(x, y));
+            group.translate(x, y);
 
             // Make it look clickable
             mainCircle.getStyle().setCursor("pointer");
+        }
+
+        /**
+         * Calculates shadow offset based on position.
+         * Light comes from top-left, so shadow extends toward bottom-right
+         * as the puck moves away from the light source.
+         */
+        private double[] calculateShadowOffset(double x, double y) {
+            double normalizedX = x / BOARD_WIDTH;  // 0 at left, 1 at right
+            double normalizedY = y / BOARD_HEIGHT; // 0 at top, 1 at bottom
+            return new double[] {
+                SHADOW_BASE_X + normalizedX * SHADOW_RANGE_X,
+                SHADOW_BASE_Y + normalizedY * SHADOW_RANGE_Y
+            };
+        }
+
+        /**
+         * Calculates highlight offset based on position.
+         * Highlight faces the light source (top-left), so it moves
+         * more toward top-left as puck moves away from light.
+         */
+        private double[] calculateHighlightOffset(double x, double y) {
+            double normalizedX = x / BOARD_WIDTH;
+            double normalizedY = y / BOARD_HEIGHT;
+            return new double[] {
+                HIGHLIGHT_BASE_X - normalizedX * HIGHLIGHT_RANGE_X,
+                HIGHLIGHT_BASE_Y - normalizedY * HIGHLIGHT_RANGE_Y
+            };
         }
 
         RadialGradientElement getGradient() {
@@ -246,21 +296,74 @@ public class AnimatedPucksView extends VVerticalLayout {
         }
 
         void animateTo(double newX, double newY) {
-            // Remove old animation if exists
-            if (animation != null && animation.getParent() != null) {
-                animation.getParent().removeChild(animation);
-            }
+            removeOldAnimations();
 
-            // Animate the entire group with a single transform animation
-            animation = group.animateTranslate()
+            Duration duration = Duration.ofSeconds(5);
+
+            // Calculate current and new shadow/highlight offsets
+            double[] currentShadow = calculateShadowOffset(currentX, currentY);
+            double[] newShadow = calculateShadowOffset(newX, newY);
+            double[] currentHighlight = calculateHighlightOffset(currentX, currentY);
+            double[] newHighlight = calculateHighlightOffset(newX, newY);
+
+            // Animate group position
+            groupAnimation = group.animateTranslate()
                     .translateFromTo(currentX, currentY, newX, newY)
-                    .dur(Duration.ofSeconds(5))
+                    .dur(duration)
                     .freeze()
                     .easeInOut();
-            animation.beginElement();
+            groupAnimation.beginElement();
+
+            // Animate shadow offset (light effect)
+            shadowCxAnim = shadow.animateCx()
+                    .from(currentShadow[0])
+                    .to(newShadow[0])
+                    .dur(duration)
+                    .freeze()
+                    .easeInOut();
+            shadowCxAnim.beginElement();
+
+            shadowCyAnim = shadow.animateCy()
+                    .from(currentShadow[1])
+                    .to(newShadow[1])
+                    .dur(duration)
+                    .freeze()
+                    .easeInOut();
+            shadowCyAnim.beginElement();
+
+            // Animate highlight offset (light effect)
+            highlightCxAnim = highlight.animateCx()
+                    .from(currentHighlight[0])
+                    .to(newHighlight[0])
+                    .dur(duration)
+                    .freeze()
+                    .easeInOut();
+            highlightCxAnim.beginElement();
+
+            highlightCyAnim = highlight.animateCy()
+                    .from(currentHighlight[1])
+                    .to(newHighlight[1])
+                    .dur(duration)
+                    .freeze()
+                    .easeInOut();
+            highlightCyAnim.beginElement();
 
             currentX = newX;
             currentY = newY;
+        }
+
+        private void removeOldAnimations() {
+            removeAnimation(groupAnimation);
+            removeAnimation(shadowCxAnim);
+            removeAnimation(shadowCyAnim);
+            removeAnimation(highlightCxAnim);
+            removeAnimation(highlightCyAnim);
+        }
+
+        private void removeAnimation(AnimateElement anim) {
+            if (anim != null && anim.getParent() != null) {
+                anim.getParent().removeChild(anim);
+            }
         }
     }
 }

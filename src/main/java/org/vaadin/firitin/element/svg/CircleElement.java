@@ -331,4 +331,23 @@ public class CircleElement extends SvgGraphicsElement {
         appendChild(animate);
         return animate;
     }
+
+    /**
+     * Creates a motion path animation and appends it to this element.
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * circle.animateMotion()
+     *     .path("M 0 0 H 300 Z")
+     *     .dur(Duration.ofSeconds(3))
+     *     .repeatIndefinitely();
+     * }</pre>
+     *
+     * @return the animation element for further configuration
+     */
+    public AnimateMotionElement animateMotion() {
+        AnimateMotionElement animate = new AnimateMotionElement();
+        appendChild(animate);
+        return animate;
+    }
 }

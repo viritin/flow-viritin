@@ -28,6 +28,16 @@ public class DefsElement extends SvgElement {
     }
 
     /**
+     * Creates a defs element with the given definition elements.
+     *
+     * @param definitions the elements to add as definitions
+     */
+    public DefsElement(SvgElement... definitions) {
+        super("defs");
+        appendChild(definitions);
+    }
+
+    /**
      * Adds definition elements to this defs container.
      *
      * @param definitions the elements to add as definitions

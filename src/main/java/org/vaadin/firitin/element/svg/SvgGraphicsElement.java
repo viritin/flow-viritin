@@ -803,6 +803,134 @@ public class SvgGraphicsElement extends SvgElement {
         return (T) this;
     }
 
+    // ========== Marker Attributes ==========
+
+    /**
+     * Sets a marker to be drawn at the first vertex of the element's path.
+     * <p>
+     * An ID is automatically generated for the marker if not already set.
+     * </p>
+     * <p>
+     * Uses write-only optimization. Use {@link #markerStartRW(MarkerElement)} if you need to read the value back.
+     * </p>
+     *
+     * @param marker the marker element
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T markerStart(MarkerElement marker) {
+        setWriteOnlyAttribute("marker-start", "url(#" + ensureId(marker) + ")");
+        return (T) this;
+    }
+
+    /**
+     * Sets a marker to be drawn at the first vertex of the element's path (read-write).
+     *
+     * @param marker the marker element
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T markerStartRW(MarkerElement marker) {
+        setAttribute("marker-start", "url(#" + ensureId(marker) + ")");
+        return (T) this;
+    }
+
+    /**
+     * Sets a marker to be drawn at all vertices except the first and last.
+     * <p>
+     * An ID is automatically generated for the marker if not already set.
+     * </p>
+     * <p>
+     * Uses write-only optimization. Use {@link #markerMidRW(MarkerElement)} if you need to read the value back.
+     * </p>
+     *
+     * @param marker the marker element
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T markerMid(MarkerElement marker) {
+        setWriteOnlyAttribute("marker-mid", "url(#" + ensureId(marker) + ")");
+        return (T) this;
+    }
+
+    /**
+     * Sets a marker to be drawn at all vertices except the first and last (read-write).
+     *
+     * @param marker the marker element
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T markerMidRW(MarkerElement marker) {
+        setAttribute("marker-mid", "url(#" + ensureId(marker) + ")");
+        return (T) this;
+    }
+
+    /**
+     * Sets a marker to be drawn at the last vertex of the element's path.
+     * <p>
+     * An ID is automatically generated for the marker if not already set.
+     * </p>
+     * <p>
+     * Uses write-only optimization. Use {@link #markerEndRW(MarkerElement)} if you need to read the value back.
+     * </p>
+     *
+     * @param marker the marker element
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T markerEnd(MarkerElement marker) {
+        setWriteOnlyAttribute("marker-end", "url(#" + ensureId(marker) + ")");
+        return (T) this;
+    }
+
+    /**
+     * Sets a marker to be drawn at the last vertex of the element's path (read-write).
+     *
+     * @param marker the marker element
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T markerEndRW(MarkerElement marker) {
+        setAttribute("marker-end", "url(#" + ensureId(marker) + ")");
+        return (T) this;
+    }
+
+    /**
+     * Sets markers to be drawn at the start, mid-points, and end of the element's path.
+     * <p>
+     * An ID is automatically generated for the marker if not already set.
+     * </p>
+     * <p>
+     * Uses write-only optimization. Use {@link #markerRW(MarkerElement)} if you need to read the value back.
+     * </p>
+     *
+     * @param marker the marker element to use for all positions
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T marker(MarkerElement marker) {
+        String url = "url(#" + ensureId(marker) + ")";
+        setWriteOnlyAttribute("marker-start", url);
+        setWriteOnlyAttribute("marker-mid", url);
+        setWriteOnlyAttribute("marker-end", url);
+        return (T) this;
+    }
+
+    /**
+     * Sets markers to be drawn at the start, mid-points, and end of the element's path (read-write).
+     *
+     * @param marker the marker element to use for all positions
+     * @return this element for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends SvgGraphicsElement> T markerRW(MarkerElement marker) {
+        String url = "url(#" + ensureId(marker) + ")";
+        setAttribute("marker-start", url);
+        setAttribute("marker-mid", url);
+        setAttribute("marker-end", url);
+        return (T) this;
+    }
+
     private static int idCounter = 0;
 
     /**

@@ -1,5 +1,7 @@
 package org.vaadin.firitin.element.svg;
 
+import java.util.function.Consumer;
+
 /**
  * A typed Java API for the SVG {@code <path>} element.
  * <p>
@@ -34,6 +36,16 @@ public class PathElement extends SvgGraphicsElement {
     }
 
     /**
+     * Creates a path element with the given path data.
+     *
+     * @param pathConfigurator a consumer that configures the path builder
+     */
+    public PathElement(Consumer<PathBuilder> pathConfigurator) {
+        super("path");
+        d(pathConfigurator);
+    }
+
+    /**
      * Sets the path data directly.
      * <p>
      * This replaces any path data built using the fluent methods.
@@ -52,6 +64,39 @@ public class PathElement extends SvgGraphicsElement {
     }
 
     /**
+     * Sets the path data using a lambda expression that configures a PathBuilder.
+     * <p>
+     * This replaces any path data built using the fluent methods.
+     * </p>
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * PathElement path = new PathElement()
+     *     .d(p -> p
+     *         .moveTo(10, 10)
+     *         .lineTo(100, 10)
+     *         .quadraticBezierTo(150, 10, 150, 60)
+     *         .lineTo(150, 100)
+     *         .closePath())
+     *     .fill(HexColor.of("#3366cc"))
+     *     .stroke(HexColor.of("#000000"));
+     * }</pre>
+     * <p>
+     * Uses write-only optimization. Use {@link #dRW(Consumer)} if you need to read the value back.
+     * </p>
+     *
+     * @param pathConfigurator a consumer that configures the path builder
+     * @return this element for method chaining
+     */
+    public PathElement d(Consumer<PathBuilder> pathConfigurator) {
+        pathData = null;
+        PathBuilder builder = new PathBuilder();
+        pathConfigurator.accept(builder);
+        setWriteOnlyAttribute("d", builder.build());
+        return this;
+    }
+
+    /**
      * Sets the path data directly (read-write).
      * <p>
      * This replaces any path data built using the fluent methods.
@@ -62,6 +107,22 @@ public class PathElement extends SvgGraphicsElement {
      */
     public PathElement dRW(String d) {
         setAttribute("d", d);
+        return this;
+    }
+
+    /**
+     * Sets the path data using a lambda expression that configures a PathBuilder (read-write).
+     * <p>
+     * This replaces any path data built using the fluent methods.
+     * </p>
+     *
+     * @param pathConfigurator a consumer that configures the path builder
+     * @return this element for method chaining
+     */
+    public PathElement dRW(Consumer<PathBuilder> pathConfigurator) {
+        PathBuilder builder = new PathBuilder();
+        pathConfigurator.accept(builder);
+        setAttribute("d", builder.build());
         return this;
     }
 
