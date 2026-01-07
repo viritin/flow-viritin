@@ -365,5 +365,11 @@ public class AnimatedPucksView extends VVerticalLayout {
                 anim.getParent().removeChild(anim);
             }
         }
+
+        @Override
+        protected void onAttach(AttachEvent attachEvent) {
+            // TODO somehow assert the parent is SVG 🤔
+            super.onAttach(attachEvent);
+        }
     }
 }

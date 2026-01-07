@@ -95,6 +95,23 @@ public class ResizeObserver {
     }
 
     /**
+     * A listener for observing multiple components at once.
+     * Called when any of the observed components changes size,
+     * with fresh dimensions for all observed components.
+     */
+    @FunctionalInterface
+    public interface MultiSizeChangeListener {
+        /**
+         * Called when any of the observed components changes size.
+         *
+         * @param dimensions a map of component to its current dimensions
+         */
+        void onChange(Map<Component, Dimensions> dimensions);
+    }
+
+    private record ObservationGroup(int groupId, Component[] components, MultiSizeChangeListener listener) {}
+
+    /**
      * A record that describes the size and position of a component. Serialized from the browsers
      * <a href="https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly">DOMRectReadOnly</a>
      *
@@ -130,7 +147,9 @@ public class ResizeObserver {
 
     private Map<Component,Integer> componentToId = new HashMap<>();
     private Map<Integer,ComponentMapping> idToComponentMapping = new HashMap<>();
+    private Map<Integer, ObservationGroup> observationGroups = new HashMap<>();
     private int nextId = 0;
+    private int nextGroupId = 0;
 
     private static ObjectMapper om = new ObjectMapper();
 
@@ -165,6 +184,7 @@ public class ResizeObserver {
                 var el = this;
                 el._resizeObserver = new ResizeObserver((entries) => {
                   const sizes = {};
+                  const affectedGroups = new Set();
                   for (const entry of entries) {
                     if (entry.target.isConnected && entry.contentBoxSize) {
                       const id = entry.target._resizeObserverId;
@@ -174,6 +194,10 @@ public class ResizeObserver {
                       dimensions.offsetWidth = entry.target.offsetWidth;
                       dimensions.offsetHeight = entry.target.offsetHeight;
                       sizes[id] = JSON.stringify(dimensions);
+                      // Check if this element belongs to any observation groups
+                      if (entry.target._resizeObserverGroups) {
+                        entry.target._resizeObserverGroups.forEach(gid => affectedGroups.add(gid));
+                      }
                     } else {
                       console.log("Ignoring resize event for detached element " + entry.target._resizeObserverId +  ", TODO: cleanup??");
                     }
@@ -181,8 +205,34 @@ public class ResizeObserver {
                   const event = new Event("element-resize");
                   event.dimensions = sizes;
                   el.dispatchEvent(event);
+
+                  // Fire group resize events with fresh dimensions for all group members
+                  affectedGroups.forEach(groupId => {
+                    const group = el._resizeObserverGroups[groupId];
+                    if (group) {
+                      const groupDimensions = {};
+                      group.elementIds.forEach(elemId => {
+                        const elem = el._resizeObserverElements[elemId];
+                        if (elem && elem.isConnected) {
+                          const rect = elem.getBoundingClientRect();
+                          const dims = {
+                            x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+                            top: rect.top, right: rect.right, bottom: rect.bottom, left: rect.left,
+                            offsetLeft: elem.offsetLeft, offsetTop: elem.offsetTop,
+                            offsetWidth: elem.offsetWidth, offsetHeight: elem.offsetHeight
+                          };
+                          groupDimensions[elemId] = JSON.stringify(dims);
+                        }
+                      });
+                      const groupEvent = new Event("group-resize");
+                      groupEvent.groupId = groupId;
+                      groupEvent.dimensions = groupDimensions;
+                      el.dispatchEvent(groupEvent);
+                    }
+                  });
                 });
                 el._resizeObserverElements = {};
+                el._resizeObserverGroups = {};
                 """);
         reg = uiElement.addEventListener("element-resize", event -> {
                     // TODO fix this stupidity, quickly converted form elemental.json to jackson...
@@ -206,6 +256,28 @@ public class ResizeObserver {
                 })
                 .addEventData("event.dimensions")
                 .debounce(100); // Wait a tiny bit for a pause while resizing, otherwise it will choke the connection for no reason...
+
+        // Listener for group resize events
+        uiElement.addEventListener("group-resize", event -> {
+                    int groupId = (int) event.getEventData().get("event.groupId").asDouble();
+                    ObservationGroup group = observationGroups.get(groupId);
+                    if (group != null) {
+                        ObjectNode dimensionsObj = (ObjectNode) event.getEventData().get("event.dimensions");
+                        Map<Component, Dimensions> dimensionsMap = new HashMap<>();
+                        for (String idx : dimensionsObj.propertyNames()) {
+                            String json = dimensionsObj.get(idx).asString();
+                            Dimensions dimensions = om.readValue(json, Dimensions.class);
+                            ComponentMapping componentMapping = idToComponentMapping.get(Integer.valueOf(idx));
+                            if (componentMapping != null) {
+                                dimensionsMap.put(componentMapping.component(), dimensions);
+                            }
+                        }
+                        group.listener().onChange(dimensionsMap);
+                    }
+                })
+                .addEventData("event.groupId")
+                .addEventData("event.dimensions")
+                .debounce(100);
     }
 
     private ComponentMapping getComponentMapping(Component component) {
@@ -290,6 +362,91 @@ public class ResizeObserver {
     public ResizeObserver observe(Component component, SizeChangeListener listener) {
         getComponentMapping(component).listeners().add(listener);
         return this;
+    }
+
+    /**
+     * Observe the size of multiple components at once. When any of the observed components
+     * changes size, the listener receives fresh dimensions for ALL observed components.
+     * This is useful when you need to coordinate based on multiple component positions,
+     * like drawing a line between two buttons.
+     *
+     * @param listener the listener to be notified with a map of all component dimensions
+     * @param components the components to observe
+     * @return a Registration that can be used to stop observing
+     */
+    public Registration observe(MultiSizeChangeListener listener, Component... components) {
+        int groupId = nextGroupId++;
+        ObservationGroup group = new ObservationGroup(groupId, components, listener);
+        observationGroups.put(groupId, group);
+
+        // Collect element IDs and ensure all components are registered
+        int[] elementIds = new int[components.length];
+        for (int i = 0; i < components.length; i++) {
+            ComponentMapping mapping = getComponentMapping(components[i]);
+            elementIds[i] = mapping.id();
+        }
+
+        // Register the group in JS for all components
+        StringBuilder idsArray = new StringBuilder("[");
+        for (int i = 0; i < elementIds.length; i++) {
+            if (i > 0) idsArray.append(",");
+            idsArray.append(elementIds[i]);
+        }
+        idsArray.append("]");
+
+        uiElement.executeJs("""
+                const groupId = $0;
+                const elementIds = JSON.parse($1);
+                // Register group
+                this._resizeObserverGroups[groupId] = { elementIds: elementIds };
+                // Mark each element as belonging to this group
+                elementIds.forEach(id => {
+                    const el = this._resizeObserverElements[id];
+                    if (el) {
+                        if (!el._resizeObserverGroups) {
+                            el._resizeObserverGroups = new Set();
+                        }
+                        el._resizeObserverGroups.add(groupId);
+                    }
+                });
+                // Trigger initial measurement for this group
+                const groupDimensions = {};
+                elementIds.forEach(elemId => {
+                    const elem = this._resizeObserverElements[elemId];
+                    if (elem && elem.isConnected) {
+                        const rect = elem.getBoundingClientRect();
+                        const dims = {
+                            x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+                            top: rect.top, right: rect.right, bottom: rect.bottom, left: rect.left,
+                            offsetLeft: elem.offsetLeft, offsetTop: elem.offsetTop,
+                            offsetWidth: elem.offsetWidth, offsetHeight: elem.offsetHeight
+                        };
+                        groupDimensions[elemId] = JSON.stringify(dims);
+                    }
+                });
+                const groupEvent = new Event("group-resize");
+                groupEvent.groupId = groupId;
+                groupEvent.dimensions = groupDimensions;
+                this.dispatchEvent(groupEvent);
+                """, groupId, idsArray.toString());
+
+        return () -> {
+            observationGroups.remove(groupId);
+            uiElement.executeJs("""
+                    const groupId = $0;
+                    const group = this._resizeObserverGroups[groupId];
+                    if (group) {
+                        // Remove group reference from elements
+                        group.elementIds.forEach(id => {
+                            const el = this._resizeObserverElements[id];
+                            if (el && el._resizeObserverGroups) {
+                                el._resizeObserverGroups.delete(groupId);
+                            }
+                        });
+                        delete this._resizeObserverGroups[groupId];
+                    }
+                    """, groupId);
+        };
     }
 
     /**

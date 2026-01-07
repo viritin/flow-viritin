@@ -254,19 +254,19 @@ public class LineBetweenButtonsResizeObserverView extends HorizontalLayout {
         }
 
         public void drawLine(Component component1, Component component2) {
-            ResizeObserver.get().observe(component1, dimensions -> {
-                this.x1 = dimensions.offsetLeft() + dimensions.offsetWidth() / 2;
-                this.y1 = dimensions.offsetTop() + dimensions.offsetHeight() / 2;
-                this.width1 = dimensions.offsetWidth();
-                this.height1 = dimensions.offsetHeight();
-            });
-            ResizeObserver.get().observe(component2, dimensions -> {
-                this.x2 = dimensions.offsetLeft() + dimensions.offsetWidth() / 2;
-                this.y2 = dimensions.offsetTop() + dimensions.offsetHeight() / 2;
-                this.width2 = dimensions.offsetWidth();
-                this.height2 = dimensions.offsetHeight();
+            ResizeObserver.get().observe(dimensions -> {
+                var dim1 = dimensions.get(component1);
+                var dim2 = dimensions.get(component2);
+                this.x1 = dim1.offsetLeft() + dim1.offsetWidth() / 2;
+                this.y1 = dim1.offsetTop() + dim1.offsetHeight() / 2;
+                this.width1 = dim1.offsetWidth();
+                this.height1 = dim1.offsetHeight();
+                this.x2 = dim2.offsetLeft() + dim2.offsetWidth() / 2;
+                this.y2 = dim2.offsetTop() + dim2.offsetHeight() / 2;
+                this.width2 = dim2.offsetWidth();
+                this.height2 = dim2.offsetHeight();
                 drawLineInternal();
-            });
+            }, component1, component2);
         }
     }
 
