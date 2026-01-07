@@ -73,8 +73,6 @@ public class SvgElement extends Element {
 
     public static SvgElement emptySvgRoot() {
         SvgElement svg = new SvgElement("svg");
-        svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-        svg.setAttribute("version", "1.1");
         return svg;
     }
 
@@ -264,8 +262,6 @@ public class SvgElement extends Element {
      */
     public SvgElement(int minX, int minY, int width, int height) {
         super("svg");
-        setAttribute("xmlns", "http://www.w3.org/2000/svg");
-        setAttribute("version", "1.1");
         setAttribute("viewBox", "%s %s %s %s".formatted(minX, minY, width, height));
     }
 
