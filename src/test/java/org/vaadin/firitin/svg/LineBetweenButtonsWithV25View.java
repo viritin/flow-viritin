@@ -29,6 +29,14 @@ public class LineBetweenButtonsWithV25View extends HorizontalLayout {
         // Line will be absolutely positioned, added first -> below others
         getStyle().setPosition(Style.Position.RELATIVE);
         ConnectingLine line = new ConnectingLine();
+        // Position the SVG absolutely, so it doesn't affect laying out other components
+        Style style = line.getStyle();
+        style.setPosition(Style.Position.ABSOLUTE);
+        style.setTop("0");
+        style.setLeft("0");
+        style.setWidth("100%");
+        style.setHeight("100%");
+
         add(line);
 
         add(button1);
@@ -36,13 +44,29 @@ public class LineBetweenButtonsWithV25View extends HorizontalLayout {
         add(button2);
 
         add(new Button("Draw line", e -> {
-            line.drawLine(button1, button2);
+            // Define DTOs to get values from the client
+            record BoundingClientRect(double x, double y, double width, double height) {
+            }
+            record Bounds(BoundingClientRect el1, BoundingClientRect el2) {
+            }
+
+            // Doing ugly JS executions here in click listener as the purpose is to highlight Element support for SVG
+            getElement().executeJs("""
+                    return {el1 : $0.getBoundingClientRect(), el2 : $1.getBoundingClientRect()};
+                    """, button1.getElement(), button2.getElement()).toCompletableFuture(Bounds.class).thenAccept(b -> {
+                double x1 = b.el1.x + b.el1.width / 2;
+                double y1 = b.el1.y + b.el1.height / 2;
+                double x2 = b.el2.x + b.el2.width / 2;
+                double y2 = b.el2.y + b.el2.height / 2;
+                line.drawLine(x1, y1, x2, y2);
+            });
+
         }));
 
     }
 
     /**
-     * A simple SVG based component drawing a line between buttons.
+     * A simple SVG based component drawing a line
      */
     static class ConnectingLine extends Component {
         private final Element line;
@@ -53,39 +77,18 @@ public class LineBetweenButtonsWithV25View extends HorizontalLayout {
             super(new Element("svg"));
             // within this svg component we only have a single red line
             line = new Element("line");
-            line.getStyle()
-                    .set("stroke", "red")
-                    .set("stroke-width", "2");
+            line.setAttribute("stroke", "red");
+            line.setAttribute("stroke-width", "2");
             getElement().appendChild(line);
-            Style style = getStyle();
-            // Position the SVG absolutely, so it doesn't affect laying out other components
-            style.setPosition(Style.Position.ABSOLUTE);
-            style.setTop("0");
-            style.setLeft("0");
-            style.setWidth("100%");
-            style.setHeight("100%");
         }
 
-        /**
-         * Reads the component positions form the browser and assigns them to the line.
-         *
-         * @param button1 the component whose center point is set to x1/y1
-         * @param button2 the component whose center point is set to x2/y2
-         */
-        public void drawLine(Component button1, Component button2) {
-            // Define DTOs to get values from the client
-            record BoundingClientRect(double x, double y, double width, double height) {}
-            record Bounds(BoundingClientRect el1, BoundingClientRect el2) {}
-
-            getElement().executeJs("""
-                    return {el1 : $0.getBoundingClientRect(), el2 : $1.getBoundingClientRect()};
-                    """, button1.getElement(), button2.getElement()).toCompletableFuture(Bounds.class).thenAccept(b -> {
-                line.setAttribute("x1", "" + (b.el1.x + b.el1.width / 2));
-                line.setAttribute("y1", "" + (b.el1.y + b.el1.height / 2));
-                line.setAttribute("x2", "" + (b.el2.x + b.el2.width / 2));
-                line.setAttribute("y2", "" + (b.el2.y + b.el2.height / 2));
-            });
-
+        // You should not expose elements directly from your component, but provide a typed Java API
+        public void drawLine(double x1, double y1, double x2, double y2) {
+            // Now only  the attributes of the line element in the browser gets dynamically adjusted
+            line.setAttribute("x1", "" + x1);
+            line.setAttribute("y1", "" + y1);
+            line.setAttribute("x2", "" + x2);
+            line.setAttribute("y2", "" + y2);
         }
     }
 }
