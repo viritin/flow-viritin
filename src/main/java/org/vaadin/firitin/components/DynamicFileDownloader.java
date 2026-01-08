@@ -515,12 +515,15 @@ public class DynamicFileDownloader extends Anchor implements
     }
 
     /**
-     * @param text the tooltip text
-     * @see HasTooltip#setTooltipText(String)
+     * Sets the tooltip text for this component.
      * <p>
      * Note, that tooltips are only supported if the content of the link
      * supports them. For example, tooltips are supported if the
      * {@link #asButton()} method is called.
+     *
+     * @param text the tooltip text
+     * @return the tooltip
+     * @see HasTooltip#setTooltipText(String)
      */
     @Override
     public Tooltip setTooltipText(String text) {
