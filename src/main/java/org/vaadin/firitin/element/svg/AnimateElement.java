@@ -267,7 +267,8 @@ public class AnimateElement extends SvgElement {
      * @return this element for method chaining
      */
     public AnimateElement begin(String begin) {
-        setWriteOnlyAttribute("begin", begin);
+        // Not using JS here as it can be problematic with timing
+        setAttribute("begin", begin);
         return this;
     }
 
@@ -278,7 +279,8 @@ public class AnimateElement extends SvgElement {
      * @return this element for method chaining
      */
     public AnimateElement end(String end) {
-        setWriteOnlyAttribute("end", end);
+        // Not using JS here as it can be problematic with timing
+        setAttribute("end", end);
         return this;
     }
 
