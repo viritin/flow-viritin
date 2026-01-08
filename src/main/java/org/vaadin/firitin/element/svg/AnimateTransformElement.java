@@ -11,7 +11,7 @@ import java.time.Duration;
  * <p>
  * To use, create an AnimateTransformElement and append it as a child of the element you want to animate.
  * </p>
- * <h3>Example - Rotating animation:</h3>
+ * <p><b>Example - Rotating animation:</b></p>
  * <pre>{@code
  * GElement arrow = new GElement();
  * arrow.add(new PathElement().d("M0,-40 L5,0 L-5,0 Z"));

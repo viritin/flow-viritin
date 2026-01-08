@@ -123,6 +123,10 @@ public class ResizeObserver {
      * @param right the right coordinate value of the DOMRectReadOnly (usually the same as x + width).
      * @param bottom the bottom coordinate value of the DOMRectReadOnly (usually the same as y + height).
      * @param left the left coordinate value of the DOMRectReadOnly (usually the same as x).
+     * @param offsetLeft the element's offsetLeft value.
+     * @param offsetTop the element's offsetTop value.
+     * @param offsetWidth the element's offsetWidth value.
+     * @param offsetHeight the element's offsetHeight value.
      */
     public record Dimensions(
             int x,

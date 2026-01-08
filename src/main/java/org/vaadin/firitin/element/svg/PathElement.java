@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  * the fluent path builder methods like {@link #moveTo(double, double)},
  * {@link #lineTo(double, double)}, etc.
  * </p>
- * <h2>Write-Only vs Read-Write Methods</h2>
+ * <p><b>Write-Only vs Read-Write Methods</b></p>
  * <p>
  * This class provides two variants for attribute setters:
  * </p>

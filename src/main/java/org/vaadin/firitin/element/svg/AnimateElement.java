@@ -11,7 +11,7 @@ import java.time.Duration;
  * <p>
  * To use, create an AnimateElement and append it as a child of the element you want to animate.
  * </p>
- * <h3>Example:</h3>
+ * <p><b>Example:</b></p>
  * <pre>{@code
  * CircleElement circle = new CircleElement().cx(50).cy(50).r(20);
  * circle.appendChild(new AnimateElement()
@@ -439,13 +439,13 @@ public class AnimateElement extends SvgElement {
      * </p>
      * <p>
      * Common easing curves:
+     * </p>
      * <ul>
      *   <li>Ease: 0.25, 0.1, 0.25, 1.0</li>
      *   <li>Ease-in: 0.42, 0, 1.0, 1.0</li>
      *   <li>Ease-out: 0, 0, 0.58, 1.0</li>
      *   <li>Ease-in-out: 0.42, 0, 0.58, 1.0</li>
      * </ul>
-     * </p>
      *
      * @param x1 x coordinate of first control point (0-1)
      * @param y1 y coordinate of first control point (0-1)

@@ -10,7 +10,7 @@ package org.vaadin.firitin.element.svg;
  * Markers must be placed inside a {@code <defs>} element and referenced
  * by ID using the marker-start, marker-mid, or marker-end attributes.
  * </p>
- * <h3>Example - Creating an arrowhead marker:</h3>
+ * <p><b>Example - Creating an arrowhead marker:</b></p>
  * <pre>{@code
  * MarkerElement arrow = new MarkerElement("arrowhead")
  *     .viewBox(0, 0, 10, 10)
@@ -26,7 +26,7 @@ package org.vaadin.firitin.element.svg;
  * // Use on a line
  * lineElement.markerEnd(arrow);
  * }</pre>
- * <h2>Write-Only vs Read-Write Methods</h2>
+ * <p><b>Write-Only vs Read-Write Methods</b></p>
  * <p>
  * This class provides two variants for each attribute setter:
  * </p>

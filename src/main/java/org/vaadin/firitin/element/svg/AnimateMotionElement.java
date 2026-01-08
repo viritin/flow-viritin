@@ -12,7 +12,7 @@ import java.util.function.Consumer;
  * <p>
  * To use, create an AnimateMotionElement and append it as a child of the element you want to animate.
  * </p>
- * <h3>Example - Linear motion:</h3>
+ * <p><b>Example - Linear motion:</b></p>
  * <pre>{@code
  * CircleElement circle = new CircleElement().center(0, 50).r(15);
  * circle.appendChild(new AnimateMotionElement()
@@ -20,7 +20,7 @@ import java.util.function.Consumer;
  *     .dur(Duration.ofSeconds(3))
  *     .repeatIndefinitely());
  * }</pre>
- * <h3>Example - Curved motion with auto-rotation:</h3>
+ * <p><b>Example - Curved motion with auto-rotation:</b></p>
  * <pre>{@code
  * RectElement rect = new RectElement().size(20, 20);
  * rect.appendChild(new AnimateMotionElement()

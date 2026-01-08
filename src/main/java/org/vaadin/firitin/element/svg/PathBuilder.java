@@ -6,7 +6,7 @@ package org.vaadin.firitin.element.svg;
  * This class provides a typed API for building SVG path definitions
  * that can be used with both {@link PathElement} and {@link AnimateMotionElement}.
  * </p>
- * <h3>Example usage with PathElement:</h3>
+ * <p><b>Example usage with PathElement:</b></p>
  * <pre>{@code
  * PathElement path = new PathElement()
  *     .d(p -> p
@@ -17,7 +17,7 @@ package org.vaadin.firitin.element.svg;
  *         .closePath())
  *     .fill(HexColor.of("#3366cc"));
  * }</pre>
- * <h3>Example usage with AnimateMotionElement:</h3>
+ * <p><b>Example usage with AnimateMotionElement:</b></p>
  * <pre>{@code
  * rect.animateMotion()
  *     .path(p -> p
