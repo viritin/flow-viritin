@@ -1,5 +1,6 @@
 package org.vaadin.firitin.element.svg;
 
+import java.time.Duration;
 import java.util.function.Consumer;
 
 /**
@@ -160,6 +161,80 @@ public class PathElement extends SvgGraphicsElement {
     public PathElement pathLengthRW(double pathLength) {
         setAttribute("pathLength", String.valueOf(pathLength));
         return this;
+    }
+
+    // ========== Animation Methods ==========
+
+    /**
+     * Animates the path data (d attribute) from its current value to a new path.
+     * <p>
+     * Both paths should have the same number and types of commands for smooth animation.
+     * If the paths have different structures, the browser will attempt to interpolate
+     * but results may be unpredictable.
+     * </p>
+     * <p><b>Example usage:</b></p>
+     * <pre>{@code
+     * pathElement.animateD(
+     *     to -> to.moveTo(10, 10).lineTo(100, 10).lineTo(100, 100),
+     *     Duration.ofMillis(400)
+     * );
+     * }</pre>
+     *
+     * @param to a consumer that configures the ending path
+     * @param duration the animation duration
+     * @return the created AnimateElement for further configuration (e.g., easing, repeat)
+     */
+    public AnimateElement animateD(Consumer<PathBuilder> to, Duration duration) {
+        PathBuilder toBuilder = new PathBuilder();
+        to.accept(toBuilder);
+
+        AnimateElement anim = new AnimateElement()
+                .attributeName("d")
+                .to(toBuilder.build())
+                .dur(duration)
+                .freeze();
+        appendChild(anim);
+        anim.beginElement();
+        return anim;
+    }
+
+    /**
+     * Animates the path data (d attribute) from one path to another.
+     * <p>
+     * Both paths should have the same number and types of commands for smooth animation.
+     * If the paths have different structures, the browser will attempt to interpolate
+     * but results may be unpredictable.
+     * </p>
+     * <p><b>Example usage:</b></p>
+     * <pre>{@code
+     * pathElement.animateD(
+     *     from -> from.moveTo(10, 10).lineTo(50, 10).lineTo(50, 50),
+     *     to -> to.moveTo(10, 10).lineTo(100, 10).lineTo(100, 100),
+     *     Duration.ofMillis(400)
+     * );
+     * }</pre>
+     *
+     * @param from a consumer that configures the starting path
+     * @param to a consumer that configures the ending path
+     * @param duration the animation duration
+     * @return the created AnimateElement for further configuration (e.g., easing, repeat)
+     */
+    public AnimateElement animateD(Consumer<PathBuilder> from, Consumer<PathBuilder> to, Duration duration) {
+        PathBuilder fromBuilder = new PathBuilder();
+        from.accept(fromBuilder);
+
+        PathBuilder toBuilder = new PathBuilder();
+        to.accept(toBuilder);
+
+        AnimateElement anim = new AnimateElement()
+                .attributeName("d")
+                .from(fromBuilder.build())
+                .to(toBuilder.build())
+                .dur(duration)
+                .freeze();
+        appendChild(anim);
+        anim.beginElement();
+        return anim;
     }
 
     // ========== Path Commands (Fluent Builder) ==========

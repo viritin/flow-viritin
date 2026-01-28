@@ -16,6 +16,7 @@ import com.vaadin.flow.router.Route;
 public class LineBetweenButtonsWithV25View extends HorizontalLayout {
 
     public LineBetweenButtonsWithV25View() {
+        setPadding(true);
         setWidthFull();
 
         var button1 = new Button("Button 1");
@@ -72,7 +73,7 @@ public class LineBetweenButtonsWithV25View extends HorizontalLayout {
         private final Element line;
 
         public ConnectingLine() {
-            // The root Element of the component can now be svg, even e.g. line or circle, but then the parent
+            // The root Element of a component can now be svg, even e.g. line or circle, but then the parent
             // component also needs to be of an SVG namespace (like in html, e.g. circle can't get directly into div)
             super(new Element("svg"));
             // within this svg component we only have a single red line
