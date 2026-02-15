@@ -4,6 +4,7 @@ import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.renderer.Renderer;
 import org.vaadin.firitin.fluency.ui.*;
 import org.vaadin.firitin.fluency.ui.internal.FluentHasAutofocus;
@@ -106,4 +107,39 @@ public class VComboBox<T> extends ComboBox<T> implements FluentHasSize<VComboBox
         getElement().setAttribute("theme", theme);
         return this;
     }
+
+    /**
+     * Sets the items to be displayed in the combo box.
+     *
+     * @param items the items to be displayed
+     * @return this instance for method chaining
+     */
+    public VComboBox<T> withItems(T... items) {
+        setItems(items);
+        return this;
+    }
+
+    /**
+     * Sets the items to be displayed in the combo box.
+     *
+     * @param items the collection of items to be displayed
+     * @return this instance for method chaining
+     */
+    public VComboBox<T> withItems(Collection<T> items) {
+        setItems(items);
+        return this;
+    }
+
+    /**
+     * Sets the items to be displayed in the combo box using a callback data provider.
+     * This is useful for lazy loading or large datasets.
+     *
+     * @param items the fetch callback that provides items based on query and filters
+     * @return this instance for method chaining
+     */
+    public VComboBox<T> withItems(CallbackDataProvider.FetchCallback<T, String> items) {
+        setItems(items);
+        return this;
+    }
+
 }
