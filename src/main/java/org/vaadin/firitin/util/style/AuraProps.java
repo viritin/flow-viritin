@@ -1,8 +1,5 @@
 package org.vaadin.firitin.util.style;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
-
 /**
  * Enumeration of Aura CSS properties with handy helper methods
  * to define them in a component scope or globally and to use
@@ -13,7 +10,7 @@ import com.vaadin.flow.component.UI;
  *
  * @see <a href="https://vaadin.com/docs/latest/styling/themes/aura">Aura Theme Reference</a>
  */
-public enum AuraProps {
+public enum AuraProps implements CssPropertyEnum {
 
     // Aura Color - Color Scheme
     CONTENT_COLOR_SCHEME,
@@ -113,23 +110,8 @@ public enum AuraProps {
     APP_LAYOUT_BORDER_RADIUS,
     APP_LAYOUT_BORDER_WIDTH;
 
-    private static final String PREFIX = "--aura-";
-
-    public String getCssName() {
-        return PREFIX + name().toLowerCase().replace('_', '-');
-    }
-
-    public void define(Component scope, String value) {
-        scope.getStyle().set(getCssName(), value);
-    }
-
-    public void define(String value) {
-        UI.getCurrent().getElement().executeJs("""
-        window.document.documentElement.style.setProperty("%s", "%s"); """
-                .formatted(getCssName(), value));
-    }
-
-    public String var() {
-        return "var(" + getCssName() + ")";
+    @Override
+    public String cssPrefix() {
+        return "--aura-";
     }
 }

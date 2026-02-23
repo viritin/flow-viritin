@@ -1,8 +1,5 @@
 package org.vaadin.firitin.util.style;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
-
 /**
  * Enumeration of shared Vaadin CSS properties (base style properties)
  * with handy helper methods to define them in a component scope or
@@ -15,7 +12,7 @@ import com.vaadin.flow.component.UI;
  *
  * @see <a href="https://vaadin.com/docs/latest/styling/themes/base">Base Style Properties Reference</a>
  */
-public enum VaadinCssProps {
+public enum VaadinCssProps implements CssPropertyEnum {
 
     // Text Color
     TEXT_COLOR,
@@ -65,23 +62,8 @@ public enum VaadinCssProps {
     ICON_VISUAL_SIZE,
     ICON_STROKE_WIDTH;
 
-    private static final String PREFIX = "--vaadin-";
-
-    public String getCssName() {
-        return PREFIX + name().toLowerCase().replace('_', '-');
-    }
-
-    public void define(Component scope, String value) {
-        scope.getStyle().set(getCssName(), value);
-    }
-
-    public void define(String value) {
-        UI.getCurrent().getElement().executeJs("""
-        window.document.documentElement.style.setProperty("%s", "%s"); """
-                .formatted(getCssName(), value));
-    }
-
-    public String var() {
-        return "var(" + getCssName() + ")";
+    @Override
+    public String cssPrefix() {
+        return "--vaadin-";
     }
 }

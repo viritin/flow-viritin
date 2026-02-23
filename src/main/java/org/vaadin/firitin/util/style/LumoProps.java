@@ -1,8 +1,5 @@
 package org.vaadin.firitin.util.style;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
-
 /**
  * Enumeration of Lumo CSS properties with handy helper methods
  * to define them in a component scope or globally and to use
@@ -11,7 +8,7 @@ import com.vaadin.flow.component.UI;
  * Consider this class still to be in experimental phase.
  * </p>
  */
-public enum LumoProps {
+public enum LumoProps implements CssPropertyEnum {
 
     // Lumo Color
     BASE_COLOR,
@@ -96,23 +93,8 @@ public enum LumoProps {
     // Lumo Interaction
     CLICKABLE_CURSOR;
 
-    private static final String PREFIX = "--lumo-";
-
-    public String getCssName() {
-        return PREFIX + name().toLowerCase().replace('_', '-');
-    }
-
-    public void define(Component scope, String value) {
-        scope.getStyle().set(getCssName(), value);
-    }
-
-    public void define(String value) {
-        UI.getCurrent().getElement().executeJs("""
-        window.document.documentElement.style.setProperty("%s", "%s"); """
-                .formatted(getCssName(), value));
-    }
-
-    public String var() {
-        return "var(" + getCssName() + ")";
+    @Override
+    public String cssPrefix() {
+        return "--lumo-";
     }
 }
