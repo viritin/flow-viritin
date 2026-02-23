@@ -1,16 +1,18 @@
 package org.vaadin.firitin;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.lumo.Lumo;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.html.VH2;
 import org.vaadin.firitin.util.style.LumoProps;
 
-@Route
+@TestTheme(Lumo.class)
+// With default this view only works if navigating from another, thus fixed url. TODO Figure out what causes this
+@Route("theme_props_lumo")
 public class LumoPropsView extends VerticalLayout {
 
     public LumoPropsView() {
