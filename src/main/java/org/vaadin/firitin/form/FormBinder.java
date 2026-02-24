@@ -4,7 +4,6 @@ import com.googlecode.gentyref.GenericTypeReflector;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.data.binder.Result;
 import com.vaadin.flow.data.binder.ValueContext;
@@ -14,7 +13,6 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -666,11 +664,9 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     public static class ParagraphWithErrorStyleClassLevelValidationViolationComponentProvider implements SerializableFunction<String, Component> {
         @Override
         public Component apply(String message) {
-            Paragraph paragraph = new Paragraph();
-            paragraph.addClassNames(LumoUtility.TextColor.ERROR);
-            paragraph.setText(message);
-            return paragraph;
+            return new ErrorMessage(message);
         }
+
     }
 
     private ValueContext fakeValueContext(HasValue hasValue) {

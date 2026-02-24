@@ -1,0 +1,3 @@
+.viritin-error-message {
+    color: var(--vaadin-input-field-error-color, var(--vaadin-text-color));
+}

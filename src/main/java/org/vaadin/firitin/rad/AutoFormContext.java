@@ -1,14 +1,10 @@
 package org.vaadin.firitin.rad;
 
-import com.vaadin.flow.component.AbstractCompositeField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.customfield.CustomField;
-import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.FieldSet;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -26,7 +22,6 @@ import org.vaadin.firitin.fields.ElementCollectionField;
 import org.vaadin.firitin.fields.EnumSelect;
 import org.vaadin.firitin.fields.LongField;
 import org.vaadin.firitin.fields.ShortField;
-import org.vaadin.firitin.layouts.HorizontalFloatLayout;
 import org.vaadin.firitin.util.VStyleUtil;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
@@ -265,10 +260,10 @@ public class AutoFormContext {
                 this.form = form;
                 addClassNames("full-width","v-record-field");
                 VStyleUtil.injectAsFirst("""
-                        .v-record-field fieldset  {
-                            padding: 0 var(--lumo-space-m);
-                            border: 1px dashed var(--lumo-contrast-30pct);
-                            border-radius: var(--lumo-border-radius-l);
+                        .v-record-field fieldset {
+                            padding: 0 var(--lumo-space-m, var(--vaadin-gap-m));
+                            border: 1px dashed gray;
+                            border-radius: var(--vaadin-radius-l);
                         }
                 """);
                 FieldSet fieldSet = new FieldSet();

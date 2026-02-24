@@ -10,20 +10,20 @@ public class Padding {
     private Size size;
 
     public enum Size {
-        EXTRA_SMALL("--lumo-space-xs"),
-        SMALL("--lumo-space-s"),
-        MEDIUM("--lumo-space-m"),
-        LARGE("--lumo-space-l"),
-        EXTRA_LARGE("--lumo-space-xl");
+        EXTRA_SMALL(VaadinCssProps.GAP_XS),
+        SMALL(VaadinCssProps.GAP_S),
+        MEDIUM(VaadinCssProps.GAP_M),
+        LARGE(VaadinCssProps.GAP_L),
+        EXTRA_LARGE(VaadinCssProps.GAP_XL);
 
-        private String cssVariableName;
+        private final VaadinCssProps prop;
 
-        private Size(String cssVariableName) {
-            this.cssVariableName = cssVariableName;
+        private Size(VaadinCssProps prop) {
+            this.prop = prop;
         }
 
         public String getVariableValue() {
-            return String.format("var(%s)", cssVariableName);
+            return prop.var();
         }
     }
 

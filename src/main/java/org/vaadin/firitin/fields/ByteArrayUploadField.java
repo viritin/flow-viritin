@@ -113,7 +113,6 @@ public class ByteArrayUploadField extends Composite<Div>
 			presentation.setVisible(true);
 			presentation.removeAll();
 			Icon icon = VaadinIcon.DOWNLOAD_ALT.create();
-			icon.addClassName("--lumo-icon-size-s");
 			presentation.add(icon);
 			presentation.add(new Span(String.format(getFileDownloadText(), readableFileSize(value.length))));
 			String filename =

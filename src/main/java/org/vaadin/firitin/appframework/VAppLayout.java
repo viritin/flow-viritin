@@ -16,9 +16,8 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.vaadin.firitin.components.orderedlayout.VScroller;
-import org.vaadin.firitin.util.style.LumoProps;
+import org.vaadin.firitin.util.style.VaadinCssProps;
 
 import java.util.Map;
 import java.util.Stack;
@@ -67,14 +66,14 @@ public abstract class VAppLayout extends AppLayout implements AfterNavigationObs
             content = (Component) headerContent;
         } else {
             H1 appName = new H1(headerContent.toString());
-            appName.getStyle().setMargin(LumoProps.SPACE_M.var());
-            appName.getStyle().setFontSize(LumoProps.FONT_SIZE_L.var());
+            appName.getStyle().setMargin(VaadinCssProps.GAP_M.var());
+            appName.getStyle().setFontSize("1.125rem");
             content = appName;
         }
         Header header = new Header(content);
 
         scroller.setContent(prepareNav());
-        scroller.addClassNames(LumoUtility.Padding.SMALL);
+        scroller.getStyle().setPadding(VaadinCssProps.GAP_S.var());
 
         addToDrawer(header, scroller, prepareDrawerFooter());
     }
@@ -114,7 +113,8 @@ public abstract class VAppLayout extends AppLayout implements AfterNavigationObs
     public HasText getViewTitle() {
         if(viewTitle == null) {
             viewTitle = new H2();
-            viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
+            viewTitle.getStyle().setFontSize("1.125rem");
+            viewTitle.getStyle().setMargin("0");
         }
         return viewTitle;
     }
@@ -124,7 +124,7 @@ public abstract class VAppLayout extends AppLayout implements AfterNavigationObs
             navbarHelpers = new HorizontalLayout();
             navbarHelpers.setAlignItems(FlexComponent.Alignment.BASELINE);
             navbarHelpers.getStyle().setPosition(Style.Position.ABSOLUTE);
-            navbarHelpers.getStyle().setRight(LumoProps.SPACE_M.var());
+            navbarHelpers.getStyle().setRight(VaadinCssProps.GAP_M.var());
             addToNavbar(true, navbarHelpers);
         }
         return navbarHelpers;

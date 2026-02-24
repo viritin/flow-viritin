@@ -151,7 +151,7 @@ public class DtoDisplay extends Composite<Div> {
                         border-collapse: collapse;
                     }
                     .dto-display td, .dto-display th {
-                        padding: var(--lumo-space-xs);
+                        padding: var(--lumo-space-xs, var(--vaadin-gap-xs));
                     }
                     .dto-display tr:first-child td, .dto-display tr:first-child th {
                         padding-top: 0;
@@ -162,7 +162,7 @@ public class DtoDisplay extends Composite<Div> {
                     }
                     .dto-display th {
                         text-align: left;
-                        color: var(--lumo-secondary-text-color);
+                        color: var(--vaadin-text-color-secondary);
                         font-weight: 500;
                     }
                     .dto-display th,
@@ -173,7 +173,7 @@ public class DtoDisplay extends Composite<Div> {
                         text-align: right;
                         white-space: nowrap;
                         align-items: start;
-                        padding-right: var(--lumo-space-s);
+                        padding-right: var(--lumo-space-s, var(--vaadin-gap-s));
                     }
                     .dto-display td>vaadin-details>vaadin-details-summary {
                         padding: 0;

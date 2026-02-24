@@ -15,7 +15,12 @@ import java.util.Optional;
  * <li>Can be used in any Vaadin Flow application without Lumo theme</li>
  * <li>Has an actual Java API</li>
  * </ul>
+ *
+ * @deprecated This component only supports the Lumo theme. Vaadin 25.1+
+ * provides a native Badge component that works with all themes. Will be removed in next
+ * major.
  */
+@Deprecated
 @Tag("viritin-badge")
 @StyleSheet("context://frontend/org/vaadin/firitin/components/badge.css")
 public class Badge extends Span {

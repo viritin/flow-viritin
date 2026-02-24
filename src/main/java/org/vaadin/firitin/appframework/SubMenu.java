@@ -1,6 +1,7 @@
 package org.vaadin.firitin.appframework;
 
 import com.vaadin.flow.router.Menu;
+import org.vaadin.firitin.util.style.VaadinCssProps;
 
 public class SubMenu extends AdvancedSideNav implements NavigationItem {
 
@@ -55,7 +56,7 @@ public class SubMenu extends AdvancedSideNav implements NavigationItem {
             addSubMenu((SubMenu) item);
         } else {
             addItem((BasicNavigationItem) item);
-            item.getStyle().setPaddingLeft("var(--lumo-space-l)");
+            item.getStyle().setPaddingLeft(VaadinCssProps.GAP_L.var());
         }
     }
 

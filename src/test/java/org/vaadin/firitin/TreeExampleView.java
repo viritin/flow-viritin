@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import com.vaadin.flow.component.UI;
 import org.vaadin.firitin.components.Tree;
 import org.vaadin.firitin.components.TreeItem;
 import org.vaadin.firitin.testdomain.Dude;

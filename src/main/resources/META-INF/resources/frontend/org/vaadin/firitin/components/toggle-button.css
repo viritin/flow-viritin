@@ -49,3 +49,69 @@ vaadin-checkbox.toggle-button[checked][disabled]::part(checkbox){
     background-color: var(--lumo-primary-color);
     opacity: 0.3;
 }
+
+/* ===== Aura theme toggle button styles ===== */
+
+vaadin-checkbox.toggle-button-aura {
+    align-items: center;
+}
+
+vaadin-checkbox.toggle-button-aura::part(checkbox) {
+    width: 2.5em;
+    height: 1.5em;
+    border-radius: 0.75em;
+    background: var(--vaadin-background-container-strong);
+    border-color: var(--vaadin-border-color);
+    border-width: 1px;
+    border-style: solid;
+    cursor: var(--vaadin-clickable-cursor, pointer);
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+vaadin-checkbox.toggle-button-aura::part(checkbox)::after {
+    mask: none;
+    filter: none;
+    inset: auto;
+    width: calc(1.5em - 6px);
+    height: calc(1.5em - 6px);
+    border-radius: 50%;
+    background: var(--vaadin-text-color-secondary);
+    position: absolute;
+    left: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: left 0.2s ease, background-color 0.2s;
+    opacity: 1;
+}
+
+vaadin-checkbox.toggle-button-aura[checked]::part(checkbox) {
+    background: var(--aura-accent-color);
+    border-color: transparent;
+}
+
+vaadin-checkbox.toggle-button-aura[checked]::part(checkbox)::after {
+    left: calc(100% - 1.5em + 4px);
+    background: var(--aura-accent-contrast-color);
+}
+
+vaadin-checkbox.toggle-button-aura[disabled]::part(checkbox) {
+    background: var(--vaadin-background-container-strong);
+    border-color: var(--vaadin-border-color);
+    opacity: 0.5;
+    cursor: var(--vaadin-disabled-cursor, not-allowed);
+}
+
+vaadin-checkbox.toggle-button-aura[disabled]::part(checkbox)::after {
+    background: var(--vaadin-text-color-disabled);
+}
+
+vaadin-checkbox.toggle-button-aura[checked][disabled]::part(checkbox) {
+    background: var(--aura-accent-color);
+    border-color: transparent;
+    opacity: 0.5;
+}
+
+vaadin-checkbox.toggle-button-aura[focus-ring]::part(checkbox) {
+    outline: var(--vaadin-focus-ring-width) solid var(--vaadin-focus-ring-color);
+    outline-offset: 1px;
+}

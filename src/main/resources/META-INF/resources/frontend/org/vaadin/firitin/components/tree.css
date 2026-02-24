@@ -3,26 +3,26 @@
 }
 
 .viritin-tree .expander vaadin-icon {
-    width: var(--lumo-font-size-m);
-    height: var(--lumo-font-size-m);
+    width: var(--lumo-font-size-m, 1rem);
+    height: var(--lumo-font-size-m, 1rem);
 }
 
 .viritin-tree .node-content>span>vaadin-icon {
-    margin-right: calc(var(--lumo-font-size-m)*0.25);
-    width: var(--lumo-font-size-m);
-    height: var(--lumo-font-size-m);
+    margin-right: calc(var(--lumo-font-size-m, 1rem)*0.25);
+    width: var(--lumo-font-size-m, 1rem);
+    height: var(--lumo-font-size-m, 1rem);
     
 }
 
 .viritin-tree .node-content {
     position: relative;
     cursor: default;
-    font-size : var(--lumo-font-size-m);
+    font-size : var(--lumo-font-size-m, 1rem);
 }
 
 .viritin-tree .selected:before {
     content: "";
-    background: var(--lumo-primary-color-10pct);
+    background: var(--vaadin-background-container-strong);
     position: absolute;
     top: -0.15em;
     right: -0.15em;

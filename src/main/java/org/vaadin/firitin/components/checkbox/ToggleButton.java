@@ -3,7 +3,8 @@ package org.vaadin.firitin.components.checkbox;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dependency.StyleSheet;
-import org.vaadin.firitin.util.VStyleUtil;
+import com.vaadin.flow.theme.aura.Aura;
+import com.vaadin.flow.theme.lumo.Lumo;
 
 /**
  * A toggle button that is essentially a styled checkbox. CSS derived from similarly named Vaadin
@@ -11,6 +12,9 @@ import org.vaadin.firitin.util.VStyleUtil;
  */
 @StyleSheet("context://frontend/org/vaadin/firitin/components/toggle-button.css")
 public class ToggleButton extends VCheckBox {
+
+    public static Class<?> baseTheme = Lumo.class;
+
     public ToggleButton() {
     }
 
@@ -31,12 +35,17 @@ public class ToggleButton extends VCheckBox {
     }
 
     protected void addClassName() {
-        addClassName("toggle-button");
+
+        if(baseTheme == Aura.class) {
+            setClassName("toggle-button-aura");
+        } else {
+            setClassName("toggle-button");
+        }
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
-        addClassName();
         super.onAttach(attachEvent);
+        addClassName();
     }
 }

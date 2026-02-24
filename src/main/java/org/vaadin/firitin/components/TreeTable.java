@@ -341,10 +341,6 @@ public class TreeTable<T> extends VGrid<T> {
                                 }
                                 e.stopPropagation();
                             });
-                            if(!allowToggling) {
-                                // override hover color, TODO figure out a better way...
-                                el.shadowRoot.querySelector("span[part='toggle']").style.color = "var(--lumo-contrast-50pct)";
-                            }
                         }, 100);
                     """.formatted(allowUserToToggleOpenState, open));
         }
