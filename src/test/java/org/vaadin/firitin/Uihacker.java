@@ -20,8 +20,11 @@ import java.util.List;
 public class Uihacker {
 
     static void adjustUITheme(UI ui, Class theme) {
-
         Object currentTheme = getUiTheme(ui);
+        if(currentTheme == null && theme == null) {
+            // use Lumo by default
+            theme = Lumo.class;
+        }
 
         if (currentTheme != null && currentTheme == theme) {
             return;

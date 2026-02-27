@@ -1,6 +1,5 @@
 package org.vaadin.firitin.appframework;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasText;
@@ -47,7 +46,7 @@ public abstract class VAppLayout extends AppLayout implements AfterNavigationObs
      */
     protected abstract Object getDrawerHeader();
 
-    private void addHeaderContent() {
+    protected void addHeaderContent() {
         DrawerToggle toggle = new DrawerToggle();
         toggle.getElement().setAttribute("aria-label", "Menu toggle");
 

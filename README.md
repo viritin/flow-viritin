@@ -6,6 +6,7 @@
 A similar helper library as "old Viritin" was for Vaadin 8 and earlier. See [the Directory page](https://vaadin.com/directory/component/flow-viritin) for more details. Tries to add missing features, fix some issues in the core components and to work as an agile arena to test new potential features for Vaadin.
 
 *Version matrix:*
+ * 3.2.0+ entry level Aura theme support (ToggleButton, CSS property enums for Aura and base Vaadin theme)
  * 3.0.0+ built against 25.0+
  * 2.16.0+ built against 24.8+ and at least some features are incompatible with older versions.
  * 2.13.0+ drops dependency to java flexmark and renders markdown by default with markdown-it on the browser
