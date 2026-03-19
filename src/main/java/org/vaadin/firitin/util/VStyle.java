@@ -33,7 +33,7 @@ public class VStyle implements Style {
     }
 
     public VStyle setColor(Color color) {
-        return this.set("color", color.toString());
+        return this.set("color", color == null ? null : color.toString());
     }
 
     public Color getBackgroundColor() {
@@ -47,7 +47,7 @@ public class VStyle implements Style {
     // Piggyback for the original Style
 
     public VStyle setBackgroundColor(Color color) {
-        return this.set("background-color", color.toString());
+        return this.set("background-color", color == null ? null : color.toString());
     }
 
     @Override
