@@ -556,6 +556,12 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         return o;
     }
 
+    private static final Set<String> emptyValidationMessages = Set.of(
+            "{jakarta.validation.constraints.NotNull.message}",
+            "{jakarta.validation.constraints.NotEmpty.message}",
+            "{jakarta.validation.constraints.NotBlank.message}"
+            );
+
     /**
      * Set the constraint violations found during validation. If violation is
      * bound to a bound property, it is shown next to the field, otherwise
@@ -573,7 +579,8 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
 
                 if (hasValue instanceof HasValidationProperties hvp) {
                     nonReported.remove(cv);
-                    if("{jakarta.validation.constraints.NotEmpty.message}".equals(cv.getMessageTemplate()) && !userModifiedFields.contains(hasValue)) {
+                    if(ignoreRequiredConstraintForField(cv, hasValue)) {
+                        // {jakarta.validation.constraints.NotNull.message}
                         // user has not modified this fied yet, don't report, expect the required indicator (*) to be enough
                     } else {
                         hvp.setInvalid(true);
@@ -584,6 +591,18 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         });
         handleClassLevelValidations(nonReported);
         constraintViolations = !violations.isEmpty();
+    }
+
+    /**
+     * By default, if a validation is "required" validation for a field that user has not touched, it is not reported
+     * in the UI, but is taken otherwise into accound.
+     *
+     * @param cv validation constraing
+     * @param hasValue the field to be tested
+     * @return true if should be ignored based on emptry validity
+     */
+    protected boolean ignoreRequiredConstraintForField(ConstraintViolation<T> cv, HasValue hasValue) {
+        return emptyValidationMessages.contains(cv.getMessageTemplate()) && !userModifiedFields.contains(hasValue);
     }
 
     /**
