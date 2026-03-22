@@ -8,6 +8,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
+import jakarta.validation.constraints.NotEmpty;
+import org.vaadin.firitin.components.textfield.VTextField;
 import org.vaadin.firitin.form.FormBinder;
 
 import java.util.Map;
@@ -19,9 +21,9 @@ import java.util.Map;
 public class FormBinderRegistrationFormView extends VerticalLayout {
 
     // DTO, most likely provided by backend, but could be for UI only as well
-    record Account(String username, String password, String passwordVerification) {}
+    record Account(@NotEmpty String username, String password, String passwordVerification) {}
 
-    TextField username = new TextField("Username");
+    TextField username = new VTextField("Username");
     PasswordField password = new PasswordField("Password");
     PasswordField passwordVerification = new PasswordField("Verify password");
     FormBinder<Account> binder = new FormBinder<>(Account.class,this);

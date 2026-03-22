@@ -35,9 +35,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Route
 public class FormBinderView extends VerticalLayout {
 
+    public static class ExtraConstraints {}
+
     @BigShouldBeBigger
     public static class Person {
         @NotEmpty String name;
+        @NotEmpty(groups = {ExtraConstraints.class}) String text;
         @NotNull
         @Min(0) Integer small;
         @Max(100) Integer big;
@@ -64,6 +67,14 @@ public class FormBinderView extends VerticalLayout {
 
         public void setBig(Integer big) {
             this.big = big;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
         }
 
         @Override
@@ -122,6 +133,15 @@ public class FormBinderView extends VerticalLayout {
             Notification.show(constraintViolations.toString());
         }));
 
+        add(new Button("Set empty bean", e -> {
+            Person person = new Person();
+            person.setSmall(1);
+            person.setBig(2);
+            binder.setValue(person);
+            binder.clearValidationErrors();
+            Notification.show("Empty name should not be reported, in other ways but with required indicator, until its value is touched.");
+        }));
+
     }
 
     @Target({ TYPE, ANNOTATION_TYPE })
@@ -155,13 +175,14 @@ public class FormBinderView extends VerticalLayout {
     public static class PersonForm extends VerticalLayout {
 
         TextField name = new VTextField("Name");
+        TextField text = new VTextField("Text"); // Should not have (*), Required only with special validation group
         IntegerField small = new IntegerField("Small number");
 
         // mismatching field to property type, needs configured converter
         TextField big = new TextField("Big bound with TextField");
 
         public PersonForm() {
-            add(name,small,big);
+            add(name, text, small, big);
         }
     }
 

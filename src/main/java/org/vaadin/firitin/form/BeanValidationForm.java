@@ -36,6 +36,7 @@ import org.vaadin.firitin.components.button.DefaultButton;
 import org.vaadin.firitin.components.button.DeleteButton;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.dialog.VDialog;
+import org.vaadin.firitin.components.formlayout.VFormLayout;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 import org.vaadin.firitin.util.VStyles;
 
@@ -89,6 +90,7 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
     private Button deleteButton;
     private Class<?>[] validationGroups;
     private Validator validator;
+    private FormLayout formLayout;
 
     private HasComponents classLevelViolationsDisplay = new Div();
 
@@ -99,6 +101,7 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
      */
     public BeanValidationForm(Class<T> entityType) {
         this.entityType = entityType;
+        getContent().setSizeFull();
         addAttachListener(e -> lazyInit());
     }
 
@@ -308,8 +311,11 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
         return layout;
     }
 
-    protected HasComponents getFormLayout() {
-        return new FormLayout();
+    protected FormLayout getFormLayout() {
+        if(formLayout == null) {
+            formLayout = new VFormLayout();
+        }
+        return formLayout;
     }
 
     public Component getClassLevelViolationsDisplay() {

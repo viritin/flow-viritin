@@ -21,6 +21,7 @@ import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.PropertyName;
 import tools.jackson.databind.introspect.AnnotatedConstructor;
+import tools.jackson.databind.introspect.AnnotatedField;
 import tools.jackson.databind.introspect.AnnotatedMember;
 import tools.jackson.databind.introspect.BasicBeanDescription;
 import tools.jackson.databind.introspect.BeanPropertyDefinition;
@@ -73,6 +74,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     Map<String, Converter> nameToConverter = new HashMap<>();
     HashMap<String, String> propertyToInputValueConversionError = new HashMap<>();
     List<Registration> registrations = new ArrayList<>();
+    Set<HasValue> userModifiedFields = new HashSet<>();
     private Set<Component> errorMsgs = new HashSet<>();
     private T valueObject;
     private List<ValueChangeListener> valueChangeListeners;
@@ -206,9 +208,21 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
 
         try {
             AnnotatedMember accessor = property.getAccessor();
-            return accessor.getAnnotation(NotEmpty.class) != null
+            boolean accessorRequired = accessor.getAnnotation(NotEmpty.class) != null
                     || accessor.getAnnotation(NotNull.class) != null
                     || accessor.getAnnotation(NotBlank.class) != null;
+            if(accessorRequired) {
+                return true;
+            }
+            // Now also check field, (e.g. quite typical for JPA entities that only fields are annotated)
+
+            AnnotatedField field = property.getField();
+            if(field != null) {
+                return field.getAnnotation(NotEmpty.class) != null
+                        || field.getAnnotation(NotNull.class) != null
+                        || field.getAnnotation(NotBlank.class) != null;
+            }
+            return false;
         } catch (java.lang.NoClassDefFoundError ex) {
             // No Bean Validation on classpath (or no getter)
             return false;
@@ -260,6 +274,10 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
             }));
         }
         registrations.add(hasValue.addValueChangeListener(e -> {
+            if(e.isFromClient()) {
+                // mark field has been modified
+                userModifiedFields.add(hasValue);
+            }
             if (valueChangeListeners != null) {
                 var event = new FormBinderValueChangeEvent<T>(FormBinder.this, e.isFromClient());
                 for (ValueChangeListener vcl : valueChangeListeners.toArray(new ValueChangeListener[0])) {
@@ -349,6 +367,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
      */
     @Override
     public void setValue(T valueObject) {
+        userModifiedFields.clear();
         this.valueObject = valueObject;
         for (BeanPropertyDefinition pd : bbd.findProperties()) {
             HasValue hasValue = bpdToEditorField.get(pd);
@@ -489,10 +508,15 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
             String property = cv.getPropertyPath().toString();
             if (!property.isEmpty()) {
                 HasValue hasValue = nameToEditorField.get(property);
+
                 if (hasValue instanceof HasValidationProperties hvp) {
-                    hvp.setInvalid(true);
-                    hvp.setErrorMessage(cv.getMessage());
                     nonReported.remove(cv);
+                    if("{jakarta.validation.constraints.NotEmpty.message}".equals(cv.getMessageTemplate()) && !userModifiedFields.contains(hasValue)) {
+                        // user has not modified this fied yet, don't report, expect the required indicator (*) to be enough
+                    } else {
+                        hvp.setInvalid(true);
+                        hvp.setErrorMessage(cv.getMessage());
+                    }
                 }
             }
         });
