@@ -219,6 +219,9 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
 
     protected void bind() {
         binder = new FormBinder<>(entityType, this);
+        if (validationGroups != null) {
+            binder.setValidationGroups(validationGroups);
+        }
         binder.setClassLevelViolationDisplay(classLevelViolationsDisplay);
         binder.addValueChangeListener(e -> {
             if (e.isFromClient()) {
@@ -238,6 +241,9 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
 
     public void setValidationGroups(Class<?>... groups) {
         this.validationGroups = groups;
+        if (binder != null) {
+            binder.setValidationGroups(groups);
+        }
     }
 
     protected <T> Set<ConstraintViolation<T>> doBeanValidation(T object) {

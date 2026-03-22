@@ -29,8 +29,9 @@ public class FormBinderBasedPersonForm extends BeanValidationForm<Person> {
 
     private TextField firstName = new VTextField("First name, remove this to see error");
     private TextField lastName = new VTextField().withTooltip("You should type last name here");
+//    private IntegerField age = new VIntegerField("Age");
 
-    private VDateTimePicker joinTime = new VDateTimePicker();
+    private VDateTimePicker joinTime = new VDateTimePicker("Join date");
 
     private ElementCollectionField<Address> addresses = new ElementCollectionField<Address>(Address.class);
 
@@ -39,8 +40,6 @@ public class FormBinderBasedPersonForm extends BeanValidationForm<Person> {
         // The default group requires "age", for which we don't have
         // a field and we are not interested in this form, define a different
         // validation group to use
-        // TODO Make validation groups affect how required indicator works
-        // Now if you add age, it is required, even though not for this group
         setValidationGroups(Person.FirstNameOnly.class);
 
         setDeleteHandler(this::handleDelete);
@@ -89,6 +88,7 @@ public class FormBinderBasedPersonForm extends BeanValidationForm<Person> {
         return Arrays.asList(
                 firstName,
                 lastName,
+//                age,
                 joinTime,
                 addresses
         );

@@ -81,6 +81,7 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     private boolean constraintViolations;
     private HasComponents classLevelViolationDisplay;
     private boolean ignoreServerOriginatedChanges = true;
+    private Class<?>[] validationGroups;
     private SerializableFunction<String, Component> classLevelValidationViolationComponentProvider = new ParagraphWithErrorStyleClassLevelValidationViolationComponentProvider();
 
     /**
@@ -201,32 +202,93 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         setValue(dto);
     }
 
-    protected static boolean isRequired(BeanPropertyDefinition property) {
+    /**
+     * Sets the active validation groups. This affects which fields show the
+     * required indicator based on their constraint annotations' group membership.
+     *
+     * @param groups the validation groups to activate
+     */
+    public void setValidationGroups(Class<?>... groups) {
+        this.validationGroups = groups;
+        // Re-evaluate required indicators for all bound fields
+        bpdToEditorField.forEach((property, hasValue) -> {
+            if (!property.getPrimaryType().isPrimitive() || property.getRawPrimaryType() == boolean.class) {
+                hasValue.setRequiredIndicatorVisible(isRequired(property));
+            }
+        });
+    }
+
+    public Class<?>[] getValidationGroups() {
+        return validationGroups;
+    }
+
+    protected boolean isRequired(BeanPropertyDefinition property) {
+        return isRequired(property, validationGroups);
+    }
+
+    protected static boolean isRequired(BeanPropertyDefinition property, Class<?>[] activeGroups) {
         if (property.getPrimaryType().isPrimitive() && property.getRawPrimaryType() != boolean.class) {
             return true;
         }
 
         try {
             AnnotatedMember accessor = property.getAccessor();
-            boolean accessorRequired = accessor.getAnnotation(NotEmpty.class) != null
-                    || accessor.getAnnotation(NotNull.class) != null
-                    || accessor.getAnnotation(NotBlank.class) != null;
-            if(accessorRequired) {
+            if(isRequiredAnnotationActive(accessor, activeGroups)) {
                 return true;
             }
             // Now also check field, (e.g. quite typical for JPA entities that only fields are annotated)
 
             AnnotatedField field = property.getField();
             if(field != null) {
-                return field.getAnnotation(NotEmpty.class) != null
-                        || field.getAnnotation(NotNull.class) != null
-                        || field.getAnnotation(NotBlank.class) != null;
+                return isRequiredAnnotationActive(field, activeGroups);
             }
             return false;
         } catch (java.lang.NoClassDefFoundError ex) {
             // No Bean Validation on classpath (or no getter)
             return false;
         }
+    }
+
+    private static boolean isRequiredAnnotationActive(AnnotatedMember member, Class<?>[] activeGroups) {
+        NotNull notNull = member.getAnnotation(NotNull.class);
+        if (notNull != null && isGroupActive(notNull.groups(), activeGroups)) {
+            return true;
+        }
+        NotEmpty notEmpty = member.getAnnotation(NotEmpty.class);
+        if (notEmpty != null && isGroupActive(notEmpty.groups(), activeGroups)) {
+            return true;
+        }
+        NotBlank notBlank = member.getAnnotation(NotBlank.class);
+        if (notBlank != null && isGroupActive(notBlank.groups(), activeGroups)) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isGroupActive(Class<?>[] annotationGroups, Class<?>[] activeGroups) {
+        if (activeGroups == null || activeGroups.length == 0) {
+            // No specific groups configured: only default group is active,
+            // so annotation must belong to default group (empty groups array)
+            return annotationGroups.length == 0;
+        }
+        if (annotationGroups.length == 0) {
+            // Annotation belongs to default group; check if default group is active
+            for (Class<?> active : activeGroups) {
+                if (active == jakarta.validation.groups.Default.class) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        // Check if any of the annotation's groups match the active groups
+        for (Class<?> ag : annotationGroups) {
+            for (Class<?> active : activeGroups) {
+                if (active == ag) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     protected boolean isReadOnly(BeanPropertyDefinition property) {
