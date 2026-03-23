@@ -17,6 +17,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import org.vaadin.firitin.util.JacksonIntrospection;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.PropertyName;
@@ -65,7 +66,7 @@ import java.util.logging.Logger;
 public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T> {
 
     // Helper "Jack" to do introspection
-    private static final ObjectMapper jack = new ObjectMapper();
+    private static final ObjectMapper jack = JacksonIntrospection.getMapper();
     private final Class<T> tClass;
     private final BasicBeanDescription bbd;
 

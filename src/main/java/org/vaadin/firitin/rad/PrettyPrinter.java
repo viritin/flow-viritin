@@ -8,6 +8,7 @@ import org.vaadin.firitin.components.details.VDetails;
 import org.vaadin.firitin.components.html.VCode;
 import org.vaadin.firitin.fields.internalhtmltable.Table;
 import org.vaadin.firitin.fields.internalhtmltable.TableRow;
+import org.vaadin.firitin.util.JacksonIntrospection;
 import tools.jackson.databind.BeanDescription;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
@@ -35,7 +36,7 @@ import static org.vaadin.firitin.rad.DtoDisplay.deCamelCased;
 public class PrettyPrinter {
 
     // Helper "Jack" to do introspection
-    static final ObjectMapper jack = new ObjectMapper();
+    static final ObjectMapper jack = JacksonIntrospection.getMapper();
     static List<PropertyPrinter> _defaultPropertyPrinters = new ArrayList<>();
     private static final PrettyPrinter INSTANCE = new PrettyPrinter(getDefaultPropertyPrinters());
 

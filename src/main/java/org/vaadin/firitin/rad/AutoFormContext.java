@@ -23,6 +23,7 @@ import org.vaadin.firitin.fields.EnumSelect;
 import org.vaadin.firitin.fields.LongField;
 import org.vaadin.firitin.fields.ShortField;
 import org.vaadin.firitin.util.VStyleUtil;
+import org.vaadin.firitin.util.JacksonIntrospection;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.introspect.BasicBeanDescription;
@@ -41,8 +42,8 @@ import java.util.Set;
  */
 public class AutoFormContext {
 
-    // Helper "Jack" to do introspection, TODO check to use the same instance as in FormBinder
-    static final ObjectMapper jack = new ObjectMapper();
+    // Helper "Jack" to do introspection, using shared instance with declaration-order sorting
+    static final ObjectMapper jack = JacksonIntrospection.getMapper();
     static List<PropertyPrinter> _defaultPropertyPrinters = new ArrayList<>();
     private final List<PropertyPrinter> propertyEditors;
     private final List<PropertyHeaderPrinter> propertyHeaderPrinters;

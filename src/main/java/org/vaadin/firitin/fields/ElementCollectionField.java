@@ -19,6 +19,7 @@ import org.vaadin.firitin.fields.internalhtmltable.TableDataCell;
 import org.vaadin.firitin.fields.internalhtmltable.TableRow;
 import org.vaadin.firitin.form.AbstractForm;
 import org.vaadin.firitin.form.FormBinder;
+import org.vaadin.firitin.util.JacksonIntrospection;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.introspect.BasicBeanDescription;
@@ -40,7 +41,7 @@ import java.util.Map;
 public class ElementCollectionField<T> extends CustomField<List<T>> {
 
     // Helper "Jack" to do introspection
-    private static final ObjectMapper jack = new ObjectMapper();
+    private static final ObjectMapper jack = JacksonIntrospection.getMapper();
 
     private final Class<T> clazz;
     private final Class<?> editorClass;

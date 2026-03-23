@@ -23,6 +23,7 @@ import org.vaadin.firitin.fluency.ui.FluentHasSize;
 import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 import org.vaadin.firitin.fluency.ui.FluentHasTheme;
 import org.vaadin.firitin.util.VStyleUtil;
+import org.vaadin.firitin.util.JacksonIntrospection;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.introspect.AnnotatedMethod;
@@ -79,7 +80,7 @@ public class VGrid<T> extends Grid<T>
         super(beanType, false);
         // Now lets get columns with Jackson, and pick the missing ones for records
         if (dummyOm == null) {
-            dummyOm = new ObjectMapper();
+            dummyOm = JacksonIntrospection.getMapper();
         }
 
         JavaType javaType = dummyOm.getTypeFactory().constructType(beanType);
