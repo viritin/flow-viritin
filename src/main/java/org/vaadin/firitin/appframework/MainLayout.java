@@ -2,6 +2,7 @@ package org.vaadin.firitin.appframework;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.RouteBaseData;
@@ -57,7 +58,11 @@ public abstract class MainLayout extends VAppLayout {
         }).forEach(rd -> {
             Class<? extends Component> routeClass = rd.getNavigationTarget();
             if (!Modifier.isAbstract(routeClass.getModifiers())) {
-                addNavigationItem(new BasicNavigationItem(routeClass));
+                try {
+                    addNavigationItem(new BasicNavigationItem(routeClass));
+                } catch (Exception e) {
+                    // TODO handle, HasUrlParameterFormat.checkMandatoryParameter
+                }
             }
         });
 
@@ -88,7 +93,11 @@ public abstract class MainLayout extends VAppLayout {
                         }).forEach(rd -> {
                             Class<? extends Component> routeClass = rd.getNavigationTarget();
                             if (!Modifier.isAbstract(routeClass.getModifiers()) && routeClass != null) {
-                                addNavigationItem(new BasicNavigationItem(routeClass));
+                                try {
+                                    addNavigationItem(new BasicNavigationItem(routeClass));
+                                } catch (Exception e) {
+                                    // TODO report, can happen e.g. if url parameters not configured
+                                }
                             }
                         });
                         buildMenu();
@@ -232,5 +241,15 @@ public abstract class MainLayout extends VAppLayout {
         });
     }
 
+    /**
+     * Assuming an attached component is within o view utilizing MainLayout, this method returns the current MainLayout.
+     * In a bigger projects it is most often better to inject the parent layout if needed and use a more specific type.
+     *
+     * @return the current main layout.
+     */
+    public static MainLayout getCurrent() {
+        UI ui = UI.getCurrent();
+        return (MainLayout) ui.getChildren().filter(c -> MainLayout.class.isAssignableFrom(c.getClass())).findFirst().get();
+    }
 
 }

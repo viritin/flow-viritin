@@ -18,16 +18,14 @@ public class MyThirdView extends MyAbstractView {
         super.onAttach(e);
         if (e.isInitialAttach()) {
             add(new Paragraph("Third content, with declarative title, icon, & ordering"));
-            MyMainLayout mainLayout = findAncestor(MyMainLayout.class);
-
             VerticalLayout subview = new VerticalLayout(
                     new Paragraph("Sub view content"),
                     new Button("Close sub view & return to main view", e1 -> {
-                        mainLayout.closeSubView();
+                        MainLayout.getCurrent().closeSubView();
                     })
             );
 
-            add(new Button("Open sub view", e1 -> mainLayout.openSubView(subview, "Sub view title")));
+            add(new Button("Open sub view", e1 -> MainLayout.getCurrent().openSubView(subview, "Sub view title")));
         }
 
     }
