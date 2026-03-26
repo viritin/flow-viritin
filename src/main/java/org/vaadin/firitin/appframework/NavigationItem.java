@@ -57,6 +57,8 @@ public interface NavigationItem extends HasStyle {
 
     String getText();
 
+    void setLabel(String label);
+
     Class<?> getNavigationTarget();
 
     boolean isEnabled();

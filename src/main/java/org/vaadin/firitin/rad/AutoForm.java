@@ -25,6 +25,7 @@ import org.vaadin.firitin.components.button.DefaultButton;
 import org.vaadin.firitin.components.button.DeleteButton;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.fields.ElementCollectionField;
+import org.vaadin.firitin.fields.EnumSelect;
 import org.vaadin.firitin.form.FormBinder;
 import tools.jackson.databind.introspect.BasicBeanDescription;
 import tools.jackson.databind.introspect.BeanPropertyDefinition;
@@ -69,7 +70,7 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
     }) {{
         setEnabled(false);
     }};
-    private Button deleteButton = new DeleteButton(() -> {
+    private DeleteButton deleteButton = new DeleteButton(() -> {
         deleteHandler.accept(getValue());
         if (dialog != null) {
             dialog.close();
@@ -127,7 +128,41 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
         return deCamelCased;
     }
 
+    private String translate(String key, String fallback) {
+        FormTranslationProvider provider = autoFormContext.getTranslationProvider();
+        if (provider != null) {
+            String translation = provider.getTranslation(key, autoFormContext.getLocale());
+            if (translation != null) {
+                return translation;
+            }
+        }
+        return fallback;
+    }
+
+    private void localizeButtons() {
+        saveButton.setText(translate("autoform.save", "Save"));
+        resetButton.setText(translate("autoform.reset", "Reset"));
+        deleteButton.setConfirmationPrompt(translate("autoform.delete.confirm", "Are you sure you want to delete this item?"));
+        deleteButton.setOkText(translate("autoform.delete", "Delete"));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void localizeEnumSelect(EnumSelect<?> enumSelect) {
+        FormTranslationProvider provider = autoFormContext.getTranslationProvider();
+        if (provider == null) {
+            return;
+        }
+        Locale locale = autoFormContext.getLocale();
+        ((EnumSelect<Enum<?>>) enumSelect).setItemLabelGenerator(item -> {
+            String enumClassName = item.getClass().getSimpleName();
+            String key = enumClassName + "." + item.name();
+            String translation = provider.getTranslation(key, locale);
+            return translation != null ? translation : item.toString();
+        });
+    }
+
     private void buildTable() {
+        localizeButtons();
         FormLayout formLayout = new FormLayout();
         beanDescription.findProperties().forEach(p -> {
             if (autoFormContext.getHiddenProperties().contains(p.getName())) {
@@ -143,6 +178,10 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
                     if (HasValue.class.isAssignableFrom(value.getClass())) {
                         // Data binding with the form binder
                         formBinder.bindProperty(p, (HasValue) value);
+                    }
+
+                    if (value instanceof EnumSelect<?> enumSelect) {
+                        localizeEnumSelect(enumSelect);
                     }
 
                     if (autoFormContext.isAnnotateTypes()) {
@@ -393,7 +432,8 @@ public class AutoForm<T> extends Composite<Div> implements ValueContext {
 
     public Dialog openInDialog() {
         dialog = new Dialog();
-        dialog.setHeaderTitle("Edit " + beanDescription.getBeanClass().getSimpleName());
+        String editPrefix = translate("autoform.edit.title", "Edit");
+        dialog.setHeaderTitle(editPrefix + " " + beanDescription.getBeanClass().getSimpleName());
         dialog.add(this);
         dialog.getFooter().add(getActions());
         dialog.open();

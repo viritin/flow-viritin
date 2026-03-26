@@ -47,7 +47,11 @@ public abstract class MainLayout extends VAppLayout {
             Class<? extends RouterLayout> parentLayout = routeData.getParentLayout();
             if(parentLayout == null) {
                 // Try to find from route registry (the @Layout annotation way)
-                parentLayout = routeConfiguration.getHandledRegistry().getLayout(routeConfiguration.getUrl(routeData.getNavigationTarget()));
+                try {
+                    parentLayout = routeConfiguration.getHandledRegistry().getLayout(routeConfiguration.getUrl(routeData.getNavigationTarget()));
+                } catch (Exception e) {
+                    // TODO log maybe? Navigation target 'foo.bar.View' requires a parameter.
+                }
             }
 
             if (parentLayout != null) {
@@ -205,12 +209,23 @@ public abstract class MainLayout extends VAppLayout {
 
         getMenu().removeAll();
         navigationItems.stream().filter(this::checkAccess).forEach(item -> {
+            translateItem(item);
             getMenu().addNavigationItem(item);
             // possible sub-items
             List<NavigationItem> subItems = new ArrayList<>(targetToItem.values().stream().filter(ni -> ni.getParentItem() == item).toList());
             sortMenuItems(subItems);
-            subItems.forEach(item::addSubItem);
+            subItems.forEach(subItem -> {
+                translateItem(subItem);
+                item.addSubItem(subItem);
+            });
         });
+    }
+
+    private void translateItem(NavigationItem item) {
+        String translated = getMenuText(item.getNavigationTarget(), item.getText());
+        if (!translated.equals(item.getText())) {
+            item.setLabel(translated);
+        }
     }
 
     /**

@@ -55,6 +55,7 @@ public class AutoFormContext {
     }};
     private boolean annotateTypes = false;
     private boolean defaultBeanValidation = true;
+    private FormTranslationProvider translationProvider;
 
     public AutoFormContext() {
         this(new ArrayList<>(getDefaultPropertyPrinters()));
@@ -153,6 +154,23 @@ public class AutoFormContext {
     public AutoFormContext withPropertyHeaderPrinter(PropertyHeaderPrinter printer) {
         propertyHeaderPrinters.add(0, printer);
         return this;
+    }
+
+    /**
+     * Sets a translation provider for localizing form labels, buttons, enum values, and dialog titles.
+     * Also registers an {@link I18nPropertyHeaderPrinter} for translating field labels.
+     *
+     * @param translationProvider the translation provider
+     * @return this for chaining
+     */
+    public AutoFormContext withTranslationProvider(FormTranslationProvider translationProvider) {
+        this.translationProvider = translationProvider;
+        withPropertyHeaderPrinter(new I18nPropertyHeaderPrinter(translationProvider, getLocale()));
+        return this;
+    }
+
+    public FormTranslationProvider getTranslationProvider() {
+        return translationProvider;
     }
 
     /**

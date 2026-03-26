@@ -139,6 +139,19 @@ public abstract class VAppLayout extends AppLayout implements AfterNavigationObs
         getNavbarHelpers().add(component);
     }
 
+    /**
+     * Returns the menu text for a navigation target. Override this to provide
+     * i18n support. The default implementation returns the text derived from
+     * annotations or class name conventions.
+     *
+     * @param navigationTarget the view class
+     * @param defaultText the text derived by NavigationItem.getMenuTextFromClass
+     * @return the text to display in the menu
+     */
+    protected String getMenuText(Class<?> navigationTarget, String defaultText) {
+        return defaultText;
+    }
+
     protected void updateViewTitle() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < viewStack.size(); i++) {
@@ -149,7 +162,8 @@ public abstract class VAppLayout extends AppLayout implements AfterNavigationObs
             if (explicitViewTitles.containsKey(component)) {
                 sb.append(explicitViewTitles.get(component));
             } else {
-                sb.append(NavigationItem.getMenuTextFromClass(component.getClass()));
+                String defaultText = NavigationItem.getMenuTextFromClass(component.getClass());
+                sb.append(getMenuText(component.getClass(), defaultText));
             }
         }
         setViewTitle(sb.toString());
