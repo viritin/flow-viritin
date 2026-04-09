@@ -23,6 +23,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import org.vaadin.firitin.components.orderedlayout.VScroller;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
+import org.vaadin.firitin.util.IntersectionObserver;
 
 /**
  * @author mstahv
@@ -37,8 +38,10 @@ public class ScrollerExample extends VVerticalLayout {
         VerticalLayout content = new VerticalLayout(new Span("first loooooooooooooooooooooooooooooooooooong line"));
         content.setWidth("100vw");
 
+        Span[] rows = new Span[100];
         for (int i = 0; i < 100; i++) {
             final Span span = new Span("Row " + i);
+            rows[i] = span;
             content.add(span);
             if (i == 5) {
                 row5 = span;
@@ -64,6 +67,19 @@ public class ScrollerExample extends VVerticalLayout {
         scroller.setHeight("300px");
         scroller.setWidth("300px");
         add(scroller);
+
+        // Use IntersectionObserver to detect when rows become visible in the scroller
+        addAttachListener(e -> {
+            var io = IntersectionObserver.of(e.getUI(), scroller);
+            for (Span row : rows) {
+                io.observe(row, entry -> {
+                    if (entry.isIntersecting()) {
+                        row.setText(row.getText() + " now visible");
+                        io.unobserve(row);
+                    }
+                });
+            }
+        });
 
         Button scrollToTop = new Button("scrollToTop()", e -> scroller.scrollToTop());
         Button scrollToTop2 = new Button("scrollTop(69)", e -> scroller.setScrollTop(69));
