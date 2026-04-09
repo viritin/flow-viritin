@@ -31,7 +31,7 @@ public class ResizeObserverCoreApiDrafting extends VVerticalLayout {
             if (registration == null) {
                 registration = addResizeListener(event -> {
                     // This is what users would most often fetch
-                    int width = event.getWidht();
+                    int width = event.getWidth();
 
                     // print the full dimentions to the screen as a demo of the API
                     sizeDisplay.updateDimentions(event.getDimensions());

@@ -67,8 +67,17 @@ public class ResizeObserver {
 
         /**
          * @return the new width of the component in pixels
+         * @deprecated Use {@link #getWidth()} instead. This method has a typo in the name.
          */
+        @Deprecated(forRemoval = true)
         public int getWidht() {
+            return getWidth();
+        }
+
+        /**
+         * @return the new width of the component in pixels
+         */
+        public int getWidth() {
             return dimensions.width();
         }
 

@@ -11,7 +11,7 @@ public class MyResponsiveGrid extends VGrid<ResizeObserver.Dimensions> {
     public MyResponsiveGrid() {
         super(ResizeObserver.Dimensions.class);
         addResizeListener(event -> {
-            configureColumns(event.getWidht() < 800 ? Mode.MOBILE : Mode.DESKTOP);
+            configureColumns(event.getWidth() < 800 ? Mode.MOBILE : Mode.DESKTOP);
             // Also add new rows to the grid, this is demo specific...
             getListDataView().addItem(event.getDimensions());
         });
