@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/DECORATION/1.8.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0 https://maven.apache.org/xsd/decoration-1.8.0.xsd"
+         name="Flow Viritin">
+
+    <skin>
+        <groupId>org.apache.maven.skins</groupId>
+        <artifactId>maven-fluido-skin</artifactId>
+        <version>2.0.0-M9</version>
+    </skin>
+
+    <custom>
+        <fluidoSkin>
+            <topBarEnabled>true</topBarEnabled>
+            <sideBarEnabled>true</sideBarEnabled>
+            <sourceLineNumbersEnabled>true</sourceLineNumbersEnabled>
+        </fluidoSkin>
+    </custom>
+
+    <body>
+        <menu name="Getting Started">
+            <item name="Overview" href="index.html"/>
+            <item name="Development" href="development.html"/>
+        </menu>
+        <menu name="Components">
+            <item name="Overview" href="components/index.html"/>
+        </menu>
+        <menu name="Browser APIs">
+            <item name="Overview" href="browser-api/index.html"/>
+            <item name="ResizeObserver" href="browser-api/resize-observer.html"/>
+        </menu>
+        <menu name="Forms &amp; RAD">
+            <item name="Forms Overview" href="forms/index.html"/>
+            <item name="RAD Tools" href="rad/index.html"/>
+        </menu>
+        <menu name="Utilities">
+            <item name="Overview" href="util/index.html"/>
+        </menu>
+        <menu name="Reports">
+            <item name="Javadoc" href="apidocs/index.html"/>
+        </menu>
+    </body>
+</project>
