@@ -16,6 +16,7 @@ Key features:
 * Displays constraint violations in fields and at class level.
 * Accepts validation messages from Bean Validation API or as a raw
   `Map<String, String>`.
+* Supports bean level validators (aka cross-field validators)
 
 ### BeanValidationForm
 
@@ -23,8 +24,10 @@ An opinionated abstract superclass for "bulk forms" built on top of
 `FormBinder`. Provides:
 
 * Automatic Bean Validation with customizable validation groups.
-* Basic layout.
+* Basic layout with save, cancel and delete buttons (shown if related handler is defined).
+* Shows constraint violations on the related field (if relation is available), like in Vaadin, bean level violations (typically cross-field valitors) on in an area on top of the save/cancel buttons.
 * Save/cancel buttons that adjust their enabled state based on user actions.
+* Ability to show in a dialog (handy for simple CRUDs on desktop UIs)
 
 ### AbstractForm
 
