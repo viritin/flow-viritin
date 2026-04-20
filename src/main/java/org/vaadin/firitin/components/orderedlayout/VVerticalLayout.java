@@ -1,13 +1,17 @@
 package org.vaadin.firitin.components.orderedlayout;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import org.vaadin.firitin.fluency.ui.*;
 
 public class VVerticalLayout extends VerticalLayout implements FluentThemableLayout<VVerticalLayout>,
         FluentComponent<VVerticalLayout>, FluentHasStyle<VVerticalLayout>, FluentHasSize<VVerticalLayout>, FluentHasComponents<VVerticalLayout>, FluentClickNotifier<VerticalLayout, VVerticalLayout> {
+    private UI ui;
+
     public VVerticalLayout() {
         super();
     }
@@ -80,4 +84,22 @@ public class VVerticalLayout extends VerticalLayout implements FluentThemableLay
         return this;
     }
 
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        this.ui = attachEvent.getUI();
+        super.onAttach(attachEvent);
+    }
+
+    /**
+     * Returns the UI after component has been attached. Workarounds the tricky Vaadin API.
+     *
+     * TODO figure out how this could be efficiently built into all Viritin components.
+     *
+     * @return the UI instance
+     *
+     * @deprecated early testing of this approach in couple of apps.
+     */
+    protected UI ui() {
+        return ui;
+    }
 }
