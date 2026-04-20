@@ -101,6 +101,8 @@ e.g. in field declaration or without declaring an extra variable. When used in a
 
 ## Documentation
 
+A WIP documentation site is being built at https://viritin.github.io/flow-viritin/ — contributions welcome.
+
 The [test directory](https://github.com/viritin/flow-viritin/tree/v24/src/test/java/org/vaadin/firitin) contains usage examples for components. Some components have decent JavaDocs. An actual manual would be great and an easy way to contribute back if you find the helpers useful 🤓
 
 ## Contributing
