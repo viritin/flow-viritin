@@ -12,15 +12,9 @@ without introducing extra variables.
 
 ### VGrid
 
-An enhanced Grid with sensible defaults:
-
-* Supports Java `record` types out of the box.
-* Columns appear in declaration order (not random).
-* Built-in column selector menu (like Vaadin 8).
-* Fallback column generation via Jackson when the default mechanism fails.
-* `CellFormatter` for styling raw data columns.
-* `Column.getStyle()` that actually works.
-* Programmatic row styling.
+An enhanced Grid with sensible defaults, records support, an advanced
+styling API and a grid-wide `CellFormatter`. See the dedicated
+[VGrid page](vgrid.html) for details and examples.
 
 ### Uploads & Downloads
 
@@ -46,4 +40,6 @@ An enhanced Grid with sensible defaults:
 * **PagingGrid** -- Traditional paging for Grid.
 * **DeleteButton** -- Confirmation dialog + error styling to prevent
   accidental clicks.
+* **[PrintPdfButton](print-pdf-button.html)** -- Generate a PDF on the
+  server and open the browser's native print dialog for it.
 * **DisclosurePanel**, **Badge**, **VSvg**, and more.

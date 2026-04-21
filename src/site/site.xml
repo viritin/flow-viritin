@@ -25,6 +25,8 @@
         </menu>
         <menu name="Components">
             <item name="Overview" href="components/index.html"/>
+            <item name="VGrid" href="components/vgrid.html"/>
+            <item name="PrintPdfButton" href="components/print-pdf-button.html"/>
         </menu>
         <menu name="Browser APIs">
             <item name="Overview" href="browser-api/index.html"/>
