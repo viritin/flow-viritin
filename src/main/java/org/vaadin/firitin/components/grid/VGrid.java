@@ -22,6 +22,7 @@ import org.vaadin.firitin.fluency.ui.FluentFocusable;
 import org.vaadin.firitin.fluency.ui.FluentHasSize;
 import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 import org.vaadin.firitin.fluency.ui.FluentHasTheme;
+import org.vaadin.firitin.util.VStyle;
 import org.vaadin.firitin.util.VStyleUtil;
 import org.vaadin.firitin.util.JacksonIntrospection;
 import tools.jackson.databind.JavaType;
@@ -402,26 +403,26 @@ public class VGrid<T> extends Grid<T>
         var oldCNG = getPartNameGenerator();
         setPartNameGenerator((ValueProvider<T, String>) t -> {
             TreeMap<String, String> styleRules = new TreeMap<>();
-            Style style = new Style() {
+            VStyle style = new VStyle() {
                 @Override
                 public String get(String name) {
                     return styleRules.get(name);
                 }
 
                 @Override
-                public Style set(String name, String value) {
+                public VStyle set(String name, String value) {
                     styleRules.put(name, value);
                     return this;
                 }
 
                 @Override
-                public Style remove(String name) {
+                public VStyle remove(String name) {
                     styleRules.remove(name);
                     return this;
                 }
 
                 @Override
-                public Style clear() {
+                public VStyle clear() {
                     styleRules.clear();
                     return this;
                 }
@@ -488,7 +489,7 @@ public class VGrid<T> extends Grid<T>
          * @param item  the item for which the row is rendered
          * @param style the style rules for given item
          */
-        public void styleRow(T item, Style style);
+        public void styleRow(T item, VStyle style);
     }
 
     /**
