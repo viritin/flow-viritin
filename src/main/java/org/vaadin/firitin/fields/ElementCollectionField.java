@@ -4,6 +4,10 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.customfield.CustomField;
+import com.vaadin.flow.component.html.Table;
+import com.vaadin.flow.component.html.TableCell;
+import com.vaadin.flow.component.html.TableDataCell;
+import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.util.SharedUtil;
@@ -13,10 +17,6 @@ import org.vaadin.firitin.components.datetimepicker.VDateTimePicker;
 import org.vaadin.firitin.components.textfield.VIntegerField;
 import org.vaadin.firitin.components.textfield.VNumberField;
 import org.vaadin.firitin.components.textfield.VTextField;
-import org.vaadin.firitin.fields.internalhtmltable.Table;
-import org.vaadin.firitin.fields.internalhtmltable.TableCell;
-import org.vaadin.firitin.fields.internalhtmltable.TableDataCell;
-import org.vaadin.firitin.fields.internalhtmltable.TableRow;
 import org.vaadin.firitin.form.AbstractForm;
 import org.vaadin.firitin.form.FormBinder;
 import org.vaadin.firitin.util.JacksonIntrospection;
@@ -134,7 +134,7 @@ public class ElementCollectionField<T> extends CustomField<List<T>> {
         TableDataCell cell = row.addDataCell();
         cell.add(new VButton(VaadinIcon.TRASH.create(), event -> {
             value.remove(item);
-            row.getParent().ifPresent(p -> ((Table) p).removeRows(row));
+            row.removeFromParent();
             fireValueChange();
         }));
     }
@@ -154,8 +154,8 @@ public class ElementCollectionField<T> extends CustomField<List<T>> {
     }
 
     private TableCell getLastCell() {
-        TableRow lastRow = table.getRows().get(table.getRows().size() - 1);
-        return lastRow.getCells().get(lastRow.getCells().size() - 1);
+        TableRow lastRow = table.getRows().getLast();
+        return lastRow.getCells().getLast();
     }
 
     private FormBinder<T> addNewRow(T item) {
@@ -282,6 +282,7 @@ public class ElementCollectionField<T> extends CustomField<List<T>> {
     @Override
     protected void setPresentationValue(List<T> ts) {
         this.value = ts;
+        table.getBody().removeAllRows();
         table.removeAllRows();
         configureColumneHeaders();
         value.forEach(this::addNewRow);

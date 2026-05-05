@@ -5,10 +5,10 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Table;
+import com.vaadin.flow.component.html.TableHeaderCell;
+import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.shared.util.SharedUtil;
-import org.vaadin.firitin.fields.internalhtmltable.Table;
-import org.vaadin.firitin.fields.internalhtmltable.TableHeaderCell;
-import org.vaadin.firitin.fields.internalhtmltable.TableRow;
 import org.vaadin.firitin.util.VStyleUtil;
 import tools.jackson.databind.introspect.BasicBeanDescription;
 
@@ -122,13 +122,13 @@ public class DtoDisplay extends Composite<Div> {
                 if (value instanceof Component c) {
                     tableRow.addCells(c);
                 } else {
-                    tableRow.addCells(value.toString());
+                    tableRow.addDataCell(value.toString());
                 }
             } else {
                 TableHeaderCell tableHeaderCell = tableRow.addHeaderCell();
                 tableHeaderCell.setText(p.getName());
                 Object value1 = p.getGetter().getValue(context.value());
-                tableRow.addCells((value1 == null ? "null" : value1.toString()) + " (no printer found)");
+                tableRow.addDataCell((value1 == null ? "null" : value1.toString()) + " (no printer found)");
             }
 
         });

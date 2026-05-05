@@ -6,12 +6,15 @@ import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
+import in.virit.color.NamedColor;
+import in.virit.color.RgbColor;
+import org.vaadin.firitin.components.grid.VGrid;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 @Route
-public class PersonGridWithFiltering extends Grid<Person> {
+public class PersonGridWithFiltering extends VGrid<Person> {
 
     private PersonFilterField fullNameFilter, emailFilter, professionFilter;
 
@@ -20,6 +23,12 @@ public class PersonGridWithFiltering extends Grid<Person> {
         fullNameFilter = addFilterableColumn("Name", Person::getFullName);
         emailFilter = addFilterableColumn("Email", Person::getEmail);
         professionFilter =addFilterableColumn("Profession", Person::getProfession);
+
+        withRowStyler((person, rowStyle) -> {
+            if(person.getProfession().toLowerCase().contains("developer")) {
+                rowStyle.setColor(new RgbColor(190, 26, 255, 0.59));
+            }
+        });
 
         // Initial listing
         listPersons();

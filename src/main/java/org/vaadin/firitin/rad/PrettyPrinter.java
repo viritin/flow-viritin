@@ -4,10 +4,10 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.Table;
+import com.vaadin.flow.component.html.TableRow;
 import org.vaadin.firitin.components.details.VDetails;
 import org.vaadin.firitin.components.html.VCode;
-import org.vaadin.firitin.fields.internalhtmltable.Table;
-import org.vaadin.firitin.fields.internalhtmltable.TableRow;
 import org.vaadin.firitin.util.JacksonIntrospection;
 import tools.jackson.databind.BeanDescription;
 import tools.jackson.databind.JavaType;
@@ -281,7 +281,7 @@ public class PrettyPrinter {
                             TableRow subTableRow = subTable.addRow();
                             properties.forEach(subP -> {
                                 Object value = subP.getGetter().getValue(e);
-                                subTableRow.addCells("" + value);
+                                subTableRow.addDataCell("" + value);
                             });
                         }
                     } else if (collection instanceof Iterable<?> iterable) {
@@ -291,10 +291,10 @@ public class PrettyPrinter {
                                 contentTypeBbd.findProperties().forEach(subP -> {
                                     try {
                                         Object value = subP.getAccessor().getValue(e);
-                                        subTableRow.addCells("" + value);
+                                        subTableRow.addDataCell("" + value);
                                     } catch (Exception e1) {
                                         if (e1.getMessage().contains("failed to lazily")) {
-                                            subTableRow.addCells("[Hbn proxy]");
+                                            subTableRow.addDataCell("[Hbn proxy]");
                                         } else {
                                             throw e1;
                                         }
@@ -303,7 +303,7 @@ public class PrettyPrinter {
                             });
                         } catch (Exception e1) {
                             if (e1.getMessage().contains("failed to lazily")) {
-                                subTable.addRow().addCells("[Hbn proxy]");
+                                subTable.addRow().addDataCell("[Hbn proxy]");
                             } else {
                                 throw e1;
                             }

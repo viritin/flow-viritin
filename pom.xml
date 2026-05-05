@@ -11,13 +11,13 @@
 
     <groupId>in.virit</groupId>
     <artifactId>viritin</artifactId>
-    <version>3.4.2-SNAPSHOT</version>
+    <version>3.5.0-SNAPSHOT</version>
     <name>Flow Viritin</name>
     <packaging>jar</packaging>
     <description>General purpose helpers for Vaadin users. Java only additions, that don't require custom client-bundle.</description>
 
     <properties>
-        <vaadin.version>25.1.3</vaadin.version>
+        <vaadin.version>25.2-SNAPSHOT</vaadin.version>
         <spring.boot.version>4.0.5</spring.boot.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>

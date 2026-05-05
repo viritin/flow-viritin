@@ -1,5 +1,7 @@
 package org.vaadin.firitin;
 
+import com.vaadin.flow.component.html.Table;
+import com.vaadin.flow.component.html.TableRow;
 import org.vaadin.firitin.components.CustomLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Html;
@@ -13,8 +15,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.router.Route;
-import org.vaadin.firitin.fields.internalhtmltable.Table;
-import org.vaadin.firitin.fields.internalhtmltable.TableRow;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -339,10 +339,7 @@ public class HugeGrid extends VerticalLayout {
         Table t = new Table();
 
         dataset.forEach(r -> {
-            TableRow tableRow = t.addRow();
-            r.forEach(c -> {
-                tableRow.addCells(c);
-            });
+            t.addRow(r);
         });
         add(t);
         reportTime(currentTimeMillis);
