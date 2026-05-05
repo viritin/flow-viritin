@@ -62,7 +62,7 @@ public class VStyle implements Style {
     }
 
     @Override
-    public VStyle remove(String name) {
+    public Style remove(String name) {
         wrapped.remove(name);
         return this;
     }
