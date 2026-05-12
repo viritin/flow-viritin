@@ -8,6 +8,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.RouteBaseData;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouterLayout;
+import com.vaadin.flow.router.RoutesChangedEvent;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -70,52 +71,55 @@ public abstract class MainLayout extends VAppLayout {
             }
         });
 
-        // Add and remove dynamically added routes
-        RouteConfiguration.forApplicationScope().addRoutesChangeListener(event -> {
-            try {
-
-                event.getRemovedRoutes().forEach(route -> {
-                    targetToItem.remove(route.getNavigationTarget());
-                });
-                // UI access used to support reload by JRebel etc
-                MainLayout.this.getUI().ifPresent(ui -> {
-                    if (ui.isClosing()) {
-                        // Route reload caused most likely by JRebel reload
-                        // and might be on a closing UI (because Vaadin dev
-                        // mode reloads automatically these days). Ignore
-                        return;
-                    }
-                    ui.access(() -> {
-                        List<RouteBaseData<?>> addedRoutes = event.getAddedRoutes();
-                        addedRoutes.stream().filter(routeData -> {
-                            Class<? extends RouterLayout> parentLayout = routeData.getParentLayout();
-                            if (parentLayout != null) {
-                                boolean assignableFrom = MainLayout.class.isAssignableFrom(parentLayout);
-                                return assignableFrom;
-                            }
-                            return false;
-                        }).forEach(rd -> {
-                            Class<? extends Component> routeClass = rd.getNavigationTarget();
-                            if (!Modifier.isAbstract(routeClass.getModifiers()) && routeClass != null) {
-                                try {
-                                    addNavigationItem(new BasicNavigationItem(routeClass));
-                                } catch (Exception e) {
-                                    // TODO report, can happen e.g. if url parameters not configured
-                                }
-                            }
-                        });
-                        buildMenu();
-                    });
-                });
-            } catch (Exception e) {
-                // caching and logging, with new dev mode, happens autoreload & jrebel
-                // if letting forwared -> all routes dissappear...
-                Logger.getLogger(getClass().getName()).log(Level.WARNING, "Error updating routes, happens with latest Vaadin versions & JRebel sometimes", e);
-            }
-
-        });
+        // Add and remove dynamically added routes. Listen to both scopes:
+        // application scope for class-reload (JRebel/dev mode) and session
+        // scope for routes registered at runtime via RouteConfiguration.forSessionScope().
+        RouteConfiguration.forApplicationScope().addRoutesChangeListener(this::handleRoutesChange);
+        RouteConfiguration.forSessionScope().addRoutesChangeListener(this::handleRoutesChange);
 
         buildMenu();
+    }
+
+    private void handleRoutesChange(RoutesChangedEvent event) {
+        try {
+            event.getRemovedRoutes().forEach(route -> {
+                targetToItem.remove(route.getNavigationTarget());
+            });
+            // UI access used to support reload by JRebel etc
+            MainLayout.this.getUI().ifPresent(ui -> {
+                if (ui.isClosing()) {
+                    // Route reload caused most likely by JRebel reload
+                    // and might be on a closing UI (because Vaadin dev
+                    // mode reloads automatically these days). Ignore
+                    return;
+                }
+                ui.access(() -> {
+                    List<RouteBaseData<?>> addedRoutes = event.getAddedRoutes();
+                    addedRoutes.stream().filter(routeData -> {
+                        Class<? extends RouterLayout> parentLayout = routeData.getParentLayout();
+                        if (parentLayout != null) {
+                            boolean assignableFrom = MainLayout.class.isAssignableFrom(parentLayout);
+                            return assignableFrom;
+                        }
+                        return false;
+                    }).forEach(rd -> {
+                        Class<? extends Component> routeClass = rd.getNavigationTarget();
+                        if (!Modifier.isAbstract(routeClass.getModifiers()) && routeClass != null) {
+                            try {
+                                addNavigationItem(new BasicNavigationItem(routeClass));
+                            } catch (Exception e) {
+                                // TODO report, can happen e.g. if url parameters not configured
+                            }
+                        }
+                    });
+                    buildMenu();
+                });
+            });
+        } catch (Exception e) {
+            // caching and logging, with new dev mode, happens autoreload & jrebel
+            // if letting forwared -> all routes dissappear...
+            Logger.getLogger(getClass().getName()).log(Level.WARNING, "Error updating routes, happens with latest Vaadin versions & JRebel sometimes", e);
+        }
     }
 
     private void addNavigationItem(NavigationItem item) {

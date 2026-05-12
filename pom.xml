@@ -11,7 +11,7 @@
 
     <groupId>in.virit</groupId>
     <artifactId>viritin</artifactId>
-    <version>3.4.2-SNAPSHOT</version>
+    <version>3.5.0-SNAPSHOT</version>
     <name>Flow Viritin</name>
     <packaging>jar</packaging>
     <description>General purpose helpers for Vaadin users. Java only additions, that don't require custom client-bundle.</description>
@@ -63,7 +63,7 @@
         <dependency>
             <groupId>in.virit</groupId>
             <artifactId>color</artifactId>
-            <version>0.0.4</version>
+            <version>0.0.5-SNAPSHOT</version>
         </dependency>
 
         <!-- Enable if needed, faster starts/restarts without
@@ -135,10 +135,33 @@
             <artifactId>reactor-core</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>in.virit</groupId>
+            <artifactId>mopo</artifactId>
+            <version>0.0.6</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.5.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <trimStackTrace>false</trimStackTrace>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>net.revelc.code.formatter</groupId>
                 <artifactId>formatter-maven-plugin</artifactId>
