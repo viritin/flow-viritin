@@ -36,7 +36,9 @@ public class DynamicRouteRegistrationIT {
     public void setup() {
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions());
         page = browser.newPage();
-        page.setDefaultTimeout(10_000);
+        // Generous timeout so the first test survives Vaadin's cold dev-mode
+        // frontend bundle compilation in CI, where target/frontend is not cached.
+        page.setDefaultTimeout(60_000);
         mopo = new Mopo(page);
     }
 
