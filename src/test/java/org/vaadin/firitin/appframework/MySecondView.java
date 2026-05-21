@@ -2,6 +2,8 @@ package org.vaadin.firitin.appframework;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -12,6 +14,7 @@ import org.vaadin.firitin.components.Tree;
 import org.vaadin.firitin.fluency.ui.FluentHasComponents;
 import org.vaadin.firitin.util.ComponentTree;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,9 +66,33 @@ public class MySecondView extends MyAbstractView {
     private static Tree<Component> componentTree(Component root,
             Tree.ChildrenProvider<Component> childrenProvider) {
         Tree<Component> tree = new Tree<>();
-        tree.setItemLabelGenerator(c -> c.getClass().getSimpleName());
+        tree.setItemLabelGenerator(MySecondView::describe);
         tree.setItems(root, childrenProvider);
         tree.showChildrenRecursively(root);
         return tree;
+    }
+
+    private static String describe(Component component) {
+        String name = component.getClass().getName();
+        List<String> details = new ArrayList<>();
+        component.getId().ifPresent(id -> details.add("id=" + id));
+        if (component instanceof HasLabel hl) {
+            String label = hl.getLabel();
+            if (label != null && !label.isEmpty()) {
+                details.add("label=\"" + truncate(label) + "\"");
+            }
+        }
+        if (component instanceof HasText ht) {
+            String text = ht.getText();
+            if (text != null && !text.isEmpty()) {
+                details.add("text=\"" + truncate(text) + "\"");
+            }
+        }
+        return details.isEmpty() ? name : name + " (" + String.join(", ", details) + ")";
+    }
+
+    private static String truncate(String s) {
+        int max = 40;
+        return s.length() <= max ? s : s.substring(0, max - 1) + "…";
     }
 }
