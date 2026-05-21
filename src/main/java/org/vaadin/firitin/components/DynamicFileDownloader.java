@@ -470,6 +470,7 @@ public class DynamicFileDownloader extends Anchor implements
         String text = getText();
         setText(null);
         this.button = new Button(text);
+        button.getElement().executeJs("$0.removeAttribute('role');");
         add(button);
         return this;
     }
