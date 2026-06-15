@@ -1,0 +1,150 @@
+/*
+ * Underline-style tab bar for the TabSheet used as a layout inside
+ * LocalizedField. Scoped to the "localized-field" class that the component sets
+ * on itself, so it does not affect regular TabSheets. Loaded via a @StyleSheet
+ * annotation on the LocalizedField component.
+ *
+ * Goals (vs. the default theme styling):
+ *   1. The whole tabsheet is a plain box: a thin gray border around it, and a
+ *      single straight divider between the tab bar and the content.
+ *   2. The active tab is indicated by an underline, not by a raised/button look.
+ *   3. The editor fills the box with no chrome of its own (no "box in a box").
+ *
+ * Theme-agnostic: the accent and surface colors are taken from the Aura design
+ * tokens when present (Aura theme) and fall back to the corresponding Lumo
+ * tokens otherwise, so the same intentional look applies in both themes.
+ */
+
+.localized-field {
+    --_lf-accent: var(--aura-accent-color, var(--lumo-primary-color));
+    --_lf-accent-text: var(--aura-accent-text-color, var(--lumo-primary-text-color));
+    --_lf-surface: var(--aura-surface-color-solid, var(--lumo-base-color));
+}
+
+.localized-field vaadin-tabsheet {
+    /* Aura insets the tab bar; remove it so the tabs reach the box edges. */
+    --vaadin-tabs-padding: 0;
+    --vaadin-tabs-gap: 0;
+    /* Thin gray border + radius around the whole component, like other fields. */
+    border: 1px solid var(--vaadin-border-color);
+    border-radius: var(--vaadin-radius-m);
+    background: var(--_lf-surface);
+    /* Let a focus ring drawn on this box be visible (Aura defaults to hidden). */
+    overflow: visible;
+}
+
+/* Drop the surface/panel background Aura paints behind the tab strip. Aura also
+ * rounds the tab strip (border-radius) and clips painting to it (contain:paint),
+ * which cuts the straight underline of the first/last tab at the rounded
+ * corners; remove both so the underline reaches the edges. */
+.localized-field vaadin-tabsheet vaadin-tabs {
+    background: none;
+    --aura-surface-opacity: 0;
+    border-radius: 0;
+    contain: none;
+    /* Lumo gives vaadin-tabs a negative horizontal margin so its scroll buttons
+     * bleed past the content edges; reset it and constrain the width to the box
+     * so the tab bar stays inside the border. */
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Aura offsets ::part(tabs) by -3px/3px and adds an edge fade mask; reset both
+ * so the tabs align exactly with the box. */
+.localized-field vaadin-tabsheet vaadin-tabs::part(tabs) {
+    margin: 0;
+    padding: 0;
+    mask-image: none;
+}
+
+/* A single straight divider between the tab bar and the content. The tab bar
+ * gets the same subtle background as a default tab bar, so it reads as a
+ * slightly shaded header above the (white) content. */
+.localized-field vaadin-tabsheet::part(tabs-container) {
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid var(--vaadin-border-color);
+    background: var(--vaadin-background-container);
+}
+
+/* Tabs as plain labels with room for an underline, not buttons: no border,
+ * radius, background or shadow. */
+.localized-field vaadin-tabsheet vaadin-tab {
+    border: 0;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+}
+
+/* Tabs are content-width and left-aligned, so trailing space is left to the
+ * right of the last tab and its underline would stop short of the border.
+ * Stretch the last tab to the edge (keeping its label left-aligned) so the
+ * selection underline reaches the right border with no gap. */
+.localized-field vaadin-tabsheet vaadin-tab:last-of-type {
+    flex-grow: 1;
+    justify-content: flex-start;
+}
+
+/* Active tab: just an underline in the accent color. */
+.localized-field vaadin-tabsheet vaadin-tab[selected] {
+    --vaadin-tab-background: transparent;
+    --vaadin-tab-text-color: var(--_lf-accent-text);
+    background: none;
+    box-shadow: none;
+    border-color: transparent;
+    border-bottom-color: var(--_lf-accent);
+}
+
+/* Lumo draws its own selection bar with a ::before pseudo on the selected tab,
+ * which would show as a second underline next to our border-bottom one. Hide it
+ * so only our underline remains (Aura has no such pseudo, so this is a no-op
+ * there). */
+.localized-field vaadin-tabsheet vaadin-tab[selected]::before {
+    display: none;
+}
+
+/* The content just holds the editor; the box provides the frame and surface. */
+.localized-field vaadin-tabsheet::part(content) {
+    padding: 0;
+    background: transparent;
+}
+
+/* The editor fills the content area with no chrome of its own, so the only
+ * frame is the surrounding box (no double border, nothing to clip). */
+.localized-field vaadin-tabsheet vaadin-text-field,
+.localized-field vaadin-tabsheet vaadin-text-area {
+    width: 100%;
+    height: 100%;
+}
+
+.localized-field vaadin-tabsheet vaadin-text-field::part(input-field),
+.localized-field vaadin-tabsheet vaadin-text-area::part(input-field) {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* Let the text area grow to fill the area rather than its default row height. */
+.localized-field vaadin-tabsheet vaadin-text-area::part(input-field) {
+    height: 100%;
+}
+
+/* Focus is shown around the editor area only (the content below the divider),
+ * not the whole box, in the same accent color as the active tab underline. The
+ * divider becomes the full-width top of the frame, so it joins the underline to
+ * the inset ring on the other three sides with no gray gap, and reaches the
+ * outer border on both sides (no broken gap next to the last tab). */
+.localized-field vaadin-tabsheet:has(vaadin-text-field[focused], vaadin-text-area[focused])::part(tabs-container) {
+    border-bottom-color: var(--_lf-accent);
+}
+
+.localized-field vaadin-tabsheet:has(vaadin-text-field[focused], vaadin-text-area[focused])::part(content) {
+    box-shadow:
+        inset 2px 0 0 var(--_lf-accent),
+        inset -2px 0 0 var(--_lf-accent),
+        inset 0 -2px 0 var(--_lf-accent);
+    border-radius: 0 0 var(--vaadin-radius-m) var(--vaadin-radius-m);
+}
