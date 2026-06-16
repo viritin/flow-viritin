@@ -1,6 +1,8 @@
 package org.vaadin.firitin.fields.localized;
 
 import com.vaadin.browserless.BrowserlessUIContext;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.Converter;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -101,6 +103,53 @@ class LocalizedFieldTest {
             field.setSelectedLocale(FI);
             assertEquals(FI, field.getSelectedLocale());
             assertEquals("Suomi", shownLanguage(ui));
+        }
+    }
+
+    @Test
+    void languageCodeMapConverterMapsByLanguageCode() {
+        LocalizedTextField field = new LocalizedTextField(EN, FI, SV);
+        try (var ui = BrowserlessUIContext.forComponent(field)) {
+            Converter<Map<Locale, String>, Map<String, String>> converter =
+                    field.languageCodeMapConverter();
+            ValueContext ctx = new ValueContext();
+
+            Map<Locale, String> all = new LinkedHashMap<>();
+            all.put(EN, "Hi");
+            all.put(FI, "Moi");
+            all.put(SV, "Hej");
+            field.setValue(all);
+
+            Map<String, String> codes = converter.convertToModel(field.getValue(), ctx)
+                    .getOrThrow(RuntimeException::new);
+            assertEquals("Hi", codes.get("en"));
+            assertEquals("Moi", codes.get("fi"));
+
+            // Back from a code-keyed map; a missing code becomes empty text.
+            Map<Locale, String> presentation =
+                    converter.convertToPresentation(Map.of("en", "Hello", "fi", "Hei"), ctx);
+            field.setValue(presentation);
+            assertEquals("Hello", field.getValue().get(EN));
+            assertEquals("Hei", field.getValue().get(FI));
+            assertEquals("", field.getValue().get(SV));
+        }
+    }
+
+    @Test
+    void presentsValueByLanguageCodeWhenCountryVariantDiffers() {
+        // Field has plain "en"; the value is keyed by "en_US".
+        LocalizedTextField field = new LocalizedTextField(Locale.ENGLISH);
+        try (var ui = BrowserlessUIContext.forComponent(field)) {
+            field.setValue(Map.of(Locale.US, "Hello"));
+            assertEquals("Hello", field.getValue().get(Locale.ENGLISH));
+        }
+    }
+
+    @Test
+    void labelConstructorSetsTheLabel() {
+        LocalizedTextField field = new LocalizedTextField("Title", EN, FI);
+        try (var ui = BrowserlessUIContext.forComponent(field)) {
+            assertEquals("Title", field.getLabel());
         }
     }
 

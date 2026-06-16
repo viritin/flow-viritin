@@ -29,6 +29,18 @@ public class LocalizedTextField extends LocalizedField<TextField> {
         super(locales, comboBoxThreshold);
     }
 
+    /** Creates a labeled field for the given languages. */
+    public LocalizedTextField(String label, Locale... locales) {
+        this(List.of(locales));
+        setLabel(label);
+    }
+
+    /** Creates a labeled field for the given languages. */
+    public LocalizedTextField(String label, List<Locale> locales) {
+        this(locales);
+        setLabel(label);
+    }
+
     @Override
     protected TextField createField(Locale locale) {
         return new TextField();

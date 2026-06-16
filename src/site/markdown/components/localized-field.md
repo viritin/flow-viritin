@@ -19,12 +19,12 @@ appears on its own.
 ### Basic usage
 
 Pass the locales you want to support. They can be given in any order; the field
-always shows them alphabetically by their localized name.
+always shows them alphabetically by their localized name. A leading `String`
+argument sets the field label:
 
 ```java
-LocalizedTextField title = new LocalizedTextField(
+LocalizedTextField title = new LocalizedTextField("Title",
         Locale.ENGLISH, Locale.of("fi"), Locale.of("sv"), Locale.GERMAN);
-title.setLabel("Title");
 add(title);
 
 // The value is a Map<Locale, String>
@@ -41,8 +41,33 @@ description.setWidth("480px");
 description.setHeight("220px");
 ```
 
-Both bind with `Binder`/`BeanValidationBinder` like any other field whose value
-type is `Map<Locale, String>`.
+### Binding to a domain model
+
+The field value type is `Map<Locale, String>`. If your domain object stores
+translations the same way, binding is glue-free:
+
+```java
+binder.forField(title).bind(Product::getTitle, Product::setTitle);
+```
+
+Many applications instead key translations by **language code** (`"fi"`),
+e.g. persisted as a `jsonb` column — a `Map<String, String>`. For that, bind
+through `languageCodeMapConverter()`:
+
+```java
+binder.forField(title)
+      .withConverter(title.languageCodeMapConverter())   // Map<Locale,String> <-> Map<String,String>
+      .bind(Product::getTitleTexts, Product::setTitleTexts);
+```
+
+Conversion is by language code only, and the field rebuilds the presentation
+with its own locales, so locale country variants (`en` vs `en_US`) do not cause
+surprises. The same tolerance applies when binding a `Map<Locale, String>`
+directly: a value keyed by `en_US` still shows in an `en` tab.
+
+For a wrapper type — say a `TranslatedText` backed by a `Map<String, String>` —
+either bind through its map accessor, or chain a second converter that wraps and
+unwraps it.
 
 ### Tab mode vs. combo box mode
 
@@ -102,7 +127,11 @@ handled automatically.
 
 The component looks a translator up from Vaadin's `Instantiator` on attach, so
 in a Spring application **registering a `Translator` bean is all it takes** for
-the action to appear — no per-field wiring:
+the action to appear — no per-field wiring. Conversely, when the Instantiator
+finds nothing (and nothing was set explicitly), the action stays hidden. So the
+button's visibility follows availability: to hide it when, say, no AI is
+configured, simply don't register the bean — gate it with `@ConditionalOnProperty`
+as below, or opt a single field out with `setTranslator(null)`.
 
 ```java
 @Configuration

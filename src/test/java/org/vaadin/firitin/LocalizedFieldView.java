@@ -61,13 +61,11 @@ public class LocalizedFieldView extends VVerticalLayout {
         add(new HorizontalLayout(setDemo, clear));
         add(new Hr());
 
-        LocalizedTextField title = new LocalizedTextField(LOCALES);
-        title.setLabel("Title");
+        LocalizedTextField title = new LocalizedTextField("Title", LOCALES);
         title.setHelperText("Enter the title in each language. Each language has its own tab.");
         addSection("LocalizedTextField", title);
 
-        LocalizedTextArea description = new LocalizedTextArea(LOCALES);
-        description.setLabel("Description");
+        LocalizedTextArea description = new LocalizedTextArea("Description", LOCALES);
         description.setHelperText("Multi-line description per language.");
         // Verifies the field is sizable straight through its HasSize API: the
         // height propagates down to the editor inside the box.
@@ -75,8 +73,7 @@ public class LocalizedFieldView extends VVerticalLayout {
         description.setHeight("220px");
         addSection("LocalizedTextArea", description);
 
-        LocalizedTextField manyLanguages = new LocalizedTextField(MANY_LOCALES);
-        manyLanguages.setLabel("Slogan");
+        LocalizedTextField manyLanguages = new LocalizedTextField("Slogan", MANY_LOCALES);
         manyLanguages.setHelperText(MANY_LOCALES.size()
                 + " languages — translation explicitly turned off here (no magic icon).");
         manyLanguages.setWidth("480px");
@@ -84,8 +81,7 @@ public class LocalizedFieldView extends VVerticalLayout {
         manyLanguages.setTranslator(null);
         addSection("Many languages", manyLanguages);
 
-        LocalizedTextField lots = new LocalizedTextField(LOTS_OF_LOCALES);
-        lots.setLabel("Keyword");
+        LocalizedTextField lots = new LocalizedTextField("Keyword", LOTS_OF_LOCALES);
         lots.setHelperText(LOTS_OF_LOCALES.size()
                 + " languages — past the threshold, so a ComboBox picks the language.");
         lots.setWidth("480px");

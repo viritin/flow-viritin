@@ -10,6 +10,9 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextFieldBase;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.converter.Converter;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.Style;
 import org.vaadin.firitin.components.button.ActionButton;
@@ -24,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -466,7 +470,71 @@ public abstract class LocalizedField<F extends TextFieldBase<F, String>>
 
     @Override
     protected void setPresentationValue(Map<Locale, String> value) {
-        fields.forEach((locale, field) ->
-                field.setValue(value == null ? "" : value.getOrDefault(locale, "")));
+        fields.forEach((locale, field) -> field.setValue(presentationFor(value, locale)));
+    }
+
+    /**
+     * The text to show for a locale: an exact key match first, then any entry
+     * with the same language code. The language fallback means a value map keyed
+     * by, say, {@code en_US} still shows in an {@code en} tab, so locale country
+     * variants do not silently lose text.
+     */
+    private String presentationFor(Map<Locale, String> value, Locale locale) {
+        if (value == null) {
+            return "";
+        }
+        String exact = value.get(locale);
+        if (exact != null) {
+            return exact;
+        }
+        return value.entrySet().stream()
+                .filter(e -> e.getKey().getLanguage().equals(locale.getLanguage()))
+                .map(Map.Entry::getValue)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse("");
+    }
+
+    /**
+     * A {@link Binder} converter between this field's value
+     * ({@code Map<Locale, String>}) and a {@code Map<String, String>} keyed by
+     * language code (e.g. {@code "fi"}), for domain models that store
+     * translations by code — a common shape, e.g. a {@code jsonb} column.
+     * <p>
+     * Conversion is by language code only (country variants are ignored), and
+     * the presentation side is rebuilt with this field's own locales, so the
+     * round trip is stable regardless of how the codes relate to the field's
+     * locales. Bind with:
+     * <pre>
+     * binder.forField(field)
+     *       .withConverter(field.languageCodeMapConverter())
+     *       .bind(MyBean::getTexts, MyBean::setTexts); // Map&lt;String,String&gt;
+     * </pre>
+     * For a wrapper type (such as a {@code TranslatedText} backed by a
+     * {@code Map<String, String>}), chain a further converter or bind through
+     * its map accessor.
+     *
+     * @return a converter from the field value to a language-code-keyed map
+     */
+    public Converter<Map<Locale, String>, Map<String, String>> languageCodeMapConverter() {
+        return Converter.from(
+                localeMap -> Result.ok(toLanguageCodeMap(localeMap)),
+                this::fromLanguageCodeMap);
+    }
+
+    private Map<String, String> toLanguageCodeMap(Map<Locale, String> localeMap) {
+        Map<String, String> codeMap = new LinkedHashMap<>();
+        fields.keySet().forEach(locale ->
+                codeMap.put(locale.getLanguage(), presentationFor(localeMap, locale)));
+        return codeMap;
+    }
+
+    private Map<Locale, String> fromLanguageCodeMap(Map<String, String> codeMap) {
+        Map<Locale, String> localeMap = new LinkedHashMap<>();
+        fields.keySet().forEach(locale -> {
+            String text = codeMap == null ? null : codeMap.get(locale.getLanguage());
+            localeMap.put(locale, text == null ? "" : text);
+        });
+        return localeMap;
     }
 }
