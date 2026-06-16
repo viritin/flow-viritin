@@ -17,7 +17,7 @@
     <description>General purpose helpers for Vaadin users. Java only additions, that don't require custom client-bundle.</description>
 
     <properties>
-        <vaadin.version>25.2-SNAPSHOT</vaadin.version>
+        <vaadin.version>25.2.0-beta2</vaadin.version>
         <spring.boot.version>4.1.0</spring.boot.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
