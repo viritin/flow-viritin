@@ -2,13 +2,16 @@ package org.vaadin.firitin;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Route;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
+import org.vaadin.firitin.fields.localized.LocalizedField;
 import org.vaadin.firitin.fields.localized.LocalizedTextArea;
 import org.vaadin.firitin.fields.localized.LocalizedTextField;
-import org.vaadin.firitin.fields.localized.Translator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -17,44 +20,85 @@ import java.util.stream.Collectors;
 @Route
 public class LocalizedFieldView extends VVerticalLayout {
 
+    static final Locale FI = Locale.of("fi");
+    static final Locale SV = Locale.of("sv");
+
     static final List<Locale> LOCALES = List.of(
-            Locale.ENGLISH,
-            Locale.of("fi"),
-            Locale.of("sv"),
-            Locale.GERMAN);
+            Locale.ENGLISH, FI, SV, Locale.GERMAN);
 
-    public LocalizedFieldView(Translator translator) {
+    /** A dozen-plus languages to see how the tab bar copes with many tabs. */
+    static final List<Locale> MANY_LOCALES = List.of(
+            Locale.ENGLISH, FI, SV, Locale.GERMAN,
+            Locale.FRENCH, Locale.of("es"), Locale.ITALIAN, Locale.of("pt"),
+            Locale.of("nl"), Locale.of("da"), Locale.of("no"), Locale.of("pl"),
+            Locale.of("cs"), Locale.of("et"));
 
-        add(new H3("LocalizedTextField"));
+    /** Over two dozen languages — past the threshold, so a ComboBox is used. */
+    static final List<Locale> LOTS_OF_LOCALES = List.of(
+            Locale.ENGLISH, FI, SV, Locale.GERMAN,
+            Locale.FRENCH, Locale.of("es"), Locale.ITALIAN, Locale.of("pt"),
+            Locale.of("nl"), Locale.of("da"), Locale.of("no"), Locale.of("pl"),
+            Locale.of("cs"), Locale.of("et"), Locale.of("hu"), Locale.of("ro"),
+            Locale.of("el"), Locale.of("tr"), Locale.of("uk"), Locale.of("ru"),
+            Locale.JAPANESE, Locale.KOREAN, Locale.CHINESE, Locale.of("ar"));
+
+    private static final Map<Locale, String> DEMO_VALUES = Map.of(
+            Locale.ENGLISH, "Hello", FI, "Hei", SV, "Hej", Locale.GERMAN, "Hallo");
+
+    private final List<LocalizedField<?>> allFields = new ArrayList<>();
+
+    public LocalizedFieldView() {
+        // No translator is wired here on purpose: the fields discover the
+        // registered Translator bean via the Instantiator on their own (see
+        // TranslatorConfig), so the translate action just appears. One field
+        // below opts out explicitly with setTranslator(null).
+
+        // Toolbar at the top, separated by a line, acting on every field below.
+        Button setDemo = new Button("Set demo values",
+                e -> allFields.forEach(f -> f.setValue(DEMO_VALUES)));
+        Button clear = new Button("Clear",
+                e -> allFields.forEach(f -> f.setValue(Map.of())));
+        add(new HorizontalLayout(setDemo, clear));
+        add(new Hr());
 
         LocalizedTextField title = new LocalizedTextField(LOCALES);
         title.setLabel("Title");
         title.setHelperText("Enter the title in each language. Each language has its own tab.");
-        title.setTranslator(translator);
-        add(title);
-
-        Paragraph titleValue = new Paragraph();
-        add(titleValue);
-        title.addValueChangeListener(e -> titleValue.setText(format(e.getValue())));
-
-        add(new Button("Set demo values", e -> title.setValue(Map.of(
-                Locale.ENGLISH, "Hello",
-                Locale.of("fi"), "Hei",
-                Locale.of("sv"), "Hej",
-                Locale.GERMAN, "Hallo"))));
-        add(new Button("Clear", e -> title.clear()));
-
-        add(new H3("LocalizedTextArea"));
+        addSection("LocalizedTextField", title);
 
         LocalizedTextArea description = new LocalizedTextArea(LOCALES);
         description.setLabel("Description");
         description.setHelperText("Multi-line description per language.");
-        description.setTranslator(translator);
-        add(description);
+        // Verifies the field is sizable straight through its HasSize API: the
+        // height propagates down to the editor inside the box.
+        description.setWidth("480px");
+        description.setHeight("220px");
+        addSection("LocalizedTextArea", description);
 
-        Paragraph descriptionValue = new Paragraph();
-        add(descriptionValue);
-        description.addValueChangeListener(e -> descriptionValue.setText(format(e.getValue())));
+        LocalizedTextField manyLanguages = new LocalizedTextField(MANY_LOCALES);
+        manyLanguages.setLabel("Slogan");
+        manyLanguages.setHelperText(MANY_LOCALES.size()
+                + " languages — translation explicitly turned off here (no magic icon).");
+        manyLanguages.setWidth("480px");
+        // Explicitly override the auto-discovered translator: no action here.
+        manyLanguages.setTranslator(null);
+        addSection("Many languages", manyLanguages);
+
+        LocalizedTextField lots = new LocalizedTextField(LOTS_OF_LOCALES);
+        lots.setLabel("Keyword");
+        lots.setHelperText(LOTS_OF_LOCALES.size()
+                + " languages — past the threshold, so a ComboBox picks the language.");
+        lots.setWidth("480px");
+        addSection("Lots of languages (ComboBox mode)", lots);
+    }
+
+    private void addSection(String heading, LocalizedField<?> field) {
+        allFields.add(field);
+        add(new H3(heading));
+        add(field);
+        Paragraph value = new Paragraph();
+        add(value);
+        field.addValueChangeListener(e -> value.setText(format(e.getValue())));
     }
 
     private static String format(Map<Locale, String> value) {

@@ -11,12 +11,22 @@ import java.util.Locale;
  */
 public class LocalizedTextArea extends LocalizedField<TextArea> {
 
+    /** Creates a field for the given languages. */
     public LocalizedTextArea(Locale... locales) {
         this(List.of(locales));
     }
 
+    /** Creates a field for the given languages. */
     public LocalizedTextArea(List<Locale> locales) {
         super(locales);
+    }
+
+    /**
+     * Creates a field for the given languages, switching to a combo box selector
+     * when there are more than {@code comboBoxThreshold} of them.
+     */
+    public LocalizedTextArea(List<Locale> locales, int comboBoxThreshold) {
+        super(locales, comboBoxThreshold);
     }
 
     @Override

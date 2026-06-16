@@ -42,4 +42,7 @@ styling API and a grid-wide `CellFormatter`. See the dedicated
   accidental clicks.
 * **[PrintPdfButton](print-pdf-button.html)** -- Generate a PDF on the
   server and open the browser's native print dialog for it.
+* **[LocalizedField](localized-field.html)** -- Edit the language versions of a
+  text (`Map<Locale, String>`) with a tab bar or combo box, with optional
+  pluggable (e.g. AI) automatic translation.
 * **DisclosurePanel**, **Badge**, **VSvg**, and more.

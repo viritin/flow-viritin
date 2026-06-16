@@ -27,6 +27,7 @@
             <item name="Overview" href="components/index.html"/>
             <item name="VGrid" href="components/vgrid.html"/>
             <item name="PrintPdfButton" href="components/print-pdf-button.html"/>
+            <item name="LocalizedField" href="components/localized-field.html"/>
         </menu>
         <menu name="Browser APIs">
             <item name="Overview" href="browser-api/index.html"/>

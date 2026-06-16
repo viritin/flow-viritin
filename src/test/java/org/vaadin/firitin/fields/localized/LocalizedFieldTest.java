@@ -4,6 +4,7 @@ import com.vaadin.browserless.BrowserlessUIContext;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
@@ -14,16 +15,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Browserless tests for {@link LocalizedField} (via {@link LocalizedTextField}).
- * The component is a composition over a {@link com.vaadin.flow.component.tabs.TabSheet}
- * and per-language {@code TextField}s, so these tests focus on the component's
- * own behavior — value presentation/collection, tab switching and the
- * translate action — rather than the (theme-only) rendering, which is best
- * verified visually.
+ * The component is a composition over a language selector ({@code Tabs} or
+ * {@code ComboBox}) and per-language editors, so these tests focus on the
+ * component's own behavior — value presentation/collection, language switching,
+ * the selector mode and the translate action — rather than the (theme-only)
+ * rendering, which is best verified visually.
  * <p>
  * Uses the Playwright-like browserless locator API: a route-free single
  * component is attached with {@link BrowserlessUIContext#forComponent}, and the
- * inner fields/button are driven through {@code findTextField()},
- * {@code findTabSheet()} and {@code findButton()}.
+ * inner editors/selector/button are driven through {@code findTextField()},
+ * {@code findTabs()}, {@code findComboBox()} and {@code findButton()}. The open
+ * language is set explicitly where it matters, since by default it follows the
+ * user's locale.
  */
 class LocalizedFieldTest {
 
@@ -31,17 +34,21 @@ class LocalizedFieldTest {
     static final Locale FI = Locale.of("fi");
     static final Locale SV = Locale.of("sv");
 
+    /** Accessible name (= language name) of the currently shown editor. */
+    private static String shownLanguage(BrowserlessUIContext ui) {
+        return ui.findTextField().component().getAriaLabel().orElseThrow();
+    }
+
     @Test
-    void typingIntoTheVisibleTabCollectsTheValuePerLanguage() {
+    void typingIntoTheShownEditorCollectsTheValuePerLanguage() {
         LocalizedTextField field = new LocalizedTextField(EN, FI, SV);
         try (var ui = BrowserlessUIContext.forComponent(field)) {
+            field.setSelectedLocale(EN);
 
-            // The first (English) tab is selected, so its editor is the visible
-            // one. The editor's accessible name is the language name.
             ui.findTextField().withAriaLabel("English").setValue("Hello");
 
             assertEquals("Hello", field.getValue().get(EN));
-            // The other languages have been visited but not typed into.
+            // The other languages remain empty.
             assertEquals("", field.getValue().get(FI));
         }
     }
@@ -50,23 +57,50 @@ class LocalizedFieldTest {
     void setValuePresentsEachLanguageOnItsOwnTab() {
         LocalizedTextField field = new LocalizedTextField(EN, FI, SV);
         try (var ui = BrowserlessUIContext.forComponent(field)) {
-
             Map<Locale, String> value = new LinkedHashMap<>();
             value.put(EN, "Hi");
             value.put(FI, "Moi");
             value.put(SV, "Hej");
             field.setValue(value);
 
-            // English tab is showing.
-            assertEquals("Hi",
-                    ui.findTextField().withAriaLabel("English").component().getValue());
+            // Selecting a language tab shows that language's text.
+            ui.findTabs().select(0);
+            assertEquals("Hi", ui.findTextField().component().getValue());
 
-            // Switch to the Finnish tab (index 1; the tab label carries a flag
-            // emoji prefix, so select by index); its editor now shows the
-            // Finnish text.
-            ui.findTabSheet().select(1);
-            assertEquals("Moi",
-                    ui.findTextField().withAriaLabel("Suomi").component().getValue());
+            ui.findTabs().select(1);
+            assertEquals("Moi", ui.findTextField().component().getValue());
+        }
+    }
+
+    @Test
+    void languagesAreOrderedAlphabeticallyRegardlessOfInputOrder() {
+        // Given in a deliberately unsorted order; expected order by display
+        // name is English < Suomi < Svenska.
+        LocalizedTextField field = new LocalizedTextField(SV, EN, FI);
+        try (var ui = BrowserlessUIContext.forComponent(field)) {
+            ui.findTabs().select(0);
+            assertEquals("English", shownLanguage(ui));
+            ui.findTabs().select(1);
+            assertEquals("Suomi", shownLanguage(ui));
+            ui.findTabs().select(2);
+            assertEquals("Svenska", shownLanguage(ui));
+        }
+    }
+
+    @Test
+    void usesAComboBoxSelectorBeyondTheThreshold() {
+        // Three languages with a threshold of two -> combo box mode.
+        LocalizedTextField field = new LocalizedTextField(List.of(SV, EN, FI), 2);
+        try (var ui = BrowserlessUIContext.forComponent(field)) {
+            assertFalse(ui.findTabs().exists(),
+                    "Should not use a tab bar beyond the threshold");
+            assertTrue(ui.findComboBox(Locale.class).exists(),
+                    "Should use a combo box beyond the threshold");
+
+            // The selection API chooses which language's editor is shown.
+            field.setSelectedLocale(FI);
+            assertEquals(FI, field.getSelectedLocale());
+            assertEquals("Suomi", shownLanguage(ui));
         }
     }
 
@@ -91,6 +125,7 @@ class LocalizedFieldTest {
         LocalizedTextField field = new LocalizedTextField(EN, FI, SV);
         field.setTranslator(translator);
         try (var ui = BrowserlessUIContext.forComponent(field)) {
+            field.setSelectedLocale(EN);
             ui.findTextField().withAriaLabel("English").setValue("Hello");
 
             ui.findButton().withAriaLabelContaining("Translate to other languages").click();
