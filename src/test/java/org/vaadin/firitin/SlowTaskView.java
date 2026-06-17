@@ -2,9 +2,11 @@ package org.vaadin.firitin;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -152,6 +154,53 @@ public class SlowTaskView extends VerticalLayout {
         });
 
         add(checkTaskButton);
+
+        add(new H2("Icon buttons (busy indicator)"));
+        add(new Paragraph("Icon-only buttons replace the icon with a spinner while busy "
+                + "(a greyed-out static icon is poor feedback). Buttons with text — where "
+                + "there is room — use the built-in (indeterminate) progress bar instead. "
+                + "If the action is trackable / has an estimate, the progress bar takes over "
+                + "even for an icon-only button so progress is shown."));
+
+        // Icon-only: the spinner kicks in automatically (icon, no text).
+        ActionButton<String> iconOnly = new ActionButton<>();
+        iconOnly.setIcon(VaadinIcon.REFRESH.create());
+        iconOnly.setAriaLabel("Refresh");
+        iconOnly.setTooltipText("Icon-only: spinner while busy");
+        iconOnly.setAction(basicSlowAction);
+        iconOnly.setPostUiAction(s -> VNotification.prominent("Refreshed: " + s));
+
+        // Icon + text: there is room, so the (indeterminate) progress bar is used
+        // automatically — the icon and text stay put.
+        ActionButton<String> iconWithText = new ActionButton<>("Reload");
+        iconWithText.setIcon(VaadinIcon.REFRESH.create());
+        iconWithText.setAction(basicSlowAction);
+        iconWithText.setPostUiAction(s -> VNotification.prominent("Reloaded: " + s));
+
+        // Icon-only but trackable: enabling the progress bar makes it the
+        // indicator (determinate progress) instead of the spinner.
+        ActionButton<String> trackableIcon = new ActionButton<>();
+        trackableIcon.setIcon(VaadinIcon.DOWNLOAD.create());
+        trackableIcon.setAriaLabel("Download");
+        trackableIcon.setTooltipText("Icon-only but trackable: shows a progress bar");
+        trackableIcon.setShowProgressBar(true);
+        trackableIcon.setAction(() -> slowGetStringWithNotifier(
+                progress -> trackableIcon.updateProgressAsync(progress, 0, 1)));
+        trackableIcon.setPostUiAction(s -> VNotification.prominent("Downloaded: " + s));
+
+        add(new HorizontalFloatLayout(iconOnly, iconWithText, trackableIcon));
+
+        // Bare icon-only "magic" button (no border/background), like the
+        // translate action in LocalizedField.
+        ActionButton<String> magic = new ActionButton<>();
+        magic.setIcon(VaadinIcon.MAGIC.create());
+        magic.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE,
+                ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_SMALL);
+        magic.setAriaLabel("Do magic");
+        magic.setTooltipText("Bare icon-only button (no border)");
+        magic.setAction(basicSlowAction);
+        magic.setPostUiAction(s -> VNotification.prominent("Magic: " + s));
+        add(magic);
 
         add(new H2("Lower level UIFuture usage"));
 

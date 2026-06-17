@@ -119,9 +119,9 @@ public interface Translator {
 When a translator is available, a small **"magic" icon** appears in the
 bottom-right corner of the field. Clicking it translates the open language into
 all the others. The work runs **off the UI thread** (translators may call a slow
-network/LLM API) on an `ActionButton`, which **disables itself while running**,
-so impatient users cannot stack up several calls. Server push or polling is
-handled automatically.
+network/LLM API) on an `ActionButton`. While it runs, the icon turns into a
+**spinner** and further clicks are blocked, so impatient users cannot stack up
+several calls. Server push or polling is handled automatically.
 
 #### Providing a translator with the Instantiator (Spring)
 

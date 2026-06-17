@@ -1,0 +1,35 @@
+/*
+ * Styling for ActionButton's busy spinner (used mainly for icon-only buttons,
+ * where greying the icon out is poor feedback). Loaded via a @StyleSheet
+ * annotation on the component.
+ */
+
+/* The default busy indicator is a spinner icon shown in place of the button's
+ * icon. Being a vaadin-icon, the theme sizes it exactly like the icon it
+ * replaces; here we just spin it. The button is disabled while busy, which would
+ * fade the icon to the disabled color; keep the spinner in the theme's accent
+ * color so it stays a clear "working" indicator. Vaadin 25 has no single
+ * cross-theme accent token populated in both themes, so resolve the accent the
+ * same way as elsewhere: Aura's accent token, falling back to Lumo's primary. */
+.action-button-spinner {
+    box-sizing: border-box;
+    /* A thicker ring than the SPINNER_THIRD glyph; one transparent side leaves
+     * the "almost circle" gap. Thickness is in em so it scales with the icon. */
+    border: 0.2em solid var(--aura-accent-color, var(--lumo-primary-color, currentColor));
+    border-inline-end-color: transparent;
+    border-radius: 50%;
+    animation: action-button-spin 1.2s linear infinite;
+}
+
+/* The ring fills the whole icon box, but glyph icons leave some internal
+ * margin; scale the ring down a touch so it reads about the same size as a
+ * normal icon. The scale is baked into the keyframes because the rotate
+ * transform would otherwise replace it. */
+@keyframes action-button-spin {
+    from {
+        transform: rotate(0deg) scale(0.8);
+    }
+    to {
+        transform: rotate(360deg) scale(0.8);
+    }
+}
