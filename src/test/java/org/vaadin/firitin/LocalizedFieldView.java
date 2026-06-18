@@ -61,8 +61,16 @@ public class LocalizedFieldView extends VVerticalLayout {
         add(new HorizontalLayout(setDemo, clear));
         add(new Hr());
 
+        // A plain text field as a reference, to compare how the box matches the
+        // theme's own field styling (Lumo: fill, no border; Aura: border + white).
+        com.vaadin.flow.component.textfield.TextField plainRef =
+                new com.vaadin.flow.component.textfield.TextField("Plain TextField (reference)");
+        plainRef.setWidth("480px");
+        add(plainRef);
+
         LocalizedTextField title = new LocalizedTextField("Title", LOCALES);
         title.setHelperText("Enter the title in each language. Each language has its own tab.");
+        title.setWidth("480px");
         addSection("LocalizedTextField", title);
 
         LocalizedTextArea description = new LocalizedTextArea("Description", LOCALES);

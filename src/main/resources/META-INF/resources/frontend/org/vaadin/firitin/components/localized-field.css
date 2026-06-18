@@ -16,7 +16,15 @@
 .localized-field {
     --_lf-accent: var(--aura-accent-color, var(--lumo-primary-color));
     --_lf-accent-text: var(--aura-accent-text-color, var(--lumo-primary-text-color));
-    --_lf-surface: var(--aura-surface-color-solid, var(--lumo-base-color));
+    /* The box is styled like a plain text field of the active theme: in Aura a
+     * white surface with a border, in Lumo a subtle background fill with no
+     * border (matching how each theme distinguishes input fields). */
+    --_lf-surface: var(--aura-surface-color-solid, var(--lumo-contrast-10pct));
+    /* The selector header sits on the solid base color (white), so in Lumo the
+     * tab/combo strip is not tinted by the field fill — only the editor below
+     * the divider carries it. In Aura this equals the surface, so the box stays
+     * uniformly white. */
+    --_lf-header: var(--aura-surface-color-solid, var(--lumo-base-color));
 }
 
 /* The custom field's input wrapper does not grow by default, so a height set on
@@ -26,16 +34,20 @@
     flex: 1;
 }
 
-/* The bordered box: a single frame around the selector header and the editor. */
+/* The box looks like a text field of the active theme (see --_lf-surface). The
+ * border is present only in Aura (its fields have one); in Lumo the fill alone
+ * marks the field, so the border collapses to 0 there. The theme is detected
+ * via the --vaadin-aura-theme marker (1 in Aura, unset elsewhere). */
 .localized-field-box {
     position: relative;
     height: 100%;
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--vaadin-border-color);
+    border: solid var(--vaadin-border-color);
+    border-width: calc(var(--vaadin-aura-theme, 0) * 1px);
     border-radius: var(--vaadin-radius-m);
     background: var(--_lf-surface);
-    /* Clip the header background and divider to the rounded corners. */
+    /* Clip the divider to the rounded corners. */
     overflow: hidden;
 }
 
@@ -48,7 +60,8 @@
 .localized-field-box > vaadin-tabs {
     flex: 0 0 auto;
     width: 100%;
-    --vaadin-tabs-background: var(--vaadin-background-container);
+    background: var(--_lf-header);
+    --vaadin-tabs-background: transparent;
     --vaadin-tabs-border-radius: 0;
     --vaadin-tabs-padding: 0;
     --vaadin-tabs-gap: 0;
@@ -75,7 +88,7 @@
     flex: 0 0 auto;
     width: 100%;
     box-sizing: border-box;
-    background: var(--vaadin-background-container);
+    background: var(--_lf-header);
     border-bottom: 1px solid var(--vaadin-border-color);
     padding: 0;
 }
