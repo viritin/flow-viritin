@@ -41,52 +41,30 @@
 
 /* ---------- Tabs selector (few languages) ---------- */
 
-/* The tab bar is a slightly shaded header with a straight divider under it. */
+/* A compact underline-style tab strip used as a slightly shaded header. The
+ * Vaadin 25 tab style properties flatten the default chrome (no panel
+ * background, radius, padding or per-tab borders), so no ::part overrides are
+ * needed; the divider under the strip is an inset box-shadow. */
 .localized-field-box > vaadin-tabs {
     flex: 0 0 auto;
     width: 100%;
-    box-sizing: border-box;
-    background: var(--vaadin-background-container);
-    border-bottom: 1px solid var(--vaadin-border-color);
+    --vaadin-tabs-background: var(--vaadin-background-container);
+    --vaadin-tabs-border-radius: 0;
     --vaadin-tabs-padding: 0;
     --vaadin-tabs-gap: 0;
-    /* Undo Aura's tab strip chrome so the tabs sit flush in our shaded header:
-     * drop the surface panel it paints, its rounded corners and paint clipping
-     * (which would clip the first/last underline at the corners). */
-    --aura-surface-opacity: 0;
-    border-radius: 0;
-    contain: none;
+    --vaadin-tab-border-radius: 0;
+    --vaadin-tab-border-width: 0;
+    --vaadin-tab-padding: var(--vaadin-padding-s);
+    box-shadow: inset 0 -1px 0 0 var(--vaadin-border-color);
 }
 
-/* Aura insets ::part(tabs) and adds an edge-fade mask; reset both so the tabs
- * align with the box edges and nothing is faded out. */
-.localized-field-box vaadin-tabs::part(tabs) {
-    margin: 0;
-    padding: 0;
-    mask-image: none;
-}
-
-/* Tabs as plain labels with room for an underline, not buttons. */
-.localized-field-box vaadin-tab {
-    border-bottom: 2px solid transparent;
-    border-radius: 0;
-    background: none;
-    box-shadow: none;
-}
-
-/* Active tab: just an underline in the accent color. */
+/* Active tab: an underline in the accent color, drawn with an inset box-shadow
+ * so it does not fight the theme's own selection bar or tab borders. */
 .localized-field-box vaadin-tab[selected] {
+    --vaadin-tab-background: transparent;
     --vaadin-tab-text-color: var(--_lf-accent-text);
     color: var(--_lf-accent-text);
-    background: none;
-    box-shadow: none;
-    border-bottom-color: var(--_lf-accent);
-}
-
-/* Lumo draws its own selection bar with a ::before pseudo; hide it so only our
- * underline shows (Aura has no such pseudo, so this is a no-op there). */
-.localized-field-box vaadin-tab[selected]::before {
-    display: none;
+    box-shadow: inset 0 -2px 0 0 var(--_lf-accent);
 }
 
 /* ---------- ComboBox selector (many languages) ---------- */
@@ -142,7 +120,10 @@
  * three sides, so the two join into one closed frame with no gap between the
  * active-tab underline and the focus ring. */
 .localized-field-box:has(.localized-field-content vaadin-text-field[focused],
-        .localized-field-content vaadin-text-area[focused]) > vaadin-tabs,
+        .localized-field-content vaadin-text-area[focused]) > vaadin-tabs {
+    box-shadow: inset 0 -1px 0 0 var(--_lf-accent);
+}
+
 .localized-field-box:has(.localized-field-content vaadin-text-field[focused],
         .localized-field-content vaadin-text-area[focused]) > vaadin-combo-box {
     border-bottom-color: var(--_lf-accent);
