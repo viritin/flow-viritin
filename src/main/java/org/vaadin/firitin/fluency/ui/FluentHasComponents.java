@@ -1,8 +1,8 @@
 package org.vaadin.firitin.fluency.ui;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
-import org.vaadin.firitin.util.ComponentTree;
 
 import java.util.stream.Stream;
 
@@ -25,19 +25,21 @@ public interface FluentHasComponents<S extends FluentHasComponents<S>> extends H
     }
 
     /**
-     * @return children via backing "StateNode" structure, so that all components are listed,
-     * regardless of the component implementation.
+     * @return all child components, including ones nested in wrappers that don't
+     * implement {@link HasComponents} and virtual children (slotted components,
+     * overlays). Backed by {@link ComponentUtil#getAllChildren(Component)}.
      */
     default Stream<Component> children() {
-        return ComponentTree.children((Component) this);
+        return ComponentUtil.getAllChildren((Component) this);
     }
 
     /**
-     * @return All descendants (via backing StateNode structure, so that all components are truly listed) in
-     * pre-order.
+     * @return all descendant components (not including this one) in pre-order,
+     * including virtual children. Backed by
+     * {@link ComponentUtil#streamDescendants(Component)}.
      */
     default Stream<Component> descendants() {
-        return ComponentTree.descendants((Component) this);
+        return ComponentUtil.streamDescendants((Component) this);
     }
 
 }

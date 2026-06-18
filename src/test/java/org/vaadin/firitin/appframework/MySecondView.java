@@ -1,6 +1,7 @@
 package org.vaadin.firitin.appframework;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasText;
@@ -8,11 +9,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Paragraph;
-
 import com.vaadin.flow.component.notification.Notification;
 import org.vaadin.firitin.components.Tree;
-import org.vaadin.firitin.fluency.ui.FluentHasComponents;
-import org.vaadin.firitin.util.ComponentTree;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +31,14 @@ public class MySecondView extends MyAbstractView {
             new ComponentTreeWithHasComponents(UI.getCurrent());
         }));
 
-        add(new Button("Component tree with Element API", e-> {
-            new ComponentTreeWithStateNode(UI.getCurrent());
+        add(new Button("Component tree with new helper", e-> {
+            new ComponentTreeWithNewHelper(UI.getCurrent());
         }));
+
+        add(new Button("Component tree with ComponentUtil", e-> {
+            new ComponentTreeWithComponentUtil(UI.getCurrent());
+        }));
+
         add(new Button("Direct children of this via VHasComponent.children", e-> {
             String children = children().map(component -> component.getClass().getSimpleName()).collect(Collectors.joining(","));
             Notification.show("Direct children: " + children);
@@ -53,15 +56,23 @@ public class MySecondView extends MyAbstractView {
         }
     }
 
-    public class ComponentTreeWithStateNode extends Dialog {
-        public ComponentTreeWithStateNode(UI ui) {
+    public class ComponentTreeWithNewHelper extends Dialog {
+        public ComponentTreeWithNewHelper(UI ui) {
             super();
             setHeaderTitle("Component Tree (with Element API):");
-            add(componentTree(ui, c -> ComponentTree.children(c).toList()));
+            add(componentTree(ui, c -> ComponentUtil.getAllChildren(c).toList()));
             open();
         }
     }
 
+    public class ComponentTreeWithComponentUtil extends Dialog {
+        public ComponentTreeWithComponentUtil(Component ui) {
+            super();
+            setHeaderTitle("Component Tree (with Element API):");
+            add(componentTree(ui, c -> ComponentUtil.getChildren(c).toList()));
+            open();
+        }
+    }
 
     private static Tree<Component> componentTree(Component root,
             Tree.ChildrenProvider<Component> childrenProvider) {
