@@ -60,7 +60,7 @@ import java.util.Optional;
  *
  * @param <F> the type of text editor used for each language
  */
-@StyleSheet("context://frontend/org/vaadin/firitin/components/localized-field.css")
+@StyleSheet("context://assets/org/vaadin/firitin/components/localized-field.css")
 public abstract class LocalizedField<F extends TextFieldBase<F, String>>
         extends VCustomField<Map<Locale, String>> {
 

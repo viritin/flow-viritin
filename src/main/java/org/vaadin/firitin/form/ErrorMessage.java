@@ -4,7 +4,7 @@ import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
-@StyleSheet("context://frontend/org/vaadin/firitin/components/formbinder.css")
+@StyleSheet("context://assets/org/vaadin/firitin/components/formbinder.css")
 class ErrorMessage extends Paragraph {
     public ErrorMessage(String message) {
         super(message);

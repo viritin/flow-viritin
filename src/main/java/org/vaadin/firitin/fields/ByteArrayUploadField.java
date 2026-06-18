@@ -39,7 +39,7 @@ import java.text.DecimalFormat;
  *
  * @author mstahv
  */
-@StyleSheet("context://frontend/org/vaadin/firitin/bytearrayuploadfield.css")
+@StyleSheet("context://assets/org/vaadin/firitin/bytearrayuploadfield.css")
 public class ByteArrayUploadField extends Composite<Div>
 		implements HasValue<ComponentValueChangeEvent<ByteArrayUploadField, byte[]>, byte[]> {
 	private static final long serialVersionUID = -188233227963143771L;

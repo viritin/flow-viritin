@@ -35,7 +35,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author mstahv
  */
-@StyleSheet("context://frontend/org/vaadin/firitin/components/tree-item.css")
+@StyleSheet("context://assets/org/vaadin/firitin/components/tree-item.css")
 public class TreeItem extends Component implements ClickNotifier<TreeItem> {
 
     private static final long serialVersionUID = -5047062207386723618L;

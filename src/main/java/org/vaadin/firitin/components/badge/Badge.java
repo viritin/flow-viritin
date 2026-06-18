@@ -22,7 +22,7 @@ import java.util.Optional;
  */
 @Deprecated
 @Tag("viritin-badge")
-@StyleSheet("context://frontend/org/vaadin/firitin/components/badge.css")
+@StyleSheet("context://assets/org/vaadin/firitin/components/badge.css")
 public class Badge extends Span {
 
     public Badge withTheme(Theme... themes) {

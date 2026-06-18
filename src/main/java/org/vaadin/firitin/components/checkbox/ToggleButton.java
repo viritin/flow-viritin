@@ -10,7 +10,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
  * A toggle button that is essentially a styled checkbox. CSS derived from similarly named Vaadin
  * add-on to be compatible with the latest Vaadin 24.7.
  */
-@StyleSheet("context://frontend/org/vaadin/firitin/components/toggle-button.css")
+@StyleSheet("context://assets/org/vaadin/firitin/components/toggle-button.css")
 public class ToggleButton extends VCheckBox {
 
     public static Class<?> baseTheme = Lumo.class;

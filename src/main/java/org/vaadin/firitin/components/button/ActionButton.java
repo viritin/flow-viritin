@@ -47,7 +47,7 @@ import java.util.function.Supplier;
  *
  * @param <T> the type of the result of the slow task
  */
-@StyleSheet("context://frontend/org/vaadin/firitin/components/action-button.css")
+@StyleSheet("context://assets/org/vaadin/firitin/components/action-button.css")
 public class ActionButton<T> extends Composite<Div> {
 
     private Integer estimatedDuration;

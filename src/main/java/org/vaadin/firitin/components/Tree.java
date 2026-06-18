@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
  * else.
  * @author mstahv
  */
-@StyleSheet("context://frontend/org/vaadin/firitin/components/tree.css")
+@StyleSheet("context://assets/org/vaadin/firitin/components/tree.css")
 public class Tree<T> extends Composite<VerticalLayout> {
 
     private static final long serialVersionUID = -927074586817131378L;
