@@ -107,9 +107,15 @@ public abstract class LocalizedField<F extends TextFieldBase<F, String>>
         ordered.sort(Comparator.comparing(this::languageName, Collator.getInstance()));
         ordered.forEach(locale -> {
             F field = createField(locale);
+            // A stable hook for tests (TestBench/Playwright): the inner editor is
+            // otherwise buried in the custom-field/tabs structure, so expose a
+            // predictable class to select it without knowing that structure.
+            field.addClassName("localized-field-input");
             // The selector provides the language visually; give screen reader
-            // users the same context by naming the editor after its language.
-            field.setAriaLabel(languageName(locale));
+            // users (and label-based test selectors like getByLabel) the same
+            // context by naming the editor after the field label and its
+            // language. Refreshed by setLabel as the label changes.
+            field.setAriaLabel(editorAriaLabel(getLabel(), locale));
             field.setValueChangeMode(ValueChangeMode.LAZY);
             field.addValueChangeListener(e -> updateValue());
             field.setWidthFull();
@@ -131,6 +137,31 @@ public abstract class LocalizedField<F extends TextFieldBase<F, String>>
         if (!ordered.isEmpty()) {
             showLocale(ordered.get(0), false);
         }
+    }
+
+    /**
+     * Sets the field label and propagates it to each language editor's
+     * accessible name (as {@code "Label (Language)"}), so screen readers and
+     * label-based test selectors (e.g. {@code getByLabel}) can reach the inner
+     * editor even though the visible label sits on the wrapping custom field.
+     */
+    @Override
+    public void setLabel(String label) {
+        super.setLabel(label);
+        fields.forEach((locale, field) ->
+                field.setAriaLabel(editorAriaLabel(label, locale)));
+    }
+
+    /**
+     * The accessible name for a language's editor: the field label qualified by
+     * the language (e.g. {@code "Description (Suomi)"}), or just the language
+     * name when the field has no label.
+     */
+    private String editorAriaLabel(String label, Locale locale) {
+        String language = languageName(locale);
+        return (label == null || label.isBlank())
+                ? language
+                : label + " (" + language + ")";
     }
 
     private Component buildTabsSelector(List<Locale> ordered) {

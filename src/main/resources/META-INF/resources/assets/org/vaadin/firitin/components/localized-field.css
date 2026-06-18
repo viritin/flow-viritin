@@ -16,15 +16,34 @@
 .localized-field {
     --_lf-accent: var(--aura-accent-color, var(--lumo-primary-color));
     --_lf-accent-text: var(--aura-accent-text-color, var(--lumo-primary-text-color));
-    /* The box is styled like a plain text field of the active theme: in Aura a
-     * white surface with a border, in Lumo a subtle background fill with no
-     * border (matching how each theme distinguishes input fields). */
-    --_lf-surface: var(--aura-surface-color-solid, var(--lumo-contrast-10pct));
-    /* The selector header sits on the solid base color (white), so in Lumo the
-     * tab/combo strip is not tinted by the field fill — only the editor below
-     * the divider carries it. In Aura this equals the surface, so the box stays
-     * uniformly white. */
-    --_lf-header: var(--aura-surface-color-solid, var(--lumo-base-color));
+    /* Lumo styles input fields as a subtle background fill with no border. The
+     * box uses that fill, while the selector header sits on the solid base color
+     * so the tab/combo strip is not tinted by the fill — only the editor below
+     * the divider carries it. The Aura overrides for these are below. */
+    --_lf-surface: var(--lumo-contrast-10pct);
+    --_lf-header: var(--lumo-base-color);
+}
+
+/* Aura paints input fields as a translucent "glass" surface over a border, NOT
+ * as the tinted solid surface token (--aura-surface-color-solid is slightly
+ * grey/blue and stays light in dark mode). To read identically to a plain Aura
+ * text field, mirror the field's own background exactly: a near-white in light
+ * mode and a dark translucent in dark mode. These two values are the field's
+ * actual computed [part=input-field] background in each mode; Aura derives them
+ * internally with no public token to reuse, so they are reproduced here, and
+ * light-dark() switches between them off the inherited color-scheme just as the
+ * field does. The header is transparent so the single translucent surface shows
+ * uniformly through the tab strip — stacking two translucent layers there would
+ * make the header lighter/darker than the editor.
+ *
+ * Gated on Aura's theme marker (--vaadin-aura-theme: 1, inherited from :root)
+ * via a style container query, since Aura is applied through an imported bundle
+ * with no theme attribute/class on the document to hook a selector onto. */
+@container style(--vaadin-aura-theme: 1) {
+    .localized-field {
+        --_lf-surface: light-dark(oklab(1 0 0 / 0.7), oklab(0.32 -0.0021 -0.0118 / 0.7));
+        --_lf-header: transparent;
+    }
 }
 
 /* The custom field's input wrapper does not grow by default, so a height set on

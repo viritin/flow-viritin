@@ -88,15 +88,16 @@ class LocalizedFieldTest {
     @Test
     void languagesAreOrderedAlphabeticallyRegardlessOfInputOrder() {
         // The view gives the languages as SV, EN, FI; expected display order is
-        // English < Suomi < Svenska.
+        // English < Suomi < Svenska. The editor's accessible name combines the
+        // field label ("Texts") with the language, so it reads "Texts (Language)".
         inView((ui, view) -> {
             Tabs tabs = ui.find(Tabs.class).from(view.text).first();
             ui.test(TabsTester.class, tabs).select(0);
-            assertEquals("English", shownLanguage(ui, view.text));
+            assertEquals("Texts (English)", shownLanguage(ui, view.text));
             ui.test(TabsTester.class, tabs).select(1);
-            assertEquals("Suomi", shownLanguage(ui, view.text));
+            assertEquals("Texts (Suomi)", shownLanguage(ui, view.text));
             ui.test(TabsTester.class, tabs).select(2);
-            assertEquals("Svenska", shownLanguage(ui, view.text));
+            assertEquals("Texts (Svenska)", shownLanguage(ui, view.text));
         });
     }
 

@@ -15,6 +15,7 @@ import org.springframework.context.event.EventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 public class Uihacker {
@@ -68,47 +69,86 @@ public class Uihacker {
             uiEvt.getUI().addAfterNavigationListener(event -> {
                 Class<? extends Component> aClass = uiEvt.getUI().getCurrentView().getClass();
                 TestTheme testTheme = aClass.getAnnotation(TestTheme.class);
+                boolean dark;
                 if (testTheme != null) {
                     Class explicitTheme = testTheme.value();
                     setSessionTheme(session, explicitTheme);
                     adjustUITheme(uiEvt.getUI(), explicitTheme);
+                    dark = false;
                 } else {
-                    Class<?> qpTheme = readThemeFromQP(session, realQueryParameters);
+                    Map<String, String> qp = parseQuery(realQueryParameters);
+                    Class<?> qpTheme = readThemeFromQP(session, qp.get("theme"));
                     adjustUITheme(uiEvt.getUI(), qpTheme);
+                    dark = isDark(qp.get("dark"));
                 }
+                adjustColorMode(uiEvt.getUI(), dark);
             });
 
         });
     }
 
-    private Class<?> readThemeFromQP(VaadinSession session, String realQueryParameters) {
-        // Note, as there is the "react router" and it "two-request init", this does not work!
-            /*
-            String parameter = request.getParameter("theme");
-             */
-
-        String parameter = "";
-        String[] split = realQueryParameters == null ? new String[0] : realQueryParameters.split("=");
-        for (int i = 0; i < split.length; i++) {
-            if (split[i].equals("theme")) {
-                parameter = split[i + 1];
-                break;
-            }
-        }
-
+    private Class<?> readThemeFromQP(VaadinSession session, String parameter) {
+        // Note, as there is the "react router" and its "two-request init", reading
+        // request.getParameter("theme") directly does not work; the original query
+        // string is forwarded as the "query" parameter and parsed in parseQuery.
         Class<?> theme = null;
 
         if ("lumo".equals(parameter)) {
             theme = Lumo.class;
         } else if ("aura".equals(parameter)) {
             theme = Aura.class;
-        } else if (!parameter.isEmpty()) {
+        } else if (parameter != null && !parameter.isEmpty()) {
             // anything that don't matched -> base
             theme = Void.class;
         }
 
         session.setAttribute("theme", theme);
         return theme;
+    }
+
+    /** Parses a raw query string (e.g. {@code theme=aura&dark}) into a map. */
+    private static Map<String, String> parseQuery(String query) {
+        Map<String, String> params = new java.util.HashMap<>();
+        if (query == null || query.isEmpty()) {
+            return params;
+        }
+        for (String pair : query.split("&")) {
+            int eq = pair.indexOf('=');
+            if (eq < 0) {
+                params.put(pair, "");
+            } else {
+                params.put(pair.substring(0, eq), pair.substring(eq + 1));
+            }
+        }
+        return params;
+    }
+
+    /**
+     * Whether the {@code dark} query parameter requests dark mode. A bare
+     * {@code ?dark}, {@code dark=true} or {@code dark=1} all enable it; absence
+     * or {@code dark=false}/{@code 0} keep light mode.
+     */
+    private static boolean isDark(String value) {
+        return value != null
+                && (value.isEmpty() || value.equalsIgnoreCase("true") || value.equals("1"));
+    }
+
+    /**
+     * Toggles dark mode on the document. Lumo's dark variant is driven by the
+     * {@code theme="dark"} attribute on the root element, while Aura's tokens use
+     * {@code light-dark()} and follow the CSS {@code color-scheme}. Setting both
+     * covers either theme; clearing both returns to light mode.
+     */
+    static void adjustColorMode(UI ui, boolean dark) {
+        if (dark) {
+            ui.getPage().executeJs(
+                    "document.documentElement.setAttribute('theme','dark');"
+                            + "document.documentElement.style.colorScheme='dark';");
+        } else {
+            ui.getPage().executeJs(
+                    "document.documentElement.removeAttribute('theme');"
+                            + "document.documentElement.style.colorScheme='';");
+        }
     }
 
     private void setSessionTheme(VaadinSession session, Class explicitTheme) {
