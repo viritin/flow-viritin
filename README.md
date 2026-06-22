@@ -6,6 +6,7 @@
 A similar helper library as "old Viritin" was for Vaadin 8 and earlier. See [the Directory page](https://vaadin.com/directory/component/flow-viritin) for more details. Tries to add missing features, fix some issues in the core components and to work as an agile arena to test new potential features for Vaadin.
 
 *Version matrix:*
+ * 3.6.0+ compatible with 25.2+
  * 3.2.0+ entry level Aura theme support (ToggleButton, CSS property enums for Aura and base Vaadin theme)
  * 3.0.0+ built against 25.0+
  * 2.16.0+ built against 24.8+ and at least some features are incompatible with older versions.
@@ -36,16 +37,16 @@ e.g. in field declaration or without declaring an extra variable. When used in a
 
 ### Access to browser API & others
 
- * Geolocation API using a pure Java API
  * BrowserCookie helper that works well with web sockets too
  * LumoProps, Java enumeration for easier discoverability (& redefining/using) of the handy Lumo theme css properties.
  * ~WebStorage helper to save data in the browsers localStorage or sessionStorage~ (available for backwards compatibility, but the same implementation found in core as well these days)
  * Like with [JS developer can with the ResizeObserver](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver), with Viritin one can observe the component sizes and hook Java logic to changes. If you are using Viritin components or implementing `FluentHasSize` on your component, you can [hook listener directly to the component](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/resizeobserver/ResizeObserverCoreApiDrafting.java#L32-L38). Otherwise, you can use the [ResizeObserver utility](https://github.com/viritin/flow-viritin/blob/v24/src/test/java/org/vaadin/firitin/resizeobserver/ResizeObserverView.java).
- * Share API aka navigator.share()
- * VStyle, an extension to the Style object from core with support for typed colors. Allows also to assign styles to different elements (not necessarily bound to an element/component), with Element reference, css selector or by injecting as CSS to the document head (with given selectors).
- * PageVisibility API to detect when the page is visible or hidden. Also detects if focus is lost from the web page as related detail. Useful for e.g. pausing animations, refreshing data when the user returns to the page or changing notification settigns based on presence.
- * Web Notification API to show notifications to the user. Uses the browser's native notification system, so the user can see the notifications even if the web page is behind another tab or application.
- * Fullscreen API to make the web page or a specific component fullscreen. Also detects when the user exits fullscreen mode.
+* VStyle, an extension to the Style object from core with support for typed colors. Allows also to assign styles to different elements (not necessarily bound to an element/component), with Element reference, css selector or by injecting as CSS to the document head (with given selectors).
+* Web Notification API to show notifications to the user. Uses the browser's native notification system, so the user can see the notifications even if the web page is behind another tab or application.
+* Geolocation API using a pure Java API _(obsoleted in Vaadin 25.2+ / Viritin 3.6+, use the native `com.vaadin.flow.component.geolocation.Geolocation` instead)_
+ * Share API aka navigator.share() _(obsoleted in Vaadin 25.2+ / Viritin 3.6+, use the native `com.vaadin.flow.component.webshare.WebShare` instead)_
+ * PageVisibility API to detect when the page is visible or hidden. Also detects if focus is lost from the web page as related detail. Useful for e.g. pausing animations, refreshing data when the user returns to the page or changing notification settigns based on presence. _(obsoleted in Vaadin 25.2+ / Viritin 3.6+, use the native `Page#pageVisibilitySignal()` instead)_
+ * Fullscreen API to make the web page or a specific component fullscreen. Also detects when the user exits fullscreen mode. _(obsoleted in Vaadin 25.2+ / Viritin 3.6+, use the native `com.vaadin.flow.component.fullscreen.Fullscreen` instead)_
 
 ### VGrid
 
@@ -66,6 +67,7 @@ e.g. in field declaration or without declaring an extra variable. When used in a
  * Tree component to visualise hierarchical structures
  * EnumSelect
  * ElementCollectionField a field to edit e.g. List<Address> type structure
+ * LocalizedTextField and LocalizedTextArea to edit the language versions of a single piece of text with Binder. The value is a `Map<Locale, String>` and the user edits one language at a time, picking the language with a tab bar (or a ComboBox once there are many languages). An optional Translator (auto-discovered from the Instantiator, e.g. a Spring bean) can fill the other languages from the currently edited one.
  * ~LocalDateTimeField for editing LocalDateTime objects with Binder~ Use DateTimePicker from core, that is available these days.
  * VLocalDateTimePicker and VLocalDatePicker who use the month names from the selected locale.
  * Text [Selection API](https://javadoc.dokku1.parttio.org/in.virit/viritin/2.5.2/org/vaadin/firitin/components/textfield/SelectionApi.html) (selectAll, getCursorPosition setSelection, getSelection et al.) for inputs that are based on keyboard input. Essentials to fine tune the UX of "pro user views".
