@@ -2,6 +2,11 @@ package org.vaadin.firitin.geolocation;
 
 import java.time.Instant;
 
+/**
+ * @deprecated Part of the deprecated {@link Geolocation} helper. Use the native
+ *             {@code com.vaadin.flow.component.geolocation.GeolocationPosition}.
+ */
+@Deprecated(since = "3.6", forRemoval = true)
 public record GeolocationEvent(GeolocationCoordinates coords, long timestamp) {
 
     /**

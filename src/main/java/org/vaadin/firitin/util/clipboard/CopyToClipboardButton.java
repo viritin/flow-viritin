@@ -22,7 +22,16 @@ import java.util.concurrent.CompletableFuture;
  *     Currently only basic text is supported, not HTML or other formats (would be fairly easy
  *     to add though).
  * </p>
+ *
+ * @deprecated Vaadin 25.2 ships a native clipboard API,
+ *             {@code com.vaadin.flow.component.clipboard.Clipboard}. Instead of a
+ *             ready-made button, arm any {@code ClickNotifier} with
+ *             {@code Clipboard.onClick(button).writeText(value, onSuccess, onError)}.
+ *             Note the action must be armed once at construction (not from inside an
+ *             {@code addClickListener}), so the privileged write runs within the
+ *             browser's user-gesture window.
  */
+@Deprecated(since = "3.6", forRemoval = true)
 public class CopyToClipboardButton extends VButton {
 
     public CopyToClipboardButton(String string) {

@@ -16,11 +16,21 @@ import com.vaadin.flow.dom.Element;
  * </p>
  * <p>
  * Note that the availability and quality of the position data can vary a lot.
- * Users can decline the geolocation request in the browser altogether, but 
+ * Users can decline the geolocation request in the browser altogether, but
  * developers can also affect the settings using GeolocationOptions.
  * </p>
  * @author mstahv
+ * @deprecated Vaadin 25.2 ships a native equivalent,
+ *             {@code com.vaadin.flow.component.geolocation.Geolocation}. Prefer it:
+ *             {@code Geolocation.watchPosition(component)} returns a
+ *             {@code GeolocationWatcher} that is bound to the component and
+ *             auto-stopped on detach (no manual {@link #cancel()}), and it offers a
+ *             one-shot {@code getPosition(...)}, a {@code GeolocationOptions.builder()}
+ *             and Signal-based reads. Note the migration is not drop-in: position data
+ *             is exposed as a record ({@code position.coords().longitude()}) instead of
+ *             getters.
  */
+@Deprecated(since = "3.6", forRemoval = true)
 public class Geolocation {
 
     private DomListenerRegistration geoupdate;

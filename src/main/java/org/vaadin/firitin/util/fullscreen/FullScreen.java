@@ -16,7 +16,16 @@ import java.util.concurrent.CompletableFuture;
  *     or a similar event. Requesting full screen mode in a constructor of a view or
  *     using server push will likely not work as expected.
  * </p>
+ *
+ * @deprecated Vaadin 25.2 ships a native fullscreen API,
+ *             {@code com.vaadin.flow.component.fullscreen.Fullscreen}. Arm entering
+ *             with {@code Fullscreen.onClick(component).enter(component)} (once at
+ *             construction, within the user-gesture window), exit any time with
+ *             {@code Fullscreen.exit()}, and observe state via
+ *             {@code Fullscreen.stateSignal()} instead of the async
+ *             {@link #isFullscreen()} future.
  */
+@Deprecated(since = "3.6", forRemoval = true)
 public class FullScreen {
 
     public static void requestFullscreen() {

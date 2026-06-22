@@ -13,7 +13,14 @@ import java.util.concurrent.CompletableFuture;
  *     in Safari, due to its incomplete handling of transient activation regarding clipboard. See
  *     test class for more details and workarounds.
  * </p>
+ *
+ * @deprecated Vaadin 25.2 ships a native clipboard API,
+ *             {@code com.vaadin.flow.component.clipboard.Clipboard}, which handles the
+ *             browser's user-gesture (transient activation) requirement correctly by
+ *             arming the action on a click: {@code Clipboard.onClick(component)} returns
+ *             a binding with {@code writeText(...)} / {@code readText(...)}.
  */
+@Deprecated(since = "3.6", forRemoval = true)
 public class Clipboard {
 
     /**

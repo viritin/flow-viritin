@@ -1,5 +1,11 @@
 package org.vaadin.firitin.geolocation;
 
+/**
+ * @deprecated Part of the deprecated {@link Geolocation} helper. Use the native
+ *             {@code com.vaadin.flow.component.geolocation.Geolocation} error API
+ *             ({@code error.debugInfo()} / {@code error.errorCode()}).
+ */
+@Deprecated(since = "3.6", forRemoval = true)
 public class GeolocationErrorEvent {
 
     /**

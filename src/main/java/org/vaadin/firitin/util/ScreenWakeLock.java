@@ -25,7 +25,15 @@ import java.util.concurrent.atomic.AtomicReference;
  * </ul>
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API">MDN Web Docs - Screen Wake Lock API</a>
+ * @deprecated Vaadin 25.2 ships a native equivalent,
+ *             {@link com.vaadin.flow.component.wakelock.WakeLock}. Prefer it:
+ *             {@code WakeLock.request()} / {@code WakeLock.release()} plus
+ *             {@code WakeLock.activeSignal()} (a {@code Signal<Boolean>} that flips to
+ *             false automatically when the browser releases the lock) replace the
+ *             {@code CompletableFuture} + release-listener + {@link #checkState()}
+ *             combo. {@code WakeLock.availabilitySignal()} provides feature detection.
  */
+@Deprecated(since = "3.6", forRemoval = true)
 public class ScreenWakeLock {
 
     /**

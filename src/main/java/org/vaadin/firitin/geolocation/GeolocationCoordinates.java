@@ -3,7 +3,11 @@ package org.vaadin.firitin.geolocation;
 /**
  * The data coming from the browser on geolocation requests
  * @author mstahv
+ * @deprecated Part of the deprecated {@link Geolocation} helper. Use the native
+ *             {@code com.vaadin.flow.component.geolocation.GeolocationCoordinates}
+ *             record (record accessors like {@code longitude()} instead of getters).
  */
+@Deprecated(since = "3.6", forRemoval = true)
 public class GeolocationCoordinates {
     
     private Double latitude;

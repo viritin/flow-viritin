@@ -6,9 +6,13 @@ import java.io.Serializable;
 
 /**
  * A class to configure options for geolocation requests.
- * 
+ *
  * @author mstahv
+ * @deprecated Part of the deprecated {@link Geolocation} helper. Use the native
+ *             {@code com.vaadin.flow.component.geolocation.GeolocationOptions}
+ *             (built via {@code GeolocationOptions.builder()}).
  */
+@Deprecated(since = "3.6", forRemoval = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GeolocationOptions implements Serializable {
 

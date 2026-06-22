@@ -16,7 +16,23 @@ import java.net.URI;
  * </p>
  * <p>
  * See also: https://developer.mozilla.org/en-US/docs/Web/API/Web_Share_API
+ *
+ * @deprecated Vaadin 25.2 ships a native Web Share API,
+ *             {@code com.vaadin.flow.component.webshare.WebShare}. Arm sharing with
+ *             {@code WebShare.onClick(button).share(content, onSuccess, onError)} (once
+ *             at construction, within the user-gesture window) and build the payload
+ *             with {@code ShareContent.create().title(..).text(..).url(..)}; feature
+ *             detection is via {@code WebShare.supportSignal()}.
+ *             <p>
+ *             <strong>Migration caveat:</strong> this Viritin {@code Share} has a
+ *             built-in fallback for browsers without the API (notably Firefox desktop),
+ *             configurable via {@link #setFirefoxFallbackNotification(Runnable)}. The
+ *             native {@code WebShare} has <em>no</em> built-in fallback — you must
+ *             handle the {@code UNSUPPORTED} case yourself via
+ *             {@code WebShare.supportSignal()} so the fallback behavior is not silently
+ *             lost.
  */
+@Deprecated(since = "3.6", forRemoval = true)
 public class Share {
 
     private static Runnable firefoxFallbackNotification = () -> {
@@ -96,6 +112,12 @@ public class Share {
 
     }
 
+    /**
+     * @deprecated Part of the deprecated {@link Share} helper. Use
+     *             {@code com.vaadin.flow.component.webshare.ShareContent} from Vaadin
+     *             25.2 instead.
+     */
+    @Deprecated(since = "3.6", forRemoval = true)
     public record ShareData(String title, String text, String url) {
     }
 

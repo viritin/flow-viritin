@@ -18,7 +18,18 @@ import java.util.concurrent.CompletableFuture;
  * helpful extra data via `document.hasFocus()` method. This allows it to determine not only
  * hidden tabs, but also tabs that are visible but not focused (and thus often behind
  * another browser window or application).
+ *
+ * @deprecated Vaadin 25.2 exposes page visibility natively via
+ *             {@code UI.getCurrent().getPage().pageVisibilitySignal()}, a
+ *             {@code Signal<}{@link com.vaadin.flow.component.page.PageVisibility}{@code >}.
+ *             A single {@code Signal.effect(component, ...)} reading {@code signal.get()}
+ *             replaces both {@link #isVisible()} and
+ *             {@link #addVisibilityChangeListener(PageVisibilityListener)}, and is
+ *             component-bound so no manual {@code Registration} cleanup is needed. Map
+ *             {@link Visibility#VISIBLE} to
+ *             {@code com.vaadin.flow.component.page.PageVisibility.VISIBLE}.
  */
+@Deprecated(since = "3.6", forRemoval = true)
 public class PageVisibility {
 
     private final UI ui;
@@ -138,6 +149,11 @@ public class PageVisibility {
         };
     }
 
+    /**
+     * @deprecated Use {@link com.vaadin.flow.component.page.PageVisibility} from
+     *             Vaadin 25.2 instead.
+     */
+    @Deprecated(since = "3.6", forRemoval = true)
     public enum Visibility {
         /**
          * The page is visible and focused.
