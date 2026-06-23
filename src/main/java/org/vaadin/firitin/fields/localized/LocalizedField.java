@@ -42,7 +42,9 @@ import java.util.Optional;
  * a {@link Tabs} tab bar by default, or a {@link ComboBox} once there are more
  * languages than {@link #getDefaultComboBoxThreshold()} (configurable), since a
  * tab bar becomes unwieldy with very many languages. Languages are always shown
- * in alphabetical order of their localized name.
+ * in alphabetical order of their localized name. Each language is labeled with
+ * its flag and name by default; {@link #setLanguageDisplay(LanguageDisplay)}
+ * switches to flag-only or name-only.
  * <p>
  * The {@code localized-field} class on this component activates the styling in
  * {@code localized-field.css} (loaded via the {@link StyleSheet} annotation
@@ -65,6 +67,26 @@ public abstract class LocalizedField<F extends TextFieldBase<F, String>>
         extends VCustomField<Map<Locale, String>> {
 
     private static int defaultComboBoxThreshold = 20;
+
+    /**
+     * How a language is visualized in the selector (tab bar or combo box): with
+     * a {@linkplain #flagFor(Locale) flag} emoji and its
+     * {@linkplain #languageName(Locale) name}, with the flag only, or with the
+     * name only. The flag is always paired with a tooltip carrying the language
+     * name, so {@link #FLAG} stays usable (and accessible) even though it shows
+     * no text. When a language has no known flag, the flag-bearing modes fall
+     * back to the name so a language is never blank.
+     */
+    public enum LanguageDisplay {
+        /** Flag emoji followed by the language name (the default). */
+        FLAG_AND_NAME,
+        /** Flag emoji only (the language name moves to a tooltip). */
+        FLAG,
+        /** Language name only, no flag. */
+        NAME
+    }
+
+    private LanguageDisplay languageDisplay = LanguageDisplay.FLAG_AND_NAME;
 
     private final Map<Locale, F> fields = new LinkedHashMap<>();
     private final Div box = new Div();
@@ -169,6 +191,9 @@ public abstract class LocalizedField<F extends TextFieldBase<F, String>>
         tabs.setWidthFull();
         ordered.forEach(locale -> {
             Tab tab = new Tab(tabLabel(locale));
+            // The language name is always available on hover, which matters most
+            // in flag-only mode where the tab itself shows no text.
+            tab.setTooltipText(languageName(locale));
             localeToTab.put(locale, tab);
             tabToLocale.put(tab, locale);
             tabs.add(tab);
@@ -445,14 +470,54 @@ public abstract class LocalizedField<F extends TextFieldBase<F, String>>
             Map.entry("hi", "IN"), Map.entry("th", "TH"), Map.entry("vi", "VN"));
 
     /**
-     * The text shown for a locale in the selector: the flag (if any) from
-     * {@link #flagFor(Locale)} followed by the {@link #languageName(Locale)}.
-     * Override to fully customize the label.
+     * The text shown for a locale in the selector, according to the current
+     * {@link LanguageDisplay} mode: the {@link #flagFor(Locale) flag} and the
+     * {@link #languageName(Locale) name}, the flag only, or the name only. When
+     * a flag is requested but none is known, the name is used instead so a
+     * language is never blank. Override to fully customize the label (this
+     * ignores the display mode).
      */
     protected String tabLabel(Locale locale) {
         String flag = flagFor(locale);
         String name = languageName(locale);
-        return flag.isEmpty() ? name : flag + " " + name;
+        return switch (languageDisplay) {
+            case NAME -> name;
+            case FLAG -> flag.isEmpty() ? name : flag;
+            case FLAG_AND_NAME -> flag.isEmpty() ? name : flag + " " + name;
+        };
+    }
+
+    /**
+     * How languages are visualized in the selector: with flag and name (the
+     * default), flag only, or name only.
+     */
+    public LanguageDisplay getLanguageDisplay() {
+        return languageDisplay;
+    }
+
+    /**
+     * Sets how each language is visualized in the selector — with its flag and
+     * name, its flag only, or its name only — and refreshes the selector
+     * immediately. The flag always carries a tooltip with the language name, so
+     * {@link LanguageDisplay#FLAG} remains usable. When a language has no known
+     * flag, the flag-bearing modes fall back to its name.
+     *
+     * @param languageDisplay the display mode, not {@code null}
+     */
+    public void setLanguageDisplay(LanguageDisplay languageDisplay) {
+        this.languageDisplay = Objects.requireNonNull(languageDisplay);
+        refreshSelectorLabels();
+    }
+
+    /** Re-applies {@link #tabLabel(Locale)} to whichever selector is in use. */
+    private void refreshSelectorLabels() {
+        if (tabs != null) {
+            localeToTab.forEach((locale, tab) -> tab.setLabel(tabLabel(locale)));
+        }
+        if (localeSelect != null) {
+            // Re-setting the generator forces the combo box to re-render labels.
+            localeSelect.setItemLabelGenerator(this::tabLabel);
+        }
     }
 
     /**

@@ -90,6 +90,41 @@ LocalizedField.setDefaultComboBoxThreshold(12);
 LocalizedTextField keyword = new LocalizedTextField(manyLocales, 8);
 ```
 
+### Showing flags, names, or both
+
+Each language in the selector is shown by default as its **flag emoji followed
+by the localized name** (e.g. 🇬🇧 English). Switch this with
+`setLanguageDisplay(...)` — no subclassing needed, and the selector refreshes
+immediately:
+
+```java
+title.setLanguageDisplay(LocalizedField.LanguageDisplay.FLAG);       // 🇬🇧 (flag only)
+title.setLanguageDisplay(LocalizedField.LanguageDisplay.NAME);       // English (name only)
+title.setLanguageDisplay(LocalizedField.LanguageDisplay.FLAG_AND_NAME); // 🇬🇧 English (default)
+```
+
+In flag-only mode the language name is still available as a **tooltip** on the
+tab (and screen readers reach it through the editor's accessible name), so the
+field stays usable. When a language has no known flag, the flag-bearing modes
+fall back to showing its name, so a language is never blank.
+
+The flag itself comes from `flagFor(Locale)`. It derives a country from the
+locale (or, for the most common languages, from the language code) and turns it
+into an emoji. Override it to add languages or to pick a different country for a
+language (e.g. US instead of GB for English):
+
+```java
+LocalizedTextField title = new LocalizedTextField("Title", locales) {
+    @Override
+    protected String flagFor(Locale locale) {
+        if (locale.getLanguage().equals("en")) {
+            return super.flagFor(Locale.of("en", "US")); // 🇺🇸 instead of 🇬🇧
+        }
+        return super.flagFor(locale);
+    }
+};
+```
+
 ### Which language is open
 
 When the field is attached, it opens the **user's own language** if it is one of
@@ -213,7 +248,12 @@ combo boxes or buttons in your application.
 
 * `createField(Locale)` — the abstract factory for the per-language editor (this
   is what `LocalizedTextField` and `LocalizedTextArea` implement).
+* `setLanguageDisplay(LanguageDisplay)` — show the flag, the name, or both
+  (see [Showing flags, names, or both](#showing-flags-names-or-both)); no
+  subclassing needed.
 * `tabLabel(Locale)` / `languageName(Locale)` / `flagFor(Locale)` — customize the
-  label, name and flag shown for each language.
+  label, name and flag shown for each language. Note that overriding
+  `tabLabel(Locale)` builds the label yourself and so bypasses the
+  `LanguageDisplay` mode.
 * `translateButtonText()` — localize the translate action's tooltip / accessible
   name.

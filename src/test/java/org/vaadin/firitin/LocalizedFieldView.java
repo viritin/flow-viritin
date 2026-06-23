@@ -5,6 +5,7 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.router.Route;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 import org.vaadin.firitin.fields.localized.LocalizedField;
@@ -58,7 +59,17 @@ public class LocalizedFieldView extends VVerticalLayout {
                 e -> allFields.forEach(f -> f.setValue(DEMO_VALUES)));
         Button clear = new Button("Clear",
                 e -> allFields.forEach(f -> f.setValue(Map.of())));
-        add(new HorizontalLayout(setDemo, clear));
+
+        // Live switch for how languages are shown in the selectors. The setter
+        // refreshes the tabs / combo box immediately, no re-creation needed.
+        RadioButtonGroup<LocalizedField.LanguageDisplay> display = new RadioButtonGroup<>();
+        display.setLabel("Language display");
+        display.setItems(LocalizedField.LanguageDisplay.values());
+        display.setValue(LocalizedField.LanguageDisplay.FLAG_AND_NAME);
+        display.addValueChangeListener(e ->
+                allFields.forEach(f -> f.setLanguageDisplay(e.getValue())));
+
+        add(new HorizontalLayout(setDemo, clear), display);
         add(new Hr());
 
         // A plain text field as a reference, to compare how the box matches the
