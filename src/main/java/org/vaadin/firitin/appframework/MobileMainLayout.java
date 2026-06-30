@@ -414,7 +414,19 @@ public abstract class MobileMainLayout extends MainLayout {
         boolean fill = content != null
                 && "100%".equals(content.getElement().getStyle().get("height"));
         contentWrapper.getClassNames().set("mobile-content--fill", fill);
-        super.showContent(contentWrapper);
+        // Install the persistent wrapper as the AppLayout content only once. On a
+        // client-side navigation the wrapper is already the content, and calling
+        // setContent() again with the *same* instance makes AppLayout remove and
+        // re-add it — detaching and re-attaching the freshly added view in one go.
+        // Components that (re)build only on attach survive that (onAttach fires
+        // again), but a one-shot attach listener does not: notably Viritin's own
+        // ResizeObserver registered its observation on first attach and tore it
+        // down on the immediately following detach, so the view came up unobserved
+        // (empty) after SPA navigation. Swapping just the inner content keeps a
+        // single, clean attach.
+        if (getContent() != contentWrapper) {
+            super.showContent(contentWrapper);
+        }
         // Highlight here, where currentViewClass was just set, so it is correct
         // regardless of whether showContent runs before or after afterNavigation
         // (their order is not guaranteed). Doing it only from afterNavigation made

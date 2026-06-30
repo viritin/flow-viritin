@@ -2,14 +2,16 @@ package org.vaadin.firitin.resizeobserver;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.router.RouterLink;
 import org.vaadin.firitin.appframework.MenuItem;
 import org.vaadin.firitin.appframework.MobileMainLayout;
@@ -17,73 +19,99 @@ import org.vaadin.firitin.appframework.NavigationItem;
 import org.vaadin.firitin.util.ResizeObserver;
 
 /**
- * Reproduction harness for a ResizeObserver regression observed on Vaadin 25.2,
- * which appears to surface specifically when navigating between views that share
- * a {@link MobileMainLayout}.
+ * Reproduction harness for the regression isolated in the {@code repro-attach-sync}
+ * project: under Viritin's {@link MobileMainLayout}, components that build their
+ * content lazily (in a {@link ResizeObserver} callback, or in {@code onAttach})
+ * render correctly on a full page load but come up <strong>empty after a
+ * client-side (SPA) navigation</strong> between sibling routes. A plain
+ * {@link RouterLayout} does not trigger it.
  * <p>
- * The UI-scoped {@link ResizeObserver} normally reports the <em>initial</em>
- * size of a component as soon as you start observing it (the browser fires the
- * ResizeObserver callback once on observe). That works for the first view that
- * creates the observer, but the regression is: once the observer already exists
- * on the UI, a view navigated to afterwards — that starts observing a component
- * in its {@code onAttach} phase — never receives that initial size callback.
- * (One plausible cause: under MobileMainLayout's content wrapping the observed
- * element has no laid-out size at the moment {@code observe()} runs, so the
- * browser's single initial callback is for a 0-sized / disconnected element and
- * the helper ignores it — and nothing resizes it afterwards.)
- * <p>
- * The harness offers two pairs of cross-linked views that build in
- * {@code onAttach} and observe a box, surfacing the size in a {@code #ro-status}
- * element:
+ * Mirror of the repro, in the library's own test sources so it can be driven by
+ * the test server + Playwright. Each pair has a Home and an Other view with
+ * cross-links; Home hosts three probes:
  * <ul>
- *   <li><b>{@code /ro-mob-a} ↔ {@code /ro-mob-b}</b> — share a MobileMainLayout
- *       (the suspected case).</li>
- *   <li><b>{@code /ro-plain-a} ↔ {@code /ro-plain-b}</b> — share a plain
- *       AppLayout (the control; expected to work).</li>
+ *   <li><b>#probe-resize</b> — Viritin {@link ResizeObserver}: observes itself in
+ *       the constructor and builds its content in the resize callback.</li>
+ *   <li><b>#probe-onattach</b> — pure Vaadin: builds children in {@code onAttach}.</li>
+ *   <li><b>#probe-js</b> — pure Vaadin: {@code Element.executeJs} in {@code onAttach}.</li>
  * </ul>
- * To reproduce: open the first view of a pair (status flips to "first size
- * #1: W x H"), then click "Go to the other view". A working pair shows a first
- * size on the second view too; the regressing pair stays on "WAITING…".
+ * Suspected case under {@link RoMobileLayout} ({@code /ro-mob-home}); control case
+ * under {@link RoPlainLayout} ({@code /ro-plain-home}). To reproduce: full-load
+ * Home, click to Other, click Back home, then inspect the probes.
  */
 public class ResizeObserverNavRegressionView {
 
-    // ---- Shared building block ------------------------------------------------
+    // ---- Probes ---------------------------------------------------------------
 
-    /** Builds itself in onAttach and observes a box, reporting the first size. */
-    public static abstract class Base extends VerticalLayout {
+    /** Viritin ResizeObserver: observes itself in the constructor, builds in the callback. */
+    public static class ResizeBuiltProbe extends Div {
+        public ResizeBuiltProbe() {
+            setId("probe-resize");
+            getStyle().setBorder("2px solid orange").setPadding("8px");
+            setText("(resize callback did NOT run)");
+            ResizeObserver.get().observe(this, dim -> {
+                removeAll();
+                add(new Span("[resize callback ran, width=" + dim.width() + "]"));
+            });
+        }
+    }
 
-        protected abstract String name();
-
-        protected abstract Class<? extends Component> otherView();
+    /** Pure Vaadin: builds children only in onAttach. */
+    public static class OnAttachChildrenProbe extends Div {
+        public OnAttachChildrenProbe() {
+            setId("probe-onattach");
+            getStyle().setBorder("2px solid green").setPadding("8px");
+            setText("(onAttach did NOT build)");
+        }
 
         @Override
-        protected void onAttach(AttachEvent attachEvent) {
-            super.onAttach(attachEvent);
+        protected void onAttach(AttachEvent e) {
+            super.onAttach(e);
             removeAll();
+            add(new Span("[children built in onAttach] "));
+            Element raw = new Element("b");
+            raw.setText("[raw element child]");
+            getElement().appendChild(raw);
+        }
+    }
 
-            add(new H3("ResizeObserver nav regression — " + name()));
-            add(new RouterLink("Go to the other view", otherView()));
+    /** Pure Vaadin: executeJs in onAttach. */
+    public static class OnAttachJsProbe extends Div {
+        public OnAttachJsProbe() {
+            setId("probe-js");
+            getStyle().setBorder("2px solid blue").setPadding("8px");
+            setText("(executeJs did NOT run)");
+        }
 
-            Span status = new Span("WAITING for first size…");
-            status.setId("ro-status");
-            status.getElement().getThemeList().add("badge error");
-            add(status);
+        @Override
+        protected void onAttach(AttachEvent e) {
+            super.onAttach(e);
+            getElement().executeJs("this.textContent = '[executeJs ran in onAttach]';");
+        }
+    }
 
-            Div observed = new Div();
-            observed.setText("observed box (" + name() + ")");
-            observed.setWidthFull();
-            observed.setHeight("160px");
-            observed.getStyle().setBackground("#cde3f5").setPadding("1em");
-            add(observed);
+    /** Shared Home content: cross-link + the three probes. */
+    public static abstract class HomeBase extends VerticalLayout {
+        protected abstract Class<? extends Component> otherView();
 
-            int[] callbacks = {0};
-            ResizeObserver.get().observe(observed, dim -> {
-                callbacks[0]++;
-                status.setText("first size #" + callbacks[0] + ": "
-                        + dim.width() + " x " + dim.height());
-                status.getElement().getThemeList().clear();
-                status.getElement().getThemeList().add("badge success");
-            });
+        public HomeBase() {
+            add(new H2("Home"));
+            add(new RouterLink("Go to other view (SPA nav)", otherView()));
+            add(new H3("1) Viritin ResizeObserver"));
+            add(new ResizeBuiltProbe());
+            add(new H3("2) Pure Vaadin children in onAttach"));
+            add(new OnAttachChildrenProbe());
+            add(new H3("3) Pure Vaadin executeJs in onAttach"));
+            add(new OnAttachJsProbe());
+        }
+    }
+
+    public static abstract class OtherBase extends VerticalLayout {
+        protected abstract Class<? extends Component> homeView();
+
+        public OtherBase() {
+            add(new H2("Other view"));
+            add(new RouterLink("Back home (SPA nav)", homeView()));
         }
     }
 
@@ -98,43 +126,34 @@ public class ResizeObserverNavRegressionView {
         @Override
         protected boolean checkAccess(NavigationItem item) {
             Class<?> t = item.getNavigationTarget();
-            return t == MobileA.class || t == MobileB.class;
+            return t == MobileHome.class || t == MobileOther.class;
         }
     }
 
-    @Route(value = "ro-mob-a", layout = RoMobileLayout.class)
-    @MenuItem(title = "A", icon = VaadinIcon.CIRCLE)
-    public static class MobileA extends Base {
-        @Override protected String name() { return "MobileMainLayout A"; }
-        @Override protected Class<? extends Component> otherView() { return MobileB.class; }
+    @Route(value = "ro-mob-home", layout = RoMobileLayout.class)
+    @MenuItem(title = "Home", icon = VaadinIcon.HOME)
+    public static class MobileHome extends HomeBase {
+        @Override protected Class<? extends Component> otherView() { return MobileOther.class; }
     }
 
-    @Route(value = "ro-mob-b", layout = RoMobileLayout.class)
-    @MenuItem(title = "B", icon = VaadinIcon.STAR)
-    public static class MobileB extends Base {
-        @Override protected String name() { return "MobileMainLayout B"; }
-        @Override protected Class<? extends Component> otherView() { return MobileA.class; }
+    @Route(value = "ro-mob-other", layout = RoMobileLayout.class)
+    @MenuItem(title = "Other", icon = VaadinIcon.STAR)
+    public static class MobileOther extends OtherBase {
+        @Override protected Class<? extends Component> homeView() { return MobileHome.class; }
     }
 
-    // ---- Control case: plain AppLayout ---------------------------------------
+    // ---- Control case: plain RouterLayout ------------------------------------
 
-    public static class RoPlainLayout extends AppLayout {
-        public RoPlainLayout() {
-            addToNavbar(new HorizontalLayout(
-                    new RouterLink("Plain A", PlainA.class),
-                    new RouterLink("Plain B", PlainB.class)));
-        }
+    public static class RoPlainLayout extends VerticalLayout implements RouterLayout {
     }
 
-    @Route(value = "ro-plain-a", layout = RoPlainLayout.class)
-    public static class PlainA extends Base {
-        @Override protected String name() { return "Plain AppLayout A"; }
-        @Override protected Class<? extends Component> otherView() { return PlainB.class; }
+    @Route(value = "ro-plain-home", layout = RoPlainLayout.class)
+    public static class PlainHome extends HomeBase {
+        @Override protected Class<? extends Component> otherView() { return PlainOther.class; }
     }
 
-    @Route(value = "ro-plain-b", layout = RoPlainLayout.class)
-    public static class PlainB extends Base {
-        @Override protected String name() { return "Plain AppLayout B"; }
-        @Override protected Class<? extends Component> otherView() { return PlainA.class; }
+    @Route(value = "ro-plain-other", layout = RoPlainLayout.class)
+    public static class PlainOther extends OtherBase {
+        @Override protected Class<? extends Component> homeView() { return PlainHome.class; }
     }
 }
