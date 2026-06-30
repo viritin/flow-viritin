@@ -95,12 +95,14 @@ The content then fills the screen and the translucent bar simply overlays it.
 ### Per-view navbar actions
 
 The [`addNavbarHelper(Component)`](index.html) pattern works here too. On a wide
-screen the helper sits in the navbar; on a phone it appears at the **top-right of
-the content header**, pinned (sticky) so it stays reachable while the content
-scrolls under it — the mobile equivalent of the wide layout's top-right actions
-(e.g. an options "…" button opening a popover). It shows even when the
-scroll-away title is turned off, so a view's actions are always available without
-having to enable the title.
+screen the helper sits in the navbar; on a phone it appears in a **pinned (sticky)
+top app-bar** that stays reachable while the content scrolls under it — the mobile
+equivalent of the wide layout's top-right actions (e.g. an options "…" button
+opening a popover). This works even when the scroll-away title is turned off, so a
+view's actions are always available without having to enable the title — and in
+that case the view title is shown implicitly, at a compact size, on the lead edge
+of the same row (so it reads as a real app-bar rather than a lone floating button)
+with the helpers on the trailing edge.
 
 ```java
 @Override

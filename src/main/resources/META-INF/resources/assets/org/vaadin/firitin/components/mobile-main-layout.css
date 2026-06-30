@@ -320,13 +320,26 @@ vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-content-
     display: none;
 }
 
-/* In a helpers-only header (title opted out on a phone) suppress the big
-   scroll-away title and align the helpers to the trailing edge, mirroring the
-   top-right navbar actions of the wide layout. The desktop "always show the
-   title" behaviour is unaffected — these rules are scoped to the bottom-bar
-   (phone) case. */
+/* Phone, title opted out (no-view-title): by default suppress the big scroll-away
+   title (the desktop "always show the title" behaviour is unaffected — these rules
+   are scoped to the bottom-bar case). */
 vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-content-header.no-view-title .mobile-view-title {
     display: none;
+}
+
+/* …but when the view did contribute navbar helpers, show the title back in that
+   row at a compact app-bar size (not the large scroll-away one): the helpers row
+   then reads as a proper top app-bar — title on the lead edge, actions on the
+   trailing edge — instead of a hollow strip with a lone button. The title fills
+   and ellipsises, pushing the helpers to the trailing edge. */
+vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-content-header.no-view-title:has(.mobile-content-header-helpers > *) .mobile-view-title {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    font-size: 1.125rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-content-header.no-view-title .mobile-content-header-helpers {
     margin-inline-start: auto;
