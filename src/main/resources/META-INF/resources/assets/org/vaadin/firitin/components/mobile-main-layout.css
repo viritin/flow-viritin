@@ -247,9 +247,17 @@ vaadin-app-layout::part(navbar-top) {
        part keeps its default overflow:auto, which makes it a scroll container that
        a position:sticky header would pin to (and then ride away with the page).
        Drop it to overflow:visible so the document is the scroll context and a
-       sticky in-content header pins to the viewport as intended. */
+       sticky in-content header pins to the viewport as intended.
+
+       Also drop the part's safe-area padding-top: AppLayout pads the content below
+       the status bar / notch, but this layout already insets its own in-content
+       header (and lets edge-to-edge views run under the notch on purpose). With the
+       part padding *and* a min-height:100dvh fill view inside it, the part became
+       100dvh + safe-area-inset-top tall → a phantom scroll of exactly the top inset
+       on every full-height view in a viewport-fit=cover PWA. */
     html.viritin-body-scroll vaadin-app-layout::part(content) {
         overflow: visible;
+        padding-top: 0;
     }
 }
 
