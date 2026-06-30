@@ -23,6 +23,10 @@
             <item name="Overview" href="index.html"/>
             <item name="Development" href="development.html"/>
         </menu>
+        <menu name="Application Layout">
+            <item name="Overview" href="appframework/index.html"/>
+            <item name="MobileMainLayout" href="appframework/mobile-main-layout.html"/>
+        </menu>
         <menu name="Components">
             <item name="Overview" href="components/index.html"/>
             <item name="VGrid" href="components/vgrid.html"/>

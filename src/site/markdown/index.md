@@ -6,6 +6,7 @@ it easy to drop in to any Vaadin project.
 
 The library covers several areas:
 
+* **[Application Layout](appframework/index.html)** -- AppLayout helpers with an auto-built navigation menu, plus the adaptive, phone-style MobileMainLayout.
 * **[Components](components/index.html)** -- Fluent API wrappers for Vaadin core components, VGrid, Tree, uploads/downloads, and more.
 * **[Browser APIs](browser-api/index.html)** -- Java APIs for browser capabilities like ResizeObserver, Geolocation, Web Notifications, Share, Fullscreen, and more.
 * **[Forms & Binding](forms/index.html)** -- FormBinder, BeanValidationForm, and field components for productive form building.
