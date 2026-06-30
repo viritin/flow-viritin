@@ -241,6 +241,15 @@ vaadin-app-layout::part(navbar-top) {
         height: auto;
         min-height: 100dvh;
     }
+
+    /* In body-scroll mode the page scrolls, not AppLayout's content part — but the
+       part keeps its default overflow:auto, which makes it a scroll container that
+       a position:sticky header would pin to (and then ride away with the page).
+       Drop it to overflow:visible so the document is the scroll context and a
+       sticky in-content header pins to the viewport as intended. */
+    html.viritin-body-scroll vaadin-app-layout::part(content) {
+        overflow: visible;
+    }
 }
 
 /* Strip the drawer toggle's button chrome so it shrink-wraps its icon: no outer
@@ -299,12 +308,42 @@ vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-drawer-t
 }
 
 /* When the in-content title is disabled (setViewTitleVisible(false)) and the
-   bottom bar is showing (touch phone), the header row has nothing left to show
-   (the toggle is hidden there too), so collapse it — apps that render their own
-   heading then get no extra band. On wider screens the header stays for the
-   toggle. */
-vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-content-header.no-view-title {
+   bottom bar is showing (touch phone), the header row would have nothing left
+   to show (the toggle is hidden there too), so collapse it — apps that render
+   their own heading then get no extra band. On wider screens the header stays
+   for the toggle.
+   Exception: if the view contributed per-view navbar helpers via
+   addNavbarHelper(), keep the header — on a phone that slim top row is the only
+   place those actions (e.g. an options "…" button, as on the wide navbar) can
+   live, so they must stay reachable. */
+vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-content-header.no-view-title:not(:has(.mobile-content-header-helpers > *)) {
     display: none;
+}
+
+/* In a helpers-only header (title opted out on a phone) suppress the big
+   scroll-away title and align the helpers to the trailing edge, mirroring the
+   top-right navbar actions of the wide layout. The desktop "always show the
+   title" behaviour is unaffected — these rules are scoped to the bottom-bar
+   (phone) case. */
+vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-content-header.no-view-title .mobile-view-title {
+    display: none;
+}
+vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-content-header.no-view-title .mobile-content-header-helpers {
+    margin-inline-start: auto;
+}
+
+/* Pin the helpers-only header to the top so the actions stay reachable while the
+   content scrolls under it. There is no scroll-away title here (the view opted
+   out), so nothing in this band is meant to scroll away. An opaque background
+   (the theme surface) keeps the scrolling content from showing through, and a
+   hairline separates it once content slides beneath. (When the scroll-away title
+   IS enabled the header is not sticky — the title is meant to scroll away.) */
+vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-content-header.no-view-title:has(.mobile-content-header-helpers > *) {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--vaadin-background-color);
+    border-bottom: 1px solid var(--vaadin-border-color-secondary, transparent);
 }
 
 /* ---------- Aura: iOS "liquid glass" floating bottom bar ----------
