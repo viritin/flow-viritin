@@ -128,11 +128,12 @@ vaadin-app-layout::part(navbar-bottom) {
 
 /* Reserve room for the floating bar so content (the last scrolled items, or a
    button at the bottom of a size-full view) clears it: the measured bar height
-   (--mobile-bottom-nav-space, set by NAV_SPACE_JS) plus a medium space and the
-   safe-area. */
+   (--mobile-bottom-nav-space, set by NAV_SPACE_JS) plus one space and the
+   safe-area. One --vaadin-padding-m (not two) makes the gap above the bar match
+   the gap the bar leaves below itself, instead of looking top-heavy. */
 vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-content {
     padding-bottom: calc(var(--mobile-bottom-nav-space, 3.5rem)
-                         + 2 * var(--vaadin-padding-m) + env(safe-area-inset-bottom));
+                         + var(--vaadin-padding-m) + env(safe-area-inset-bottom));
 }
 
 /* Edge-to-edge opt-in (MobileMainLayout.EDGE_TO_EDGE on the view): no clearance,
@@ -357,6 +358,13 @@ vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-content-
     z-index: 2;
     background: var(--vaadin-background-color);
     border-bottom: 1px solid var(--vaadin-border-color-secondary, transparent);
+    /* Tighter, vertically balanced padding for this compact app-bar — the base
+       header is top-weighted for the large scroll-away title, which would look
+       lopsided here. The hairline above separates it from the content, so no
+       extra bottom margin is needed. */
+    padding-top: calc(var(--vaadin-padding-s) + env(safe-area-inset-top));
+    padding-bottom: var(--vaadin-padding-s);
+    margin-bottom: 0;
 }
 
 /* ---------- Aura: iOS "liquid glass" floating bottom bar ----------
