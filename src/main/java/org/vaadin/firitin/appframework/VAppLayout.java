@@ -177,9 +177,27 @@ public abstract class VAppLayout extends AppLayout implements AfterNavigationObs
         while (viewStack.size() > 1) {
             closeSubView();
         }
-        super.setContent(content);
+        showContent(content);
         viewStack.clear();
         viewStack.push(content);
+    }
+
+    /**
+     * Places the given logical view into the {@link AppLayout} content area.
+     * The default implementation delegates straight to
+     * {@link AppLayout#setContent(Component)}.
+     * <p>
+     * This is the single point through which every view (the main view and any
+     * {@link #openSubView(Component) sub view}) reaches the content area, so
+     * subclasses can override it to <em>wrap or decorate</em> the content — for
+     * instance to render a scroll-away page title above it on a mobile-style
+     * layout. The logical view stack and the view titles keep tracking the
+     * unwrapped components, so overriding this does not disturb them.
+     *
+     * @param content the view to show, never the wrapper
+     */
+    protected void showContent(Component content) {
+        super.setContent(content);
     }
 
     public void openSubView(Component component, String viewTitle) {
@@ -187,7 +205,7 @@ public abstract class VAppLayout extends AppLayout implements AfterNavigationObs
         if (viewTitle != null) {
             explicitViewTitles.put(component, viewTitle);
         }
-        super.setContent(component);
+        showContent(component);
         updateViewTitle();
     }
 
@@ -204,7 +222,7 @@ public abstract class VAppLayout extends AppLayout implements AfterNavigationObs
             throw new IllegalStateException();
         }
         explicitViewTitles.remove(pop);
-        super.setContent(viewStack.peek());
+        showContent(viewStack.peek());
         updateViewTitle();
     }
 
@@ -214,7 +232,7 @@ public abstract class VAppLayout extends AppLayout implements AfterNavigationObs
             throw new IllegalStateException();
         }
         explicitViewTitles.remove(pop);
-        super.setContent(viewStack.peek());
+        showContent(viewStack.peek());
         updateViewTitle();
     }
 

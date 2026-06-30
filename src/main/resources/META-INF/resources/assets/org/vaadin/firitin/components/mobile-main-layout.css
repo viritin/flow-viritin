@@ -1,0 +1,451 @@
+/*
+ * Styling for MobileMainLayout: an icon (optionally + caption) bottom navigation
+ * bar that AppLayout renders at the bottom of the screen on touch phones, and a
+ * large, scroll-away page title in the content area.
+ *
+ * Theme-agnostic: it uses the shared --vaadin-* base style properties (present
+ * in both Lumo and Aura) rather than Lumo-only --lumo-* tokens, so it looks
+ * right under either theme. The active-item accent uses the Aura accent token
+ * when present and falls back to the Lumo primary color otherwise.
+ */
+
+/* The bottom bar: evenly spaced items across the full width, separated from the
+   content above by a divider, on the theme's own background. */
+.mobile-bottom-nav {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+    justify-content: space-around;
+    border-top: 1px solid var(--vaadin-border-color);
+    background: var(--vaadin-background-color);
+}
+
+/*
+ * AppLayout decides where a touch-optimized navbar goes by reading its own
+ * --vaadin-app-layout-touch-optimized custom property: when "true" the bar is
+ * reslotted to the bottom (slot "navbar-bottom"), otherwise it stays at the top
+ * (slot "navbar"). By default AppLayout only flips it to "true" under
+ * "(pointer: coarse) and (max-width: 800px) and (min-height: 500px)", i.e. on
+ * actual touch devices — so a narrow *desktop* (mouse → pointer: fine) window
+ * never gets the bottom bar.
+ *
+ * We want phone-like layout whenever the viewport is phone-sized, regardless of
+ * input device, so we re-assert the property on width alone (keeping AppLayout's
+ * min-height guard so short landscape screens still fall back to the drawer).
+ * This also makes the bottom bar testable in a plain narrow desktop browser.
+ */
+@media (max-width: 800px) and (min-height: 500px) {
+    vaadin-app-layout {
+        --vaadin-app-layout-touch-optimized: true;
+    }
+}
+
+/*
+ * Belt-and-braces: if the bar still ends up in the top navbar slot (e.g. a
+ * viewport too short for the rule above), hide it there — we only ever want a
+ * bottom bar, never a full-width top one. Wide screens then show the side
+ * drawer alone.
+ */
+.mobile-bottom-nav[slot="navbar"] {
+    display: none;
+}
+
+/* Each entry (a nav link or the "More" item): icon stacked over an optional
+   caption, an equal share of the width. */
+.mobile-bottom-nav-item {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 3rem;
+    margin: 0;
+    padding: var(--vaadin-padding-xs);
+    color: var(--vaadin-text-color-secondary);
+    text-decoration: none; /* a nav link is an <a>; no underline */
+    cursor: pointer;
+}
+
+/* Icon-only items need less height than the labelled ones — otherwise the icon
+   floats in too much empty space and the bar looks needlessly tall. */
+.mobile-bottom-nav:not(.mobile-bottom-nav--labeled) .mobile-bottom-nav-item {
+    min-height: 2.25rem;
+}
+
+.mobile-bottom-nav-item vaadin-icon {
+    width: var(--vaadin-icon-size, 1.5rem);
+    height: var(--vaadin-icon-size, 1.5rem);
+}
+
+/* Optional small caption under the icon (setBottomNavLabelsVisible(true)).
+   Full width + centered so multi-word labels stay centered under the icon. */
+.mobile-bottom-nav-label {
+    width: 100%;
+    font-size: 0.6875rem;
+    line-height: 1.1;
+    text-align: center;
+}
+
+/* The active route's item is marked with the [highlight] attribute. Kept as a
+   plain attribute selector (not nested in a style container query) so every
+   engine — Safari included — repaints it when the attribute toggles on client
+   navigation. The lozenge background is themed via --mobile-nav-highlight-bg,
+   which the Aura block sets on the bar; in Lumo it is unset, so the fallback
+   leaves the active item with just its accent icon colour. */
+.mobile-bottom-nav-item[highlight] {
+    color: var(--aura-accent-text-color, var(--lumo-primary-text-color));
+    background-color: var(--mobile-nav-highlight-bg, transparent);
+    /* Round the lozenge here too (not only in the Aura block) for the same
+       Safari reason: a border-radius left inside the style container query is
+       not repainted when [highlight] toggles, so the lozenge turned square on
+       client navigation. Invisible in Lumo, where the background is transparent. */
+    border-radius: 999px;
+}
+
+/* The bottom bar overlays the content (position:fixed) rather than sitting in
+   the flow of AppLayout's bottom-navbar area. This is what makes hide-on-scroll
+   work cleanly: a flow child would keep its reserved space when transformed away,
+   leaving an empty strip; taking it out of flow collapses that area so the
+   content fills behind it. (Aura insets it into a floating pill below.) */
+.mobile-bottom-nav[slot="navbar-bottom"] {
+    position: fixed;
+    left: 0;
+    right: 0;
+    /* Clear the home indicator when content runs edge-to-edge (env() is 0 unless
+       viewport-fit=cover is active, so this is a no-op otherwise). */
+    bottom: env(safe-area-inset-bottom);
+    width: auto;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+/* Our bar overlays as position:fixed, so the bottom-navbar part must not reserve
+   any height — Lumo gives it a 56px min-height by default, which would otherwise
+   leave an empty strip behind the bar once it hides on scroll. */
+vaadin-app-layout::part(navbar-bottom) {
+    min-height: 0;
+}
+
+/* Reserve room for the floating bar so content (the last scrolled items, or a
+   button at the bottom of a size-full view) clears it: the measured bar height
+   (--mobile-bottom-nav-space, set by NAV_SPACE_JS) plus a medium space and the
+   safe-area. */
+vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-content {
+    padding-bottom: calc(var(--mobile-bottom-nav-space, 3.5rem)
+                         + 2 * var(--vaadin-padding-m) + env(safe-area-inset-bottom));
+}
+
+/* Edge-to-edge opt-in (MobileMainLayout.EDGE_TO_EDGE on the view): no clearance,
+   so the view's content runs full-bleed under the floating bar. */
+vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-content:has(> .mobile-edge-to-edge) {
+    padding-bottom: 0;
+}
+
+/* Hide-on-scroll: slide the bar down out of view (class toggled by AUTO_HIDE_JS). */
+.mobile-bottom-nav[slot="navbar-bottom"].mobile-bottom-nav--hidden {
+    transform: translateY(calc(100% + var(--vaadin-padding-l)));
+    opacity: 0;
+    pointer-events: none;
+}
+
+/*
+ * Aura gives the content surface a subtle "depth" treatment: a light
+ * background-color plus translucent gradient overlays (background-image). On a
+ * small phone the shorter content area then reads as an off-shade band against
+ * the rest of the layout. Flatten both the layout and its content part to one
+ * solid background. The `background` shorthand also resets Aura's gradient image
+ * (not just the colour); !important beats Aura's own part rule. In Lumo the token
+ * is the white the layout already uses, so this is a no-op there.
+ *
+ * Only on small/handheld screens (the breakpoint where this layout switches to
+ * the bottom bar): on a wide desktop the layered surfaces are intentional and
+ * make the drawer layout look right, so leave them alone there.
+ */
+@media (max-width: 800px), (max-height: 600px) {
+    vaadin-app-layout {
+        background: var(--vaadin-background-color);
+        /* Our bottom bar is a fixed overlay, so AppLayout need not reserve space
+           for a touch navbar (it otherwise adds ~56px as host padding-bottom →
+           a phantom scrollbar of exactly the bar height once the view content
+           fills the viewport, on every browser). AppLayout applies that offset
+           via its own ":host" rule (and, on some versions, an inline style set
+           from JS); both outrank a plain "vaadin-app-layout { padding-bottom: 0 }"
+           on those versions, so this needs !important to reliably win. */
+        padding-bottom: 0 !important;
+        --vaadin-app-layout-navbar-offset-bottom: 0 !important;
+    }
+
+    vaadin-app-layout::part(content) {
+        background: var(--vaadin-background-color) !important;
+    }
+}
+
+/*
+ * This layout renders the view header (toggle + title) inside the content, so
+ * the top navbar is unused. Collapse it so AppLayout does not reserve a wasted
+ * full-width bar. The bottom navbar (navbar-bottom) is untouched.
+ */
+vaadin-app-layout::part(navbar-top) {
+    display: none;
+}
+
+/* Content with an in-content header row on top; both scroll with the content.
+   border-box so the bottom clearance padding counts within a fill view's height
+   (min-height: 100dvh) instead of overflowing it. */
+.mobile-content {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* The header row: drawer toggle, large title, per-view helpers on the right.
+   Its inline padding matches the inset that Vaadin layouts give their content
+   (--lumo-space-m in Lumo, 1rem otherwise — both resolve to the 16px a default
+   VerticalLayout uses), so the toggle and title line up with the view content
+   instead of adding a second margin. */
+.mobile-content-header {
+    display: flex;
+    align-items: center;
+    gap: var(--vaadin-gap-xs);
+    padding: var(--vaadin-padding-m)
+             var(--lumo-space-m, 1rem)
+             var(--vaadin-padding-xs);
+    /* Keep the title clear of the status bar / dynamic island when content runs
+       edge-to-edge (env() is 0 unless viewport-fit=cover is active). */
+    padding-top: calc(var(--vaadin-padding-m) + env(safe-area-inset-top));
+    /* Set the header a touch apart from the view content below it. */
+    margin-bottom: var(--vaadin-gap-s);
+}
+
+/*
+ * Body/page scrolling mode (setBodyScrolling(true)): undo Flow's default
+ * height:100% on html/body/#outlet so the whole page scrolls instead of the
+ * content area. The mobile browser's address bar can then collapse, and when the
+ * application's viewport uses viewport-fit=cover, content scrolls edge-to-edge
+ * under the status bar / dynamic island. AppLayout grows with the content
+ * (min-height keeps it filling the viewport when content is short).
+ *
+ * Scoped to the small/touch breakpoint (the same ≈800px where AppLayout switches
+ * to the bottom bar): edge-to-edge page scrolling is a phone concern, and on a
+ * wide screen the persistent drawer still wants the normal full-height layout.
+ */
+@media (max-width: 800px), (max-height: 600px) {
+    html.viritin-body-scroll,
+    html.viritin-body-scroll body,
+    html.viritin-body-scroll #outlet {
+        height: auto;
+        min-height: 100%;
+    }
+
+    html.viritin-body-scroll vaadin-app-layout {
+        height: auto;
+        min-height: 100dvh;
+    }
+}
+
+/* Strip the drawer toggle's button chrome so it shrink-wraps its icon: no outer
+   margin, no inner padding and no min-size box centering the icon. Its left edge
+   then sits on the header's inline padding (the content margin). A small inline-end
+   margin sets it a touch apart from the title so the two read as separate elements
+   rather than a cramped pair. It is only ever shown on non-touch screens here, so
+   the smaller hit area is fine. */
+.mobile-drawer-toggle {
+    margin: 0;
+    margin-inline-end: var(--vaadin-gap-s);
+    padding: 0;
+    min-width: 0;
+    min-height: 0;
+    width: auto;
+    height: auto;
+    color: var(--vaadin-text-color-secondary);
+    /* Aura paints a border, a translucent "glass" background and a shadow on the
+       toggle's button host; flatten it to a bare icon (Lumo's is already bare).
+       The background needs !important to beat Aura's own :host rule. */
+    border: none;
+    background: transparent !important;
+    box-shadow: none;
+}
+
+.mobile-view-title {
+    /* Moderate by default — on a wide desktop this reads as a normal app-bar
+       heading next to the toggle, not an oversized banner. */
+    font-size: 1.25rem;
+    line-height: 1.1;
+    margin: 0;
+    flex: 1; /* take the slack so helpers sit at the right edge */
+}
+
+/* Phone-like mode (bottom bar shown) keeps the larger, native-style scroll-away
+   heading the title is designed for. */
+vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-view-title {
+    font-size: 1.5rem;
+}
+
+.mobile-content-header-helpers {
+    display: flex;
+    align-items: center;
+    gap: var(--vaadin-gap-s);
+}
+
+/*
+ * The drawer toggle is the universal way to open the drawer on wide screens and
+ * on narrow non-touch screens (where there is no bottom bar). On a touch phone
+ * the bottom bar is shown and its "More" reaches the drawer, so the toggle would
+ * be redundant — hide it exactly then (i.e. when the bottom bar sits at the
+ * bottom, slot "navbar-bottom").
+ */
+vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-drawer-toggle {
+    display: none;
+}
+
+/* When the in-content title is disabled (setViewTitleVisible(false)) and the
+   bottom bar is showing (touch phone), the header row has nothing left to show
+   (the toggle is hidden there too), so collapse it — apps that render their own
+   heading then get no extra band. On wider screens the header stays for the
+   toggle. */
+vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-content-header.no-view-title {
+    display: none;
+}
+
+/* ---------- Aura: iOS "liquid glass" floating bottom bar ----------
+ *
+ * On the Aura theme the bottom bar becomes a rounded, translucent "glass" pill
+ * that floats over the content, the way the tab bar does in recent iOS apps
+ * (Mail, Instagram). Gated on Aura's marker (--vaadin-aura-theme: 1, inherited
+ * from :root and set by the Aura theme itself) via a style container query,
+ * since Aura is applied as a bundle with no theme attribute/class to select on.
+ *
+ * Aura already renders the bottom-navbar PART (#navbarBottom) as a fixed,
+ * frosted (backdrop-filter) overlay that the content scrolls under. We use that
+ * native glass directly — just reshaping the part into an inset, rounded pill —
+ * rather than stripping it and adding our own blur on the bar (a nested
+ * backdrop-filter would be cancelled, notably on iOS). Our bar inside stays
+ * transparent and only lays out the items.
+ */
+@container style(--vaadin-aura-theme: 1) {
+    vaadin-app-layout::part(navbar-bottom) {
+        /* Inset Aura's fixed glass bar into a floating pill (clearing the home
+           indicator). Keep Aura's own backdrop-filter, only tuning its radius. */
+        left: var(--vaadin-padding-l);
+        right: var(--vaadin-padding-l);
+        bottom: calc(var(--vaadin-padding-m) + env(safe-area-inset-bottom));
+        width: auto;
+        /* Drop Aura's own navbar padding; our bar provides its own inset, so this
+           padding would only make the pill needlessly tall. */
+        padding: 0;
+        border: 1px solid light-dark(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.12));
+        border-radius: 999px;
+        box-shadow:
+            inset 0 1px 0 0 light-dark(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.08)),
+            0 12px 32px rgba(0, 0, 0, 0.22);
+        -webkit-backdrop-filter: blur(8px) saturate(180%);
+        backdrop-filter: blur(8px) saturate(180%);
+        transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+
+    /* The bar flows inside Aura's glass part (so the part wraps and frosts it),
+       with padding to inset the items from the rounded corners. The contrast
+       tint lives here, on our own element, rather than on Aura's part: a light
+       wash in light mode (so the dark icons read) and a dark wash in dark mode
+       (so the light icons read), over the part's frosted backdrop. Putting it on
+       the part would compete with Aura's own part background and lose whenever
+       the Aura stylesheet happens to load after ours (as in app projects); the
+       bar is ours alone, so this always wins. The pill radius matches the part
+       so the wash keeps the rounded shape. */
+    .mobile-bottom-nav[slot="navbar-bottom"] {
+        position: static;
+        /* Grow to fill the part's width — as a flex child of Aura's navbar it
+           would otherwise shrink to the items' intrinsic width (~half). */
+        flex: 1;
+        background-color: light-dark(rgb(232 232 232 / 0.3), rgb(12 12 12 / 0.3));
+        border: 0;
+        border-radius: 999px;
+        /* The active item's lozenge colour for Aura's glass bar. Exposed as a
+           static, theme-gated custom property here and applied on [highlight]
+           OUTSIDE this style container query (see the global rule): Safari does
+           not re-evaluate a style container query when a descendant's attribute
+           toggles, so a [highlight] rule placed inside this block would fail to
+           repaint the lozenge on client navigation (it worked only on first load). */
+        --mobile-nav-highlight-bg: light-dark(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.16));
+        padding: 5px;
+    }
+
+    /* Hide-on-scroll moves the glass pill (the part), not just the items inside,
+       so cancel the base transform on the bar and apply it to the part. */
+    .mobile-bottom-nav[slot="navbar-bottom"].mobile-bottom-nav--hidden {
+        transform: none;
+        opacity: 1;
+    }
+
+    vaadin-app-layout:has(.mobile-bottom-nav.mobile-bottom-nav--hidden)::part(navbar-bottom) {
+        transform: translateY(calc(100% + var(--vaadin-padding-l)));
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    /* The active item's lozenge (colour + pill rounding) is applied on [highlight]
+       in the global rule, deliberately kept out of this style container query so
+       Safari repaints it on client navigation. */
+}
+
+/* ---------- Two-level groups: popover from a bottom-bar group item ---------- */
+
+/* The popover (opened by tapping a group item) lists the group's child views as
+   a vertical icon + label menu. The popover surface itself is the theme's own
+   (Lumo/Aura) overlay; we only lay out its contents. */
+.mobile-bottom-nav-popover-list {
+    display: flex;
+    flex-direction: column;
+    min-width: 12rem;
+}
+
+.mobile-bottom-nav-popover-item {
+    display: flex;
+    align-items: center;
+    gap: var(--vaadin-gap-s);
+    padding: var(--vaadin-padding-s) var(--vaadin-padding-m);
+    color: var(--vaadin-text-color);
+    text-decoration: none; /* it is an <a> (RouterLink) */
+}
+
+.mobile-bottom-nav-popover-item vaadin-icon {
+    width: var(--vaadin-icon-size, 1.5rem);
+    height: var(--vaadin-icon-size, 1.5rem);
+    color: var(--vaadin-text-color-secondary);
+}
+
+.mobile-bottom-nav-popover-item[highlight] {
+    color: var(--aura-accent-text-color, var(--lumo-primary-text-color));
+}
+
+/* ---------- Full-size view: fill the available content area ----------
+ *
+ * Set by MobileMainLayout when the shown view asks to fill (setSizeFull / 100%
+ * height). The content column is given a definite height (the viewport) and the
+ * view takes the space left by the header via flex, so its 100% height resolves
+ * instead of collapsing in the otherwise auto-height (body-scrolling) layout.
+ */
+.mobile-content.mobile-content--fill {
+    flex: 1;
+}
+
+/* Desktop: the content area has a definite height (a wide drawer layout), so fill
+   it exactly — using 100dvh here would overshoot it (Aura's content inset) and add
+   a scrollbar. */
+@media (min-width: 801px) and (min-height: 601px) {
+    .mobile-content.mobile-content--fill {
+        height: 100%;
+    }
+}
+
+/* Small/handheld: heights are auto (body scrolling), so pin to the viewport. */
+@media (max-width: 800px), (max-height: 600px) {
+    .mobile-content.mobile-content--fill {
+        min-height: 100dvh;
+    }
+}
+
+.mobile-content--fill > :not(.mobile-content-header) {
+    flex: 1 1 0;
+    min-height: 0;
+}

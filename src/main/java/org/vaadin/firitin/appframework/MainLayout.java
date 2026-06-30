@@ -211,8 +211,11 @@ public abstract class MainLayout extends VAppLayout {
 
         sortMenuItems(navigationItems);
 
+        List<NavigationItem> visibleItems = navigationItems.stream()
+                .filter(this::checkAccess).toList();
+
         getMenu().removeAll();
-        navigationItems.stream().filter(this::checkAccess).forEach(item -> {
+        visibleItems.forEach(item -> {
             translateItem(item);
             getMenu().addNavigationItem(item);
             // possible sub-items
@@ -223,6 +226,43 @@ public abstract class MainLayout extends VAppLayout {
                 item.addSubItem(subItem);
             });
         });
+
+        onMenuBuilt(visibleItems);
+    }
+
+    /**
+     * Called at the end of {@link #buildMenu()} with the visible, access-filtered
+     * and ordered top-level navigation items (the same ones just rendered into
+     * the drawer {@link #getMenu() SideNav}). The default implementation does
+     * nothing.
+     * <p>
+     * Subclasses can use this to build an <em>additional</em> navigation
+     * presentation from the same model, e.g. a mobile bottom navigation bar (see
+     * {@link MobileMainLayout}). The items carry their navigation target, icon
+     * ({@link MenuItem}/{@link Menu}) and translated label, so the alternative
+     * presentation stays in sync with access control, ordering and i18n for
+     * free. It is called again whenever the menu is rebuilt (routes added or
+     * removed), so rebuild the alternative presentation from scratch here.
+     *
+     * @param topLevelItems the visible top-level items, in menu order
+     */
+    protected void onMenuBuilt(List<NavigationItem> topLevelItems) {
+    }
+
+    /**
+     * The child navigation items of the given (parent/group) item, in menu order.
+     * Empty for a leaf item. Useful for an alternative presentation that wants to
+     * render two-level hierarchies itself (e.g. {@link MobileMainLayout} opening a
+     * group's children in a popover instead of a drawer sub-menu).
+     *
+     * @param parent the parent item
+     * @return its direct children, sorted as in the menu
+     */
+    protected List<NavigationItem> getChildItems(NavigationItem parent) {
+        List<NavigationItem> children = new ArrayList<>(targetToItem.values().stream()
+                .filter(ni -> ni.getParentItem() == parent).toList());
+        sortMenuItems(children);
+        return children;
     }
 
     private void translateItem(NavigationItem item) {
