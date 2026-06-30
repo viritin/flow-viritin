@@ -11,7 +11,7 @@
 
     <groupId>in.virit</groupId>
     <artifactId>viritin</artifactId>
-    <version>3.7.0</version>
+    <version>3.7.1-SNAPSHOT</version>
     <name>Flow Viritin</name>
     <packaging>jar</packaging>
     <description>General purpose helpers for Vaadin users. Java only additions, that don't require custom client-bundle.</description>
@@ -37,7 +37,7 @@
         <url>https://github.com/viritin/flow-viritin</url>
         <connection>scm:git:git://github.com/viritin/flow-viritin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:/viritin/flow-viritin.git</developerConnection>
-      <tag>viritin-3.7.0</tag>
+      <tag>viritin-2.19.2</tag>
   </scm>
 
     <issueManagement>
