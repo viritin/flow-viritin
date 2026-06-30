@@ -1,8 +1,10 @@
 package org.vaadin.firitin.appframework;
 
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.router.Menu;
 import org.vaadin.firitin.util.style.VaadinCssProps;
 
+@StyleSheet("context://assets/org/vaadin/firitin/components/app-side-nav.css")
 public class SubMenu extends AdvancedSideNav implements NavigationItem {
 
     private final Class<?> navigationTarget;

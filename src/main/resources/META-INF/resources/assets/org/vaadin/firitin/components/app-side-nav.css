@@ -1,0 +1,21 @@
+/*
+ * Drawer sub-menu (nested side-nav) alignment fix for the appframework.
+ *
+ * A SubMenu is a nested <vaadin-side-nav> placed inside the drawer's side-nav,
+ * and its items carry our GAP_L host padding so they read as a child level.
+ * In Lumo that single padding is the whole indent (~16px). Aura additionally
+ * indents items of a nested side-nav on its own, via a generated indent before
+ * the content (driven by --vaadin-side-nav-child-indent), so the two stack and
+ * the sub-item ends up pushed roughly twice as far in as in Lumo.
+ *
+ * Zero Aura's built-in child indent for these items so only our GAP_L padding
+ * applies — matching Lumo exactly. Using the public token (rather than tweaking
+ * the content part's padding/gap) keeps Aura's hover highlight and icon spacing
+ * intact. Scoped to items inside a side-nav nested in another side-nav, so
+ * top-level items are untouched.
+ */
+@container style(--vaadin-aura-theme: 1) {
+    vaadin-side-nav vaadin-side-nav vaadin-side-nav-item {
+        --vaadin-side-nav-child-indent: 0;
+    }
+}
