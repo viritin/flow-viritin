@@ -317,7 +317,6 @@ public class FormBinderKnownIssuesTest {
      * would both do. The check is cheap: the display is the form's own field.
      */
     @Test
-    @Disabled("Today: the message goes into a Div with no parent, and is never seen")
     public void aClassLevelViolationIsShownEvenIfTheLayoutForgotTheDisplay() {
         CustomLayoutForm form = new CustomLayoutForm();
         form.setEntity(new CommentAndTarget("ok", 40.0));

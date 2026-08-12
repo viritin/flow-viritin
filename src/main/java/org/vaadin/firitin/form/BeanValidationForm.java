@@ -213,7 +213,26 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
     protected void lazyInit() {
         if (!getContent().getChildren().findAny().isPresent()) {
             getContent().add(createContent());
+            ensureClassLevelViolationsAreVisible();
             bind();
+        }
+    }
+
+    /**
+     * Puts the class level violation display into the form if the content did not
+     * take it.
+     * <p>
+     * The default {@link #createContent()} adds it, but any form that lays itself
+     * out is free to forget — and then every violation that belongs to no single
+     * field is rendered into a component with no parent, where nobody sees it.
+     * Since class level constraints are much of the reason to use this form at all,
+     * losing them silently is the worst of the options; appending the display is
+     * the least surprising of the rest.
+     */
+    private void ensureClassLevelViolationsAreVisible() {
+        Component display = getClassLevelViolationsDisplay();
+        if (display.getParent().isEmpty()) {
+            getContent().add(display);
         }
     }
 
