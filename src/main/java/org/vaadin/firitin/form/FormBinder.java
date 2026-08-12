@@ -570,6 +570,10 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         for (int i = 0; i < annotatedConstructor.getParameterCount(); i++) {
             BeanPropertyDefinition definition = properties.get(i);
             HasValue hasValue = bpdToEditorField.get(definition);
+            if (hasValue == null) {
+                args[i] = unboundComponentValue(definition);
+                continue;
+            }
             Object value = hasValue.getValue();
             value = convertInputValue(value, definition, fakeValueContext(hasValue));
             args[i] = value;
@@ -585,6 +589,40 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * The value for a record component that no editor was bound to.
+     * <p>
+     * Not every component of a record is edited: an identifier, a creation time or
+     * a version belongs to the value but has no business being on screen. Those are
+     * carried over from the object that was set, which is the only place they can
+     * come from and the only answer that keeps a record usable as the value of a
+     * form. Previously this was a NullPointerException naming neither the record nor
+     * the component, and the way around it was to split the record in two.
+     *
+     * @param definition the component with no editor
+     * @return the value it had in the object last set
+     */
+    private Object unboundComponentValue(BeanPropertyDefinition definition) {
+        if (valueObject != null) {
+            AnnotatedMember accessor = definition.getAccessor();
+            /*
+               The same access fix a bound property gets when it is bound. Without
+               it this reads only from public types, and an application's own DTO —
+               a record nested in the form class that uses it — is not one.
+            */
+            accessor.fixAccess(true);
+            return accessor.getValue(valueObject);
+        }
+        if (definition.getRawPrimaryType().isPrimitive()) {
+            // Nothing to carry over, and null is not a value this component can take.
+            throw new IllegalStateException("Cannot construct %s: its component '%s' has no editor"
+                    .formatted(bbd.getType().getRawClass().getName(), definition.getName())
+                    + " field to read from, no value has been set to read it from either, and"
+                    + " %s cannot be null.".formatted(definition.getRawPrimaryType().getName()));
+        }
+        return null;
     }
 
     protected T constructPojo() {

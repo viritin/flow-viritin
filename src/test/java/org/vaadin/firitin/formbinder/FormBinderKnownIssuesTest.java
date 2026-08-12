@@ -51,6 +51,11 @@ public class FormBinderKnownIssuesTest {
                                    @NotNull @Positive Double target) {
     }
 
+    /** Not public on purpose: an application's own DTOs rarely are. */
+    record HiddenEdit(long id, @Size(max = 4) String comment,
+                      @NotNull @Positive Double target) {
+    }
+
     /** The same shape as a mutable bean, which the binder writes into in place. */
     public static class CommentAndTargetBean {
         @Size(max = 4)
@@ -214,7 +219,6 @@ public class FormBinderKnownIssuesTest {
      * in a closure.
      */
     @Test
-    @Disabled("Today: NullPointerException in constructRecord, 'hasValue is null'")
     public void aRecordComponentWithoutAnEditorKeepsTheValueItWasGiven() {
         TwoFieldForm form = new TwoFieldForm();
         FormBinder<CounterEdit> binder = new FormBinder<>(CounterEdit.class, form);
@@ -225,6 +229,40 @@ public class FormBinderKnownIssuesTest {
         CounterEdit edited = binder.getValue();
         Assertions.assertEquals("peura", edited.comment());
         Assertions.assertEquals(7, edited.id(), "the unedited component should survive");
+    }
+
+    /**
+     * The same for a record that is not public, which is what a DTO nested in an
+     * application's own form class usually is. Reading it takes the same access fix
+     * that a bound property gets — found by running a real application against this,
+     * where every such record is package private.
+     */
+    @Test
+    public void anUnboundComponentOfAPackagePrivateRecordIsReadable() {
+        TwoFieldForm form = new TwoFieldForm();
+        FormBinder<HiddenEdit> binder = new FormBinder<>(HiddenEdit.class, form);
+        binder.setValue(new HiddenEdit(7, "hirvi", 40.0));
+
+        form.comment.setValue("peura");
+
+        Assertions.assertEquals(7, binder.getValue().id());
+    }
+
+    /**
+     * The case that cannot be carried over: no editor, nothing set to read from,
+     * and a component that cannot be null. The value is genuinely unavailable, so
+     * this has to fail — but it should say which component and why.
+     */
+    @Test
+    public void anUnboundPrimitiveComponentWithNothingSetIsDiagnosable() {
+        TwoFieldForm form = new TwoFieldForm();
+        FormBinder<CounterEdit> binder = new FormBinder<>(CounterEdit.class, form);
+
+        IllegalStateException failure =
+                Assertions.assertThrows(IllegalStateException.class, binder::getValue);
+
+        Assertions.assertTrue(failure.getMessage().contains("id"),
+                "the component should be named: " + failure.getMessage());
     }
 
     // ------------------------------------------------------------------
