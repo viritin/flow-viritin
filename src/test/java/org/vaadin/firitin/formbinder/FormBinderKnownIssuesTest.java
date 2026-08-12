@@ -7,10 +7,14 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -49,6 +53,26 @@ public class FormBinderKnownIssuesTest {
 
     public record CommentAndTarget(@Size(max = 4) String comment,
                                    @NotNull @Positive Double target) {
+    }
+
+    /** Bounds that a field can state exactly as the constraint does. */
+    public record Bounded(@Min(1) @Max(9) Double amount,
+                          @DecimalMin("1.5") Integer count) {
+    }
+
+    public static class BoundedForm extends VerticalLayout {
+        NumberField amount = new NumberField();
+        IntegerField count = new IntegerField();
+    }
+
+    /** A form that already limits a field more tightly than the annotation does. */
+    public static class PreConfiguredForm extends VerticalLayout {
+        TextField comment = new TextField();
+        NumberField target = new NumberField();
+
+        public PreConfiguredForm() {
+            comment.setMaxLength(2);
+        }
     }
 
     /** Not public on purpose: an application's own DTOs rarely are. */
@@ -300,17 +324,53 @@ public class FormBinderKnownIssuesTest {
      * pieces and could do it.
      */
     @Test
-    @Disabled("Today: only @NotNull is applied, as the required indicator")
     public void constraintsAreAppliedToTheFieldsThatCanEnforceThem() {
         TwoFieldForm form = new TwoFieldForm();
         new FormBinder<>(CommentAndTarget.class, form);
 
-        // This part already works today.
+        // This part already worked.
         Assertions.assertTrue(form.target.isRequiredIndicatorVisible(),
                 "@NotNull should make the field required");
 
         Assertions.assertEquals(4, form.comment.getMaxLength(), "@Size(max = 4)");
-        Assertions.assertTrue(form.target.getMin() > 0, "@Positive");
+    }
+
+    /*
+       A field's minimum is inclusive and @Positive is not, and there is no next
+       double after zero to use instead. A field that allowed zero while the
+       constraint refused it would be a worse lie than no limit at all, so the
+       server side keeps that one to itself.
+    */
+    @Test
+    public void aStrictBoundIsNotHandedToTheField() {
+        TwoFieldForm form = new TwoFieldForm();
+        new FormBinder<>(CommentAndTarget.class, form);
+
+        Assertions.assertFalse(Double.isFinite(form.target.getMin()),
+                "@Positive is strict; an inclusive minimum cannot say the same thing");
+    }
+
+    @Test
+    public void inclusiveBoundsReachTheField() {
+        BoundedForm form = new BoundedForm();
+        new FormBinder<>(Bounded.class, form);
+
+        Assertions.assertEquals(1.0, form.amount.getMin(), "@Min(1)");
+        Assertions.assertEquals(9.0, form.amount.getMax(), "@Max(9)");
+        Assertions.assertEquals(2, form.count.getMin(), "@DecimalMin(\"1.5\") rounded towards valid");
+    }
+
+    /**
+     * The developer knew something the annotation does not — a target that has to be
+     * at least one degree-day, say, where the constraint only says "positive". The
+     * limit they set stays, and the constraint is still checked where it always was.
+     */
+    @Test
+    public void aLimitTheDeveloperSetIsKept() {
+        PreConfiguredForm form = new PreConfiguredForm();
+        new FormBinder<>(CommentAndTarget.class, form);
+
+        Assertions.assertEquals(2, form.comment.getMaxLength());
     }
 
     // ------------------------------------------------------------------

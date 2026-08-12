@@ -13,10 +13,23 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NegativeOrZero;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import org.vaadin.firitin.util.JacksonIntrospection;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
@@ -27,8 +40,10 @@ import tools.jackson.databind.introspect.AnnotatedMember;
 import tools.jackson.databind.introspect.BasicBeanDescription;
 import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,6 +52,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.DoubleBinaryOperator;
+import java.util.function.IntConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -314,6 +331,160 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         return false;
     }
 
+    /**
+     * Hands the constraints a field can enforce itself over to the field.
+     * <p>
+     * {@code @NotNull} has always reached the widget as a required indicator, and
+     * that one mapping does real work: a required field refuses to be emptied, so
+     * the constraint is met in the browser rather than reported after the fact. The
+     * same is available for the limits — {@code @Size(max = 64)} is a maxlength, and
+     * the developer should not have to write it twice.
+     * <p>
+     * Only bounds that mean exactly what the field means:
+     * <ul>
+     * <li>a limit the developer already set is kept. They knew something; the
+     * constraint is still checked where it always was.
+     * <li>strict bounds are left out. {@code @Positive} is "greater than zero" while
+     * a field's minimum is inclusive, and there is no next double after zero to use
+     * instead. A field that allowed zero while the constraint refused it would be a
+     * worse lie than no limit at all.
+     * <li>{@code @Pattern} is left out too: the expression would be handed to the
+     * browser, and a Java regular expression is not a JavaScript one.
+     * <li>constraints belonging to a validation group are left out. Which groups
+     * are active is decided after binding, and a limit cannot be un-set per group.
+     * </ul>
+     * Everything skipped here is still validated where it always was.
+     *
+     * @param property the property being bound
+     * @param hasValue the editor bound to it
+     */
+    protected void applyConstraintsToEditor(BeanPropertyDefinition property, HasValue<?, ?> hasValue) {
+        try {
+            applyLengthLimits(property, hasValue);
+            applyValueBounds(property, hasValue);
+        } catch (NoClassDefFoundError e) {
+            // Bean Validation is optional here, and so are the field types below.
+        }
+    }
+
+    private static void applyLengthLimits(BeanPropertyDefinition property, HasValue<?, ?> hasValue) {
+        Size size = defaultGroupConstraint(property, Size.class);
+        if (size == null) {
+            return;
+        }
+        if (hasValue instanceof TextField f) {
+            applyLengthLimits(size, f.getMaxLength(), f::setMaxLength, f.getMinLength(), f::setMinLength);
+        } else if (hasValue instanceof TextArea f) {
+            applyLengthLimits(size, f.getMaxLength(), f::setMaxLength, f.getMinLength(), f::setMinLength);
+        } else if (hasValue instanceof PasswordField f) {
+            applyLengthLimits(size, f.getMaxLength(), f::setMaxLength, f.getMinLength(), f::setMinLength);
+        } else if (hasValue instanceof EmailField f) {
+            applyLengthLimits(size, f.getMaxLength(), f::setMaxLength, f.getMinLength(), f::setMinLength);
+        }
+    }
+
+    /* Zero is what an unset length limit reads as in all of these fields. */
+    private static void applyLengthLimits(Size size, int currentMax, IntConsumer setMax,
+                                          int currentMin, IntConsumer setMin) {
+        if (size.max() != Integer.MAX_VALUE && currentMax <= 0) {
+            setMax.accept(size.max());
+        }
+        if (size.min() > 0 && currentMin <= 0) {
+            setMin.accept(size.min());
+        }
+    }
+
+    private static void applyValueBounds(BeanPropertyDefinition property, HasValue<?, ?> hasValue) {
+        Double min = lowerBound(property);
+        Double max = upperBound(property);
+        if (min == null && max == null) {
+            return;
+        }
+        if (hasValue instanceof NumberField f) {
+            // An unset bound reads as an infinity here.
+            if (min != null && !Double.isFinite(f.getMin())) {
+                f.setMin(min);
+            }
+            if (max != null && !Double.isFinite(f.getMax())) {
+                f.setMax(max);
+            }
+        } else if (hasValue instanceof IntegerField f) {
+            // ...and as the extreme of the type here.
+            if (min != null && f.getMin() == Integer.MIN_VALUE) {
+                f.setMin((int) Math.ceil(min));
+            }
+            if (max != null && f.getMax() == Integer.MAX_VALUE) {
+                f.setMax((int) Math.floor(max));
+            }
+        }
+    }
+
+    /** The tightest lower bound stated inclusively, or null if none is. */
+    private static Double lowerBound(BeanPropertyDefinition property) {
+        Double bound = null;
+        Min min = defaultGroupConstraint(property, Min.class);
+        if (min != null) {
+            bound = (double) min.value();
+        }
+        DecimalMin decimalMin = defaultGroupConstraint(property, DecimalMin.class);
+        if (decimalMin != null && decimalMin.inclusive()) {
+            bound = tightest(bound, new BigDecimal(decimalMin.value()).doubleValue(), Math::max);
+        }
+        if (defaultGroupConstraint(property, PositiveOrZero.class) != null) {
+            bound = tightest(bound, 0d, Math::max);
+        }
+        return bound;
+    }
+
+    /** The tightest upper bound stated inclusively, or null if none is. */
+    private static Double upperBound(BeanPropertyDefinition property) {
+        Double bound = null;
+        Max max = defaultGroupConstraint(property, Max.class);
+        if (max != null) {
+            bound = (double) max.value();
+        }
+        DecimalMax decimalMax = defaultGroupConstraint(property, DecimalMax.class);
+        if (decimalMax != null && decimalMax.inclusive()) {
+            bound = tightest(bound, new BigDecimal(decimalMax.value()).doubleValue(), Math::min);
+        }
+        if (defaultGroupConstraint(property, NegativeOrZero.class) != null) {
+            bound = tightest(bound, 0d, Math::min);
+        }
+        return bound;
+    }
+
+    private static Double tightest(Double current, double candidate, DoubleBinaryOperator tighter) {
+        return current == null ? candidate : tighter.applyAsDouble(current, candidate);
+    }
+
+    /**
+     * The constraint of the given type on a property, if it applies whatever the
+     * validation groups are.
+     */
+    private static <A extends Annotation> A defaultGroupConstraint(BeanPropertyDefinition property,
+                                                                   Class<A> type) {
+        AnnotatedMember accessor = property.getAccessor();
+        A annotation = accessor == null ? null : accessor.getAnnotation(type);
+        if (annotation == null) {
+            AnnotatedField field = property.getField();
+            annotation = field == null ? null : field.getAnnotation(type);
+        }
+        return annotation != null && groupsOf(annotation).length == 0 ? annotation : null;
+    }
+
+    private static Class<?>[] groupsOf(Annotation annotation) {
+        return switch (annotation) {
+            case Size a -> a.groups();
+            case Min a -> a.groups();
+            case Max a -> a.groups();
+            case DecimalMin a -> a.groups();
+            case DecimalMax a -> a.groups();
+            case PositiveOrZero a -> a.groups();
+            case NegativeOrZero a -> a.groups();
+            default -> new Class<?>[0];
+        };
+    }
+
     protected boolean isReadOnly(BeanPropertyDefinition property) {
         if(!property.hasSetter()) {
             return !this.bbd.isRecordType();
@@ -338,6 +509,8 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     }
 
     protected void configureEditor(BeanPropertyDefinition property, HasValue hasValue) {
+
+        applyConstraintsToEditor(property, hasValue);
 
         if (hasValue instanceof HasValueChangeMode hvcm) {
             /*
