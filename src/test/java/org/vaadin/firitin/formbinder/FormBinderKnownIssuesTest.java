@@ -378,7 +378,6 @@ public class FormBinderKnownIssuesTest {
      * reader types is a deliberate choice, and it silently becomes lazy.
      */
     @Test
-    @Disabled("Today: the mode set before binding is overwritten with LAZY")
     public void aValueChangeModeSetByTheDeveloperIsRespected() {
         TwoFieldForm form = new TwoFieldForm();
         form.comment.setValueChangeMode(ValueChangeMode.EAGER);
@@ -386,6 +385,9 @@ public class FormBinderKnownIssuesTest {
         new FormBinder<>(CommentAndTarget.class, form);
 
         Assertions.assertEquals(ValueChangeMode.EAGER, form.comment.getValueChangeMode());
+        // The default is still lazy, which is what keeps validation off every keystroke.
+        Assertions.assertEquals(ValueChangeMode.LAZY, form.target.getValueChangeMode(),
+                "a field the developer did not configure should still become lazy");
     }
 
     // ------------------------------------------------------------------

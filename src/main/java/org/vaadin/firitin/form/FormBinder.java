@@ -340,7 +340,19 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     protected void configureEditor(BeanPropertyDefinition property, HasValue hasValue) {
 
         if (hasValue instanceof HasValueChangeMode hvcm) {
-            hvcm.setValueChangeMode(ValueChangeMode.LAZY);
+            /*
+               Lazy by default, because a binder that hears about every keystroke
+               validates on every keystroke. But only where the developer has not
+               said otherwise: BeanValidationForm's own documentation tells them to
+               "configure e.g. with setValueChangeMode", and quietly overwriting
+               what they configured made that advice false. EAGER is the one that
+               matters in practice — a form that reacts as the reader types is a
+               deliberate choice.
+            */
+            ValueChangeMode mode = hvcm.getValueChangeMode();
+            if (mode == null || mode == ValueChangeMode.ON_CHANGE) {
+                hvcm.setValueChangeMode(ValueChangeMode.LAZY);
+            }
         }
         if (!isImmutable()) {
             ValueContext ctx = fakeValueContext(hasValue);
