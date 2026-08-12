@@ -20,7 +20,6 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.vaadin.firitin.form.BeanValidationForm;
 import org.vaadin.firitin.form.FormBinder;
@@ -30,9 +29,12 @@ import org.vaadin.firitin.form.FormBinder;
  * where the binder either fails in a way that does not name its cause, or leaves
  * work to the developer that it has all the information to do itself.
  *
- * <p>Every test here asserts the <b>desired</b> behaviour and is therefore
- * disabled: removing the {@code @Disabled} is what a fix looks like. The reason
- * on each says what happens today.
+ * <p>They were written as the list of what was wrong: each asserted the desired
+ * behaviour and was disabled with what happened at the time, and removing that
+ * annotation was what a fix looked like. The list is empty now, so they are simply
+ * tests — of a null value, of inherited fields, of a record component nothing
+ * edits, of where a class level violation goes, of what a form does with the entity
+ * it is given, and of which constraints a field can enforce for itself.
  *
  * <p>These are headless — no UI, no session — like the rest of
  * {@link FormBinderTest}.
