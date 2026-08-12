@@ -51,6 +51,39 @@ public class FormBinderKnownIssuesTest {
                                    @NotNull @Positive Double target) {
     }
 
+    /** The same shape as a mutable bean, which the binder writes into in place. */
+    public static class CommentAndTargetBean {
+        @Size(max = 4)
+        private String comment;
+        @NotNull
+        @Positive
+        private Double target;
+
+        public CommentAndTargetBean() {
+        }
+
+        public CommentAndTargetBean(String comment, Double target) {
+            this.comment = comment;
+            this.target = target;
+        }
+
+        public String getComment() {
+            return comment;
+        }
+
+        public void setComment(String comment) {
+            this.comment = comment;
+        }
+
+        public Double getTarget() {
+            return target;
+        }
+
+        public void setTarget(Double target) {
+            this.target = target;
+        }
+    }
+
     public static class TwoFieldForm extends VerticalLayout {
         TextField comment = new TextField();
         NumberField target = new NumberField();
@@ -106,9 +139,14 @@ public class FormBinderKnownIssuesTest {
      * {@link BeanValidationForm#setEntity(null)} calls exactly this. Clearing the
      * editors is the obvious meaning; today the property loop asks Jackson for a
      * property of null.
+     *
+     * <p>Null is the binder's empty value — there is no other candidate for a
+     * type it does not construct — so {@code clear()}, which {@code HasValue}
+     * defines as {@code setValue(getEmptyValue())}, has to mean the same thing.
+     * Each editor is cleared to <em>its own</em> empty value, which is why the
+     * text field ends up at "" and the number field at null.
      */
     @Test
-    @Disabled("Today: NullPointerException from accessor.getValue(null) in setValue")
     public void aNullValueClearsTheEditors() {
         TwoFieldForm form = new TwoFieldForm();
         FormBinder<CommentAndTarget> binder = new FormBinder<>(CommentAndTarget.class, form);
@@ -118,6 +156,32 @@ public class FormBinderKnownIssuesTest {
 
         Assertions.assertEquals("", form.comment.getValue());
         Assertions.assertNull(form.target.getValue());
+
+        // The inherited shorthand takes the same route and must survive it.
+        binder.setValue(new CommentAndTarget("hirvi", 40.0));
+        Assertions.assertDoesNotThrow(binder::clear);
+        Assertions.assertEquals("", form.comment.getValue());
+    }
+
+    /**
+     * The same for a mutable bean, where clearing the editors fires value change
+     * events that the binder writes back into the bean — except that there is no
+     * longer a bean to write into. Observing server originated changes is not the
+     * default, but it is offered, and it is what a test does.
+     */
+    @Test
+    public void aMutableBeanFormCanBeEmptiedWhileServerChangesAreObserved() {
+        TwoFieldForm form = new TwoFieldForm();
+        FormBinder<CommentAndTargetBean> binder =
+                new FormBinder<>(CommentAndTargetBean.class, form);
+        binder.setIgnoreServerOriginatedChanges(false);
+        binder.setValue(new CommentAndTargetBean("hirvi", 40.0));
+
+        Assertions.assertDoesNotThrow(() -> binder.setValue(null));
+
+        Assertions.assertEquals("", form.comment.getValue());
+        // With nothing bound, the binder builds a new bean from the empty editors.
+        Assertions.assertNotNull(binder.getValue());
     }
 
     /**
@@ -125,7 +189,6 @@ public class FormBinderKnownIssuesTest {
      * "the currently edited entity or null if the form is currently unbound".
      */
     @Test
-    @Disabled("Today: NullPointerException, via binder.setValue(null) in setEntity")
     public void anEntityCanBeSetToNullToUnbindTheForm() {
         CustomLayoutForm form = new CustomLayoutForm();
         form.setEntity(new CommentAndTarget("hirvi", 40.0));

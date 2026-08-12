@@ -325,7 +325,9 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
             // Mutate
             registrations.add(hasValue.addValueChangeListener(e -> {
                 boolean dropServerOriginateEvent = !e.isFromClient() && ignoreServerOriginatedChanges;
-                if (!dropServerOriginateEvent) {
+                // No value object to write into: the form has been emptied with
+                // setValue(null), and getValue() will construct a new one.
+                if (!dropServerOriginateEvent && valueObject != null) {
                     Object value = e.getValue();
                     value = convertInputValue(value, property, ctx);
                     try {
@@ -424,14 +426,34 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
     }
 
     /**
-     * Sets the value object bound to this form
+     * Sets the value object bound to this form.
+     * <p>
+     * A {@code null} value is accepted and empties the form: every bound editor is
+     * cleared to its own empty value and validation errors are removed. This is the
+     * empty value of a binder, so {@link #clear()}, which the {@link HasValue}
+     * contract defines as {@code setValue(getEmptyValue())}, does the same thing.
+     * It also matches {@code Binder.setBean(null)} in Vaadin's own binder.
+     * <p>
+     * Note that {@link #getValue()} does not return null afterwards: with no value
+     * object bound it constructs one from the current editor values, which is what
+     * makes a binder usable for creating a new object as well as for editing one.
      *
-     * @param valueObject the new value
+     * @param valueObject the new value, or null to empty the form
      */
     @Override
     public void setValue(T valueObject) {
         userModifiedFields.clear();
         this.valueObject = valueObject;
+        if (valueObject == null) {
+            /*
+               Nothing to read properties from. Clearing rather than leaving the
+               editors as they were: the alternative is a form showing the values of
+               an object it is no longer bound to, and the errors that came with it.
+            */
+            nameToEditorField.values().forEach(HasValue::clear);
+            clearValidationErrors();
+            return;
+        }
         for (BeanPropertyDefinition pd : bbd.findProperties()) {
             HasValue hasValue = bpdToEditorField.get(pd);
             if (hasValue != null) {
