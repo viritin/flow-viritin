@@ -152,6 +152,24 @@
 
     <build>
         <plugins>
+            <!--
+                The parent brings surefire 2.17, which predates the JUnit Platform.
+                With only Jupiter on the classpath and no JUnit 4, it falls back to
+                the POJO provider, which runs "public void testXxx()" methods and
+                nothing else: @Test and @Disabled are not read at all. The suite
+                therefore ran 5 of its 14 tests, and a new test class reported
+                "Tests run: 0" rather than failing to find anything to run.
+
+                Same version as failsafe below, which was already modern.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
+                <configuration>
+                    <trimStackTrace>false</trimStackTrace>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
