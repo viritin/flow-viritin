@@ -100,31 +100,58 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         this.bbd = (BasicBeanDescription) jack._deserializationContext().introspectBeanDescription(javaType);;
 
         for (Component formComponent : containerComponents) {
-            Class<? extends Component> aClass = formComponent.getClass();
-            Field[] declaredFields = aClass.getDeclaredFields();
-            for (Field f : declaredFields) {
+            for (Field f : editorFields(formComponent.getClass())) {
                 // TODO, figure out other naming strategies
-                // TODO, inspect the class hierarchy to some known core component
-                Class<?> type = f.getType();
-                if (HasValue.class.isAssignableFrom(type)) {
-                    BeanPropertyDefinition property = bbd.findProperty(new PropertyName(f.getName()));
+                BeanPropertyDefinition property = bbd.findProperty(new PropertyName(f.getName()));
 
-                    if (property != null) {
-                        property.getAccessor().fixAccess(true);
-                        try {
-                            f.setAccessible(true);
-                            HasValue hasValue = (HasValue) f.get(formComponent);
-                            if (isRequired(property)) {
-                                hasValue.setRequiredIndicatorVisible(true);
-                            }
-                            bindProperty(property, hasValue);
-                        } catch (IllegalAccessException e) {
-                            throw new RuntimeException(e);
+                if (property != null) {
+                    property.getAccessor().fixAccess(true);
+                    try {
+                        f.setAccessible(true);
+                        HasValue hasValue = (HasValue) f.get(formComponent);
+                        if (isRequired(property)) {
+                            hasValue.setRequiredIndicatorVisible(true);
                         }
+                        bindProperty(property, hasValue);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             }
         }
+    }
+
+    /**
+     * The fields that can hold an editor, from the given class and the classes it
+     * extends.
+     * <p>
+     * A form built on a base class that already carries some of the fields is an
+     * ordinary thing to write, and looking only at the concrete class would leave
+     * the inherited ones silently unbound. The walk stops at Vaadin's own classes:
+     * beyond that point the fields belong to the framework rather than to the form,
+     * and a component's internals are not editors anyone asked to bind.
+     * <p>
+     * A field hides one of the same name in a base class, exactly as it does in
+     * Java.
+     *
+     * @param formClass the class of the component holding the editors
+     * @return the fields, subclass first
+     */
+    private static List<Field> editorFields(Class<?> formClass) {
+        List<Field> fields = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        for (Class<?> c = formClass; c != null && !isFrameworkClass(c); c = c.getSuperclass()) {
+            for (Field f : c.getDeclaredFields()) {
+                if (HasValue.class.isAssignableFrom(f.getType()) && seen.add(f.getName())) {
+                    fields.add(f);
+                }
+            }
+        }
+        return fields;
+    }
+
+    private static boolean isFrameworkClass(Class<?> c) {
+        return c.getName().startsWith("com.vaadin.");
     }
 
     /**
@@ -142,22 +169,17 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         }
         JavaType javaType = jack.getTypeFactory().constructType(tClass);
         this.bbd = (BasicBeanDescription) jack._deserializationContext().introspectBeanDescription(javaType);
-        Class<?> aClass = editorObject.getClass();
-        Field[] declaredFields = aClass.getDeclaredFields();
-        for (Field f : declaredFields) {
-            Class<?> type = f.getType();
-            if (HasValue.class.isAssignableFrom(type)) {
-                BeanPropertyDefinition property = bbd.findProperty(new PropertyName(f.getName()));
+        for (Field f : editorFields(editorObject.getClass())) {
+            BeanPropertyDefinition property = bbd.findProperty(new PropertyName(f.getName()));
 
-                if (property != null) {
-                    property.getAccessor().fixAccess(true);
-                    try {
-                        f.setAccessible(true);
-                        HasValue hasValue = (HasValue) f.get(editorObject);
-                        bindProperty(property, hasValue);
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    }
+            if (property != null) {
+                property.getAccessor().fixAccess(true);
+                try {
+                    f.setAccessible(true);
+                    HasValue hasValue = (HasValue) f.get(editorObject);
+                    bindProperty(property, hasValue);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }

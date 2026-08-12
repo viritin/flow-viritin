@@ -238,7 +238,6 @@ public class FormBinderKnownIssuesTest {
      * NullPointerException above.
      */
     @Test
-    @Disabled("Today: only [target] is bound; the inherited comment field is not seen")
     public void fieldsDeclaredInASuperclassAreBoundToo() {
         DerivedForm form = new DerivedForm();
         FormBinder<CommentAndTarget> binder = new FormBinder<>(CommentAndTarget.class, form);
