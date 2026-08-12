@@ -291,7 +291,6 @@ public class FormBinderKnownIssuesTest {
      * fields from being marked, so only the button state would change.
      */
     @Test
-    @Disabled("Today: save button is enabled and isValid() is true for an invalid entity")
     public void anInvalidEntityDoesNotEnableSaving() {
         CustomLayoutForm form = new CustomLayoutForm();
 

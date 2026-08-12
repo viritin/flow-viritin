@@ -473,7 +473,19 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
             binder.setValue(entity);
             hasChanges = false;
             setVisible(true);
+            /*
+               Judge what was just handed in, rather than waiting for the reader to
+               touch a field. Without this the form calls itself valid until the
+               first change, which is how setEntityWithEnabledSave could offer a
+               Save button for an entity that fails validation.
+
+               This does not turn a fresh, empty entity red: the binder does not
+               report a missing value for a field the reader has not touched, which
+               is what the required indicator is for.
+            */
+            binder.setConstraintViolations(doBeanValidation(entity));
         } else {
+            // Clears the editors and any violations left from the previous entity.
             binder.setValue(null);
             hasChanges = false;
             setVisible(false);
