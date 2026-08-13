@@ -1,38 +1,40 @@
-## Forms & Binding
+## Forms &amp; Binding
 
 Flow Viritin provides several approaches to form building, from low-level
 binding to fully automatic form generation.
 
 ### FormBinder
 
-`FormBinder` connects domain objects (POJOs or Java records) to UI fields
-using **name-based binding**. If your property is `firstName`, FormBinder looks
-for a field named `firstName` in the container objects you provide.
+`FormBinder` connects domain objects — POJOs or Java `record`s — to UI fields
+using **name-based binding**: a property called `firstName` is bound to a field
+called `firstName`, with no per-field configuration to write. It works
+non-buffered, so validation logic can be written against the object itself,
+including logic that spans several of its properties.
 
-Key features:
+It shows violations rather than producing them, and takes them from the Bean
+Validation API or as a plain `Map<String, String>`. Constraints that a field can
+enforce for itself — a maximum length, a minimum value, a required value — are
+handed over to the field while binding.
 
-* Supports both POJOs and Java `record` types.
-* Encourages writing validation logic separately from UI components.
-* Displays constraint violations in fields and at class level.
-* Accepts validation messages from Bean Validation API or as a raw
-  `Map<String, String>`.
-* Supports bean level validators (aka cross-field validators)
+[Read more about FormBinder](form-binder.html), including records, nested values
+and what the binder does with a constraint.
 
 ### BeanValidationForm
 
-An opinionated abstract superclass for "bulk forms" built on top of
-`FormBinder`. Provides:
+An opinionated form built on `FormBinder`, for the ordinary case where the
+validation is Bean Validation and the form has a save button. It validates on
+every change and when the entity is set, keeps the save, cancel and delete
+buttons in a state that matches, and gives the violations that belong to no
+single field — cross-field constraints — a place of their own. It can open
+itself in a dialog, which is often all a simple CRUD needs.
 
-* Automatic Bean Validation with customizable validation groups.
-* Basic layout with save, cancel and delete buttons (shown if related handler is defined).
-* Shows constraint violations on the related field (if relation is available), like in Vaadin, bean level violations (typically cross-field valitors) on in an area on top of the save/cancel buttons.
-* Save/cancel buttons that adjust their enabled state based on user actions.
-* Ability to show in a dialog (handy for simple CRUDs on desktop UIs)
+[Read more about BeanValidationForm](bean-validation-form.html), including
+class level constraints, validation groups and using Spring's validator.
 
 ### AbstractForm
 
-The older form solution based on the Vaadin core `Binder`. Still available
-for backward compatibility but no longer actively developed.
+The older form solution based on the Vaadin core `Binder`. Still available for
+backward compatibility but no longer actively developed.
 
 ### Field components
 

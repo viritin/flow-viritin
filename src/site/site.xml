@@ -39,6 +39,8 @@
         </menu>
         <menu name="Forms &amp; RAD">
             <item name="Forms Overview" href="forms/index.html"/>
+            <item name="FormBinder" href="forms/form-binder.html"/>
+            <item name="BeanValidationForm" href="forms/bean-validation-form.html"/>
             <item name="RAD Tools" href="rad/index.html"/>
         </menu>
         <menu name="Utilities">
