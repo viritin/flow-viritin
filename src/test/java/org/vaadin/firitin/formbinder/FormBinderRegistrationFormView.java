@@ -9,6 +9,7 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import jakarta.validation.constraints.NotEmpty;
+import org.vaadin.firitin.components.RichText;
 import org.vaadin.firitin.components.textfield.VTextField;
 import org.vaadin.firitin.form.FormBinder;
 
@@ -29,6 +30,17 @@ public class FormBinderRegistrationFormView extends VerticalLayout {
     FormBinder<Account> binder = new FormBinder<>(Account.class,this);
 
     public FormBinderRegistrationFormView() {
+        add(new RichText().withMarkDown("""
+        A rule that spans two fields, without the Bean Validation API: the two
+        passwords have to match. The check is written against the DTO the binder
+        hands over, not against the fields — so it reads like a rule about accounts
+        and could be moved somewhere it is reusable.
+
+        Type two different passwords and press Register. The message appears on the
+        second field, because that is the key it was given. Make them match, and the
+        form goes through.
+
+        """));
         add(new H1("Register as new user"));
         add(username, password, passwordVerification);
         add(new Button("Register", this::register));

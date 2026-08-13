@@ -1,14 +1,17 @@
 package org.vaadin.firitin.formbinder;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import jakarta.validation.ConstraintViolation;
 import org.vaadin.firitin.PersonForm;
+import org.vaadin.firitin.components.RichText;
 import org.vaadin.firitin.components.datetimepicker.VDateTimePicker;
 import org.vaadin.firitin.components.textfield.VIntegerField;
 import org.vaadin.firitin.components.textfield.VTextField;
@@ -28,7 +31,7 @@ import java.util.Set;
 public class FormBinderBasedPersonForm extends BeanValidationForm<Person> {
 
     private TextField firstName = new VTextField("First name, remove this to see error");
-    private TextField lastName = new VTextField().withTooltip("You should type last name here");
+    private TextField lastName = new VTextField("Lastname").withTooltip("You should type last name here");
 //    private IntegerField age = new VIntegerField("Age");
 
     private VDateTimePicker joinTime = new VDateTimePicker("Join date");
@@ -51,6 +54,31 @@ public class FormBinderBasedPersonForm extends BeanValidationForm<Person> {
         setEntity(person);
         joinTime.setLocale(new Locale("fi", "FI"));
 
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        getContent().addComponentAsFirst(new RichText().withMarkDown("""
+                # Validation groups, and a form that could not be saved without them
+
+                `Person` requires an **age** — `@NotNull`, in the default validation
+                group. This form has no field for one, so with the default group it
+                could never be valid, and nothing on the screen would say why. It
+                asks for a group of its own instead:
+
+                ```java
+                setValidationGroups(Person.FirstNameOnly.class);
+                ```
+
+                In that group the first name is required and has to be 3 to 15
+                characters. Try it: empty the first name, or type two letters, and
+                watch Save go. The age is not asked about at all.
+
+                The toolbar has all three buttons because all three handlers are
+                set. The delete one is a trash icon, and it asks before it does
+                anything.
+                """));
     }
 
     @Override

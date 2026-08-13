@@ -21,6 +21,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import org.vaadin.firitin.components.RichText;
 import org.vaadin.firitin.components.textfield.VTextField;
 import org.vaadin.firitin.form.FormBinder;
 
@@ -88,6 +89,32 @@ public class FormBinderView extends VerticalLayout {
     }
 
     public FormBinderView() {
+
+        add(new RichText().withMarkDown("""
+        # FormBinder on its own, without BeanValidationForm
+
+        No form base class here: the binder is given a bean and a component that
+        has the fields, and everything else is written in this view. Validation
+        runs from a listener it adds itself, which is why nothing happens until
+        you change something or press a button.
+
+        Four things worth trying:
+
+        * **Big bound with TextField** — the property is an `Integer` and the field
+          is a `TextField`, so a converter was registered for it. Type something
+          that is not a number to see what a conversion error looks like.
+        * **Text** has no required marker, although it is `@NotEmpty`. The
+          constraint belongs to a validation group that is not active here.
+        * **Small number** is `@NotNull @Min(0)`, and the field knows both: the
+          marker and the minimum came from the annotations, not from this view.
+        * **Set empty bean** binds a fresh one. The missing name is not reported
+          until you touch the field — until then the required marker is the whole
+          message.
+
+        The rule about big and small belongs to no single field, so it is reported
+        under them.
+
+        """));
 
         var p = new Person();
         p.setName("Jorma");

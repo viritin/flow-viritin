@@ -55,6 +55,20 @@ public class FormBinderWithRecordView extends VerticalLayout {
         including a class level (aka cross-field) validator, and the violations
         are reported in the UI while you change the form.
         
+        ## The rules, so you know what to poke at
+        
+        | Field | Constraint |
+        |---|---|
+        | Name | `@NotEmpty` — must not be empty |
+        | Small number | `@NotNull` and `@Min(0)` — required, not negative |
+        | Big number | `@Max(100)` — and it is an `int`, so it cannot be empty either |
+        | *the record itself* | `@BigShouldBeBigger` — the big one has to exceed the small one |
+        
+        The last rule belongs to no single field, so it is reported under the form
+        rather than on one of them. **The form opens already breaking it** — 70 and
+        69 — and this view validates on change, so the first thing you type is what
+        makes it say so.
+        
         """));
 
         var personRecord = new Person("Jorma", 70, 69);
