@@ -76,6 +76,13 @@ import java.util.logging.Logger;
  * <li> Aiming for binding anything without property names (for good solution
  * this needs to be resolved at language level and supported with thing like
  * Bean Validation first)</li>
+ * <li> Being a field in another form. A binder binds the fields of a form; it is
+ * not one. When a property is itself a value worth editing as a unit, put its
+ * fields in a {@link com.vaadin.flow.component.customfield.CustomField} and bind
+ * that — a CustomField is a component, it can show a violation of its own, and it
+ * can use a FormBinder of its own inside. See
+ * {@code FormBinderKnownIssuesTest#aCompositionIsBoundThroughACustomField} for the
+ * whole of it.</li>
  * </ul>
  *
  * @param <T> The class/record type bound by this binder.
@@ -719,10 +726,14 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         return false;
     }
 
+    /**
+     * Not supported: a binder binds the fields of a form rather than being one.
+     *
+     * @throws UnsupportedOperationException always
+     */
     @Override
     public void setReadOnly(boolean readOnly) {
-        // TODO figure out what to do, coming via HasValue...
-        throw new UnsupportedOperationException("Not implemented");
+        throw new UnsupportedOperationException(notAFieldMessage("setReadOnly"));
     }
 
     @Override
@@ -731,11 +742,28 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         return false;
     }
 
+    /**
+     * Not supported: a binder has no place to show a required indicator, and marking
+     * every bound field required would say something else entirely.
+     *
+     * @throws UnsupportedOperationException always
+     */
     @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        throw new RuntimeException("Not supported");
-        // TODO figure out if this should throw or stop using HasValue altogether
-        // Passing to fields is simply wrong and we don't have a place to show the
+        throw new UnsupportedOperationException(notAFieldMessage("setRequiredIndicatorVisible"));
+    }
+
+    /*
+       These two are reached by binding a FormBinder as the editor of a property,
+       which is the one thing this class implementing HasValue makes look possible.
+       It is not, and the message is the only chance to say where to go instead.
+    */
+    private static String notAFieldMessage(String method) {
+        return method + " is not supported: a FormBinder binds the fields of a form,"
+                + " it is not a field itself. To edit a nested value as one field, put"
+                + " its fields in a CustomField and bind that. The CustomField can use"
+                + " a FormBinder of its own inside, and unlike a binder it is a"
+                + " component that can show a violation of its own.";
     }
 
     // TODO figure out if opening this to public (and having explicit field)

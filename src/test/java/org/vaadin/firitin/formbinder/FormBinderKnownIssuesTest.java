@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
@@ -289,6 +291,108 @@ public class FormBinderKnownIssuesTest {
 
         Assertions.assertTrue(failure.getMessage().contains("id"),
                 "the component should be named: " + failure.getMessage());
+    }
+
+    // ------------------------------------------------------------------
+    // A nested value: what to do instead of nesting a binder
+    // ------------------------------------------------------------------
+
+    public record Bands(@Min(1) Double low, @Max(30) Double high) {
+    }
+
+    public record Settings(String name, Bands bands) {
+    }
+
+    /**
+     * The supported way to edit a nested value as one field, and the shape the
+     * exceptions on setReadOnly and setRequiredIndicatorVisible point at.
+     */
+    public static class BandsField extends CustomField<Bands> {
+        NumberField low = new NumberField();
+        NumberField high = new NumberField();
+        private final FormBinder<Bands> binder;
+
+        public BandsField() {
+            /*
+               manualValueUpdate: a CustomField otherwise regenerates its value from
+               a DOM change event, and there is no DOM in a test like this one. The
+               update comes from the inner binder instead, and only for changes that
+               came from the client — otherwise filling the fields programmatically
+               would report itself as a change the reader made.
+            */
+            super(null, true);
+            add(low, high);
+            binder = new FormBinder<>(Bands.class, this);
+            binder.addValueChangeListener(event -> {
+                if (event.isFromClient()) {
+                    updateValue();
+                }
+            });
+        }
+
+        @Override
+        protected Bands generateModelValue() {
+            return binder.getValue();
+        }
+
+        @Override
+        protected void setPresentationValue(Bands bands) {
+            binder.setValue(bands);
+        }
+    }
+
+    public static class SettingsForm extends VerticalLayout {
+        TextField name = new TextField();
+        BandsField bands = new BandsField();
+
+        public SettingsForm() {
+            add(name, bands);
+        }
+    }
+
+    @Test
+    public void aCompositionIsBoundThroughACustomField() {
+        SettingsForm form = new SettingsForm();
+        FormBinder<Settings> outer = new FormBinder<>(Settings.class, form);
+
+        outer.setValue(new Settings("cold room", new Bands(2.0, 8.0)));
+        Assertions.assertEquals(2.0, form.bands.low.getValue(), "the value reaches the subfields");
+        Assertions.assertEquals(1.0, form.bands.low.getMin(),
+                "and so do the constraints of the nested record");
+
+        /*
+           Filling a subfield from the server is not a change the reader made, and
+           the composite is right not to report one: this is what keeps setValue on
+           the outer binder from looking like editing.
+        */
+        Double previous = form.bands.low.getValue();
+        form.bands.low.setValue(3.0);
+        Assertions.assertEquals(new Bands(2.0, 8.0), outer.getValue().bands(),
+                "a server originated change is not the reader editing");
+
+        // As a browser does it, and as the browserless test tools do it.
+        ComponentUtil.fireEvent(form.bands.low, new AbstractField.ComponentValueChangeEvent<>(
+                form.bands.low, form.bands.low, previous, true));
+
+        Assertions.assertEquals(new Bands(3.0, 8.0), outer.getValue().bands(),
+                "a change the reader made reaches the outer value");
+    }
+
+    /**
+     * The thing that looks possible and is not. What matters is that the failure
+     * names the way out — this class implementing HasValue is otherwise an
+     * invitation.
+     */
+    @Test
+    public void aBinderRefusesToBeAFieldAndSaysWhatToDoInstead() {
+        TwoFieldForm form = new TwoFieldForm();
+        FormBinder<CommentAndTarget> binder = new FormBinder<>(CommentAndTarget.class, form);
+
+        UnsupportedOperationException failure = Assertions.assertThrows(
+                UnsupportedOperationException.class, () -> binder.setReadOnly(true));
+
+        Assertions.assertTrue(failure.getMessage().contains("CustomField"),
+                "the message should name the alternative: " + failure.getMessage());
     }
 
     // ------------------------------------------------------------------
