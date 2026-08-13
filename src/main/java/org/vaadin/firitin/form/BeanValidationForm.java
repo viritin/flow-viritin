@@ -274,6 +274,42 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
         }
     }
 
+    /**
+     * The validator this form checks its entity with.
+     * <p>
+     * Built here from the default provider, with the locale taken from the UI rather
+     * than from the JVM. That is enough while the constraints are self-contained.
+     * <p>
+     * It stops being enough as soon as a {@code ConstraintValidator} needs something
+     * from the application — a repository to ask whether an identifier is still free,
+     * a registry of what exists. A validator built from the default provider is
+     * instantiated by reflection, so its injection points stay null and the check
+     * fails with {@code HV000028} instead of answering. Message templates are read
+     * from {@code ValidationMessages.properties} for the same reason, rather than
+     * from an application's own message source.
+     * <p>
+     * In a Spring application both are already solved by the container's validator,
+     * and giving it to the form is two lines:
+     *
+     * <pre>
+     * public PersonForm(jakarta.validation.Validator validator) {
+     *     super(Person.class);
+     *     this.validator = validator;
+     * }
+     *
+     * &#64;Override
+     * protected Validator getValidator() {
+     *     return validator;
+     * }
+     * </pre>
+     *
+     * There is deliberately no Spring aware version of this class: one overridable
+     * method costs less than a second artifact to keep in step. See
+     * {@code SpringManagedValidatorTest} in the test sources for the whole example,
+     * including what the failure looks like without it.
+     *
+     * @return the validator, built on first use
+     */
     protected Validator getValidator() {
         if (validator == null) {
             Configuration<?> configuration = Validation.byDefaultProvider().configure();
