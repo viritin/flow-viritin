@@ -1,0 +1,42 @@
+/*
+   The row editor is an HTML table, and a table sizes itself to its content: the
+   fields in it keep their default width, the table grows past the box it was given,
+   and the columns at the right end are simply outside it. In a FormLayout column
+   that starts at about half the screen, two of four columns can be off the edge
+   before anything looks wrong.
+
+   table-layout: fixed is what stops that — width: 100% alone does nothing, since
+   with the default layout algorithm the content's minimum width still wins. Fixed
+   makes the columns share what there is, and the fields shrink with their cells
+   without any sizing of their own.
+
+   Wrapped in :where() so the whole selector carries no specificity at all. An
+   application that has sized these fields by hand keeps its own rules without
+   having to outrank anything.
+*/
+:where(.viritin-element-collection-field) table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+/*
+   And the editors themselves. A Vaadin field is 12em wide by default and keeps that
+   width inside the cell the fixed layout just sized, so without this the columns are
+   right and the fields still lie across each other.
+
+   The delete button is left out: it is an icon, and stretching it across its column
+   would be its own kind of wrong.
+*/
+:where(.viritin-element-collection-field td > :not(vaadin-button)) {
+    width: 100%;
+    min-width: 0;
+}
+
+/*
+   The delete button's column takes what an icon needs, and the editors share the
+   rest. With a fixed layout the widths come from the first row, which is why the
+   header row has an empty cell for this column.
+*/
+:where(.viritin-element-collection-field) table th:last-child {
+    width: 3em;
+}

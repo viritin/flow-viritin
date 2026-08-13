@@ -4,6 +4,7 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.customfield.CustomField;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.util.SharedUtil;
@@ -38,7 +39,15 @@ import java.util.Map;
  *
  * <p>Usage example: selecting runners to a relay team.</p>
  */
+@StyleSheet("context://assets/org/vaadin/firitin/components/element-collection-field.css")
 public class ElementCollectionField<T> extends CustomField<List<T>> {
+
+    /**
+     * Carries the default sizing, and is the handle for replacing it: the rules
+     * behind this name have no specificity of their own, so an application's own
+     * rule for these fields wins without any effort.
+     */
+    public static final String CLASS_NAME = "viritin-element-collection-field";
 
     // Helper "Jack" to do introspection
     private static final ObjectMapper jack = JacksonIntrospection.getMapper();
@@ -68,6 +77,7 @@ public class ElementCollectionField<T> extends CustomField<List<T>> {
         this.clazz = clazz;
         this.editorClass = editorClass;
         table = new Table();
+        addClassName(CLASS_NAME);
         add(table);
     }
 
@@ -80,6 +90,7 @@ public class ElementCollectionField<T> extends CustomField<List<T>> {
         this.clazz = clazz;
         this.editorClass = null;
         table = new Table();
+        addClassName(CLASS_NAME);
         add(table);
     }
 
@@ -111,6 +122,14 @@ public class ElementCollectionField<T> extends CustomField<List<T>> {
         for(String fieldName : fieldNames) {
             tr.addHeaderCells(getHeaderForField(fieldName));
         }
+        /*
+           One more, empty, for the column the delete buttons go in. It is what makes
+           that column sizable: the row widths are read from the first row, so without
+           a cell here the column holding an icon takes as much room as a column
+           holding a field — and every other column narrows the moment the first row
+           is added and the button appears.
+        */
+        tr.addHeaderCells("");
         table.addRows(tr);
     }
 
