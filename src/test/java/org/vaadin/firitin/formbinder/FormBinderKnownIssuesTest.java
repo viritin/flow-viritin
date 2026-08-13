@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -454,6 +456,47 @@ public class FormBinderKnownIssuesTest {
         field.setValue(value);
         ComponentUtil.fireEvent(field,
                 new AbstractField.ComponentValueChangeEvent<>(field, field, previous, true));
+    }
+
+    // ------------------------------------------------------------------
+    // A record whose Jackson order is not its constructor order
+    // ------------------------------------------------------------------
+
+    /**
+     * A DTO that is also a JSON payload, told to serialise in an order of its own.
+     * Nothing unusual about it, and nothing about the annotation says anything about
+     * constructors.
+     */
+    @JsonPropertyOrder({"apparatus", "zone"})
+    public record Reading(String zone, String apparatus) {
+    }
+
+    public static class ReadingForm extends VerticalLayout {
+        TextField zone = new TextField();
+        TextField apparatus = new TextField();
+
+        public ReadingForm() {
+            add(zone, apparatus);
+        }
+    }
+
+    /**
+     * The arguments used to be taken from Jackson's property list by position. That
+     * list is usually in constructor order, which is why this went unnoticed — but
+     * {@code @JsonPropertyOrder} reorders it while the constructor stays where it is,
+     * and the two values then swap places on the way into the record. Both are
+     * Strings, so nothing complains: the reader's shed becomes the apparatus and the
+     * apparatus becomes the shed.
+     */
+    @Test
+    public void aRecordIsFilledByComponentNameRatherThanByPosition() {
+        ReadingForm form = new ReadingForm();
+        FormBinder<Reading> binder = new FormBinder<>(Reading.class, form);
+
+        form.zone.setValue("shed");
+        form.apparatus.setValue("DHT");
+
+        Assertions.assertEquals(new Reading("shed", "DHT"), binder.getValue());
     }
 
     // ------------------------------------------------------------------

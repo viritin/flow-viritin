@@ -42,6 +42,7 @@ import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -824,7 +825,8 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         List<AnnotatedConstructor> constructors = bbd.getConstructors();
         // The default constructor is the last one with Jackson utils
         AnnotatedConstructor annotatedConstructor = constructors.get(constructors.size() - 1);
-        List<BeanPropertyDefinition> properties = bbd.findProperties();
+        List<BeanPropertyDefinition> properties =
+                propertiesInComponentOrder(annotatedConstructor.getParameterCount());
         Object[] args = new Object[annotatedConstructor.getParameterCount()];
         for (int i = 0; i < annotatedConstructor.getParameterCount(); i++) {
             BeanPropertyDefinition definition = properties.get(i);
@@ -848,6 +850,41 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * The properties in the order the record declares its components, which is the
+     * order its constructor takes them.
+     * <p>
+     * The arguments used to be taken from {@code findProperties()} by position, which
+     * is Jackson's order rather than the record's. They are usually the same, because
+     * Jackson lists creator properties first and in creator order — but not always:
+     * {@code @JsonPropertyOrder}, which a record used as a JSON payload may well
+     * carry, reorders that list while the constructor stays where it was. Two
+     * components of the same type then swap places on the way into the record, and
+     * nothing complains, because nothing can tell one String from another.
+     * <p>
+     * Falls back to Jackson's order where the components cannot answer: a creator
+     * that is not the canonical constructor, or a property renamed with
+     * {@code @JsonProperty}, where the component's name no longer finds it.
+     *
+     * @param parameterCount how many arguments the chosen constructor takes
+     * @return the properties, one per constructor argument
+     */
+    private List<BeanPropertyDefinition> propertiesInComponentOrder(int parameterCount) {
+        RecordComponent[] components = bbd.getType().getRawClass().getRecordComponents();
+        if (components == null || components.length != parameterCount) {
+            return bbd.findProperties();
+        }
+        List<BeanPropertyDefinition> ordered = new ArrayList<>(parameterCount);
+        for (RecordComponent component : components) {
+            BeanPropertyDefinition property = bbd.findProperty(new PropertyName(component.getName()));
+            if (property == null) {
+                return bbd.findProperties();
+            }
+            ordered.add(property);
+        }
+        return ordered;
     }
 
     /**
