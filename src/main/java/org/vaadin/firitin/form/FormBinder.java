@@ -539,8 +539,10 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
             // Mutate
             registrations.add(hasValue.addValueChangeListener(e -> {
                 boolean dropServerOriginateEvent = !e.isFromClient() && ignoreServerOriginatedChanges;
-                // No value object to write into: the form has been emptied with
-                // setValue(null), and getValue() will construct a new one.
+                // Nothing to write into yet: either nothing has been set and
+                // nobody has asked for a value, or the form was emptied with
+                // setValue(null). getValue() builds the bean, and from that point
+                // the changes land in it.
                 if (!dropServerOriginateEvent && valueObject != null) {
                     Object value = e.getValue();
                     value = convertInputValue(value, property, ctx);
@@ -627,14 +629,32 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         return null;
     }
 
+    /**
+     * The value the form currently holds.
+     * <p>
+     * For a record a new instance is built from the editors on every call: that is
+     * what immutability leaves available, and record equality makes it invisible.
+     * <p>
+     * For a mutable bean the object that was set is returned, and it is the same
+     * object every time — the binder writes the changes into it as they are made.
+     * When nothing has been set, one is built from the editors on the first ask and
+     * <b>kept</b> from then on, so that both cases behave alike: a caller may hold
+     * on to what it was given and write into it without the next call handing back
+     * something else. Building a fresh bean per call, as this used to, made such a
+     * write disappear without a word.
+     * <p>
+     * Emptying the form with {@code setValue(null)} lets go of that bean as well;
+     * the next call builds another.
+     *
+     * @return the value, never null
+     */
     @Override
     public T getValue() {
         if (isImmutable()) {
             return constructRecord();
-        } else {
-            if (valueObject == null) {
-                return constructPojo();
-            }
+        }
+        if (valueObject == null) {
+            valueObject = constructPojo();
         }
         return valueObject;
     }

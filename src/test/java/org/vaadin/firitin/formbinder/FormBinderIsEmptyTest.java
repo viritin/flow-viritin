@@ -39,9 +39,9 @@ import org.vaadin.firitin.form.FormBinder;
  * has no empty form to construct — the editor can be empty, {@code int} cannot. So
  * {@code getEmptyValue()} would throw, and with it {@code clear()}, which the
  * interface defines as {@code setValue(getEmptyValue())}.
- * <li>for a mutable bean it <b>would not answer anything</b>. Two beans built from
- * the same empty editors are not equal, because a bean carries the equality it was
- * written with, and most are written with none.
+ * <li>for a mutable bean it <b>would not answer anything</b>. The empty value would
+ * be a bean built for the comparison, and a bean is equal to nothing but itself
+ * unless someone wrote it an equals — most are written with none.
  * </ul>
  *
  * <p>Which leaves the definition that needs neither construction nor equality:
@@ -117,8 +117,11 @@ public class FormBinderIsEmptyTest {
     public void equalityWouldNotAnswerForAMutableBean() {
         FormBinder<Bean> binder = new FormBinder<>(Bean.class, new BeanForm());
 
-        Assertions.assertNotEquals(binder.getValue(), binder.getValue(),
-                "two beans built from the same empty editors are not equal");
+        // What getEmptyValue() would have to hand over: a bean built for the comparison.
+        Bean anEmptyOne = new Bean();
+
+        Assertions.assertNotEquals(anEmptyOne, binder.getValue(),
+                "same content, and still not equal: the bean has no equals of its own");
     }
 
     @Test

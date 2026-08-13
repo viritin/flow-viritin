@@ -396,6 +396,67 @@ public class FormBinderKnownIssuesTest {
     }
 
     // ------------------------------------------------------------------
+    // A mutable bean that was never set
+    // ------------------------------------------------------------------
+
+    /**
+     * With a bean bound, the binder writes the changes into it and hands back the
+     * same object every time — that is what "non-buffered" means here. With nothing
+     * bound it used to build a fresh bean on every call instead, so the two cases
+     * behaved differently and nothing said so: an application that took the value
+     * and wrote into it lost the write, and the next call answered with something
+     * else again.
+     */
+    @Test
+    public void anUnsetMutableBeanIsBuiltOnceAndKept() {
+        TwoFieldForm form = new TwoFieldForm();
+        FormBinder<CommentAndTargetBean> binder =
+                new FormBinder<>(CommentAndTargetBean.class, form);
+
+        CommentAndTargetBean first = binder.getValue();
+        Assertions.assertSame(first, binder.getValue(), "the same bean, not another one");
+
+        first.setComment("written by the application");
+        Assertions.assertEquals("written by the application", binder.getValue().getComment(),
+                "and a write to it survives");
+    }
+
+    /** The bean is still the form's: what the reader types reaches it. */
+    @Test
+    public void whatIsTypedReachesTheKeptBean() {
+        TwoFieldForm form = new TwoFieldForm();
+        FormBinder<CommentAndTargetBean> binder =
+                new FormBinder<>(CommentAndTargetBean.class, form);
+
+        CommentAndTargetBean bean = binder.getValue();
+        typeAsUser(form.comment, "hirvi");
+
+        Assertions.assertEquals("hirvi", bean.getComment());
+        Assertions.assertSame(bean, binder.getValue());
+    }
+
+    /** Emptying the form lets go of it, as setValue(null) lets go of any other. */
+    @Test
+    public void emptyingTheFormLetsGoOfTheKeptBean() {
+        TwoFieldForm form = new TwoFieldForm();
+        FormBinder<CommentAndTargetBean> binder =
+                new FormBinder<>(CommentAndTargetBean.class, form);
+
+        CommentAndTargetBean first = binder.getValue();
+        binder.setValue(null);
+
+        Assertions.assertNotSame(first, binder.getValue());
+    }
+
+    /** A change the reader made, as the browser and the test tools deliver it. */
+    private static void typeAsUser(TextField field, String value) {
+        String previous = field.getValue();
+        field.setValue(value);
+        ComponentUtil.fireEvent(field,
+                new AbstractField.ComponentValueChangeEvent<>(field, field, previous, true));
+    }
+
+    // ------------------------------------------------------------------
     // 3. Fields declared in a superclass
     // ------------------------------------------------------------------
 
