@@ -16,3 +16,4 @@ webpack.generated.js
 frontend/generated/
 src/main/frontend/generated
 .claude-contained/
+.flattened-pom.xml
