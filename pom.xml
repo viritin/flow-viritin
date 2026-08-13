@@ -5,7 +5,7 @@
     <parent>
         <groupId>in.virit.sb</groupId>
         <artifactId>viritin-addon-project-parent</artifactId>
-        <version>0.0.9</version>
+        <version>0.0.10</version>
         <relativePath />
     </parent>
 
@@ -17,7 +17,7 @@
     <description>General purpose helpers for Vaadin users. Java only additions, that don't require custom client-bundle.</description>
 
     <properties>
-        <vaadin.version>25.2.1</vaadin.version>
+        <vaadin.version>25.2.6</vaadin.version>
         <spring.boot.version>4.1.0</spring.boot.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
