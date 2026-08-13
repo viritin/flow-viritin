@@ -11,28 +11,19 @@ import org.junit.jupiter.api.Test;
 import org.vaadin.firitin.form.FormBinder;
 
 /**
- * What {@code isEmpty()} answers for a binder, pinned down so the question can be
- * looked at rather than reasoned about.
+ * What {@code isEmpty()} answers for a binder, and why it is not what the interface
+ * describes.
  *
- * <p>{@link HasValue} defines it, and neither half of the definition fits:
+ * <p>{@link HasValue} defines it as the value being equal to the empty value:
  *
  * <pre>
  * default V getEmptyValue() { return null; }
  * default boolean isEmpty()  { return Objects.equals(getValue(), getEmptyValue()); }
  * </pre>
  *
- * <p>{@link FormBinder#getValue()} never returns null — with nothing bound it
- * constructs a value from the editors, which is what makes a binder usable for
- * creating a new object as well as for editing one. So the comparison is always
- * against null, and <b>isEmpty() is false in every state</b>: before anything is
- * set, after a value is set, and after {@code clear()}. That is what the assertions
- * below record.
- *
- * <p>The interface expects the two to agree — "override {@link #getEmptyValue()} if
- * the empty value is not null" — so the tidy answer would be to define the empty
- * value of a form as the object built from every editor's own empty value. For a
- * record that even works for free, since records compare by component. The two tests
- * below are why it is not that simple:
+ * <p>Following that would mean defining the empty value of a form as the object
+ * built from every editor's own empty value. Two of the tests below are why it is
+ * not that:
  *
  * <ul>
  * <li>that object <b>cannot always be built</b>. A record with a primitive component
@@ -44,18 +35,14 @@ import org.vaadin.firitin.form.FormBinder;
  * unless someone wrote it an equals — most are written with none.
  * </ul>
  *
- * <p>Which leaves the definition that needs neither construction nor equality:
- * <b>empty = every bound editor is empty</b>, asked of the editors, where "empty" is
- * already defined properly for each of them. That would make {@code isEmpty()} true
- * after {@code clear()} and change nothing else — at the price of no longer being
- * the comparison the interface describes, and of being about the editors rather than
- * about the parts of the value nothing edits.</p>
+ * <p>So the question goes to the editors instead, where "empty" already means
+ * something exact for each of them. {@code getEmptyValue()} stays null, and the pair
+ * is knowingly not the comparison the interface describes.
  *
- * <p>Neither is urgent: nothing in this library calls it, and a binder cannot be a
- * field of another form, so no Vaadin code reaches it either. It is an inconsistency
- * in what the class advertises rather than one anybody has run into — the
- * application this came from never called it.
- */
+ * <p>The cost is in the last test: this is about the form, not about the value. A
+ * component nothing edits — an identifier carried over from the object that was set
+ * — does not make the form non-empty.
+  */
 public class FormBinderIsEmptyTest {
 
     public record CommentAndTarget(String comment, Double target) {
@@ -125,24 +112,50 @@ public class FormBinderIsEmptyTest {
     }
 
     @Test
-    public void isEmptyIsFalseInEveryState() {
+    public void isEmptyAsksTheEditors() {
         Form form = new Form();
         FormBinder<CommentAndTarget> binder = new FormBinder<>(CommentAndTarget.class, form);
 
         Assertions.assertNull(binder.getEmptyValue(),
-                "the empty value of a binder is null, as HasValue defaults it");
+                "the empty value stays null: there is no object to offer as one");
 
-        // Nothing set: the editors are empty, but a value is constructed from them.
-        Assertions.assertFalse(binder.isEmpty());
+        // Nothing typed anywhere, even though a value can be constructed from it.
+        Assertions.assertTrue(binder.isEmpty());
         Assertions.assertEquals(new CommentAndTarget("", null), binder.getValue());
 
         binder.setValue(new CommentAndTarget("hirvi", 40.0));
         Assertions.assertFalse(binder.isEmpty());
 
         binder.clear();
-        Assertions.assertFalse(binder.isEmpty(),
-                "even here, where a reader of the interface would expect true");
-        Assertions.assertEquals(new CommentAndTarget("", null), binder.getValue(),
-                "because clearing empties the editors, and getValue() reads the editors");
+        Assertions.assertTrue(binder.isEmpty(), "which is what clearing a form means");
+    }
+
+    /** One empty editor is not enough; the form is empty when they all are. */
+    @Test
+    public void oneFilledEditorIsEnoughToMakeItNotEmpty() {
+        Form form = new Form();
+        FormBinder<CommentAndTarget> binder = new FormBinder<>(CommentAndTarget.class, form);
+
+        form.target.setValue(40.0);
+
+        Assertions.assertFalse(binder.isEmpty());
+    }
+
+    /**
+     * The cost of asking the editors: a component nothing edits is not part of the
+     * question. The form is empty because nothing has been typed into it, while the
+     * value it would hand over still carries the identifier it was given.
+     */
+    @Test
+    public void aComponentNothingEditsDoesNotCount() {
+        BeanForm form = new BeanForm();
+        FormBinder<WithIdentifier> binder = new FormBinder<>(WithIdentifier.class, form);
+        binder.setValue(new WithIdentifier(7, ""));
+
+        Assertions.assertTrue(binder.isEmpty(), "nothing has been typed into the form");
+        Assertions.assertEquals(7, binder.getValue().id(), "and the value still knows its id");
+    }
+
+    public record WithIdentifier(long id, String comment) {
     }
 }

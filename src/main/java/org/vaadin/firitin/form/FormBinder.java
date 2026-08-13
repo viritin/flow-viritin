@@ -726,6 +726,32 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         }
     }
 
+    /**
+     * Whether every bound editor is empty.
+     * <p>
+     * {@link HasValue} defines this as the value being equal to
+     * {@link #getEmptyValue()}, and that comparison cannot answer it here. The empty
+     * value of a form would have to be an object built from empty editors, and such
+     * an object cannot always be built — a record with a primitive component has
+     * none — nor recognised, since a mutable bean is equal to nothing but itself
+     * unless someone wrote it an equals. So the question goes to the editors, where
+     * "empty" is already defined exactly for each of them: an empty text field, a
+     * number field with nothing in it, an unticked checkbox.
+     * <p>
+     * This is therefore about the form rather than about the value. A component of
+     * the value that no editor edits — an identifier carried over from the object
+     * that was set — does not make the form non-empty. "Nothing has been typed here"
+     * is the question a form can answer.
+     * <p>
+     * A binder with no editors bound at all is empty, for the same reason.
+     *
+     * @return true if no bound editor holds a value
+     */
+    @Override
+    public boolean isEmpty() {
+        return nameToEditorField.values().stream().allMatch(editor -> editor.isEmpty());
+    }
+
     public FormBinder<T> withValue(T value) {
         setValue(value);
         return this;
