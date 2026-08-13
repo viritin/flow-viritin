@@ -78,7 +78,8 @@ public class FormBinderCarForm extends BeanValidationForm<Car> {
 
                 The save button is enabled if there are some changes **and** if the form is valid.                
                  The ValidPassengerCountValidator check all persons can fit to the seats of this car. 
-                 Increase the car size or remove persons to make save button enabled. 
+                 Increase the car size or **remove** persons to make save button enabled.
+                 Adding one makes the car less valid, not more. 
                 """),
                 seatCount,
                 passengers);

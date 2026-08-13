@@ -84,6 +84,37 @@ class FormBinderCarFormTest {
         });
     }
 
+    /**
+     * The whole of it, in both directions and through both fields.
+     *
+     * <p>Here because the question "did this regress?" was worth a second, and
+     * because the answer is not obvious from the screen: adding a passenger makes
+     * the car <em>less</em> valid, so Save staying disabled is the validator being
+     * right rather than the form being stuck. The view now says so as well.
+     */
+    @Test
+    void theFormKeepsUpWithBothFieldsInBothDirections() {
+        inView((ui, form) -> {
+            ui.findIntegerField().setValue(3);
+            assertTrue(form.getSaveButton().isEnabled(), "three seats, three passengers");
+
+            ui.findIntegerField().setValue(4);
+            assertTrue(form.getSaveButton().isEnabled(),
+                    "and again through the same field, which is not a one-off");
+
+            ui.findIntegerField().setValue(2);
+            assertFalse(form.getSaveButton().isEnabled());
+
+            ui.findTextField().setValue("Jorma");
+            assertTrue(form.getSaveButton().isEnabled(),
+                    "one passenger fits two seats — the other way to fix it");
+
+            ui.findTextField().setValue("Jorma,Ville,Kalle,Uusi");
+            assertFalse(form.getSaveButton().isEnabled(),
+                    "and adding passengers is not a way to fix anything");
+        });
+    }
+
     /** Anywhere below the form, since a class level violation belongs to no field. */
     private static boolean containsText(Component root, String text) {
         String own = root.getElement().getText();
