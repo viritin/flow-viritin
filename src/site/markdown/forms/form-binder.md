@@ -124,6 +124,23 @@ binder.setRawConstraintViolations(Map.of(
         "", "The dates overlap"));   // the empty key: belongs to no field
 ```
 
+### Reacting to usable changes
+
+A form that saves as the reader types has two conditions to check on every event:
+that the change came from the client rather than from your own code filling the
+fields, and that nothing is currently reported as wrong. Both in one place:
+
+```java
+binder.addValidValueChangeListener(e -> service.save(binder.getValue()));
+```
+
+"Wrong" means what the binder has been told — a conversion error it noticed
+itself, and the violations last handed to `setConstraintViolations`. If you feed
+those from a listener of your own, add that listener first, or this one answers
+about the change before last. With
+[BeanValidationForm](bean-validation-form.html) there is no such order to get
+right, and `setEagerSavedHandler` says the same thing in one line.
+
 ### Converters
 
 When a field's type differs from the property's, register a converter by

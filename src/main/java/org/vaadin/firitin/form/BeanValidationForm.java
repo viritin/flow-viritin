@@ -76,6 +76,7 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
     private final Class<T> entityType;
     private T entity;
     private SavedHandler<T> savedHandler;
+    private SavedHandler<T> eagerSavedHandler;
     private ResetHandler<T> resetHandler;
     private DeleteHandler<T> deleteHandler;
     private String modalWindowTitle = "Edit entry";
@@ -151,6 +152,29 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
     public void setSavedHandler(SavedHandler<T> savedHandler) {
         this.savedHandler = savedHandler;
         getSaveButton().setVisible(this.savedHandler != null);
+    }
+
+    public SavedHandler<T> getEagerSavedHandler() {
+        return eagerSavedHandler;
+    }
+
+    /**
+     * Saves as the reader types, without a save button.
+     * <p>
+     * For a form that is a row in a list or a panel of settings, where a save button
+     * of its own would be one button too many. The handler is called after every
+     * change the reader makes that leaves the form valid; a change that does not is
+     * shown on the field and not saved, and what was stored stays as it was.
+     * <p>
+     * Shows no button and does not need {@link #setSavedHandler}, which is the
+     * other, deliberate way to save. A form may have both, though it is worth asking
+     * why.
+     *
+     * @param eagerSavedHandler called with the entity after each valid change, or
+     *        null to stop
+     */
+    public void setEagerSavedHandler(SavedHandler<T> eagerSavedHandler) {
+        this.eagerSavedHandler = eagerSavedHandler;
     }
 
     public DeleteHandler<T> getDeleteHandler() {
@@ -249,6 +273,20 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
                 Set<ConstraintViolation<T>> constraintViolations = doBeanValidation(e.getValue());
                 binder.setConstraintViolations(constraintViolations);
                 adjustResetButtonState();
+                adjustSaveButtonState();
+            }
+        });
+        /*
+           Added after the validating listener above, which is what lets this one ask
+           whether the change just made left the form usable. Without that filter it
+           would also fire while the form is being filled programmatically, and save
+           whatever half-typed value passed through.
+        */
+        binder.addValidValueChangeListener(e -> {
+            if (eagerSavedHandler != null) {
+                eagerSavedHandler.onSave(getEntity());
+                // Saved, so there is nothing unsaved left to report.
+                hasChanges = false;
                 adjustSaveButtonState();
             }
         });

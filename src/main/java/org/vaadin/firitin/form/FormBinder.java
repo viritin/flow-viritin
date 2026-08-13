@@ -767,6 +767,34 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         return () -> valueChangeListeners.remove(listener);
     }
 
+    /**
+     * Adds a listener for changes the reader made that left the form in a usable
+     * state.
+     * <p>
+     * The two conditions a "save as you type" form checks, in one place: the change
+     * came from the client rather than from the application filling the fields, and
+     * nothing is currently reported as wrong.
+     * <p>
+     * "Wrong" means what this binder has been told, since a binder shows violations
+     * rather than producing them — a conversion error it noticed itself, and the
+     * violations last handed to {@link #setConstraintViolations(Set)}. If you feed
+     * those from a listener of your own, add that listener first, or this one will
+     * answer about the change before last. {@link BeanValidationForm} has no such
+     * order to get right: it registers its own validating listener when the binder
+     * is created.
+     *
+     * @param listener the listener
+     * @return a registration for removing it
+     */
+    public Registration addValidValueChangeListener(
+            ValueChangeListener<? super FormBinderValueChangeEvent<T>> listener) {
+        return addValueChangeListener(event -> {
+            if (event.isFromClient() && isValid()) {
+                listener.valueChanged(event);
+            }
+        });
+    }
+
     @Override
     public boolean isReadOnly() {
         // TODO figure out what to do, coming via HasValue...

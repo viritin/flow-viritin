@@ -99,22 +99,19 @@ Affects both what is validated and which fields show the required indicator.
 ### Saving without a save button
 
 Sometimes a form is a row in a list, or a panel of settings, and a save button
-of its own would be one button too many. Set no saved handler, leave the toolbar
-out of `createContent()`, and save from the binder instead — only when what you
-have is valid:
+of its own would be one button too many. Say that instead of a saved handler:
 
 ```java
-getBinder().addValueChangeListener(event -> {
-    if (event.isFromClient() && isValid()) {
-        service.save(getEntity());
-    }
-});
+setEagerSavedHandler(counter -> service.save(counter));
 ```
 
-`isValid()` answers about the value that was just typed, whichever order you
-write those two statements in: `getBinder()` initialises the form on first use,
-so the form's own listener — the one that validates — is always registered
-before any you add.
+The handler is called after every change the reader makes that leaves the form
+valid. A change that does not is shown on the field and not saved, so what is
+stored keeps what it had — which is the part that is easy to get wrong when
+saving on every event. No button appears, and `setSavedHandler` is not needed.
+
+`EagerSaveView` in the test sources is a working example: a list of rows, each
+saving itself as you type.
 
 ### Spring: use the container's validator
 
