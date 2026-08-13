@@ -8,7 +8,12 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 class ErrorMessage extends Paragraph {
     public ErrorMessage(String message) {
         super(message);
-        // TODO add default styling to some place or figure out some vaadin base/aura equivalent
+        /*
+           The colour comes from formbinder.css, which picks the token the theme in
+           use actually defines. The Lumo utility class is kept because it says the
+           same thing for an application that has loaded Lumo's utility.css — but it
+           cannot be relied on, since that stylesheet is not part of the theme.
+        */
         addClassNames("viritin-error-message", LumoUtility.TextColor.ERROR);
     }
 }

@@ -1,3 +1,16 @@
+/*
+   The colour of a violation that belongs to no single field.
+
+   Three steps, because the token that names it depends on the theme. Aura defines
+   --vaadin-input-field-error-color at root scope, so it wins there. Lumo does not
+   define that one at all — it has --lumo-error-text-color instead — and its
+   .text-error utility class lives in a stylesheet of its own that an application
+   does not get unless it asks. Without the middle step the message lands on the
+   last one and is drawn in the ordinary text colour, which is how an error message
+   comes to look like a sentence.
+*/
 .viritin-error-message {
-    color: var(--vaadin-input-field-error-color, var(--vaadin-text-color));
+    color: var(--vaadin-input-field-error-color,
+           var(--lumo-error-text-color,
+           var(--vaadin-text-color)));
 }
