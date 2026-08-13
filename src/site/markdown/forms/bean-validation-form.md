@@ -111,9 +111,10 @@ getBinder().addValueChangeListener(event -> {
 });
 ```
 
-Add that listener after `setEntity()`, so that it runs after the form's own
-listener has validated the change: `isValid()` then answers about the value that
-was just typed.
+`isValid()` answers about the value that was just typed, whichever order you
+write those two statements in: `getBinder()` initialises the form on first use,
+so the form's own listener — the one that validates — is always registered
+before any you add.
 
 ### Spring: use the container's validator
 
