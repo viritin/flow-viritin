@@ -2,6 +2,7 @@ package org.vaadin.firitin.formbinder;
 
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 
@@ -27,16 +28,28 @@ import org.vaadin.firitin.form.FormBinder;
  * set, after a value is set, and after {@code clear()}. That is what the assertions
  * below record.
  *
- * <p>Two ways out, and they mean different things:
+ * <p>The interface expects the two to agree — "override {@link #getEmptyValue()} if
+ * the empty value is not null" — so the tidy answer would be to define the empty
+ * value of a form as the object built from every editor's own empty value. For a
+ * record that even works for free, since records compare by component. The two tests
+ * below are why it is not that simple:
  *
  * <ul>
- * <li><b>empty = nothing bound.</b> {@code getValue()} would have to return null
- * when no value has been set, which would take the "build a new object from empty
- * fields" use away — {@code FormBinderTest.testRecordBasics} depends on it.
- * <li><b>empty = every editor is empty.</b> An override that asks the editors
- * instead of comparing values. {@code clear()} would then make it true, which is
- * what a reader of the interface would expect, and no existing behaviour changes.
+ * <li>that object <b>cannot always be built</b>. A record with a primitive component
+ * has no empty form to construct — the editor can be empty, {@code int} cannot. So
+ * {@code getEmptyValue()} would throw, and with it {@code clear()}, which the
+ * interface defines as {@code setValue(getEmptyValue())}.
+ * <li>for a mutable bean it <b>would not answer anything</b>. Two beans built from
+ * the same empty editors are not equal, because a bean carries the equality it was
+ * written with, and most are written with none.
  * </ul>
+ *
+ * <p>Which leaves the definition that needs neither construction nor equality:
+ * <b>empty = every bound editor is empty</b>, asked of the editors, where "empty" is
+ * already defined properly for each of them. That would make {@code isEmpty()} true
+ * after {@code clear()} and change nothing else — at the price of no longer being
+ * the comparison the interface describes, and of being about the editors rather than
+ * about the parts of the value nothing edits.</p>
  *
  * <p>Neither is urgent: nothing in this library calls it, and a binder cannot be a
  * field of another form, so no Vaadin code reaches it either. It is an inconsistency
@@ -55,6 +68,57 @@ public class FormBinderIsEmptyTest {
         public Form() {
             add(comment, target);
         }
+    }
+
+    /** A record with a primitive component: the editor can be empty, {@code int} cannot. */
+    public record Edit(String comment, int count) {
+    }
+
+    public static class EditForm extends VerticalLayout {
+        TextField comment = new TextField();
+        IntegerField count = new IntegerField();
+
+        public EditForm() {
+            add(comment, count);
+        }
+    }
+
+    /** A bean with the equality most application beans have, which is none. */
+    public static class Bean {
+        private String comment;
+
+        public String getComment() {
+            return comment;
+        }
+
+        public void setComment(String comment) {
+            this.comment = comment;
+        }
+    }
+
+    public static class BeanForm extends VerticalLayout {
+        TextField comment = new TextField();
+
+        public BeanForm() {
+            add(comment);
+        }
+    }
+
+    @Test
+    public void theEmptyValueCannotAlwaysBeBuilt() {
+        FormBinder<Edit> binder = new FormBinder<>(Edit.class, new EditForm());
+
+        // Every editor is empty, and the record still cannot be constructed from them.
+        Assertions.assertThrows(NullPointerException.class, binder::getValue,
+                "a primitive component has no empty value to build");
+    }
+
+    @Test
+    public void equalityWouldNotAnswerForAMutableBean() {
+        FormBinder<Bean> binder = new FormBinder<>(Bean.class, new BeanForm());
+
+        Assertions.assertNotEquals(binder.getValue(), binder.getValue(),
+                "two beans built from the same empty editors are not equal");
     }
 
     @Test
