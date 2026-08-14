@@ -19,6 +19,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -138,6 +139,46 @@ public class FormBinderKnownIssuesTest {
 
         public DerivedForm() {
             add(comment, target);
+        }
+    }
+
+    /**
+     * The same required field twice, differing only in whether the constraint
+     * carries a message written for the reader.
+     */
+    public record Named(@NotBlank String name) {
+    }
+
+    public record NamedWithOwnMessage(@NotBlank(message = "Give the identifier") String name) {
+    }
+
+    public static class NameForm extends BeanValidationForm<Named> {
+        TextField name = new TextField();
+
+        public NameForm() {
+            super(Named.class);
+            setSavedHandler(value -> {
+            });
+        }
+
+        @Override
+        protected List<Component> getFormComponents() {
+            return List.of(name);
+        }
+    }
+
+    public static class OwnMessageForm extends BeanValidationForm<NamedWithOwnMessage> {
+        TextField name = new TextField();
+
+        public OwnMessageForm() {
+            super(NamedWithOwnMessage.class);
+            setSavedHandler(value -> {
+            });
+        }
+
+        @Override
+        protected List<Component> getFormComponents() {
+            return List.of(name);
         }
     }
 
@@ -658,6 +699,77 @@ public class FormBinderKnownIssuesTest {
         // The default is still lazy, which is what keeps validation off every keystroke.
         Assertions.assertEquals(ValueChangeMode.LAZY, form.target.getValueChangeMode(),
                 "a field the developer did not configure should still become lazy");
+    }
+
+    // ------------------------------------------------------------------
+    // 8. A form that opens already complaining
+    // ------------------------------------------------------------------
+
+    /**
+     * An empty form asks for what it needs with the required indicator, not by
+     * marking a field the reader has not reached yet. The binder has this rule
+     * already — {@code ignoreRequiredConstraintForField} — and it is what makes
+     * validating in {@code setEntity} safe.
+     */
+    @Test
+    public void anUntouchedRequiredFieldIsNotMarkedInvalid() {
+        NameForm form = new NameForm();
+
+        form.setEntity(new Named(""));
+
+        Assertions.assertFalse(form.name.isInvalid(),
+                "a field nobody has touched should not be reported as wrong");
+        Assertions.assertTrue(form.name.isRequiredIndicatorVisible(),
+                "the indicator is what asks for the value instead");
+    }
+
+    /**
+     * And the same when the constraint carries a message of its own — which is
+     * the normal case, since "must not be blank" is rarely what a form wants to
+     * say. The rule is about <em>which constraint</em> this is, not about how it
+     * happens to be worded: matching the message template means a form that
+     * explains itself well is exactly the one that opens covered in red.
+     */
+    @Test
+    public void aConstraintMessageOfItsOwnDoesNotDefeatTheSuppression() {
+        OwnMessageForm form = new OwnMessageForm();
+
+        form.setEntity(new NamedWithOwnMessage(""));
+
+        Assertions.assertFalse(form.name.isInvalid(),
+                "the wording of a constraint should not decide when it is reported");
+        Assertions.assertTrue(form.name.isRequiredIndicatorVisible(),
+                "the indicator is what asks for the value instead");
+    }
+
+    /**
+     * The other half of the rule: once the reader has filled the field, emptying
+     * it again is a mistake they made and should be told about. Suppressing it
+     * then would leave them looking for why Save does nothing.
+     */
+    @Test
+    public void emptyingAFieldTheReaderFilledIsReported() {
+        OwnMessageForm form = new OwnMessageForm();
+        form.setEntity(new NamedWithOwnMessage(""));
+
+        typeInto(form.name, "AB");
+        typeInto(form.name, "");
+
+        Assertions.assertTrue(form.name.isInvalid(),
+                "a value the reader removed is their change, and it is wrong");
+        Assertions.assertEquals("Give the identifier", form.name.getErrorMessage());
+    }
+
+    /**
+     * A change the reader makes, as opposed to the form filling itself in: the
+     * distinction the suppression rests on, and the only part of a browser this
+     * needs.
+     */
+    private static void typeInto(TextField field, String value) {
+        String old = field.getValue();
+        field.setValue(value);
+        ComponentUtil.fireEvent(field,
+                new AbstractField.ComponentValueChangeEvent<>(field, field, old, true));
     }
 
     // ------------------------------------------------------------------

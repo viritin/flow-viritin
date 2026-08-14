@@ -30,6 +30,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.metadata.ConstraintDescriptor;
 import org.vaadin.firitin.util.JacksonIntrospection;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
@@ -963,10 +964,19 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         return o;
     }
 
-    private static final Set<String> emptyValidationMessages = Set.of(
-            "{jakarta.validation.constraints.NotNull.message}",
-            "{jakarta.validation.constraints.NotEmpty.message}",
-            "{jakarta.validation.constraints.NotBlank.message}"
+    /**
+     * The constraints that mean "this has to be filled in", which is what the
+     * required indicator says on a field nobody has touched yet.
+     *
+     * <p>Recognised by annotation rather than by message: a constraint almost
+     * always carries a message written for the reader, and matching the default
+     * template meant that a form explaining itself well was exactly the one that
+     * opened covered in red.
+     */
+    private static final Set<Class<? extends Annotation>> emptyValueConstraints = Set.of(
+            NotNull.class,
+            NotEmpty.class,
+            NotBlank.class
             );
 
     /**
@@ -1009,7 +1019,13 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
      * @return true if should be ignored based on emptry validity
      */
     protected boolean ignoreRequiredConstraintForField(ConstraintViolation<T> cv, HasValue hasValue) {
-        return emptyValidationMessages.contains(cv.getMessageTemplate()) && !userModifiedFields.contains(hasValue);
+        return isEmptyValueConstraint(cv) && !userModifiedFields.contains(hasValue);
+    }
+
+    private static boolean isEmptyValueConstraint(ConstraintViolation<?> cv) {
+        ConstraintDescriptor<?> descriptor = cv.getConstraintDescriptor();
+        return descriptor != null
+                && emptyValueConstraints.contains(descriptor.getAnnotation().annotationType());
     }
 
     /**

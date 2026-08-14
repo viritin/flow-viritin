@@ -67,7 +67,20 @@ form.setEntityWithEnabledSave(person);
 
 A fresh, empty entity does not turn the form red — a missing value is not
 reported for a field the reader has not touched yet, which is what the required
-indicator is there for.
+indicator is there for. Emptying a field they did fill in *is* reported: that is
+their change, and a disabled save button on its own would leave them looking for
+the reason.
+
+Which constraints count as "this has to be filled in" is decided by the
+annotation — `@NotNull`, `@NotEmpty`, `@NotBlank` — and not by the message, so a
+constraint that explains itself in your own words behaves the same as one left
+with the default:
+
+```java
+record NewDevice(@NotBlank(message = "Give the device identifier") String deviceId) {}
+```
+
+Override `ignoreRequiredConstraintForField` to decide differently.
 
 ### Class level constraints
 
