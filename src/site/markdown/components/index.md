@@ -13,7 +13,10 @@ without introducing extra variables.
 ### VGrid
 
 An enhanced Grid with sensible defaults, records support, an advanced
-styling API and a grid-wide `CellFormatter`. See the dedicated
+styling API and a grid-wide `CellFormatter`. Columns can be defined
+with getter method references, like
+`setColumns(Person::getFirstName, Person::getLastName)`, instead of
+property name strings. See the dedicated
 [VGrid page](vgrid.html) for details and examples.
 
 ### Uploads & Downloads
