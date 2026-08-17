@@ -13,8 +13,6 @@ import org.vaadin.firitin.components.RichText;
 import org.vaadin.firitin.components.textfield.VTextField;
 import org.vaadin.firitin.form.FormBinder;
 
-import java.util.Map;
-
 /**
  * Example/playground for cross-field-validation without Java Bean Validation API
  */
