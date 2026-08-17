@@ -32,6 +32,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.metadata.ConstraintDescriptor;
 import org.vaadin.firitin.util.JacksonIntrospection;
+import org.vaadin.firitin.util.PropertyRef;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.PropertyName;
@@ -1090,6 +1091,37 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         constraintViolations = !propertyToViolation.isEmpty();
     }
 
+    /**
+     * Reports a single constraint violation, naming the property with a method
+     * reference to its getter instead of a string:
+     *
+     * <pre><code>
+     * binder.setRawConstraintViolation(Account::getPasswordVerification, "Passwords do not match!");
+     * </code></pre>
+     *
+     * Like {@link #setRawConstraintViolations(Map)}, of which this is the single
+     * property form, this replaces the violations currently shown. Use the map
+     * version to report several at once.
+     *
+     * @param property a method reference to the getter of the property the violation is about
+     * @param message  the message to show
+     */
+    public void setRawConstraintViolation(PropertyRef<T, ?> property, String message) {
+        setRawConstraintViolation(property.getPropertyName(), message);
+    }
+
+    /**
+     * Reports a single constraint violation for the given property.
+     *
+     * @param property the property the violation is about, or an empty string for a
+     *                 violation that belongs to no single field
+     * @param message  the message to show
+     * @see #setRawConstraintViolation(PropertyRef, String)
+     */
+    public void setRawConstraintViolation(String property, String message) {
+        setRawConstraintViolations(Map.of(property, message));
+    }
+
     private void handleClassLevelValidations(HashMap<String, String> nonReported) {
         nonReported.forEach((_property, cv) -> {
             addClassLevelValidationViolation(createClassLevelValidationComponent(cv));
@@ -1131,6 +1163,18 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
      */
     public void setConverter(String property, Converter<?, ?> strToDt) {
         nameToConverter.put(property, strToDt);
+    }
+
+    /**
+     * Sets a converter to use between the domain model property and the
+     * corresponding UI component editing it, naming the property with a method
+     * reference to its getter instead of a string.
+     *
+     * @param property a method reference to the getter of the property
+     * @param strToDt  the converter
+     */
+    public void setConverter(PropertyRef<T, ?> property, Converter<?, ?> strToDt) {
+        setConverter(property.getPropertyName(), strToDt);
     }
 
     /**
@@ -1187,6 +1231,17 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
 
     public HasValue getEditor(String property) {
         return nameToEditorField.get(property);
+    }
+
+    /**
+     * Returns the field editing the given property, naming it with a method
+     * reference to its getter instead of a string.
+     *
+     * @param property a method reference to the getter of the property
+     * @return the field bound to the property, or null if none is bound
+     */
+    public HasValue getEditor(PropertyRef<T, ?> property) {
+        return getEditor(property.getPropertyName());
     }
 
     public static class ParagraphWithErrorStyleClassLevelValidationViolationComponentProvider implements SerializableFunction<String, Component> {

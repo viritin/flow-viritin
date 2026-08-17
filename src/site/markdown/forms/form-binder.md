@@ -124,6 +124,22 @@ binder.setRawConstraintViolations(Map.of(
         "", "The dates overlap"));   // the empty key: belongs to no field
 ```
 
+For a single violation the property can be named with a method reference to
+its getter, so the compiler checks it and renaming the property renames this
+too:
+
+```java
+binder.setRawConstraintViolation(Account::getPasswordVerification,
+        "Passwords do not match!");
+```
+
+`setConverter` and `getEditor` take one the same way:
+
+```java
+binder.setConverter(Person::getBirthDate, new StringToDateConverter());
+binder.getEditor(Person::getBirthDate);
+```
+
 ### Reacting to usable changes
 
 A form that saves as the reader types has two conditions to check on every event:

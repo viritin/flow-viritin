@@ -37,8 +37,9 @@ public class FormBinderRegistrationFormView extends VerticalLayout {
         and could be moved somewhere it is reusable.
 
         Type two different passwords and press Register. The message appears on the
-        second field, because that is the key it was given. Make them match, and the
-        form goes through.
+        second field, because `Account::passwordVerification` is the property it was
+        given — a method reference rather than a string, so a typo would not compile.
+        Make them match, and the form goes through.
 
         """));
         add(new H1("Register as new user"));
@@ -52,9 +53,10 @@ public class FormBinderRegistrationFormView extends VerticalLayout {
         // UI fields -> cleaner code and would be easier move the logic
         // separate place for re-use
         if(!account.password().equals(account.passwordVerification())) {
-            binder.setRawConstraintViolations(
-                    Map.of("passwordVerification", "Passwords do not match!")
-            );
+            // The record's accessor names the field, so a typo here would not
+            // compile and renaming the component renames this too
+            binder.setRawConstraintViolation(Account::passwordVerification,
+                    "Passwords do not match!");
         } else {
             Notification.show("All fine, do stuff with things");
         }

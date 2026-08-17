@@ -91,6 +91,33 @@ public class FormBinderTest {
         }
     }
 
+    /**
+     * The property of a violation, a converter or an editor named with a method
+     * reference to the getter instead of a string, the same mechanism VGrid uses
+     * for its columns.
+     */
+    @Test
+    public void propertiesCanBeNamedWithGetterReferences() {
+        FooBarForm form = new FooBarForm();
+        FormBinder<FooBar> binder = new FormBinder<>(FooBar.class, form);
+
+        Assertions.assertSame(form.foo, binder.getEditor(FooBar::foo));
+        Assertions.assertSame(binder.getEditor("bar"), binder.getEditor(FooBar::bar));
+
+        binder.setRawConstraintViolation(FooBar::foo, "Not good enough");
+        Assertions.assertTrue(form.foo.isInvalid());
+        Assertions.assertEquals("Not good enough", form.foo.getErrorMessage());
+        Assertions.assertFalse(binder.isValid());
+
+        // Like the map version, this replaces what was shown
+        binder.setRawConstraintViolation(FooBar::baz, "Nor is this");
+        Assertions.assertFalse(form.foo.isInvalid());
+        Assertions.assertTrue(form.baz.isInvalid());
+
+        binder.clearValidationErrors();
+        Assertions.assertFalse(form.baz.isInvalid());
+    }
+
     @Test
     public void testRecordBasics() {
 
