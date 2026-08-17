@@ -1,6 +1,8 @@
 package org.vaadin.firitin;
 
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.function.ValueProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -116,6 +118,60 @@ public class PropertyRefTest {
                 PropertyRef.of(Customer::getAddress).then(Address::getStreet));
 
         Assertions.assertEquals(List.of("name", "address.street"), columnKeys(grid));
+    }
+
+    @Test
+    public void columnsCanBeAddedAndLookedUpWithGetterReferences() {
+        VGrid<Person> grid = new VGrid<>(Person.class, false);
+        grid.addColumns(Person::getFirstName, Person::getLastName);
+        VGrid.VColumn<Person> age = grid.addPropertyColumn(Person::getAge);
+        age.setHeader("Ikä");
+
+        Assertions.assertEquals(List.of("firstName", "lastName", "age"), columnKeys(grid));
+        Assertions.assertSame(age, grid.getColumnByKey(Person::getAge));
+        Assertions.assertEquals("Ikä", grid.getColumnByKey(Person::getAge).getHeaderText());
+        Assertions.assertNull(grid.getColumnByKey(Person::getJoinTime));
+    }
+
+    @Test
+    public void columnsCanBeSortedRemovedAndReorderedWithGetterReferences() {
+        VGrid<Person> grid = new VGrid<>(Person.class, false);
+        grid.setColumns(Person::getFirstName, Person::getLastName, Person::getAge);
+
+        grid.setSortableColumns(Person::getLastName);
+        Assertions.assertTrue(grid.getColumnByKey(Person::getLastName).isSortable());
+        Assertions.assertFalse(grid.getColumnByKey(Person::getFirstName).isSortable());
+
+        grid.setColumnOrder(Person::getAge, Person::getLastName, Person::getFirstName);
+        Assertions.assertEquals(List.of("age", "lastName", "firstName"), columnKeys(grid));
+
+        grid.removeColumnByKey(Person::getAge);
+        Assertions.assertEquals(List.of("lastName", "firstName"), columnKeys(grid));
+
+        IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> grid.setColumnOrder(Person::getAge, Person::getLastName));
+        Assertions.assertTrue(e.getMessage().contains("age"), e.getMessage());
+    }
+
+    @Test
+    public void customRendererColumnCanBeKeyedWithAGetterReference() {
+        VGrid<Person> grid = new VGrid<>(Person.class, false);
+        VGrid.VColumn<Person> column = (VGrid.VColumn<Person>) grid
+                .addColumn(person -> person.getFirstName() + " " + person.getLastName());
+        column.withKey(Person::getFirstName);
+
+        Assertions.assertSame(column, grid.getColumnByKey(Person::getFirstName));
+    }
+
+    @Test
+    public void backendSortPropertiesCanBeGivenAsGetterReferences() {
+        VGrid<Person> grid = new VGrid<>(Person.class, false);
+        VGrid.VColumn<Person> column = grid.addPropertyColumn(Person::getFirstName)
+                .withSortProperties(Person::getFirstName, Person::getLastName);
+
+        Assertions.assertEquals(List.of("firstName", "lastName"),
+                column.getSortOrder(SortDirection.ASCENDING)
+                        .map(QuerySortOrder::getSorted).toList());
     }
 
     private static List<String> columnKeys(Grid<?> grid) {

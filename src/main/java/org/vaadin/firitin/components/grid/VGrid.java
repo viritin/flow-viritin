@@ -197,6 +197,89 @@ public class VGrid<T> extends Grid<T>
         setColumns(toPropertyNames(properties));
     }
 
+    /**
+     * Adds a column for the given property, using a method reference to its getter
+     * instead of a property name string:
+     *
+     * <pre><code>
+     * grid.addPropertyColumn(Person::getFirstName).setHeader("Etunimi");
+     * </code></pre>
+     *
+     * @param property a method reference to the getter of the property to show
+     * @return the new column, for further configuration
+     */
+    public VColumn<T> addPropertyColumn(PropertyRef<T, ?> property) {
+        Column<T> column = addColumn(property.getPropertyName());
+        if (column instanceof VColumn<T> vColumn) {
+            return vColumn;
+        }
+        throw new IllegalStateException(
+                "The column factory of this grid does not produce VColumns, but "
+                        + column.getClass().getName());
+    }
+
+    /**
+     * Adds columns for the given properties, using method references to their
+     * getters instead of property name strings.
+     *
+     * @param properties method references to the getters of the properties to show
+     */
+    @SafeVarargs
+    public final void addColumns(PropertyRef<T, ?>... properties) {
+        addColumns(toPropertyNames(properties));
+    }
+
+    /**
+     * Makes the columns of the given properties sortable, using method references
+     * to their getters instead of property name strings.
+     *
+     * @param properties method references to the getters of the properties to make sortable
+     */
+    @SafeVarargs
+    public final void setSortableColumns(PropertyRef<T, ?>... properties) {
+        setSortableColumns(toPropertyNames(properties));
+    }
+
+    /**
+     * Sets the order of the columns, using method references to the getters instead
+     * of property name strings. Note that all columns of the grid must be listed.
+     *
+     * @param properties method references to the getters of the properties, in the wanted order
+     * @throws IllegalArgumentException if any of the properties has no column in this grid
+     */
+    @SafeVarargs
+    public final void setColumnOrder(PropertyRef<T, ?>... properties) {
+        setColumnOrder(Arrays.stream(properties).map(property -> {
+            Column<T> column = getColumnByKey(property);
+            if (column == null) {
+                throw new IllegalArgumentException(
+                        "This grid has no column for the property " + property.getPropertyName());
+            }
+            return column;
+        }).toList());
+    }
+
+    /**
+     * Finds the column of the given property, using a method reference to its getter
+     * instead of a property name string.
+     *
+     * @param property a method reference to the getter of the property
+     * @return the column, or null if this grid has no column for the property
+     */
+    public Column<T> getColumnByKey(PropertyRef<T, ?> property) {
+        return getColumnByKey(property.getPropertyName());
+    }
+
+    /**
+     * Removes the column of the given property, using a method reference to its
+     * getter instead of a property name string.
+     *
+     * @param property a method reference to the getter of the property
+     */
+    public void removeColumnByKey(PropertyRef<T, ?> property) {
+        removeColumnByKey(property.getPropertyName());
+    }
+
     private static String[] toPropertyNames(PropertyRef<?, ?>[] properties) {
         return Arrays.stream(properties)
                 .map(PropertyRef::getPropertyName)
@@ -612,6 +695,31 @@ public class VGrid<T> extends Grid<T>
          */
         public VColumn(Grid<T> grid, String columnId, Renderer<T> renderer) {
             super(grid, columnId, renderer);
+        }
+
+        /**
+         * Sets the properties this column is sorted by in the backend, using method
+         * references to their getters instead of property name strings.
+         *
+         * @param properties method references to the getters of the sort properties
+         * @return this column, for further configuration
+         */
+        @SafeVarargs
+        public final VColumn<T> withSortProperties(PropertyRef<T, ?>... properties) {
+            setSortProperty(toPropertyNames(properties));
+            return this;
+        }
+
+        /**
+         * Sets the key of this column, using a method reference to the getter of the
+         * property instead of a string.
+         *
+         * @param property a method reference to the getter of the property
+         * @return this column, for further configuration
+         */
+        public VColumn<T> withKey(PropertyRef<T, ?> property) {
+            setKey(property.getPropertyName());
+            return this;
         }
 
         @Override
