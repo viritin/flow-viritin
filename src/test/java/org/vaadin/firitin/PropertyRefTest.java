@@ -313,6 +313,23 @@ public class PropertyRefTest {
     }
 
     @Test
+    public void theDemoViewDemonstratesWhatItClaims() {
+        GridColumnsWithoutStrings.PeopleGrid peopleGrid = new GridColumnsWithoutStrings.PeopleGrid();
+        // The Age column is re-rendered, but keeps its place, header and sorting
+        Assertions.assertEquals(List.of("firstName", "lastName", "age"), columnKeys(peopleGrid));
+        Grid.Column<Person> age = peopleGrid.getColumnByKey(Person::getAge);
+        Assertions.assertInstanceOf(ComponentRenderer.class, age.getRenderer());
+        Assertions.assertEquals("Age", age.getHeaderText());
+        Assertions.assertTrue(age.isSortable());
+        Assertions.assertNotNull(age.getComparator(SortDirection.ASCENDING));
+
+        // The second grid has no bean type, yet gets its headers from the getters
+        GridColumnsWithoutStrings.HandBuiltGrid handBuilt = new GridColumnsWithoutStrings.HandBuiltGrid();
+        Assertions.assertEquals(List.of("First Name", "Last Name", "Age"),
+                handBuilt.getColumns().stream().map(Grid.Column::getHeaderText).toList());
+    }
+
+    @Test
     public void componentColumnsAreNotAffected() {
         VGrid<Person> grid = new VGrid<>(Person.class, false);
         Grid.Column<Person> column = grid
