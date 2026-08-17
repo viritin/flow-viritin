@@ -154,6 +154,18 @@ public class PropertyRefTest {
     }
 
     @Test
+    public void hidePropertiesDropsOnlyTheGivenColumns() {
+        VGrid<Person> grid = new VGrid<>(Person.class, false);
+        grid.setColumns(Person::getFirstName, Person::getLastName, Person::getAge);
+
+        grid.hideProperties(Person::getLastName);
+
+        Assertions.assertEquals(List.of("firstName", "age"), columnKeys(grid));
+        // the remaining columns are all left visible
+        Assertions.assertTrue(grid.getColumns().stream().allMatch(Grid.Column::isVisible));
+    }
+
+    @Test
     public void customRendererColumnCanBeKeyedWithAGetterReference() {
         VGrid<Person> grid = new VGrid<>(Person.class, false);
         VGrid.VColumn<Person> column = (VGrid.VColumn<Person>) grid

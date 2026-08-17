@@ -160,7 +160,6 @@ public class VGrid<T> extends Grid<T>
             properties.remove(pToHide);
         }
         setColumns(properties.toArray(new String[properties.size()]));
-        getColumns().get(1).setVisible(false);
         return this;
     }
 
