@@ -23,6 +23,7 @@ import org.vaadin.firitin.fluency.ui.FluentHasSize;
 import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 import org.vaadin.firitin.fluency.ui.FluentHasTheme;
 import org.vaadin.firitin.util.PropertyRef;
+import org.vaadin.firitin.util.PropertyRefs;
 import org.vaadin.firitin.util.VStyle;
 import org.vaadin.firitin.util.VStyleUtil;
 import org.vaadin.firitin.util.JacksonIntrospection;
@@ -32,6 +33,7 @@ import tools.jackson.databind.introspect.AnnotatedMethod;
 import tools.jackson.databind.introspect.BasicBeanDescription;
 import tools.jackson.databind.introspect.BeanPropertyDefinition;
 
+import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.RecordComponent;
@@ -54,6 +56,8 @@ public class VGrid<T> extends Grid<T>
 
     // Not really used for object mapping, but introspection
     private static ObjectMapper dummyOm;
+    private static boolean autoConfigureFromGetterReferencesByDefault = true;
+    private boolean autoConfigureFromGetterReferences = autoConfigureFromGetterReferencesByDefault;
     private BasicBeanDescription bbd;
     private Set<String> columnCssKeys;
     private Set<String> rowCssKeys;
@@ -487,7 +491,144 @@ public class VGrid<T> extends Grid<T>
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+        if (autoConfigureFromGetterReferences) {
+            autoConfigureFromGetterReference(column, valueProvider);
+        }
         return column;
+    }
+
+    /**
+     * If the given value provider is a method reference to a getter, configures the
+     * column like {@link #addColumn(String)} would: the property name becomes the
+     * column key, the property caption becomes the header and a column of a
+     * {@link Comparable} property becomes sortable.
+     * <p>
+     * Everything here is best effort. A value provider that can't be tied to a
+     * property, a plain lambda expression in particular, leaves the column
+     * untouched, as do a property name that is already taken by another column and
+     * a method reference that doesn't look like a getter of this grid's bean type.
+     * </p>
+     *
+     * @param column        the freshly created column
+     * @param valueProvider the value provider the column was created from
+     */
+    protected void autoConfigureFromGetterReference(Column<T> column, ValueProvider<T, ?> valueProvider) {
+        String propertyName = resolvePropertyName(valueProvider);
+        if (propertyName == null) {
+            return;
+        }
+        if (column instanceof VColumn<T> vColumn) {
+            vColumn.setAutomaticKey(propertyName);
+        }
+        // Nested paths are captioned by their last part, like Vaadin does for beans
+        String caption = propertyName.substring(propertyName.lastIndexOf('.') + 1);
+        column.setHeader(SharedUtil.propertyIdToHumanFriendly(caption));
+        if (isComparableProperty(propertyName, valueProvider)) {
+            column.setSortable(true);
+        }
+    }
+
+    /**
+     * Digs the property name out of a value provider, if it is a method reference
+     * to a getter of this grid's bean type.
+     *
+     * @param valueProvider the value provider
+     * @return the property name, or null if the value provider is not a getter reference
+     */
+    private String resolvePropertyName(ValueProvider<T, ?> valueProvider) {
+        if (valueProvider instanceof PropertyRef<?, ?> propertyRef) {
+            // The developer has stated the intent explicitly
+            try {
+                return propertyRef.getPropertyName();
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+        }
+        SerializedLambda lambda;
+        try {
+            lambda = PropertyRefs.serializedLambda(valueProvider);
+        } catch (RuntimeException e) {
+            return null;
+        }
+        // Not a method reference but a lambda expression, or not a no-arg getter
+        if (lambda.getImplMethodName().startsWith("lambda$")
+                || !lambda.getImplMethodSignature().startsWith("()")) {
+            return null;
+        }
+        String methodName = lambda.getImplMethodName();
+        if (methodName.equals("getClass") || methodName.equals("toString")
+                || methodName.equals("hashCode")) {
+            return null;
+        }
+        String propertyName = PropertyRefs.propertyNameFromGetterName(methodName);
+        if (bbd != null) {
+            // The bean type is known, so only accept its actual properties. This also
+            // covers records and other accessors without a JavaBeans style prefix.
+            return getBeanPropertyNames().contains(propertyName) ? propertyName : null;
+        }
+        // Without a bean type all we can do is trust the JavaBeans naming convention
+        return propertyName.equals(methodName) ? null : propertyName;
+    }
+
+    private boolean isComparableProperty(String propertyName, ValueProvider<T, ?> valueProvider) {
+        if (bbd != null) {
+            return getBeanPropertyDefinitions().stream()
+                    .filter(p -> p.getName().equals(propertyName))
+                    .findFirst()
+                    .map(p -> Comparable.class.isAssignableFrom(p.getPrimaryType().getRawClass()))
+                    .orElse(false);
+        }
+        try {
+            String signature = PropertyRefs.serializedLambda(valueProvider).getImplMethodSignature();
+            String returnType = signature.substring(signature.indexOf(')') + 1);
+            if (returnType.length() == 1) {
+                // A primitive, all of which have Comparable wrapper types, except void
+                return !returnType.equals("V");
+            }
+            if (returnType.startsWith("L")) {
+                String className = returnType.substring(1, returnType.length() - 1).replace('/', '.');
+                return Comparable.class.isAssignableFrom(
+                        Class.forName(className, false, valueProvider.getClass().getClassLoader()));
+            }
+        } catch (RuntimeException | ClassNotFoundException e) {
+            // Can't tell, so leave the column as it was
+        }
+        return false;
+    }
+
+    /**
+     * Defines whether columns added with a method reference to a getter, like
+     * {@code grid.addColumn(Person::getFirstName)}, are configured with the key,
+     * header and sortability of that property. On by default.
+     * <p>
+     * Turn this off to get the behaviour of Vaadin's raw
+     * {@link Grid#addColumn(ValueProvider)}, where such a column has no key and no
+     * header at all.
+     * </p>
+     *
+     * @param autoConfigureFromGetterReferences true to configure the columns, false to leave them bare
+     */
+    public void setAutoConfigureFromGetterReferences(boolean autoConfigureFromGetterReferences) {
+        this.autoConfigureFromGetterReferences = autoConfigureFromGetterReferences;
+    }
+
+    /**
+     * @return true if getter reference columns are configured with their property's
+     *         key, header and sortability
+     */
+    public boolean isAutoConfigureFromGetterReferences() {
+        return autoConfigureFromGetterReferences;
+    }
+
+    /**
+     * Defines the default of {@link #setAutoConfigureFromGetterReferences(boolean)}
+     * for grids created after this call. Meant as an escape hatch for an
+     * application that has a lot of grids and wants the pre 3.8 behaviour.
+     *
+     * @param autoConfigure true to configure the columns, false to leave them bare
+     */
+    public static void setAutoConfigureFromGetterReferencesByDefault(boolean autoConfigure) {
+        autoConfigureFromGetterReferencesByDefault = autoConfigure;
     }
 
     // Copy pasted from Grid to override formatting
@@ -683,6 +824,7 @@ public class VGrid<T> extends Grid<T>
     public static class VColumn<T> extends Column<T> {
 
         private Style customStyle;
+        private boolean automaticKey;
 
         /**
          * Constructs a new Column for use inside a Grid.
@@ -719,6 +861,48 @@ public class VGrid<T> extends Grid<T>
         public VColumn<T> withKey(PropertyRef<T, ?> property) {
             setKey(property.getPropertyName());
             return this;
+        }
+
+        /**
+         * Assigns the key that was derived from a getter reference. Unlike a key set
+         * by the developer, this one gives way to a later {@link #setKey(String)}
+         * call, and is skipped altogether if another column has reserved the name.
+         *
+         * @param key the property name
+         */
+        void setAutomaticKey(String key) {
+            if (getGrid().getColumnByKey(key) != null) {
+                // Another column of the same property already exists, the old
+                // behaviour of leaving this one without a key is the safe one
+                return;
+            }
+            super.setKey(key);
+            automaticKey = true;
+        }
+
+        @Override
+        public VColumn<T> setKey(String key) {
+            if (automaticKey) {
+                releaseAutomaticKey();
+            }
+            super.setKey(key);
+            automaticKey = false;
+            return this;
+        }
+
+        private void releaseAutomaticKey() {
+            try {
+                Field keyToColumnMap = Grid.class.getDeclaredField("keyToColumnMap");
+                keyToColumnMap.setAccessible(true);
+                ((Map<?, ?>) keyToColumnMap.get(getGrid())).remove(getKey());
+                Field columnKey = Column.class.getDeclaredField("columnKey");
+                columnKey.setAccessible(true);
+                columnKey.set(this, null);
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(
+                        "Failed to replace the column key derived from a getter reference", e);
+            }
+            automaticKey = false;
         }
 
         @Override

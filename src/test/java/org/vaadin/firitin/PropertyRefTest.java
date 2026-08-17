@@ -1,6 +1,7 @@
 package org.vaadin.firitin;
 
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.function.ValueProvider;
@@ -163,6 +164,106 @@ public class PropertyRefTest {
         Assertions.assertEquals(List.of("firstName", "age"), columnKeys(grid));
         // the remaining columns are all left visible
         Assertions.assertTrue(grid.getColumns().stream().allMatch(Grid.Column::isVisible));
+    }
+
+    @Test
+    public void addColumnConfiguresTheColumnFromAGetterReference() {
+        VGrid<Person> grid = new VGrid<>(Person.class, false);
+        Grid.Column<Person> column = grid.addColumn(Person::getFirstName);
+
+        Assertions.assertEquals("firstName", column.getKey());
+        Assertions.assertEquals("First Name", column.getHeaderText());
+        Assertions.assertTrue(column.isSortable());
+    }
+
+    @Test
+    public void addColumnConfiguresGettersOfABeanlessGridToo() {
+        // No bean type, so only the JavaBeans naming convention to lean on
+        VGrid<Person> grid = new VGrid<>();
+        Grid.Column<Person> column = grid.addColumn(Person::getAge);
+
+        Assertions.assertEquals("age", column.getKey());
+        Assertions.assertEquals("Age", column.getHeaderText());
+        Assertions.assertTrue(column.isSortable());
+    }
+
+    @Test
+    public void lambdasAndNonPropertyMethodsAreLeftAlone() {
+        VGrid<Person> grid = new VGrid<>(Person.class, false);
+        Grid.Column<Person> computed = grid
+                .addColumn(p -> p.getFirstName() + " " + p.getLastName());
+        Grid.Column<Person> notAProperty = grid.addColumn(Person::toString);
+
+        Assertions.assertNull(computed.getKey());
+        Assertions.assertNull(computed.getHeaderText());
+        Assertions.assertFalse(computed.isSortable());
+        Assertions.assertNull(notAProperty.getKey());
+        Assertions.assertNull(notAProperty.getHeaderText());
+    }
+
+    @Test
+    public void explicitKeyOverridesTheOneDerivedFromTheGetterReference() {
+        VGrid<Person> grid = new VGrid<>(Person.class, false);
+        Grid.Column<Person> column = grid.addColumn(Person::getFirstName).setKey("name");
+
+        Assertions.assertEquals("name", column.getKey());
+        Assertions.assertSame(column, grid.getColumnByKey("name"));
+        // the automatically assigned key is properly released
+        Assertions.assertNull(grid.getColumnByKey("firstName"));
+        // and a column of that property can be added again
+        Assertions.assertEquals("firstName", grid.addColumn(Person::getFirstName).getKey());
+    }
+
+    @Test
+    public void explicitHeaderOverridesTheDerivedOne() {
+        VGrid<Person> grid = new VGrid<>(Person.class, false);
+        Grid.Column<Person> column = grid.addColumn(Person::getFirstName).setHeader("Etunimi");
+
+        Assertions.assertEquals("Etunimi", column.getHeaderText());
+        Assertions.assertEquals("firstName", column.getKey());
+    }
+
+    @Test
+    public void twoColumnsOfTheSamePropertyDoNotClash() {
+        VGrid<Person> grid = new VGrid<>(Person.class, false);
+        Grid.Column<Person> first = grid.addColumn(Person::getFirstName);
+        Grid.Column<Person> second = grid.addColumn(Person::getFirstName);
+
+        Assertions.assertEquals("firstName", first.getKey());
+        // the second one keeps the old behaviour instead of throwing
+        Assertions.assertNull(second.getKey());
+        Assertions.assertEquals("First Name", second.getHeaderText());
+        Assertions.assertSame(first, grid.getColumnByKey(Person::getFirstName));
+    }
+
+    @Test
+    public void autoConfigurationCanBeTurnedOff() {
+        VGrid<Person> grid = new VGrid<>(Person.class, false);
+        grid.setAutoConfigureFromGetterReferences(false);
+        Grid.Column<Person> column = grid.addColumn(Person::getFirstName);
+
+        Assertions.assertNull(column.getKey());
+        Assertions.assertNull(column.getHeaderText());
+        Assertions.assertFalse(column.isSortable());
+    }
+
+    @Test
+    public void realWorldGridGetsItsHeadersWithoutBoilerplate() {
+        PopoverView.PersonGrid grid = new PopoverView.PersonGrid();
+
+        Assertions.assertEquals(List.of("First Name", "Last Name", "Age", "Actions"),
+                grid.getColumns().stream().map(Grid.Column::getHeaderText).toList());
+        Assertions.assertEquals("firstName", grid.getColumns().get(0).getKey());
+    }
+
+    @Test
+    public void componentColumnsAreNotAffected() {
+        VGrid<Person> grid = new VGrid<>(Person.class, false);
+        Grid.Column<Person> column = grid
+                .addComponentColumn(person -> new Span(person.getFirstName()));
+
+        Assertions.assertNull(column.getKey());
+        Assertions.assertNull(column.getHeaderText());
     }
 
     @Test

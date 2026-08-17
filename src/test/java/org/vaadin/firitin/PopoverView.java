@@ -49,9 +49,11 @@ public class PopoverView extends VerticalLayout {
 
     public static class PersonGrid extends VGrid<Person> {
         public PersonGrid() {
-            addColumn(Person::getFirstName).setHeader("First Name");
-            addColumn(Person::getLastName).setHeader("Last Name");
-            addColumn(Person::getAge).setHeader("Age");
+            // The headers "First Name", "Last Name" and "Age" and the sorting come
+            // from the getter references, no need to spell them out
+            addColumn(Person::getFirstName);
+            addColumn(Person::getLastName);
+            addColumn(Person::getAge);
             addComponentColumn(person -> {
                 return new VHorizontalLayout(
                         new Button(VaadinIcon.EDIT.create()),
