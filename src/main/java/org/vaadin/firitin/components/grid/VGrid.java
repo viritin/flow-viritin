@@ -22,6 +22,7 @@ import org.vaadin.firitin.fluency.ui.FluentFocusable;
 import org.vaadin.firitin.fluency.ui.FluentHasSize;
 import org.vaadin.firitin.fluency.ui.FluentHasStyle;
 import org.vaadin.firitin.fluency.ui.FluentHasTheme;
+import org.vaadin.firitin.util.PropertyRef;
 import org.vaadin.firitin.util.VStyle;
 import org.vaadin.firitin.util.VStyleUtil;
 import org.vaadin.firitin.util.JacksonIntrospection;
@@ -132,6 +133,22 @@ public class VGrid<T> extends Grid<T>
     }
 
     /**
+     * Configures the columns shown by the grid, using method references to the
+     * getters instead of property name strings:
+     *
+     * <pre><code>
+     * grid.withProperties(Person::getFirstName, Person::getLastName);
+     * </code></pre>
+     *
+     * @param properties method references to the getters of the properties to show
+     * @return the grid for further configuration
+     */
+    @SafeVarargs
+    public final VGrid<T> withProperties(PropertyRef<T, ?>... properties) {
+        return withProperties(toPropertyNames(properties));
+    }
+
+    /**
      * Hides given columns.
      *
      * @param propertyNamesToHide the property names/column keys to hide
@@ -145,6 +162,45 @@ public class VGrid<T> extends Grid<T>
         setColumns(properties.toArray(new String[properties.size()]));
         getColumns().get(1).setVisible(false);
         return this;
+    }
+
+    /**
+     * Hides given columns, using method references to the getters instead of
+     * property name strings.
+     *
+     * @param propertiesToHide method references to the getters of the properties to hide
+     * @return the grid for further configuration
+     */
+    @SafeVarargs
+    public final VGrid<T> hideProperties(PropertyRef<T, ?>... propertiesToHide) {
+        return hideProperties(toPropertyNames(propertiesToHide));
+    }
+
+    /**
+     * Configures the columns shown by the grid, using method references to the
+     * getters instead of property name strings:
+     *
+     * <pre><code>
+     * grid.setColumns(Person::getFirstName, Person::getLastName);
+     * </code></pre>
+     *
+     * Nested properties can be referenced by chaining:
+     *
+     * <pre><code>
+     * grid.setColumns(PropertyRef.of(Person::getAddress).then(Address::getStreet));
+     * </code></pre>
+     *
+     * @param properties method references to the getters of the properties to show
+     */
+    @SafeVarargs
+    public final void setColumns(PropertyRef<T, ?>... properties) {
+        setColumns(toPropertyNames(properties));
+    }
+
+    private static String[] toPropertyNames(PropertyRef<?, ?>[] properties) {
+        return Arrays.stream(properties)
+                .map(PropertyRef::getPropertyName)
+                .toArray(String[]::new);
     }
 
     @Override
