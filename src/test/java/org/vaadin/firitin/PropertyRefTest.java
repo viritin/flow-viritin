@@ -3,6 +3,7 @@ package org.vaadin.firitin;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.function.ValueProvider;
 import org.junit.jupiter.api.Assertions;
@@ -254,6 +255,61 @@ public class PropertyRefTest {
         Assertions.assertEquals(List.of("First Name", "Last Name", "Age", "Actions"),
                 grid.getColumns().stream().map(Grid.Column::getHeaderText).toList());
         Assertions.assertEquals("firstName", grid.getColumns().get(0).getKey());
+    }
+
+    @Test
+    public void oneColumnOfAnOtherwiseStandardGridCanBeRenderedWithComponents() {
+        VGrid<Person> grid = new VGrid<>(Person.class);
+        List<String> keysBefore = columnKeys(grid);
+        Grid.Column<Person> column = grid.getColumnByKey(Person::getLastName);
+        column.setWidth("10em");
+
+        grid.setComponentRenderer(Person::getLastName,
+                person -> new Span(person.getLastName().toUpperCase()));
+
+        // The column stays where it was, with everything but the rendering intact
+        Assertions.assertEquals(keysBefore, columnKeys(grid));
+        Assertions.assertSame(column, grid.getColumnByKey(Person::getLastName));
+        Assertions.assertEquals("Last Name", column.getHeaderText());
+        Assertions.assertEquals("10em", column.getWidth());
+        Assertions.assertTrue(column.isSortable());
+        // and in memory sorting still works on the underlying value
+        Assertions.assertNotNull(column.getComparator(SortDirection.ASCENDING));
+
+        Assertions.assertInstanceOf(ComponentRenderer.class, column.getRenderer());
+        Span rendered = (Span) ((ComponentRenderer<?, Person>) column.getRenderer())
+                .createComponent(new Person(1, "Jorma", "Testaaja", 40));
+        Assertions.assertEquals("TESTAAJA", rendered.getText());
+    }
+
+    @Test
+    public void theColumnToReRenderCanBeNamedWithAStringToo() {
+        VGrid<Person> grid = new VGrid<>(Person.class);
+        grid.setComponentRenderer("lastName", person -> new Span(person.getLastName()));
+
+        Assertions.assertInstanceOf(ComponentRenderer.class,
+                grid.getColumnByKey("lastName").getRenderer());
+    }
+
+    @Test
+    public void reRenderingAnUnknownColumnTellsWhichKeysThereAre() {
+        VGrid<Person> grid = new VGrid<>(Person.class, false);
+        grid.setColumns(Person::getFirstName, Person::getLastName);
+
+        IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> grid.setComponentRenderer(Person::getAge, person -> new Span()));
+        Assertions.assertTrue(e.getMessage().contains("age"), e.getMessage());
+        Assertions.assertTrue(e.getMessage().contains("firstName"), e.getMessage());
+    }
+
+    @Test
+    public void componentRendererCanAlsoBeSetOnTheColumn() {
+        VGrid<Person> grid = new VGrid<>(Person.class);
+        VGrid.VColumn<Person> column = grid.getColumnByKey(Person::getFirstName)
+                .setComponentRenderer(person -> new Span(person.getFirstName()));
+
+        Assertions.assertInstanceOf(ComponentRenderer.class, column.getRenderer());
+        Assertions.assertEquals("First Name", column.getHeaderText());
     }
 
     @Test

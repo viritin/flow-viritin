@@ -1,5 +1,6 @@
 package org.vaadin.firitin.components.grid;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
@@ -12,6 +13,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableComparator;
@@ -44,6 +46,7 @@ import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -212,13 +215,81 @@ public class VGrid<T> extends Grid<T>
      * @return the new column, for further configuration
      */
     public VColumn<T> addPropertyColumn(PropertyRef<T, ?> property) {
-        Column<T> column = addColumn(property.getPropertyName());
-        if (column instanceof VColumn<T> vColumn) {
-            return vColumn;
-        }
-        throw new IllegalStateException(
-                "The column factory of this grid does not produce VColumns, but "
-                        + column.getClass().getName());
+        return asVColumn(addColumn(property.getPropertyName()));
+    }
+
+    /**
+     * Replaces the way the column of the given property is rendered, leaving
+     * everything else about the column as it is: its position among the other
+     * columns, its key, header, width and sorting all stay put. Handy for taking an
+     * otherwise standard grid and giving just one of its columns a hand-written
+     * presentation.
+     *
+     * <pre><code>
+     * VGrid&lt;Person&gt; grid = new VGrid&lt;&gt;(Person.class);
+     * grid.setComponentRenderer(Person::getEmail, person -&gt; new Anchor("mailto:" + person.getEmail(), person.getEmail()));
+     * </code></pre>
+     *
+     * Note that the column keeps the comparator it was created with, so in memory
+     * sorting keeps working on the underlying property value even though the cell
+     * now shows a component.
+     *
+     * @param property          a method reference to the getter of the property whose column to re-render
+     * @param componentProvider creates the component to show for a row
+     * @param <C>               the component type
+     * @return the grid for further configuration
+     * @throws IllegalArgumentException if this grid has no column for the property
+     */
+    public <C extends Component> VGrid<T> setComponentRenderer(PropertyRef<T, ?> property,
+                                                                ValueProvider<T, C> componentProvider) {
+        return setComponentRenderer(property.getPropertyName(), componentProvider);
+    }
+
+    /**
+     * Replaces the way the column with the given key is rendered, leaving everything
+     * else about the column as it is.
+     *
+     * @param columnKey         the key of the column to re-render
+     * @param componentProvider creates the component to show for a row
+     * @param <C>               the component type
+     * @return the grid for further configuration
+     * @throws IllegalArgumentException if this grid has no column with the key
+     * @see #setComponentRenderer(PropertyRef, ValueProvider)
+     */
+    public <C extends Component> VGrid<T> setComponentRenderer(String columnKey,
+                                                                ValueProvider<T, C> componentProvider) {
+        return setRenderer(columnKey, new ComponentRenderer<>(componentProvider));
+    }
+
+    /**
+     * Replaces the renderer of the column of the given property, leaving everything
+     * else about the column as it is. The general form of
+     * {@link #setComponentRenderer(PropertyRef, ValueProvider)}, for cases where a
+     * {@link com.vaadin.flow.data.renderer.LitRenderer} or one of the built-in
+     * renderers is a better fit than a server side component.
+     *
+     * @param property a method reference to the getter of the property whose column to re-render
+     * @param renderer the new renderer
+     * @return the grid for further configuration
+     * @throws IllegalArgumentException if this grid has no column for the property
+     */
+    public VGrid<T> setRenderer(PropertyRef<T, ?> property, Renderer<T> renderer) {
+        return setRenderer(property.getPropertyName(), renderer);
+    }
+
+    /**
+     * Replaces the renderer of the column with the given key, leaving everything
+     * else about the column as it is.
+     *
+     * @param columnKey the key of the column to re-render
+     * @param renderer  the new renderer
+     * @return the grid for further configuration
+     * @throws IllegalArgumentException if this grid has no column with the key
+     * @see #setRenderer(PropertyRef, Renderer)
+     */
+    public VGrid<T> setRenderer(String columnKey, Renderer<T> renderer) {
+        requireColumn(columnKey).setRenderer(renderer);
+        return this;
     }
 
     /**
@@ -252,14 +323,9 @@ public class VGrid<T> extends Grid<T>
      */
     @SafeVarargs
     public final void setColumnOrder(PropertyRef<T, ?>... properties) {
-        setColumnOrder(Arrays.stream(properties).map(property -> {
-            Column<T> column = getColumnByKey(property);
-            if (column == null) {
-                throw new IllegalArgumentException(
-                        "This grid has no column for the property " + property.getPropertyName());
-            }
-            return column;
-        }).toList());
+        setColumnOrder(Arrays.stream(properties)
+                .map(property -> requireColumn(property.getPropertyName()))
+                .toList());
     }
 
     /**
@@ -269,8 +335,31 @@ public class VGrid<T> extends Grid<T>
      * @param property a method reference to the getter of the property
      * @return the column, or null if this grid has no column for the property
      */
-    public Column<T> getColumnByKey(PropertyRef<T, ?> property) {
-        return getColumnByKey(property.getPropertyName());
+    public VColumn<T> getColumnByKey(PropertyRef<T, ?> property) {
+        Column<T> column = getColumnByKey(property.getPropertyName());
+        return column == null ? null : asVColumn(column);
+    }
+
+    private Column<T> requireColumn(String columnKey) {
+        Column<T> column = getColumnByKey(columnKey);
+        if (column == null) {
+            throw new IllegalArgumentException(
+                    "This grid has no column with the key '%s'. The keyed columns are %s."
+                            .formatted(columnKey, getColumns().stream()
+                                    .map(Column::getKey)
+                                    .filter(Objects::nonNull)
+                                    .toList()));
+        }
+        return column;
+    }
+
+    private VColumn<T> asVColumn(Column<T> column) {
+        if (column instanceof VColumn<T> vColumn) {
+            return vColumn;
+        }
+        throw new IllegalStateException(
+                "The column factory of this grid does not produce VColumns, but "
+                        + column.getClass().getName());
     }
 
     /**
@@ -860,6 +949,30 @@ public class VGrid<T> extends Grid<T>
          */
         public VColumn<T> withKey(PropertyRef<T, ?> property) {
             setKey(property.getPropertyName());
+            return this;
+        }
+
+        /**
+         * Replaces the way this column is rendered with a component, leaving the rest
+         * of the column configuration untouched.
+         *
+         * @param componentProvider creates the component to show for a row
+         * @param <C>               the component type
+         * @return this column, for further configuration
+         */
+        public <C extends Component> VColumn<T> setComponentRenderer(ValueProvider<T, C> componentProvider) {
+            return withRenderer(new ComponentRenderer<>(componentProvider));
+        }
+
+        /**
+         * Replaces the renderer of this column, leaving the rest of the column
+         * configuration untouched.
+         *
+         * @param renderer the new renderer
+         * @return this column, for further configuration
+         */
+        public VColumn<T> withRenderer(Renderer<T> renderer) {
+            setRenderer(renderer);
             return this;
         }
 

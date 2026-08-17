@@ -12,6 +12,8 @@ record and bean-based data.
   refactoring keep them in sync.
 * `addColumn(Person::getFirstName)` gives the column a key, a header
   and sorting, instead of a bare, headerless column.
+* One column of an otherwise standard grid can be given a component
+  based rendering in place, without rebuilding the column set.
 * Reads columns in declaration order for both POJOs and Java
   `record`s (the core introspector returns them in a random order).
 * Falls back to Jackson when the default Vaadin mechanism cannot
@@ -137,6 +139,52 @@ grid.setAutoConfigureFromGetterReferences(false);
 
 // Or once at startup, affects grids created afterwards
 VGrid.setAutoConfigureFromGetterReferencesByDefault(false);
+```
+
+### Re-rendering a single column
+
+Replacing the presentation of one column of an otherwise standard grid
+usually means tearing the whole set of columns down and building it
+back up: the ones before the special column, the special one, and the
+ones after it. `setComponentRenderer` swaps just the rendering, and
+leaves the column where it was with the rest of its configuration --
+key, header, width, sorting -- intact:
+
+```java
+VGrid<Person> grid = new VGrid<>(Person.class);
+
+grid.setComponentRenderer(Person::getEmail,
+    person -> new Anchor("mailto:" + person.getEmail(), person.getEmail()));
+```
+
+The column key works as well as the getter reference, which is handy
+when the grid was built from strings:
+
+```java
+grid.setComponentRenderer("email",
+    person -> new Anchor("mailto:" + person.getEmail(), person.getEmail()));
+```
+
+The column keeps the comparator it was created with, so in-memory
+sorting still sorts by the underlying property value even though the
+cell now shows a component.
+
+For a `LitRenderer` or one of the built-in renderers, `setRenderer`
+is the general form of the same thing:
+
+```java
+grid.setRenderer(Person::getJoinTime,
+    new LocalDateTimeRenderer<>(Person::getJoinTime, "dd.MM.yyyy"));
+```
+
+Both are also available on the column itself, if you have one at hand
+(there the general form is `withRenderer`, as `Column` already has a
+`setRenderer` of its own):
+
+```java
+grid.getColumnByKey(Person::getEmail)
+    .setComponentRenderer(person -> new Anchor("mailto:" + person.getEmail(), person.getEmail()))
+    .setWidth("20em");
 ```
 
 ### Column styling with typed Style methods
