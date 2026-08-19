@@ -90,10 +90,5 @@ public class EagerSaveView extends VerticalLayout {
             row.setPadding(false);
             return row;
         }
-
-        @Override
-        protected List<Component> getFormComponents() {
-            return List.of();
-        }
     }
 }

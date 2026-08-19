@@ -153,6 +153,15 @@ public class DefaultButton extends VButton {
     }
 
     /**
+     * Tells whether this button is clicked by the ENTER key.
+     *
+     * @return true when the ENTER shortcut is (or will be, on attach) registered
+     */
+    public boolean isEnterShortcutEnabled() {
+        return enterShortcutEnabled;
+    }
+
+    /**
      * Controls whether this button is clicked by the ENTER key. On by default,
      * which is the point of the class — but two DefaultButtons in one view means
      * one keypress clicking both, so a form that shares its view (or its popover)

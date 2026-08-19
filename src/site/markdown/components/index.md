@@ -41,6 +41,9 @@ property name strings. See the dedicated
 * **CustomLayout** -- Render raw HTML while placing Vaadin components inside.
 * **BorderLayout** -- Swing-style layout implemented with CSS Grid.
 * **PagingGrid** -- Traditional paging for Grid.
+* **DefaultButton** -- Primary styling and a click on ENTER, for the one
+  action a view is for. The shortcut survives reattaching without stacking, and
+  `setEnterShortcutEnabled(false)` turns it off when two of these share a view.
 * **DeleteButton** -- Confirmation dialog + error styling to prevent
   accidental clicks.
 * **[PrintPdfButton](print-pdf-button.html)** -- Generate a PDF on the
