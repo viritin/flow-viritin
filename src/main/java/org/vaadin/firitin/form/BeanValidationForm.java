@@ -90,6 +90,7 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
     private Button resetButton;
     private Button deleteButton;
     private Class<?>[] validationGroups;
+    private boolean saveOnEnter = true;
     private Validator validator;
     private FormLayout formLayout;
 
@@ -104,6 +105,44 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
         this.entityType = entityType;
         getContent().setSizeFull();
         addAttachListener(e -> lazyInit());
+    }
+
+    /**
+     * Sizes this form as a part of a page rather than as the page.
+     * <p>
+     * The composition root is full size by default, which suits a form that has
+     * a view or a modal to itself. Embedded anywhere else the default is a trap
+     * with two different faces: as a section of a page a full-height form
+     * pushes everything below it off the screen, and inside a popover — which
+     * sizes itself by its content — a full-height child is a child with no
+     * height at all. This call gives the root full width and content-driven
+     * height instead.
+     *
+     * @return the form, for further configuration
+     */
+    public BeanValidationForm<T> asSection() {
+        getContent().setWidthFull();
+        getContent().setHeight(null);
+        return this;
+    }
+
+    /**
+     * Controls whether the save button created by this form submits on ENTER.
+     * <p>
+     * On by default, and right for a form that has the view to itself. With two
+     * bound forms in one view — or one popover — one keypress would perform two
+     * saves, so the form that is not the main verdict of the page switches its
+     * shortcut off. Affects the {@link DefaultButton} that
+     * {@link #createSaveButton()} creates; a save button set explicitly with
+     * {@link #setSaveButton(Button)} is managed by whoever created it.
+     *
+     * @param saveOnEnter true to submit this form on ENTER
+     */
+    public void setSaveOnEnter(boolean saveOnEnter) {
+        this.saveOnEnter = saveOnEnter;
+        if (saveButton instanceof DefaultButton db) {
+            db.setEnterShortcutEnabled(saveOnEnter);
+        }
     }
 
     /**
@@ -426,14 +465,21 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
     }
 
     /**
-     * Return the list of field components added to the form body by default.
-     * Use a dummy implementation if your override createContent() method where
-     * you can fully customise how the content of the form is built.
+     * Return the list of field components the default {@link #createContent()}
+     * stacks into the form body, in order.
+     * <p>
+     * Only consulted by that default. A form that overrides
+     * {@link #createContent()} to lay itself out never causes this to be called
+     * — which is why it is no longer abstract: forcing every such form to
+     * declare an empty list said nothing except that the form declines a
+     * default it does not use.
      *
-     * @return the fields displayed in the form created by createContent()
-     * method.
+     * @return the fields displayed by the default createContent(), empty by
+     * default
      */
-    protected abstract List<Component> getFormComponents();
+    protected List<Component> getFormComponents() {
+        return List.of();
+    }
 
     /**
      * Adjust save button state. Override if you for example want to have Save
@@ -460,7 +506,10 @@ public abstract class BeanValidationForm<T> extends Composite<Div> {
     }
 
     protected Button createSaveButton() {
-        return new DefaultButton(getSaveCaption()).withVisible(false);
+        DefaultButton button = new DefaultButton(getSaveCaption());
+        button.setVisible(false);
+        button.setEnterShortcutEnabled(saveOnEnter);
+        return button;
     }
 
     protected boolean isBound() {
