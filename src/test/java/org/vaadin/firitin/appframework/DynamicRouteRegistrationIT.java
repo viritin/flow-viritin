@@ -51,7 +51,17 @@ public class DynamicRouteRegistrationIT {
     @Test
     public void dynamicallyRegisteredViewAppearsInMenu() {
         page.navigate("http://localhost:" + port + "/my-app/dynamicregistration");
-        mopo.waitForConnectionToSettle();
+        try {
+            mopo.waitForConnectionToSettle();
+        } catch (Exception e) {
+            System.out.println("Loading initial view didn't work, seems to be flaky for some reason in CI, this should be investigated. Trying again once...");
+            //- waiting for locator("vaadin-connection-indicator[loading]")
+            //9 × locator resolved to 1 element
+            //        - unexpected value "1"
+            page.reload(new Page.ReloadOptions().setTimeout(10_000));
+            page.navigate("http://localhost:" + port + "/my-app/dynamicregistration");
+            mopo.waitForConnectionToSettle();
+        }
 
         Locator dynamicMenuItem = page.locator("vaadin-side-nav-item[path='my-app/dynamic']");
         assertThat(dynamicMenuItem).hasCount(0);
