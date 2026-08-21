@@ -1,8 +1,8 @@
 package org.vaadin.firitin.layouts;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.HasUrlParameter;
+import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 
 /**
  * A view one level down from the front page: the floating header — the way
@@ -34,7 +34,7 @@ import com.vaadin.flow.router.HasUrlParameter;
  * is itself a parameterised route, known only once the URL arrives.</li>
  * </ul>
  */
-public class NavigationView extends VerticalLayout {
+public class NavigationView extends VVerticalLayout {
 
     private final SubViewHeader header;
 
