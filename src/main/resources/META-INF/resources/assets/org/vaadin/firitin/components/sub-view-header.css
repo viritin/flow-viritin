@@ -83,6 +83,15 @@ header.sub-view-header > * {
    bar on every side — up to cover the sticky offset to the screen's edge, out
    past the layout's padding, down to give the fade room — and it is wider than
    its job needs because the page's own padding is not this component's to know.
+
+   That width has a cost the host has to pay: an absolutely positioned box that
+   reaches past the page's right edge widens the document, and the page grows a
+   horizontal scrollbar — on a phone, a page that can be dragged sideways by
+   the width of this overhang. The bar cannot clip it itself without losing the
+   reach that is the point. Whoever holds the bar clips instead, with
+   `overflow-x: clip` and not `hidden`: `hidden` makes a scroll container, and a
+   sticky bar inside one sticks to it rather than to the page. NavigationView
+   does this; a view composing the bar by hand has to do the same.
 */
 header.sub-view-header::before {
   content: "";

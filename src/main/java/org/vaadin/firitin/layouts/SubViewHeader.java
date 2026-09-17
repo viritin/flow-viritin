@@ -44,6 +44,14 @@ import com.vaadin.flow.router.RouterLink;
  * <p>The title is an {@code <h1>}: on a view like this it is the page's main
  * heading, and the document outline should say so.
  *
+ * <p>The veil under the bar reaches past the bar's sides so that its blur meets
+ * the screen's edge whatever padding the page has. The part past the right edge
+ * would widen the document and give the page a horizontal scrollbar, so the
+ * layout holding the bar has to clip horizontally — {@code overflow-x: clip},
+ * not {@code hidden}, which would make a scroll container and stop the bar
+ * sticking to the page. {@link NavigationView} does this; a view composing the
+ * bar by hand must do the same.
+ *
  * <p>{@link NavigationView} is the view around this bar, for the classes that
  * would rather inherit the whole arrangement than compose it.
  */

@@ -25,6 +25,13 @@ import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
  * flush against the end of the document — on a phone that reads as a page cut
  * off rather than one that has ended. A minimum keeps what full height was for
  * (a short page still fills the screen) and lets the box grow.</li>
+ * <li><b>Nothing sticking out sideways.</b> The header's veil reaches past
+ * the layout's padding so its blur meets the screen's edge, and whatever an
+ * absolutely positioned box reaches past the page's right edge becomes
+ * horizontal scroll — on a phone, a page that could be dragged a thumb's
+ * width to the side for no reason. The view clips its own horizontal
+ * overflow ({@code overflow-x: clip}, which unlike {@code hidden} is not a
+ * scroll container, so the sticky header keeps sticking to the page).</li>
  * <li><b>The title in one place.</b> {@link #setTitle(String)} names the view
  * in the bar; the browser tab is still the view's own business
  * ({@code HasDynamicTitle}), because only the view knows what several of its
@@ -46,6 +53,19 @@ public class NavigationView extends VVerticalLayout {
     protected NavigationView(Class<? extends Component> backTarget, String backLabel) {
         header = new SubViewHeader(backTarget, backLabel);
         setMinHeight("100%");
+        /*
+           Horizontal only, and clip rather than hidden. The header's veil is
+           wider than this box on purpose (see sub-view-header.css), and the
+           part of it past the right edge would otherwise widen the document and
+           put a horizontal scrollbar on a page that has nothing to scroll to.
+           `hidden` would clip the same pixels but also turn this layout into a
+           scroll container, and the header would then stick to it instead of to
+           the page — that is, not at all. Set as a raw property because Style
+           has setOverflow for both axes only, and the vertical axis stays
+           visible: nothing on it needs clipping, and the veil's reach above the
+           bar is what covers the safe area.
+        */
+        getStyle().set("overflow-x", "clip");
         add(header);
     }
 
