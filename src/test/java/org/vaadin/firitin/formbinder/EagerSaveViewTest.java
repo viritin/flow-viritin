@@ -10,6 +10,7 @@ import com.vaadin.browserless.BrowserlessApplicationContext;
 import com.vaadin.browserless.BrowserlessUIContext;
 import com.vaadin.flow.component.html.Pre;
 
+import com.vaadin.flow.component.textfield.TextField;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -47,9 +48,12 @@ class EagerSaveViewTest {
     @Test
     void aChangeThatDoesNotValidateIsNotSaved() {
         inView((ui, view) -> {
-            ui.findTextField().atIndex(1).setValue("aivan liian pitka kommentti");
+            TextField component = ui.findTextField().atIndex(1).component();
 
-            assertTrue(ui.findTextField().atIndex(1).component().isInvalid(),
+            // simulate some app logic setting an invalid value (framework should prevent this anyway)
+            component.setValue("aivan liian pitka kommentti");
+
+            assertTrue(component.isInvalid(),
                     "the reader is told");
             assertTrue(stored(ui).contains("comment=hirvi"), "and the store is untouched: " + stored(ui));
         });
