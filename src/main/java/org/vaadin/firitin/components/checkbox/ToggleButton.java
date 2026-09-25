@@ -20,8 +20,11 @@ import com.vaadin.flow.theme.lumo.Lumo;
  * the same way and put the switch first by removing the reverse variant:
  * {@code removeThemeVariants(CheckboxVariant.AURA_REVERSE)} (works with Lumo
  * too).
+ *
+ * @deprecated Use {@link com.vaadin.flow.component.checkbox.Switch} instead.
  */
 @StyleSheet("context://assets/org/vaadin/firitin/components/toggle-button.css")
+@Deprecated(forRemoval = true)
 public class ToggleButton extends VCheckBox {
 
     /**
