@@ -17,6 +17,7 @@ package org.vaadin.firitin.components;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.shared.ui.LoadMode;
@@ -25,6 +26,7 @@ import org.jsoup.safety.Safelist;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -49,7 +51,21 @@ import java.nio.charset.StandardCharsets;
  *     (does not save content to the server memory), easier to use append method (no need
  *     for UI.access dance) and more flexibility (uses the excellent Flexmark library for
  *     server side rendering if available, else falls back to the client side markdown-it)
- * </p>>
+ * </p>
+ * <p>
+ * As the content is by default only sent to the browser, the browser discards
+ * it if the component is detached (moving the component within the same round
+ * trip and toggling visibility are fine). To support re-attaching without
+ * consuming server memory, the component keeps a {@link WeakReference} to the
+ * given content string and sends it again on re-attach. This always works
+ * with string literals and constants, and with content otherwise kept in
+ * memory by the application. Content built dynamically (e.g. read from a file)
+ * is typically garbage collected soon, and then an
+ * {@link IllegalStateException} is thrown on re-attach. The same happens if
+ * markdown has been appended (the full content only exists in the browser) or
+ * the session has been deserialized. If you need to re-attach reliably, set the
+ * content again before that, or use {@link #setRichTextAndSaveReference(String)}.
+ * </p>
  */
 public class RichText extends Div {
 
@@ -57,6 +73,15 @@ public class RichText extends Div {
     transient private Safelist safelist;
     private String richText;
     private UI ui;
+    // Content was sent to the browser without keeping it on the server
+    private boolean contentOnlyInBrowser;
+    // Incremented when content is (re)set, to detect content set while detached
+    private int contentVersion;
+    private boolean contentLost;
+    // The given content (not a copy of it) for re-sending on re-attach. Weak,
+    // so it doesn't consume memory unless the app keeps it anyway (literals)
+    private transient WeakReference<String> contentRef;
+    private boolean contentIsMarkdown;
 
     public RichText() {
         setWidth("100%");
@@ -70,7 +95,7 @@ public class RichText extends Div {
 
 
     public RichText withMarkDown(String markdown) {
-        markdownStrategy.setMarkdown(markdown, this);
+        sendOnlyToBrowser(markdown, true);
         return this;
     }
 
@@ -79,8 +104,7 @@ public class RichText extends Div {
             // Note, this is now reading the whole markdown file into memory
             // previously it was read line by line. Probably a tiny bit less efficient.
             String mdString = new String(markdown.readAllBytes(), StandardCharsets.UTF_8);
-            markdownStrategy.setMarkdown(mdString, this);
-            return this;
+            return withMarkDown(mdString);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -88,6 +112,7 @@ public class RichText extends Div {
 
     public RichText appendMarkDown(String markdownFragment) {
         markdownStrategy.appendMarkdown(markdownFragment, this);
+        contentRef = null;
         return this;
     }
 
@@ -100,9 +125,7 @@ public class RichText extends Div {
      */
     public RichText appendMarkDownAsync(String markdownFragment) {
         assert ui != null;
-        ui.access(() -> {
-            markdownStrategy.appendMarkdown(markdownFragment, this);
-        });
+        ui.access(() -> appendMarkDown(markdownFragment));
         return this;
     }
 
@@ -171,13 +194,17 @@ public class RichText extends Div {
     }
 
     public RichText setRichText(String text) {
-        getElement().executeJs("this.innerHTML = $0", Jsoup.clean(text, getWhitelist()));
+        sendOnlyToBrowser(text, false);
         return this;
     }
 
     public RichText setRichTextAndSaveReference(String text) {
         this.richText = text;
         getElement().setProperty("innerHTML", Jsoup.clean(richText, getWhitelist()));
+        contentOnlyInBrowser = false;
+        contentVersion++;
+        contentLost = false;
+        contentRef = null;
         return this;
     }
 
@@ -252,9 +279,66 @@ public class RichText extends Div {
         markdownStrategy = new MarkdownItStrategy();
     }
 
+    private void sendOnlyToBrowser(String content, boolean markdown) {
+        send(content, markdown);
+        contentRef = new WeakReference<>(content);
+        contentIsMarkdown = markdown;
+        contentOnlyInBrowser = true;
+        // Pending JS is executed on attach, so the content is there again
+        contentVersion++;
+        contentLost = false;
+    }
+
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         ui = attachEvent.getUI();
+        if (contentLost) {
+            String content = contentRef == null ? null : contentRef.get();
+            if (content == null) {
+                throw new IllegalStateException("""
+                        RichText was re-attached, but its content is gone: the \
+                        content was only sent to the browser (to save server \
+                        memory) and the browser discarded it when the component \
+                        was detached. The weak reference kept for re-attaching \
+                        has been garbage collected (content not kept in memory \
+                        by the application, unlike e.g. string literals), or \
+                        markdown was appended (the full content only exists in \
+                        the browser). Set the \
+                        content again before re-attaching, use \
+                        setRichTextAndSaveReference(String) to keep the content \
+                        on the server, or hide the component with \
+                        setVisible(false) instead of removing it.""");
+            }
+            send(content, contentIsMarkdown);
+            contentLost = false;
+        }
+    }
+
+    private void send(String content, boolean markdown) {
+        if (markdown) {
+            markdownStrategy.setMarkdown(content, this);
+        } else {
+            // Sanitized here, the cleaned copy is not referenced by anything
+            getElement().executeJs("this.innerHTML = $0", Jsoup.clean(content, getWhitelist()));
+        }
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        super.onDetach(detachEvent);
+        if (contentOnlyInBrowser) {
+            // The element survives in the browser if re-attached within the
+            // same round trip (e.g. moved to another place), so check only
+            // when the response is written. The UI as the context, as
+            // callbacks for a detached component would not be executed.
+            UI detachedFrom = detachEvent.getUI();
+            int version = contentVersion;
+            detachedFrom.beforeClientResponse(detachedFrom, ctx -> {
+                if (!isAttached() && contentVersion == version) {
+                    contentLost = true;
+                }
+            });
+        }
     }
 }

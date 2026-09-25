@@ -27,6 +27,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.vaadin.firitin.components.RichText;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
 
+import java.time.LocalTime;
 import java.util.Random;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -140,6 +141,47 @@ public class RichTextExample extends VVerticalLayout {
 
         }));
 
+
+        RichText richText = new RichText().withMarkDown("# It works!?");
+        add(richText);
+        add(new Button("Toggle visibility", e -> richText.setVisible(!richText.isVisible())));
+
+        add(new Button("Move (detach + re-attach in the same round trip)", e -> {
+            remove(richText);
+            addComponentAtIndex(indexOf(e.getSource()) - 1, richText);
+        }));
+
+        // Content re-sent on re-attach from a weak reference, a string literal
+        // is never garbage collected
+        add(toggleAttachedButton("Toggle attached", richText, () -> {}));
+
+        add(toggleAttachedButton("Toggle attached, re-setting the content", richText,
+                () -> richText.withMarkDown("# It works again!")));
+
+        // Throws IllegalStateException on re-attach: with appended markdown the
+        // full content only exists in the browser, which discarded it on detach
+        RichText appended = new RichText().withMarkDown("# Base content");
+        appended.appendMarkDown(" and appended markdown");
+        add(appended);
+        add(toggleAttachedButton("Toggle attached (appended, throws on re-attach)", appended, () -> {}));
+
+        // Dynamically built content is only weakly referenced, so re-attaching
+        // works until it is garbage collected, then throws
+        RichText dynamic = new RichText().withMarkDown("# Built at " + LocalTime.now());
+        add(dynamic);
+        add(toggleAttachedButton("Toggle attached (dynamic, throws on re-attach after GC)", dynamic, () -> {}));
+        add(new Button("System.gc()", e -> System.gc()));
+    }
+
+    private Button toggleAttachedButton(String caption, RichText richText, Runnable beforeReattach) {
+        return new Button(caption, e -> {
+            if(richText.isAttached()) {
+                richText.removeFromParent();
+            } else {
+                beforeReattach.run();
+                addComponentAtIndex(indexOf(e.getSource()), richText);
+            }
+        });
     }
 
 }
