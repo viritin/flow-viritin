@@ -3,6 +3,7 @@ package org.vaadin.firitin.components;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import org.vaadin.firitin.fluency.ui.FluentHtmlContainer;
+import org.vaadin.firitin.util.style.VaadinCssProps;
 
 /**
  * Supporting text on a line of its own, in the theme's secondary text color
@@ -15,7 +16,7 @@ import org.vaadin.firitin.fluency.ui.FluentHtmlContainer;
 public class SecondaryText extends Div implements FluentHtmlContainer<SecondaryText> {
 
     public SecondaryText() {
-        getStyle().setColor("var(--vaadin-text-color-secondary)");
+        getStyle().setColor(VaadinCssProps.TEXT_COLOR_SECONDARY.var());
     }
 
     public SecondaryText(String text) {
