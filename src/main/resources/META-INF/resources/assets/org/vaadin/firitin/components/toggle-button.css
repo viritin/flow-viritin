@@ -1,117 +1,118 @@
-/* Styles derived from https://github.com/vaadin-component-factory/toggle-button */
+/* Styles derived from https://github.com/vaadin-component-factory/toggle-button
+ *
+ * Each theme gets its own block, gated on the marker property the theme sets
+ * on :root (--vaadin-lumo-theme / --vaadin-aura-theme: 1) via a style container
+ * query, so the right look is picked in the browser and the blocks don't leak
+ * into each other. ToggleButton sets the "reverse" theme variant by default
+ * (label first, switch after it), removing it puts the switch first.
+ *
+ * Declarations here are in the outer scope, so they win over the checkbox's
+ * own shadow-DOM styles for the same state without !important.
+ */
 
-vaadin-checkbox.toggle-button::part(checkbox),
-vaadin-checkbox.toggle-button > input {
-    grid-column: 2;
+/* ===== Lumo ===== */
+@container style(--vaadin-lumo-theme: 1) {
+    :is(vaadin-checkbox.toggle-button, vaadin-checkbox-group.toggle-button > vaadin-checkbox) {
+        /* Switch after the label with the "reverse" variant. Lumo replaces the
+           base styles (that implement the variant in Aura) and lays out its
+           own grid container, so the variant is implemented here. */
+        &[theme~='reverse']::part(checkbox),
+        &[theme~='reverse'] > input {
+            grid-column: 2;
+        }
+
+        &::part(checkbox) {
+            width: calc(1.5em * 2 - 12px);
+            height: 1.5em;
+            border-radius: 0.75em;
+            background-color: var(--lumo-contrast-40pct);
+            margin: 0;
+            cursor: pointer;
+        }
+
+        /* The knob. Lumo draws the checkmark as an icon-font glyph in this
+           pseudo-element; transparent color hides it in every state. */
+        &::part(checkbox)::after {
+            width: calc(1.2em - 4px);
+            height: calc(1.2em - 4px);
+            border-radius: 50%;
+            background-color: var(--lumo-primary-contrast-color);
+            color: transparent;
+            border: none;
+            top: 2px;
+            left: 2px;
+            transform: none;
+            opacity: 1;
+            transition: transform 0.2s ease;
+        }
+
+        &[checked]::part(checkbox) {
+            background-color: var(--lumo-primary-color);
+        }
+
+        &[checked]::part(checkbox)::after {
+            transform: translate(calc(100% - 8px));
+        }
+
+        &[checked][disabled]::part(checkbox) {
+            opacity: 0.3;
+        }
+    }
 }
 
-vaadin-checkbox-group.toggle-button > vaadin-checkbox::part(checkbox),
-vaadin-checkbox.toggle-button::part(checkbox) {
-    width: calc(1.5em * 2 - 12px);
-    height: 1.5em;
-    border-radius: 0.75em;
-    background-color: var(--lumo-contrast-40pct);
-    margin: 0;
-    cursor: pointer;
-}
+/* ===== Aura ===== */
+@container style(--vaadin-aura-theme: 1) {
+    :is(vaadin-checkbox.toggle-button, vaadin-checkbox-group.toggle-button > vaadin-checkbox) {
+        align-items: center;
 
-vaadin-checkbox-group.toggle-button > vaadin-checkbox::part(checkbox)::after,
-vaadin-checkbox.toggle-button::part(checkbox)::after {
-    width: calc(1.2em - 4px);
-    height: calc(1.2em - 4px);
-    border-radius: 50%;
-    background-color: var(--lumo-primary-contrast-color);
-    border: none;
-    top: 2px;
-    left: 2px;
-    transform: none;
-    opacity: 1;
-    transition: transform 0.2s ease;
-}
+        /* The cursor comes from the base styles (clickable/disabled). */
+        &::part(checkbox) {
+            width: 2.5em;
+            height: 1.5em;
+            border-radius: 0.75em;
+            background: var(--vaadin-background-container-strong);
+            border: 1px solid var(--vaadin-border-color);
+            transition: background-color 0.2s, border-color 0.2s;
+        }
 
-vaadin-checkbox-group.toggle-button > vaadin-checkbox[disabled]::part(checkbox)::after,
-vaadin-checkbox.toggle-button[disabled]::part(checkbox)::after {
-    color: transparent!important;
-}
+        /* The knob. mask/filter/inset reset the base-style checkmark. */
+        &::part(checkbox)::after {
+            mask: none;
+            filter: none;
+            inset: auto;
+            width: calc(1.5em - 6px);
+            height: calc(1.5em - 6px);
+            border-radius: 50%;
+            background: var(--vaadin-text-color-secondary);
+            position: absolute;
+            left: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: left 0.2s ease, background-color 0.2s;
+            opacity: 1;
+        }
 
-vaadin-checkbox-group.toggle-button > vaadin-checkbox[checked]::part(checkbox)::after,
-vaadin-checkbox.toggle-button[checked]::part(checkbox)::after {
-    transform: translate(calc(100% - 8px));
-}
+        &[checked]::part(checkbox) {
+            background: var(--aura-accent-color);
+            border-color: transparent;
+        }
 
-vaadin-checkbox-group.toggle-button > vaadin-checkbox[checked]::part(checkbox),
-vaadin-checkbox.toggle-button[checked]::part(checkbox) {
-    background-color: var(--lumo-primary-color);
-}
+        &[checked]::part(checkbox)::after {
+            left: calc(100% - 1.5em + 4px);
+            background: var(--aura-accent-contrast-color);
+        }
 
-vaadin-checkbox-group.toggle-button > vaadin-checkbox[checked][disabled]::part(checkbox),
-vaadin-checkbox.toggle-button[checked][disabled]::part(checkbox){
-    background-color: var(--lumo-primary-color);
-    opacity: 0.3;
-}
+        &[disabled]::part(checkbox) {
+            opacity: 0.5;
+        }
 
-/* ===== Aura theme toggle button styles ===== */
+        &[disabled]::part(checkbox)::after {
+            background: var(--vaadin-text-color-disabled);
+        }
 
-vaadin-checkbox.toggle-button-aura {
-    align-items: center;
-}
-
-vaadin-checkbox.toggle-button-aura::part(checkbox) {
-    width: 2.5em;
-    height: 1.5em;
-    border-radius: 0.75em;
-    background: var(--vaadin-background-container-strong);
-    border-color: var(--vaadin-border-color);
-    border-width: 1px;
-    border-style: solid;
-    cursor: var(--vaadin-clickable-cursor, pointer);
-    transition: background-color 0.2s, border-color 0.2s;
-}
-
-vaadin-checkbox.toggle-button-aura::part(checkbox)::after {
-    mask: none;
-    filter: none;
-    inset: auto;
-    width: calc(1.5em - 6px);
-    height: calc(1.5em - 6px);
-    border-radius: 50%;
-    background: var(--vaadin-text-color-secondary);
-    position: absolute;
-    left: 2px;
-    top: 50%;
-    transform: translateY(-50%);
-    transition: left 0.2s ease, background-color 0.2s;
-    opacity: 1;
-}
-
-vaadin-checkbox.toggle-button-aura[checked]::part(checkbox) {
-    background: var(--aura-accent-color);
-    border-color: transparent;
-}
-
-vaadin-checkbox.toggle-button-aura[checked]::part(checkbox)::after {
-    left: calc(100% - 1.5em + 4px);
-    background: var(--aura-accent-contrast-color);
-}
-
-vaadin-checkbox.toggle-button-aura[disabled]::part(checkbox) {
-    background: var(--vaadin-background-container-strong);
-    border-color: var(--vaadin-border-color);
-    opacity: 0.5;
-    cursor: var(--vaadin-disabled-cursor, not-allowed);
-}
-
-vaadin-checkbox.toggle-button-aura[disabled]::part(checkbox)::after {
-    background: var(--vaadin-text-color-disabled);
-}
-
-vaadin-checkbox.toggle-button-aura[checked][disabled]::part(checkbox) {
-    background: var(--aura-accent-color);
-    border-color: transparent;
-    opacity: 0.5;
-}
-
-vaadin-checkbox.toggle-button-aura[focus-ring]::part(checkbox) {
-    outline: var(--vaadin-focus-ring-width) solid var(--vaadin-focus-ring-color);
-    outline-offset: 1px;
+        &[focus-ring]::part(checkbox) {
+            outline: var(--vaadin-focus-ring-width) solid var(--vaadin-focus-ring-color);
+            outline-offset: 1px;
+        }
+    }
 }
