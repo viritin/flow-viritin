@@ -324,8 +324,20 @@ vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-drawer-t
    Exception: if the view contributed per-view navbar helpers via
    addNavbarHelper(), keep the header — on a phone that slim top row is the only
    place those actions (e.g. an options "…" button, as on the wide navbar) can
-   live, so they must stay reachable. */
+   live, so they must stay reachable.
+   The collapsed header is kept as a bare spacer of the top safe area rather than
+   removed: it is the only thing insetting the content below the status bar /
+   dynamic island, so with display:none the view's own heading ran under the notch
+   in an edge-to-edge (viewport-fit=cover) PWA. Its visible children are already
+   hidden here, and env() is 0 elsewhere, so off a notched device it has no height. */
 vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-content-header.no-view-title:not(:has(.mobile-content-header-helpers > *)) {
+    padding: env(safe-area-inset-top) 0 0;
+    margin-bottom: 0;
+}
+
+/* Edge-to-edge views (MobileMainLayout.EDGE_TO_EDGE) run under the notch on
+   purpose, so drop the spacer for them entirely. */
+vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-content:has(> .mobile-edge-to-edge) > .mobile-content-header.no-view-title:not(:has(.mobile-content-header-helpers > *)) {
     display: none;
 }
 
