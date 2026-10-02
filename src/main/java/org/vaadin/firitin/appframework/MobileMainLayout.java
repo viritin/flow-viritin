@@ -125,7 +125,8 @@ public abstract class MobileMainLayout extends MainLayout {
         wire(30);
         """;
 
-    // Latency compensation for the bottom bar. A RouterLink navigates on the
+    // Latency compensation for the bottom bar and the drawer's SideNav. A
+    // RouterLink (or a SideNav item) navigates on the
     // server, so nothing moved until the response came back: on a slow link (a
     // Pi behind a tunnel, a phone on mobile data) a tap seemed to do nothing for
     // a moment. On the tap, the tapped item is marked "nav-pending" at once, and
@@ -143,14 +144,60 @@ public abstract class MobileMainLayout extends MainLayout {
         layout.__mblNavPending = true;
         let timer;
         let closePopover;
+        let pending, currentAttribute;
         const clear = () => {
           clearTimeout(timer);
+          pending = null;
+          itemArrived.disconnect();
+          contentArrived.disconnect();
           layout.removeAttribute('nav-pending');
-          layout.querySelectorAll('.mobile-bottom-nav-item[nav-pending]')
+          layout.querySelectorAll('[nav-pending]')
               .forEach(item => item.removeAttribute('nav-pending'));
         };
+        // Marks the item and the layout until the item gets the attribute that
+        // says it is current. A bar link gets [highlight] in the very response
+        // that brings the view; a SideNav item sets [current] itself a moment
+        // later, once the location has changed, and clearing at the view's arrival
+        // flashed the old item as current for a frame. So when the view is in (or
+        // the round trip is over) without the item being current, the marks stay
+        // a little longer, for a navigation that went elsewhere or nowhere.
+        const mark = (item, attribute) => {
+          clear();
+          pending = item;
+          currentAttribute = attribute;
+          item.setAttribute('nav-pending', '');
+          layout.setAttribute('nav-pending', '');
+          timer = setTimeout(clear, 10000);
+          const content = layout.querySelector('.mobile-content');
+          if (content) contentArrived.observe(content, { childList: true });
+          itemArrived.observe(item, { attributes: true, attributeFilter: [attribute] });
+        };
+        const settle = () => {
+          if (!pending) return;
+          if (pending.hasAttribute(currentAttribute)) {
+            clear();
+          } else {
+            clearTimeout(timer);
+            timer = setTimeout(clear, 300);
+          }
+        };
+        const itemArrived = new MutationObserver(settle);
+        const contentArrived = new MutationObserver(settle);
         layout.addEventListener('click', e => {
           if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          // The drawer's SideNav (the desktop menu, and the drawer on a phone): an
+          // item's own link, not its expand toggle; the item sets [current] itself
+          // once the browser's location has changed
+          const path = e.composedPath();
+          const sideItem = path.find(node => node.localName === 'vaadin-side-nav-item');
+          if (sideItem) {
+            const own = path.find(node => node.localName === 'a' && node.getRootNode().host === sideItem);
+            if (own && sideItem.path != null && !sideItem.disabled && !sideItem.current
+                && !sideItem.target && !sideItem.routerIgnore) {
+              mark(sideItem, 'current');
+            }
+            return;
+          }
           // A bar link, or a link in a group's popover, which lives inside the
           // group item: the group item is the one marked
           const link = e.target.closest && e.target.closest('a.mobile-bottom-nav-item, a.mobile-bottom-nav-popover-item');
@@ -177,22 +224,13 @@ public abstract class MobileMainLayout extends MainLayout {
           }
           if (link.hasAttribute('highlight')) return;
           const item = link.closest('.mobile-bottom-nav-item');
-          if (!item) return;
-          clear();
-          item.setAttribute('nav-pending', '');
-          layout.setAttribute('nav-pending', '');
-          timer = setTimeout(clear, 10000);
-          arrived.disconnect();
-          const content = layout.querySelector('.mobile-content');
-          if (content) arrived.observe(content, { childList: true });
-          arrived.observe(item, { attributes: true, attributeFilter: ['highlight'] });
+          if (item) mark(item, 'highlight');
         }, true);
-        const arrived = new MutationObserver(() => { arrived.disconnect(); clear(); });
         const state = window.Vaadin && window.Vaadin.connectionState;
         if (state && state.addStateChangeListener) {
           state.addStateChangeListener((previous, current) => {
             if (current === 'loading' && closePopover) closePopover();
-            if (current === 'connected') clear();
+            if (current === 'connected') settle();
           });
         }
         """;

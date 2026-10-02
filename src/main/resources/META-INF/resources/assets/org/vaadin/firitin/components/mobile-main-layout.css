@@ -140,6 +140,21 @@ vaadin-app-layout[nav-pending] .mobile-bottom-nav-item[highlight]:not([nav-pendi
     transition: opacity 0.15s ease;
 }
 
+/* The same for the drawer's SideNav: the tapped item looks current at once and
+   the current one gives it up. The custom properties are the ones the themes use
+   for [current]; Aura's values, Lumo's as fallbacks. */
+vaadin-side-nav-item[nav-pending]::part(content) {
+    --vaadin-side-nav-item-background: var(--aura-surface-color, var(--lumo-primary-color-10pct)) padding-box;
+    --vaadin-side-nav-item-text-color: var(--aura-accent-text-color, var(--lumo-primary-text-color));
+    --vaadin-side-nav-item-border-color: var(--vaadin-border-color-secondary, transparent);
+}
+
+vaadin-app-layout[nav-pending] vaadin-side-nav-item[current]:not([nav-pending])::part(content) {
+    --vaadin-side-nav-item-background: transparent;
+    --vaadin-side-nav-item-text-color: var(--vaadin-text-color-secondary, var(--lumo-secondary-text-color));
+    --vaadin-side-nav-item-border-color: transparent;
+}
+
 vaadin-app-layout[nav-pending] .mobile-content {
     opacity: 0.2;
     /* ease-out: most of the fade happens at once, so the tap shows; the rest
