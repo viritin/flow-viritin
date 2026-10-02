@@ -125,6 +125,51 @@ public abstract class MobileMainLayout extends MainLayout {
         wire(30);
         """;
 
+    // Latency compensation for the bottom bar. A RouterLink navigates on the
+    // server, so nothing moved until the response came back: on a slow link (a
+    // Pi behind a tunnel, a phone on mobile data) a tap seemed to do nothing for
+    // a moment. On the tap, the tapped item is marked "nav-pending" at once, and
+    // the layout too, which the stylesheet uses to move the lozenge there and to
+    // start dimming the old view. Both marks go as soon as the new
+    // view is in (the content's children change or the item gets [highlight]),
+    // when the round trip ends without one (Vaadin's connection state returns to
+    // "connected": a refused navigation), or after a timeout should neither
+    // happen. Client-only attributes on purpose: the
+    // server-owned [highlight] is left alone, so a navigation that is rerouted
+    // or refused cannot leave a stale highlight behind.
+    private static final String NAV_PENDING_JS = """
+        const layout = this;
+        if (layout.__mblNavPending) return;
+        layout.__mblNavPending = true;
+        let timer;
+        const clear = () => {
+          clearTimeout(timer);
+          layout.removeAttribute('nav-pending');
+          layout.querySelectorAll('.mobile-bottom-nav-item[nav-pending]')
+              .forEach(item => item.removeAttribute('nav-pending'));
+        };
+        layout.addEventListener('click', e => {
+          if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          const item = e.target.closest && e.target.closest('a.mobile-bottom-nav-item');
+          if (!item || item.hasAttribute('highlight')) return;
+          clear();
+          item.setAttribute('nav-pending', '');
+          layout.setAttribute('nav-pending', '');
+          timer = setTimeout(clear, 10000);
+          arrived.disconnect();
+          const content = layout.querySelector('.mobile-content');
+          if (content) arrived.observe(content, { childList: true });
+          arrived.observe(item, { attributes: true, attributeFilter: ['highlight'] });
+        }, true);
+        const arrived = new MutationObserver(() => { arrived.disconnect(); clear(); });
+        const state = window.Vaadin && window.Vaadin.connectionState;
+        if (state && state.addStateChangeListener) {
+          state.addStateChangeListener((previous, current) => {
+            if (current === 'connected') clear();
+          });
+        }
+        """;
+
     // Client-side scroll watcher: hides the bottom bar when the content is
     // scrolled down and brings it back on scroll up (iOS-style). It toggles the
     // "mobile-bottom-nav--hidden" class with no server round-trip, reads the live
@@ -202,6 +247,7 @@ public abstract class MobileMainLayout extends MainLayout {
         // duplicate scroll listeners.
         getElement().executeJs(AUTO_HIDE_JS);
         getElement().executeJs(NAV_SPACE_JS);
+        getElement().executeJs(NAV_PENDING_JS);
     }
 
     @Override

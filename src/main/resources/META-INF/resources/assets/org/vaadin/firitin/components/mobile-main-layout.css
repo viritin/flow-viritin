@@ -103,6 +103,33 @@
     border-radius: 999px;
 }
 
+/* Latency compensation (see NAV_PENDING_JS): from the tap until the server has
+   answered, the tapped item shows the lozenge instead of the current one, and the
+   old view starts to dim right away; a quick navigation replaces it before the
+   fade gets far. Plain attribute selectors, for the same Safari repaint reason as
+   [highlight]. */
+.mobile-bottom-nav-item[nav-pending] {
+    color: var(--aura-accent-text-color, var(--lumo-primary-text-color));
+    background-color: var(--mobile-nav-highlight-bg, transparent);
+    border-radius: 999px;
+}
+
+vaadin-app-layout[nav-pending] .mobile-bottom-nav-item[highlight]:not([nav-pending]) {
+    color: var(--vaadin-text-color-secondary);
+    background-color: transparent;
+}
+
+.mobile-content {
+    transition: opacity 0.15s ease;
+}
+
+vaadin-app-layout[nav-pending] .mobile-content {
+    opacity: 0.2;
+    /* ease-out: most of the fade happens at once, so the tap shows; the rest
+       deepens while the wait goes on */
+    transition: opacity 0.8s ease-out;
+}
+
 /* The bottom bar overlays the content (position:fixed) rather than sitting in
    the flow of AppLayout's bottom-navbar area. This is what makes hide-on-scroll
    work cleanly: a flow child would keep its reserved space when transformed away,
