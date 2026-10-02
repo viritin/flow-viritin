@@ -13,6 +13,7 @@ import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.server.Command;
 import in.virit.color.HexColor;
 import org.vaadin.firitin.components.RichText;
+import org.vaadin.firitin.util.style.CssPropertyEnum;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -146,13 +147,43 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
         setMarkdown(markdown);
     }
 
+    /**
+     * Sets the colour of the user's avatar.
+     *
+     * @param color the avatar colour
+     * @see #setAvatarColor(String) for a colour from the theme, e.g. a CSS variable
+     */
     public void setAvatarColor(in.virit.color.Color color) {
-        getElement().getStyle().set("--vaadin-avatar-user-color", color.toString());
+        setAvatarColor(color.toString());
+    }
+
+    /**
+     * Sets the colour of the user's avatar as any CSS colour value. Unlike a
+     * {@link in.virit.color.Color}, this can be a colour of the theme, so it follows
+     * the theme and its light and dark variants, e.g.
+     * {@code "var(--lumo-primary-color)"}, {@code "var(--aura-accent-color)"} or
+     * {@code "color-mix(in srgb, var(--lumo-primary-color) 50%, white)"}.
+     *
+     * @param cssColor the avatar colour as a CSS colour value
+     * @see #setAvatarColor(CssPropertyEnum) for a theme property as such
+     */
+    public void setAvatarColor(String cssColor) {
+        getElement().getStyle().set("--vaadin-avatar-user-color", cssColor);
         // remove the once set by constructor && ensure the flag making it use
 
         getElement().executeJs("\n" +
                 "$0.querySelector('vaadin-avatar').style.setProperty('--vaadin-avatar-user-color', null);$0.querySelector('vaadin-avatar').setAttribute('has-color-index', true);");
 
+    }
+
+    /**
+     * Sets the colour of the user's avatar to a colour property of the theme, e.g.
+     * {@code LumoProps.PRIMARY_COLOR} or {@code AuraProps.ACCENT_COLOR}.
+     *
+     * @param colorProperty the theme's colour property
+     */
+    public void setAvatarColor(CssPropertyEnum colorProperty) {
+        setAvatarColor(colorProperty.var());
     }
 
     public void setUserColorIndex(int index) {
