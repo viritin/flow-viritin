@@ -103,6 +103,23 @@
     border-radius: 999px;
 }
 
+/* A group item whose popover is open (Vaadin's Popover sets aria-expanded on its
+   target) carries the lozenge while the popover is up, and the current view's
+   item gives it up: the popover's arrow points at the group, and two lit items,
+   with the lozenge away from where the menu came from, looked as if the tap had
+   not registered. */
+.mobile-bottom-nav-item[aria-expanded="true"] {
+    color: var(--aura-accent-text-color, var(--lumo-primary-text-color));
+    background-color: var(--mobile-nav-highlight-bg, transparent);
+    border-radius: 999px;
+}
+
+.mobile-bottom-nav:has(.mobile-bottom-nav-item[aria-expanded="true"])
+        .mobile-bottom-nav-item[highlight]:not([aria-expanded="true"]) {
+    color: var(--vaadin-text-color-secondary);
+    background-color: transparent;
+}
+
 /* Latency compensation (see NAV_PENDING_JS): from the tap until the server has
    answered, the tapped item shows the lozenge instead of the current one, and the
    old view starts to dim right away; a quick navigation replaces it before the

@@ -142,6 +142,7 @@ public abstract class MobileMainLayout extends MainLayout {
         if (layout.__mblNavPending) return;
         layout.__mblNavPending = true;
         let timer;
+        let closePopover;
         const clear = () => {
           clearTimeout(timer);
           layout.removeAttribute('nav-pending');
@@ -150,8 +151,33 @@ public abstract class MobileMainLayout extends MainLayout {
         };
         layout.addEventListener('click', e => {
           if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-          const item = e.target.closest && e.target.closest('a.mobile-bottom-nav-item');
-          if (!item || item.hasAttribute('highlight')) return;
+          // A bar link, or a link in a group's popover, which lives inside the
+          // group item: the group item is the one marked
+          const link = e.target.closest && e.target.closest('a.mobile-bottom-nav-item, a.mobile-bottom-nav-popover-item');
+          if (!link) return;
+          // A chosen child closes its group's popover, but only once the click is
+          // through. The click bubbles on to the group item, the popover's target,
+          // which would toggle it closed first; "opened" is synchronised, and that
+          // message went out before the navigation's (Flow sends the navigation a
+          // moment after the click), so the navigation waited a whole round trip
+          // behind it. With the click trigger off for this one click, the popover
+          // closes when the navigation's request is out (the connection state
+          // turns "loading") and its own message queues behind it.
+          const popover = link.closest('vaadin-popover');
+          if (popover) {
+            const trigger = popover.trigger;
+            popover.trigger = [];
+            closePopover = () => {
+              closePopover = null;
+              clearTimeout(closeTimer);
+              popover.trigger = trigger;
+              popover.opened = false;
+            };
+            const closeTimer = setTimeout(() => closePopover && closePopover(), 300);
+          }
+          if (link.hasAttribute('highlight')) return;
+          const item = link.closest('.mobile-bottom-nav-item');
+          if (!item) return;
           clear();
           item.setAttribute('nav-pending', '');
           layout.setAttribute('nav-pending', '');
@@ -165,6 +191,7 @@ public abstract class MobileMainLayout extends MainLayout {
         const state = window.Vaadin && window.Vaadin.connectionState;
         if (state && state.addStateChangeListener) {
           state.addStateChangeListener((previous, current) => {
+            if (current === 'loading' && closePopover) closePopover();
             if (current === 'connected') clear();
           });
         }
@@ -386,8 +413,9 @@ public abstract class MobileMainLayout extends MainLayout {
                     link.setHighlightCondition(HighlightConditions.sameLocation());
                     link.add(iconFor(child));
                     link.add(new Span(getMenuText(target, child.getText())));
-                    // Close the popover once a child is chosen.
-                    link.getElement().addEventListener("click", e -> popover.close());
+                    // The popover closes itself in the browser once a child is chosen
+                    // (see NAV_PENDING_JS): a server-side click listener here cost a
+                    // round trip of its own before the navigation's.
                     list.add(link);
                 });
         popover.add(list);
