@@ -65,6 +65,9 @@
     color: var(--vaadin-text-color-secondary);
     text-decoration: none; /* a nav link is an <a>; no underline */
     cursor: pointer;
+    /* No grey flash over a tapped item on iOS: the lozenge moving to it at once
+       (see NAV_PENDING_JS) is the tap's feedback. Vaadin's SideNav does the same. */
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* Icon-only items need less height than the labelled ones — otherwise the icon
@@ -545,6 +548,7 @@ vaadin-app-layout:has(.mobile-bottom-nav[slot="navbar-bottom"]) .mobile-content-
     padding: var(--vaadin-padding-s) var(--vaadin-padding-m);
     color: var(--vaadin-text-color);
     text-decoration: none; /* it is an <a> (RouterLink) */
+    -webkit-tap-highlight-color: transparent;
 }
 
 .mobile-bottom-nav-popover-item vaadin-icon {
