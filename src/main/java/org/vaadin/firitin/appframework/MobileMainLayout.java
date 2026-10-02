@@ -209,8 +209,12 @@ public abstract class MobileMainLayout extends MainLayout {
         // The body-scroll class lives on the document root, so drop it when this
         // layout goes away (e.g. navigating to a view under a different layout),
         // otherwise the page-scroll behaviour would linger for the next view.
+        // Run it through the page: Flow drops JS addressed to an element that is
+        // being detached, so getElement().executeJs never reached the browser and
+        // a full-height view without this layout (a login page) collapsed to its
+        // content at the top of the page, under the status bar in a PWA.
         if (bodyScrolling) {
-            getElement().executeJs(BODY_SCROLL_OFF_JS);
+            detachEvent.getUI().getPage().executeJs(BODY_SCROLL_OFF_JS);
         }
         super.onDetach(detachEvent);
     }
