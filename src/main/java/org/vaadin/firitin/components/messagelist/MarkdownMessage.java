@@ -128,7 +128,8 @@ public class MarkdownMessage extends Component implements HasStyle, HasSize {
      * @param name the name of the user
      */
     public MarkdownMessage(String markdown, String name) {
-        this(name, LocalDateTime.now(), Color.AVATAR_PRESETS[name.hashCode()%Color.AVATAR_PRESETS.length]);
+        // floorMod, not %: a negative hash code (e.g. "dialog") gave a negative index
+        this(name, LocalDateTime.now(), Color.AVATAR_PRESETS[Math.floorMod(name.hashCode(), Color.AVATAR_PRESETS.length)]);
         setMarkdown(markdown);
     }
 
