@@ -1,39 +1,23 @@
 package org.vaadin.firitin.components.textfield;
 
-import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.shared.HasTextSelection;
 import com.vaadin.flow.function.SerializableConsumer;
 
 import java.io.Serializable;
 import tools.jackson.databind.node.ObjectNode;
 
-public interface SelectionApi extends HasElement {
-
-    /**
-     * Selects all text in the field and moves the focus to the field.
-     */
-    default void selectAll() {
-        getElement().executeJs("setTimeout(()=>{this.inputElement.select()},0);");
-    };
-
-    /**
-     * Sets the start and end positions of the current text selection.
-     * <p>Note, that the method simply proxies the parameters to the similarly named method in the browser, without sanity checks or any synchronization.</p>
-     *
-     * @param selectionStart The 0-based index of the first selected character. An index greater than the length of the element's value is treated as pointing to the end of the value.
-     * @param selectionEnd The 0-based index for the end of the selection (exclusive). An index greater than the length of the element's value is treated as pointing to the end of the value.
-     */
-    default void setSelectionRange(int selectionStart, int selectionEnd) {
-        getElement().executeJs("setTimeout(()=>{this.inputElement.setSelectionRange($0,$1)},0);",selectionStart,selectionEnd);
-    };
-
-    /**
-     * Sets the cursor position to given index.
-     *
-     * @param cursorPosition the cursor position
-     */
-    default void setCursorPosition(int cursorPosition) {
-        setSelectionRange(cursorPosition, cursorPosition);
-    };
+/**
+ * Text selection helpers for field components wrapping a native input.
+ * <p>
+ * Since Vaadin 25.4 the setters ({@link #setSelectionRange(int, int)},
+ * {@link #selectAll()} and {@link #setCursorPosition(int)}) come from the core
+ * {@link HasTextSelection} interface. This interface adds asynchronous getters
+ * for the current selection and cursor position, and makes the selection
+ * setters available also for fields that don't support them in core (like
+ * EmailField, NumberField, IntegerField and DatePicker).
+ * </p>
+ */
+public interface SelectionApi extends HasTextSelection {
 
     interface SelectionRangeCallback extends Serializable {
         /**
@@ -41,7 +25,7 @@ public interface SelectionApi extends HasElement {
          * field.
          *
          * @param start the start of the selection (inclusive)
-         * @param end the end of the selection (inclusive)
+         * @param end the end of the selection (exclusive)
          * @param content the string content currently selected
          */
         void selectionRange(int start, int end, String content);
