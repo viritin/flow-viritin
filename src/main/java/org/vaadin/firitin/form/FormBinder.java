@@ -1,6 +1,5 @@
 package org.vaadin.firitin.form;
 
-import com.googlecode.gentyref.GenericTypeReflector;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasValue;
@@ -45,7 +44,6 @@ import tools.jackson.databind.introspect.BeanPropertyDefinition;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.RecordComponent;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -708,16 +706,13 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
                     } catch (ClassCastException ex) {
                         // Try checking out still the Vaadin's default conversions
                         try {
-                            Type fieldValueType = GenericTypeReflector.getTypeParameter(
-                                    hasValue.getClass(),
-                                    HasValue.class.getTypeParameters()[1]);
-                            Class<?> fieldValueClazz = GenericTypeReflector.erase(fieldValueType);
+                            Class<?> fieldValueClazz = findFieldValueClass(hasValue);
                             converter = DefaultConverterFactory.INSTANCE.newInstance(fieldValueClazz, pd.getPrimaryType().getRawClass())
                                     .orElseThrow(() -> new RuntimeException("No converter found for " + pd.getPrimaryType().getRawClass().getName()));
                             Object converted = converter.convertToPresentation(pValue, fakeValueContext(hasValue));
                             hasValue.setValue(converted);
                         } catch (Exception e) {
-                            new RuntimeException("Conversion failed for " + pd.getPrimaryType().getRawClass().getName(), e);
+                            throw new RuntimeException("Conversion failed for " + pd.getPrimaryType().getRawClass().getName(), e);
                         }
                     }
                 }
@@ -1258,4 +1253,14 @@ public class FormBinder<T> implements HasValue<FormBinderValueChangeEvent<T>, T>
         return new ValueContext(null, component);
     }
 
+    private static Class<?> findFieldValueClass(HasValue<?, ?> hasValue) {
+        JavaType[] typeParameters = jack.getTypeFactory().findTypeParameters(
+                jack.getTypeFactory().constructType(hasValue.getClass()),
+                HasValue.class);
+        if (typeParameters.length < 2) {
+            throw new IllegalStateException("Unable to detect value type of "
+                    + hasValue.getClass().getName());
+        }
+        return typeParameters[1].getRawClass();
+    }
 }
