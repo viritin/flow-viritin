@@ -51,11 +51,11 @@ jobs:
           ${{ runner.os }}-maven-
 
     - name: Build with Maven
-      run: mvn -B verify javadoc:javadoc --file pom.xml
+      run: mvn -B -s .github/maven-settings.xml verify javadoc:javadoc --file pom.xml
 
     - name: Generate Maven Site
       if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/v25' && steps.filter.outputs.site == 'true')
-      run: mvn -B site --file pom.xml
+      run: mvn -B -s .github/maven-settings.xml site --file pom.xml
 
     - name: Upload Pages artifact
       if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/v25' && steps.filter.outputs.site == 'true')

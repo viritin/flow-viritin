@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Maven settings for GitHub Actions: enables Vaadin pre-release repository
+     (also hosts Vaadin snapshots) so builds against e.g. 25.x-SNAPSHOT work. -->
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+    <profiles>
+        <profile>
+            <id>vaadin-prereleases</id>
+            <repositories>
+                <repository>
+                    <id>vaadin-prereleases</id>
+                    <url>https://maven.vaadin.com/vaadin-prereleases</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>vaadin-prereleases</id>
+                    <url>https://maven.vaadin.com/vaadin-prereleases</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+    </profiles>
+    <activeProfiles>
+        <activeProfile>vaadin-prereleases</activeProfile>
+    </activeProfiles>
+</settings>
