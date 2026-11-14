@@ -1,5 +1,8 @@
 package org.vaadin.firitin.components.datepicker;
 
+import com.vaadin.flow.data.value.HasValueChangeMode;
+import com.vaadin.flow.data.value.ValueChangeMode;
+import org.vaadin.firitin.components.internal.PickerValueChangeModeSupport;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import org.vaadin.firitin.components.datetimepicker.VDateTimePicker;
@@ -20,7 +23,10 @@ import java.util.Locale;
 public class VDatePicker extends DatePicker implements FluentHasSize<VDatePicker>, FluentHasValidation<VDatePicker>,
         FluentHasStyle<VDatePicker>, FluentFocusable<DatePicker, VDatePicker>, FluentComponent<VDatePicker>,
         FluentThemableLayout<VDateTimePicker>, FluentHasValueAndElement<VDatePicker, AbstractField.ComponentValueChangeEvent<DatePicker, LocalDate>, LocalDate>,
-        FluentHasHelper<VDatePicker>, FluentHasTooltip<VDatePicker>, SelectionApi {
+        FluentHasHelper<VDatePicker>, FluentHasTooltip<VDatePicker>, SelectionApi, HasValueChangeMode {
+
+    private final PickerValueChangeModeSupport valueChangeModeSupport = new PickerValueChangeModeSupport(this);
+
 
     public VDatePicker() {
         super();
@@ -136,4 +142,53 @@ public class VDatePicker extends DatePicker implements FluentHasSize<VDatePicker
         setRequiredIndicatorVisible(requiredIndicatorVisible);
         return this;
     }
+
+    /**
+     * Returns the value change mode. Defaults to {@link ValueChangeMode#LAZY}
+     * in Viritin, so that value change events are fired while the user types
+     * (when the typed text is a complete, valid value), like with VTextField.
+     *
+     * @return the value change mode
+     */
+    @Override
+    public ValueChangeMode getValueChangeMode() {
+        return valueChangeModeSupport.getValueChangeMode();
+    }
+
+    /**
+     * Sets the value change mode. {@link ValueChangeMode#ON_CHANGE} and
+     * {@link ValueChangeMode#ON_BLUR} restore the default behaviour of the
+     * web component (value committed on enter or blur). With
+     * {@link ValueChangeMode#LAZY}, {@link ValueChangeMode#TIMEOUT} and
+     * {@link ValueChangeMode#EAGER} the value is committed also while
+     * typing, if the typed text is a complete value (it parses and formats back
+     * to the exact same text).
+     *
+     * @param valueChangeMode the new value change mode
+     */
+    @Override
+    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
+        valueChangeModeSupport.setValueChangeMode(valueChangeMode);
+    }
+
+    @Override
+    public void setValueChangeTimeout(int valueChangeTimeout) {
+        valueChangeModeSupport.setValueChangeTimeout(valueChangeTimeout);
+    }
+
+    @Override
+    public int getValueChangeTimeout() {
+        return valueChangeModeSupport.getValueChangeTimeout();
+    }
+
+    public VDatePicker withValueChangeMode(ValueChangeMode valueChangeMode) {
+        setValueChangeMode(valueChangeMode);
+        return this;
+    }
+
+    public VDatePicker withValueChangeTimeout(int valueChangeTimeout) {
+        setValueChangeTimeout(valueChangeTimeout);
+        return this;
+    }
+
 }
