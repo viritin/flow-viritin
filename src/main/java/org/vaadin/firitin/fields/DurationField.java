@@ -24,6 +24,8 @@ import java.time.temporal.ChronoUnit;
  * </ul>
  */
 public class DurationField extends CustomField<Duration> implements HasPlaceholder {
+    private static final String DEFAULT_INPUT_WIDTH = "8em";
+
     VTextField durationInput = new VTextField()
             .withPlaceholder("hh:mm:ss");
 
@@ -41,7 +43,7 @@ public class DurationField extends CustomField<Duration> implements HasPlacehold
      */
     public DurationField(String label) {
         setLabel(label);
-        durationInput.setWidth("8em");
+        durationInput.setWidth(DEFAULT_INPUT_WIDTH);
         durationInput.addBlurListener(e -> {
             // Normalize formatting on blur
             String str = durationInput.getValue();
@@ -143,6 +145,19 @@ public class DurationField extends CustomField<Duration> implements HasPlacehold
     protected void setPresentationValue(Duration newPresentationValue) {
         String presentation = formatToPresentation(newPresentationValue);
         durationInput.setValue(presentation);
+    }
+
+    /**
+     * Sets the width of the field. With a defined width, the inner input fills
+     * the field. With undefined width (null), the input uses its default width
+     * (8em) and the field sizes according to its content.
+     *
+     * @param width the width to set, may be {@code null}
+     */
+    @Override
+    public void setWidth(String width) {
+        super.setWidth(width);
+        durationInput.setWidth(width == null || width.isEmpty() ? DEFAULT_INPUT_WIDTH : "100%");
     }
 
     @Override
