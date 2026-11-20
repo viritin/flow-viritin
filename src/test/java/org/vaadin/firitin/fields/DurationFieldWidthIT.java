@@ -1,16 +1,11 @@
 package org.vaadin.firitin.fields;
 
-import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
-import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.BoundingBox;
-import in.virit.mopo.Mopo;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Value;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.vaadin.firitin.VaadinPage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,39 +13,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class DurationFieldWidthIT {
 
-    @Value("${local.server.port}")
-    private int port;
+    @RegisterExtension
+    final VaadinPage vaadin = new VaadinPage(DurationFieldWidthView.class);
 
-    static Playwright playwright = Playwright.create();
-
-    private Browser browser;
-    private Page page;
-
-    @BeforeEach
-    public void setup() {
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions());
-        page = browser.newPage();
-        page.setDefaultTimeout(60_000);
-        page.navigate("http://localhost:" + port + "/durationfieldwidth");
-        new Mopo(page).waitForConnectionToSettle();
-    }
-
-    @AfterEach
-    public void closePlaywright() {
-        page.close();
-        browser.close();
+    private Page page() {
+        return vaadin.page();
     }
 
     private BoundingBox host(String id) {
-        return page.locator("#" + id).boundingBox();
+        return page().locator("#" + id).boundingBox();
     }
 
     private BoundingBox input(String id) {
-        return page.locator("#" + id + " vaadin-text-field").boundingBox();
+        return page().locator("#" + id + " vaadin-text-field").boundingBox();
     }
 
     private double emPx() {
-        return ((Number) page.evaluate(
+        return ((Number) page().evaluate(
                 "() => parseFloat(getComputedStyle(document.querySelector('#default vaadin-text-field')).fontSize)"))
                 .doubleValue();
     }

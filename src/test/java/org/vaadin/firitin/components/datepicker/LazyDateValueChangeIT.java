@@ -1,16 +1,12 @@
 package org.vaadin.firitin.components.datepicker;
 
-import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
-import com.microsoft.playwright.Playwright;
-import in.virit.mopo.Mopo;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Value;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.vaadin.addons.dramafinder.AutoWait;
+import org.vaadin.firitin.VaadinPage;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
@@ -22,30 +18,11 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class LazyDateValueChangeIT {
 
-    @Value("${local.server.port}")
-    private int port;
+    @RegisterExtension
+    final VaadinPage vaadin = new VaadinPage(LazyDateValueChangeView.class);
 
-    static Playwright playwright = Playwright.create();
-
-    private Browser browser;
-    private Page page;
-    private Mopo mopo;
-
-    @BeforeEach
-    public void setup() {
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions());
-        page = browser.newPage();
-        // Generous timeout for Vaadin's cold dev-mode frontend compilation in CI
-        page.setDefaultTimeout(60_000);
-        mopo = new Mopo(page);
-        page.navigate("http://localhost:" + port + "/lazydatevaluechange");
-        mopo.waitForConnectionToSettle();
-    }
-
-    @AfterEach
-    public void closePlaywright() {
-        page.close();
-        browser.close();
+    private Page page() {
+        return vaadin.page();
     }
 
     @Test
@@ -64,7 +41,7 @@ public class LazyDateValueChangeIT {
     public void datePickerClearedWhileTyping() {
         typeWithoutBlur("#date input", "14.11.2026");
         assertValueWithoutBlur("#date", "#date-value", "2026-11-14");
-        page.locator("#date input").fill("");
+        page().locator("#date input").fill("");
         assertValueWithoutBlur("#date", "#date-value", "null");
     }
 
@@ -73,29 +50,29 @@ public class LazyDateValueChangeIT {
         // "14.11.20" would parse as year 2020 and be reformatted, so it
         // must not be committed (and rewritten) while the user is typing
         typeWithoutBlur("#date input", "14.11.20");
-        page.waitForTimeout(1000);
-        assertThat(page.locator("#date-value")).hasText("-");
-        assertThat(page.locator("#date input")).hasValue("14.11.20");
+        page().waitForTimeout(1000);
+        assertThat(page().locator("#date-value")).hasText("-");
+        assertThat(page().locator("#date input")).hasValue("14.11.20");
     }
 
     @Test
     public void datePickerDoesNotFireAgainOnBlur() {
         typeWithoutBlur("#date input", "14.11.2026");
         assertValueWithoutBlur("#date", "#date-value", "2026-11-14");
-        page.locator("#date input").press("Tab");
-        mopo.waitForConnectionToSettle();
-        page.waitForTimeout(500);
-        assertThat(page.locator("#date-count")).hasText("1");
-        assertThat(page.locator("#date input")).hasValue("14.11.2026");
+        page().locator("#date input").press("Tab");
+        AutoWait.waitForVaadinIdle(page());
+        page().waitForTimeout(500);
+        assertThat(page().locator("#date-count")).hasText("1");
+        assertThat(page().locator("#date input")).hasValue("14.11.2026");
     }
 
     @Test
     public void onChangeModeKeepsWebComponentDefaults() {
         typeWithoutBlur("#date-onchange input", "14.11.2026");
-        page.waitForTimeout(1000);
-        assertThat(page.locator("#date-onchange-value")).hasText("-");
-        page.locator("#date-onchange input").press("Enter");
-        assertThat(page.locator("#date-onchange-value")).hasText("2026-11-14");
+        page().waitForTimeout(1000);
+        assertThat(page().locator("#date-onchange-value")).hasText("-");
+        page().locator("#date-onchange input").press("Enter");
+        assertThat(page().locator("#date-onchange-value")).hasText("2026-11-14");
     }
 
     @Test
@@ -112,16 +89,16 @@ public class LazyDateValueChangeIT {
     }
 
     private void typeWithoutBlur(String inputSelector, String text) {
-        Locator input = page.locator(inputSelector);
+        Locator input = page().locator(inputSelector);
         input.click();
         input.pressSequentially(text, new Locator.PressSequentiallyOptions().setDelay(30));
     }
 
     private void assertValueWithoutBlur(String fieldSelector, String valueSelector, String expected) {
-        assertThat(page.locator(valueSelector)).hasText(expected,
+        assertThat(page().locator(valueSelector)).hasText(expected,
                 new com.microsoft.playwright.assertions.LocatorAssertions.HasTextOptions().setTimeout(5_000));
         // the value must have arrived without the user leaving the field
-        assertThat(page.locator(fieldSelector)).hasAttribute("focused", "");
-        assertThat(page.locator("#save")).isEnabled();
+        assertThat(page().locator(fieldSelector)).hasAttribute("focused", "");
+        assertThat(page().locator("#save")).isEnabled();
     }
 }

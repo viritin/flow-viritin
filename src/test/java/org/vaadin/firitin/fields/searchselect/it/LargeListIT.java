@@ -1,17 +1,12 @@
 package org.vaadin.firitin.fields.searchselect.it;
 
-import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
-import com.microsoft.playwright.Playwright;
-import com.microsoft.playwright.options.LoadState;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Value;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.vaadin.firitin.VaadinPage;
 import org.vaadin.firitin.fields.searchselect.LargeListView;
 import org.vaadin.firitin.fields.searchselect.SearchSelect;
 
@@ -27,38 +22,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class LargeListIT {
 
-    private static final Playwright playwright = Playwright.create();
+    @RegisterExtension
+    final VaadinPage vaadin = new VaadinPage(LargeListView.class);
 
-    @Value("${local.server.port}")
-    private int port;
+    private Page page() {
+        return vaadin.page();
+    }
 
-    private Browser browser;
-    private Page page;
     private final AtomicInteger serverRequests = new AtomicInteger();
 
     @BeforeEach
     void open() {
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
-        page = browser.newPage();
-        page.setDefaultTimeout(15000);
-        page.navigate("http://localhost:" + port + "/searchselect-large");
-        page.waitForLoadState(LoadState.NETWORKIDLE);
         assertThat(input("backend")).isVisible();
-        page.onRequest(request -> {
+        page().onRequest(request -> {
             if (request.url().contains("v-r=uidl")) {
                 serverRequests.incrementAndGet();
             }
         });
-    }
-
-    @AfterEach
-    void close() {
-        browser.close();
-    }
-
-    @AfterAll
-    static void closePlaywright() {
-        playwright.close();
     }
 
     @Test
@@ -67,8 +47,8 @@ class LargeListIT {
         input("backend").pressSequentially("pk1 juo 2026", new Locator.PressSequentiallyOptions().setDelay(80));
 
         assertThat(visibleItems()).hasText(new String[] {"Juoksu – (PK1) kevyt, season 2026"});
-        assertThat(page.locator("#queries")).containsText("(latest: \"pk1 juo 2026\")");
-        page.waitForTimeout(500);
+        assertThat(page().locator("#queries")).containsText("(latest: \"pk1 juo 2026\")");
+        page().waitForTimeout(500);
         assertThat(serverRequests.get()).as("server requests").isEqualTo(1);
     }
 
@@ -76,7 +56,7 @@ class LargeListIT {
     void a_pause_while_typing_queries_the_server() {
         input("backend").click();
         input("backend").pressSequentially("juo");
-        assertThat(page.locator("#queries")).containsText("(latest: \"juo\")");
+        assertThat(page().locator("#queries")).containsText("(latest: \"juo\")");
 
         input("backend").pressSequentially(" 2026 pk1", new Locator.PressSequentiallyOptions().setDelay(80));
 
@@ -88,10 +68,10 @@ class LargeListIT {
     void refining_narrows_the_previous_results_at_once() {
         input("backend").click();
         input("backend").pressSequentially("juo");
-        assertThat(page.locator("#queries")).containsText("(latest: \"juo\")");
+        assertThat(page().locator("#queries")).containsText("(latest: \"juo\")");
         // From now on the server answers slowly: what is shown must come from the browser.
-        page.route("**/*v-r=uidl*", route -> {
-            page.waitForTimeout(3000);
+        page().route("**/*v-r=uidl*", route -> {
+            page().waitForTimeout(3000);
             route.resume();
         });
 
@@ -111,15 +91,15 @@ class LargeListIT {
         input("in-memory").press("ArrowDown");
         input("in-memory").press("Enter");
 
-        assertThat(page.locator("#selected")).hasText("Selected: Hiihto – Vaellus, season 2100");
+        assertThat(page().locator("#selected")).hasText("Selected: Hiihto – Vaellus, season 2100");
         assertThat(input("in-memory")).hasValue("Hiihto – Vaellus, season 2100");
     }
 
     private Locator input(String id) {
-        return page.locator("#" + id + " input");
+        return page().locator("#" + id + " input");
     }
 
     private Locator visibleItems() {
-        return page.locator("vaadin-combo-box-item:visible");
+        return page().locator("vaadin-combo-box-item:visible");
     }
 }
