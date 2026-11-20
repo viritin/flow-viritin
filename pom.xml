@@ -143,6 +143,13 @@
             <version>0.0.6</version>
             <scope>test</scope>
         </dependency>
+        <!-- Newer than the one mopo brings: 1.56 doesn't support ubuntu-latest (26.04) in CI -->
+        <dependency>
+            <groupId>com.microsoft.playwright</groupId>
+            <artifactId>playwright</artifactId>
+            <version>1.65.1</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
