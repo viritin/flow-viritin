@@ -51,11 +51,11 @@ jobs:
           ${{ runner.os }}-maven-
 
     - name: Build with Maven
-      run: mvn -B -s .github/maven-settings.xml verify javadoc:javadoc --file pom.xml
+      run: mvn -B verify javadoc:javadoc --file pom.xml
 
     - name: Generate Maven Site
       if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/v25' && steps.filter.outputs.site == 'true')
-      run: mvn -B -s .github/maven-settings.xml site --file pom.xml
+      run: mvn -B site --file pom.xml
 
     - name: Upload Pages artifact
       if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/v25' && steps.filter.outputs.site == 'true')
@@ -66,8 +66,6 @@ jobs:
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
       uses: advanced-security/maven-dependency-submission-action@b275d12641ac2d2108b2cbb7598b154ad2f2cee8 # v5.0.0
-      with:
-        settings-file: .github/maven-settings.xml
 
   deploy-site:
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/v25' && needs.build.outputs.site-changed == 'true')
