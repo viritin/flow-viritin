@@ -83,15 +83,15 @@ class SearchSelectIT {
         input().press("ArrowDown");
         input().press("Enter");
 
-        assertThat(page.locator("#selected")).hasText("Valittu: Hiihto – Vaellus (käyttäjä)");
+        assertThat(page.locator("#selected")).hasText("Selected: Hiihto – Vaellus (user)");
         assertThat(input()).hasValue("Hiihto – Vaellus");
     }
 
     @Test
     void a_value_set_on_the_server_is_shown() {
-        page.getByText("Valitse palvelimelta: Hiihto – Vaellus").click();
+        page.getByText("Select on server: Hiihto – Vaellus").click();
 
-        assertThat(page.locator("#selected")).hasText("Valittu: Hiihto – Vaellus (palvelin)");
+        assertThat(page.locator("#selected")).hasText("Selected: Hiihto – Vaellus (server)");
         assertThat(input()).hasValue("Hiihto – Vaellus");
     }
 

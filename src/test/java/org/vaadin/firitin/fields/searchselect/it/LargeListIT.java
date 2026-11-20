@@ -66,8 +66,8 @@ class LargeListIT {
         input("backend").click();
         input("backend").pressSequentially("pk1 juo 2026", new Locator.PressSequentiallyOptions().setDelay(80));
 
-        assertThat(visibleItems()).hasText(new String[] {"Juoksu – (PK1) kevyt, kausi 2026"});
-        assertThat(page.locator("#queries")).containsText("(viimeisin: \"pk1 juo 2026\")");
+        assertThat(visibleItems()).hasText(new String[] {"Juoksu – (PK1) kevyt, season 2026"});
+        assertThat(page.locator("#queries")).containsText("(latest: \"pk1 juo 2026\")");
         page.waitForTimeout(500);
         assertThat(serverRequests.get()).as("server requests").isEqualTo(1);
     }
@@ -76,11 +76,11 @@ class LargeListIT {
     void a_pause_while_typing_queries_the_server() {
         input("backend").click();
         input("backend").pressSequentially("juo");
-        assertThat(page.locator("#queries")).containsText("(viimeisin: \"juo\")");
+        assertThat(page.locator("#queries")).containsText("(latest: \"juo\")");
 
         input("backend").pressSequentially(" 2026 pk1", new Locator.PressSequentiallyOptions().setDelay(80));
 
-        assertThat(visibleItems()).hasText(new String[] {"Juoksu – (PK1) kevyt, kausi 2026"});
+        assertThat(visibleItems()).hasText(new String[] {"Juoksu – (PK1) kevyt, season 2026"});
         assertThat(serverRequests.get()).as("server requests").isEqualTo(2);
     }
 
@@ -88,16 +88,16 @@ class LargeListIT {
     void refining_narrows_the_previous_results_at_once() {
         input("backend").click();
         input("backend").pressSequentially("juo");
-        assertThat(page.locator("#queries")).containsText("(viimeisin: \"juo\")");
+        assertThat(page.locator("#queries")).containsText("(latest: \"juo\")");
         // From now on the server answers slowly: what is shown must come from the browser.
         page.route("**/*v-r=uidl*", route -> {
             page.waitForTimeout(3000);
             route.resume();
         });
 
-        input("backend").pressSequentially(" kausi 1901");
+        input("backend").pressSequentially(" season 1901");
 
-        assertThat(visibleItems().first()).containsText("kausi 1901",
+        assertThat(visibleItems().first()).containsText("season 1901",
                 new com.microsoft.playwright.assertions.LocatorAssertions.ContainsTextOptions().setTimeout(1000));
         assertThat(visibleItems().allTextContents()).allMatch(item -> item.toLowerCase().contains("juo") && item.endsWith("1901"));
     }
@@ -106,13 +106,13 @@ class LargeListIT {
     void an_item_found_on_the_server_can_be_chosen() {
         input("in-memory").click();
         input("in-memory").pressSequentially("hiihto vaellus 2100");
-        assertThat(visibleItems()).hasText(new String[] {"Hiihto – Vaellus, kausi 2100"});
+        assertThat(visibleItems()).hasText(new String[] {"Hiihto – Vaellus, season 2100"});
 
         input("in-memory").press("ArrowDown");
         input("in-memory").press("Enter");
 
-        assertThat(page.locator("#selected")).hasText("Valittu: Hiihto – Vaellus, kausi 2100");
-        assertThat(input("in-memory")).hasValue("Hiihto – Vaellus, kausi 2100");
+        assertThat(page.locator("#selected")).hasText("Selected: Hiihto – Vaellus, season 2100");
+        assertThat(input("in-memory")).hasValue("Hiihto – Vaellus, season 2100");
     }
 
     private Locator input(String id) {

@@ -16,35 +16,35 @@ import java.util.stream.IntStream;
 @Route("searchselect-large")
 public class LargeListView extends VerticalLayout {
 
-    /** Every training type for 200 seasons, e.g. "Juoksu – (PK1) kevyt, kausi 2026". */
+    /** Every training type for 200 seasons, e.g. "Juoksu – (PK1) kevyt, season 2026". */
     public static final List<String> SEASON_TYPES = IntStream.rangeClosed(1901, 2100).boxed()
-            .flatMap(season -> TrainingType.all().stream().map(type -> type.label() + ", kausi " + season))
+            .flatMap(season -> TrainingType.all().stream().map(type -> type.label() + ", season " + season))
             .toList();
 
     public LargeListView() {
-        SearchSelect<String> inMemory = new SearchSelect<>("Muistissa", SEASON_TYPES);
+        SearchSelect<String> inMemory = new SearchSelect<>("In memory", SEASON_TYPES);
         inMemory.setId("in-memory");
         inMemory.setWidth("26em");
 
         AtomicInteger queries = new AtomicInteger();
-        Paragraph queryCount = new Paragraph("Haut: 0");
+        Paragraph queryCount = new Paragraph("Queries: 0");
         queryCount.setId("queries");
-        SearchSelect<String> backend = new SearchSelect<>("Taustajärjestelmästä");
+        SearchSelect<String> backend = new SearchSelect<>("From backend");
         backend.setId("backend");
         backend.setWidth("26em");
         backend.setItems(query -> {
             String filter = query.getFilter().orElse("");
-            queryCount.setText("Haut: " + queries.incrementAndGet() + " (viimeisin: \"" + filter + "\")");
+            queryCount.setText("Queries: " + queries.incrementAndGet() + " (latest: \"" + filter + "\")");
             return SEASON_TYPES.stream()
                     .filter(label -> SearchMatching.matchesAllWords(label, filter))
                     .skip(query.getOffset())
                     .limit(query.getLimit());
         });
 
-        Paragraph selected = new Paragraph("Valittu: –");
+        Paragraph selected = new Paragraph("Selected: –");
         selected.setId("selected");
-        inMemory.addValueChangeListener(event -> selected.setText("Valittu: " + event.getValue()));
-        backend.addValueChangeListener(event -> selected.setText("Valittu: " + event.getValue()));
+        inMemory.addValueChangeListener(event -> selected.setText("Selected: " + event.getValue()));
+        backend.addValueChangeListener(event -> selected.setText("Selected: " + event.getValue()));
 
         add(inMemory, backend, queryCount, selected);
     }

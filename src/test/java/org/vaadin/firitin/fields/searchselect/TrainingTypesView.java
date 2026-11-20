@@ -13,18 +13,18 @@ import com.vaadin.flow.router.Route;
 public class TrainingTypesView extends VerticalLayout {
 
     public TrainingTypesView() {
-        SearchSelect<TrainingType> type = new SearchSelect<>("Laji", TrainingType.all());
+        SearchSelect<TrainingType> type = new SearchSelect<>("Training type", TrainingType.all());
         type.setItemLabelGenerator(TrainingType::label);
-        type.setPlaceholder("Kirjoita esim. pk juo");
+        type.setPlaceholder("Type e.g. pk juo");
         type.setWidth("22em");
 
-        Paragraph selected = new Paragraph("Valittu: –");
+        Paragraph selected = new Paragraph("Selected: –");
         selected.setId("selected");
-        type.addValueChangeListener(event -> selected.setText("Valittu: "
+        type.addValueChangeListener(event -> selected.setText("Selected: "
                 + (event.getValue() == null ? "–" : event.getValue().label())
-                + (event.isFromClient() ? " (käyttäjä)" : " (palvelin)")));
+                + (event.isFromClient() ? " (user)" : " (server)")));
 
-        Button selectOnServer = new Button("Valitse palvelimelta: Hiihto – Vaellus",
+        Button selectOnServer = new Button("Select on server: Hiihto – Vaellus",
                 event -> type.setValue(new TrainingType("Hiihto", "Vaellus")));
 
         add(type, selected, selectOnServer);

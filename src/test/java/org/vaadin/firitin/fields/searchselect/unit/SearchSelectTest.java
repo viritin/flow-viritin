@@ -54,11 +54,11 @@ class SearchSelectTest {
     @Test
     void the_search_text_can_differ_from_the_label() {
         SearchSelect<TrainingType> select = select();
-        // Skiing types can also be found by "sukset" (skis), which isn't in their labels.
-        select.setSearchTextGenerator(type -> type.sport().equals("Hiihto") ? type.label() + " sukset" : type.label());
+        // Skiing types can also be found by "skis", which isn't in their labels.
+        select.setSearchTextGenerator(type -> type.sport().equals("Hiihto") ? type.label() + " skis" : type.label());
 
         assertThat(select.filter("vaellus")).hasSize(2);
-        assertThat(select.filter("sukset vaellus")).extracting(TrainingType::label)
+        assertThat(select.filter("skis vaellus")).extracting(TrainingType::label)
                 .containsExactly("Hiihto – Vaellus");
     }
 
@@ -66,11 +66,11 @@ class SearchSelectTest {
     void small_lists_are_filtered_in_the_browser_large_ones_on_the_server() {
         assertThat(select().isFilteredOnServer()).isFalse();
 
-        SearchSelect<String> large = new SearchSelect<>("Laji", LargeListView.SEASON_TYPES);
+        SearchSelect<String> large = new SearchSelect<>("Training type", LargeListView.SEASON_TYPES);
 
         assertThat(large.isFilteredOnServer()).isTrue();
         assertThat(large.filter("")).hasSize(100);
-        assertThat(large.filter("pk1 juo 2026")).containsExactly("Juoksu – (PK1) kevyt, kausi 2026");
+        assertThat(large.filter("pk1 juo 2026")).containsExactly("Juoksu – (PK1) kevyt, season 2026");
     }
 
     @Test
@@ -86,22 +86,22 @@ class SearchSelectTest {
         });
 
         assertThat(select.isFilteredOnServer()).isTrue();
-        assertThat(select.filter("kausi 1999")).hasSize(20).allMatch(label -> label.endsWith("1999"));
-        assertThat(filters).contains("kausi 1999/20");
+        assertThat(select.filter("season 1999")).hasSize(20).allMatch(label -> label.endsWith("1999"));
+        assertThat(filters).contains("season 1999/20");
     }
 
     @Test
     void a_value_stays_when_switching_to_a_backend_query() {
-        SearchSelect<String> select = new SearchSelect<>("Laji", LargeListView.SEASON_TYPES);
-        select.setValue("Juoksu – (PK1) kevyt, kausi 2026");
+        SearchSelect<String> select = new SearchSelect<>("Training type", LargeListView.SEASON_TYPES);
+        select.setValue("Juoksu – (PK1) kevyt, season 2026");
 
         select.setItems(query -> LargeListView.SEASON_TYPES.stream().limit(query.getLimit()));
 
-        assertThat(select.getValue()).isEqualTo("Juoksu – (PK1) kevyt, kausi 2026");
+        assertThat(select.getValue()).isEqualTo("Juoksu – (PK1) kevyt, season 2026");
     }
 
     private static SearchSelect<TrainingType> select() {
-        SearchSelect<TrainingType> select = new SearchSelect<>("Laji", TrainingType.all());
+        SearchSelect<TrainingType> select = new SearchSelect<>("Training type", TrainingType.all());
         select.setItemLabelGenerator(TrainingType::label);
         return select;
     }
@@ -111,13 +111,13 @@ class SearchSelectTest {
         SearchSelect<TrainingType> select = select();
 
         select.setRequired(true);
-        select.setAriaLabel("Laji");
-        select.setTooltipText("Harjoituksen laji");
+        select.setAriaLabel("Training type");
+        select.setTooltipText("The type of the training");
 
         assertThat(select.isRequired()).isTrue();
         assertThat(select.isRequiredIndicatorVisible()).isTrue();
-        assertThat(select.getAriaLabel()).contains("Laji");
-        assertThat(select.getElement().getProperty("accessibleName")).isEqualTo("Laji");
-        assertThat(select.getTooltip().getText()).isEqualTo("Harjoituksen laji");
+        assertThat(select.getAriaLabel()).contains("Training type");
+        assertThat(select.getElement().getProperty("accessibleName")).isEqualTo("Training type");
+        assertThat(select.getTooltip().getText()).isEqualTo("The type of the training");
     }
 }
