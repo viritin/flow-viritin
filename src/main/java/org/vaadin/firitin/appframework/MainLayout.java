@@ -212,16 +212,14 @@ public abstract class MainLayout extends VAppLayout {
         sortMenuItems(navigationItems);
 
         List<NavigationItem> visibleItems = navigationItems.stream()
-                .filter(this::checkAccess).toList();
+                .filter(this::isShown).toList();
 
         getMenu().removeAll();
         visibleItems.forEach(item -> {
             translateItem(item);
             getMenu().addNavigationItem(item);
-            // possible sub-items
-            List<NavigationItem> subItems = new ArrayList<>(targetToItem.values().stream().filter(ni -> ni.getParentItem() == item).toList());
-            sortMenuItems(subItems);
-            subItems.forEach(subItem -> {
+            // possible sub-items, those the user may access
+            getChildItems(item).forEach(subItem -> {
                 translateItem(subItem);
                 item.addSubItem(subItem);
             });
@@ -250,19 +248,36 @@ public abstract class MainLayout extends VAppLayout {
     }
 
     /**
-     * The child navigation items of the given (parent/group) item, in menu order.
-     * Empty for a leaf item. Useful for an alternative presentation that wants to
-     * render two-level hierarchies itself (e.g. {@link MobileMainLayout} opening a
-     * group's children in a popover instead of a drawer sub-menu).
+     * The child navigation items of the given (parent/group) item that pass
+     * {@link #checkAccess(NavigationItem)}, in menu order. Empty for a leaf item.
+     * Useful for an alternative presentation that wants to render two-level
+     * hierarchies itself (e.g. {@link MobileMainLayout} opening a group's children
+     * in a popover instead of a drawer sub-menu).
      *
      * @param parent the parent item
-     * @return its direct children, sorted as in the menu
+     * @return its direct children the user may access, sorted as in the menu
      */
     protected List<NavigationItem> getChildItems(NavigationItem parent) {
         List<NavigationItem> children = new ArrayList<>(targetToItem.values().stream()
-                .filter(ni -> ni.getParentItem() == parent).toList());
+                .filter(ni -> ni.getParentItem() == parent)
+                .filter(this::checkAccess).toList());
         sortMenuItems(children);
         return children;
+    }
+
+    /**
+     * Whether a top-level item is shown in the menu. A view is shown when it passes
+     * {@link #checkAccess(NavigationItem)}. A group without a view of its own (a
+     * {@link MenuItem#parent()} that is not a component, rendered as a
+     * {@link SubMenu}) is shown when at least one of its children passes it: the
+     * group's marker class is not a route, so checking access to it (e.g. with
+     * Vaadin's {@code AccessAnnotationChecker}) would say nothing about the views
+     * it holds.
+     */
+    private boolean isShown(NavigationItem item) {
+        return item instanceof SubMenu
+                ? !getChildItems(item).isEmpty()
+                : checkAccess(item);
     }
 
     private void translateItem(NavigationItem item) {
@@ -274,7 +289,9 @@ public abstract class MainLayout extends VAppLayout {
 
     /**
      * Application that has e.g. role based access control can limit the appearance of the
-     * navigation item in the menu by returning false here.
+     * navigation item in the menu by returning false here. Called for views at every
+     * level of the menu, also for those in a group; a group without a view of its own
+     * is shown when any of its views is.
      *
      * @param navigationItem the navigation item
      * @return true if item should be visible or not
